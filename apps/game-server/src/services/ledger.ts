@@ -13,7 +13,17 @@ export type GoldReason =
   | 'repair'
   | 'teleport'
   | 'craft'
-  | 'admin';
+  | 'admin'
+  | 'farm_upgrade'
+  | 'loot'
+  | 'enhance'
+  | 'guild'
+  | 'storage'
+  | 'daily_reward'
+  | 'achievement'
+  | 'specialization'
+  | 'skill_training'
+  | 'death';
 
 export type ItemReason =
   | 'starter_kit'
@@ -27,7 +37,19 @@ export type ItemReason =
   | 'harvest'
   | 'gather'
   | 'loot'
-  | 'admin';
+  | 'admin'
+  | 'plant'
+  | 'fertilize'
+  | 'farm_upgrade'
+  | 'tool_broken'
+  | 'quest'
+  | 'daily_reward'
+  | 'achievement'
+  | 'enhance'
+  | 'pickup'
+  | 'mail'
+  | 'discard'
+  | 'equip';
 
 /**
  * Change a character's Gold inside an open transaction and write the ledger

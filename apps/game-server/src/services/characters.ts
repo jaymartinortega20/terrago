@@ -7,6 +7,7 @@ export type { CharacterRecord, PositionSave } from '../world/characterState';
 export { buildSelfState } from '../world/characterState';
 import { consumeFromSlotTx, grantItemsTx, loadSlots, lockCharacter, toState } from './inventory';
 import { changeGold } from './ledger';
+import { loadSkills } from './progress';
 
 function toSummary(r: Record<string, any>): CharacterSummary {
   return {
@@ -111,6 +112,7 @@ export async function loadCharacter(pool: Pool, userId: string, characterId: str
     mp: r.mp,
     energy: r.energy,
     energyUpdatedAt: new Date(r.energy_updated_at).getTime(),
+    skills: await loadSkills(pool, characterId),
   };
   return sanitizePosition(rec);
 }

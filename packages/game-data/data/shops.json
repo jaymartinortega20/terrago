@@ -1,0 +1,136 @@
+[
+ {
+  "npcId": "farmer_rowan",
+  "name": "Rowan's Farm Supply",
+  "sells": [
+   {
+    "itemId": "carrot_seed",
+    "price": 8
+   },
+   {
+    "itemId": "potato_seed",
+    "price": 12,
+    "requires": {
+     "skill": "farming",
+     "level": 2
+    }
+   },
+   {
+    "itemId": "wheat_seed",
+    "price": 6,
+    "requires": {
+     "skill": "farming",
+     "level": 3
+    }
+   },
+   {
+    "itemId": "tomato_seed",
+    "price": 20,
+    "requires": {
+     "skill": "farming",
+     "level": 5
+    }
+   },
+   {
+    "itemId": "rice_seed",
+    "price": 14,
+    "requires": {
+     "skill": "farming",
+     "level": 6
+    }
+   },
+   {
+    "itemId": "corn_seed",
+    "price": 25,
+    "requires": {
+     "skill": "farming",
+     "level": 8
+    }
+   },
+   {
+    "itemId": "strawberry_seed",
+    "price": 45,
+    "requires": {
+     "skill": "farming",
+     "level": 10
+    }
+   },
+   {
+    "itemId": "pumpkin_seed",
+    "price": 60,
+    "requires": {
+     "skill": "farming",
+     "level": 14
+    }
+   },
+   {
+    "itemId": "basic_fertilizer",
+    "price": 15
+   },
+   {
+    "itemId": "growth_tonic",
+    "price": 28,
+    "requires": {
+     "skill": "farming",
+     "level": 6
+    }
+   },
+   {
+    "itemId": "copper_hoe",
+    "price": 160,
+    "requires": {
+     "skill": "farming",
+     "level": 4
+    }
+   },
+   {
+    "itemId": "copper_watering_can",
+    "price": 160,
+    "requires": {
+     "skill": "farming",
+     "level": 4
+    }
+   },
+   {
+    "itemId": "iron_hoe",
+    "price": 950,
+    "requires": {
+     "skill": "farming",
+     "level": 15
+    }
+   },
+   {
+    "itemId": "iron_watering_can",
+    "price": 950,
+    "requires": {
+     "skill": "farming",
+     "level": 15
+    }
+   }
+  ],
+  "buys": [
+   "crop",
+   "seed"
+  ]
+ },
+ {
+  "npcId": "merchant_mira",
+  "name": "Mira's Goods",
+  "sells": [
+   {
+    "itemId": "travelers_bread",
+    "price": 10
+   }
+  ],
+  "buys": [
+   "crop",
+   "seed",
+   "material",
+   "fish",
+   "consumable",
+   "tool",
+   "weapon",
+   "armor"
+  ]
+ }
+]

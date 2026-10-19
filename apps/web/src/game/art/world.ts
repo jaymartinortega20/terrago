@@ -1,4 +1,5 @@
 import { PROP_TYPES, type BuildingDef, type GroundTileKey, type MapDef, type PropType } from '@terrago/shared';
+import { drawExtraIcon } from './icons';
 import { ART_SCALE, OUTLINE, PixelBuffer, SHADOW, makeCanvas, mix, seeded, shade } from './pixel';
 
 const T = 16; // logical pixels per tile
@@ -575,7 +576,7 @@ export function itemIcon(icon: string, scale = ART_SCALE): HTMLCanvasElement {
       b.ellipse(11, 4, 5, 9, '#d6b07a').set(13, 8, '#a8743f').set(13, 7, '#a8743f');
       break;
     default:
-      b.rect(3, 3, 10, 10, '#b06ad6').rect(6, 5, 4, 2, '#fff').rect(8, 7, 2, 2, '#fff').rect(7, 10, 2, 2, '#fff');
+      if (!drawExtraIcon(icon, b)) b.rect(3, 3, 10, 10, '#b06ad6').rect(6, 5, 4, 2, '#fff').rect(8, 7, 2, 2, '#fff').rect(7, 10, 2, 2, '#fff');
   }
   b.outline(OUTLINE);
   const canvas = b.toCanvas(scale);

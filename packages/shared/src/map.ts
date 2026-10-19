@@ -89,6 +89,8 @@ export interface PortalDef {
   toY: number;
   toDir: Direction;
   label: string;
+  /** 'self': enter your own instance of the target map (e.g. your homestead). */
+  instance?: 'self';
 }
 
 export interface MapDef {
@@ -104,6 +106,10 @@ export interface MapDef {
   tiles: string[];
   objects: MapObject[];
   portals: PortalDef[];
+  /** Instanced maps exist once per owner (homesteads) instead of once for everyone. */
+  instanced?: boolean;
+  /** Farm plot tile positions in unlock order (homesteads). */
+  farmPlots?: [number, number][];
 }
 
 /** Tile -> pixel helpers. A position is the bottom-centre of an entity's feet. */

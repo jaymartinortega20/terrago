@@ -1,19 +1,142 @@
 {
   "_comment": "Balance values read by the server at startup. Tune here, not in code.",
-  "xpCurve": { "baseXp": 100, "exponent": 1.8, "maxLevel": 100 },
-  "energy": { "max": 100, "regenIntervalMs": 180000, "startingEnergy": 60 },
+  "xpCurve": {
+    "baseXp": 100,
+    "exponent": 1.8,
+    "maxLevel": 100
+  },
+  "energy": {
+    "max": 100,
+    "regenIntervalMs": 36000,
+    "startingEnergy": 80
+  },
   "character": {
     "startingGold": 25,
     "startingMap": "greenhaven",
     "inventoryCapacity": 20,
     "starterItems": [
-      { "itemId": "worn_hoe", "quantity": 1 },
-      { "itemId": "leaky_watering_can", "quantity": 1 },
-      { "itemId": "carrot_seed", "quantity": 6 },
-      { "itemId": "travelers_bread", "quantity": 3 }
+      {
+        "itemId": "worn_hoe",
+        "quantity": 1
+      },
+      {
+        "itemId": "leaky_watering_can",
+        "quantity": 1
+      },
+      {
+        "itemId": "carrot_seed",
+        "quantity": 6
+      },
+      {
+        "itemId": "travelers_bread",
+        "quantity": 3
+      }
     ]
   },
   "persistence": {
     "positionSaveIntervalMs": 30000
+  },
+  "skillCurve": {
+    "baseXp": 40,
+    "exponent": 1.9,
+    "maxLevel": 100
+  },
+  "farming": {
+    "homesteadMap": "homestead",
+    "waterMs": 3600000,
+    "actionCooldownMs": 180,
+    "energy": {
+      "till": [
+        2,
+        2,
+        1
+      ],
+      "water": [
+        1,
+        1,
+        1
+      ],
+      "plant": 0,
+      "harvest": 0,
+      "fertilize": 0
+    },
+    "characterXpShare": 0.5,
+    "qualityValue": [
+      1,
+      1.25,
+      1.5,
+      2,
+      3
+    ],
+    "tiers": [
+      {
+        "tier": 1,
+        "plots": 12
+      },
+      {
+        "tier": 2,
+        "plots": 24,
+        "gold": 400,
+        "farmingLevel": 5,
+        "materials": [
+          {
+            "itemId": "softwood_log",
+            "quantity": 20
+          },
+          {
+            "itemId": "stone",
+            "quantity": 20
+          }
+        ]
+      },
+      {
+        "tier": 3,
+        "plots": 50,
+        "gold": 2500,
+        "farmingLevel": 15,
+        "materials": [
+          {
+            "itemId": "hardwood_log",
+            "quantity": 40
+          },
+          {
+            "itemId": "copper_bar",
+            "quantity": 15
+          }
+        ]
+      },
+      {
+        "tier": 4,
+        "plots": 100,
+        "gold": 10000,
+        "farmingLevel": 30,
+        "materials": [
+          {
+            "itemId": "hardwood_log",
+            "quantity": 80
+          },
+          {
+            "itemId": "iron_bar",
+            "quantity": 40
+          }
+        ]
+      },
+      {
+        "tier": 5,
+        "plots": 200,
+        "gold": 40000,
+        "farmingLevel": 50,
+        "materials": [
+          {
+            "itemId": "hardwood_log",
+            "quantity": 150
+          },
+          {
+            "itemId": "iron_bar",
+            "quantity": 100
+          }
+        ]
+      }
+    ]
   }
 }

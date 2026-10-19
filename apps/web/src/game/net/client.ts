@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { getMap } from '@terrago/game-data';
+import { getCrop, getItem, getMap } from '@terrago/game-data';
 import {
   CHAT,
   CODE_DIR,
@@ -12,7 +12,10 @@ import {
   facingFor,
   stepMovement,
   tileCenter,
+  cropStatus,
+  type ActRequest,
   type ChatMessage,
+  type FarmUpgradeView,
   type ClientToServerEvents,
   type CollisionGrid,
   type Direction,
@@ -24,6 +27,7 @@ import {
   type PublicPlayer,
   type ServerToClientEvents,
   type Snapshot,
+  type WorldObject,
 } from '@terrago/shared';
 import { api, GAME_SERVER_URL } from '@/lib/api';
 import { initialUi, pushNotice, Store, type UiState } from '../store';
@@ -50,6 +54,10 @@ type ClientEvents = {
   add: [RemotePlayer];
   remove: [string];
   chat: [ChatMessage];
+  /** Objects added/changed (ids) or removed. */
+  objects: [WorldObject[], string[]];
+  /** A tile action happened (for effects): tile + kind. */
+  acted: [{ tx: number; ty: number; message: string | null }];
 };
 
 export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -83,6 +91,9 @@ export class GameClient {
   private pending: MoveCommand[] = [];
   private serverOffset: number | null = null;
   readonly remotes = new Map<string, RemotePlayer>();
+  readonly objects = new Map<string, WorldObject>();
+  /** Tile index for quick "what's here?" lookups. */
+  private objectsByTile = new Map<string, WorldObject>();
   private listeners = new Map<keyof ClientEvents, Set<(...a: unknown[]) => void>>();
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private ended = false;
@@ -166,6 +177,18 @@ export class GameClient {
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
     socket.on('inventory:update', (inventory) => this.ui.set({ inventory }));
     socket.on('notice', (n) => pushNotice(this.ui, n.kind, n.text));
+    socket.on('objects:set', (list) => {
+      for (const o of list) this.putObject(o);
+      this.emit('objects', list, []);
+    });
+    socket.on('objects:remove', (ids) => {
+      for (const id of ids) {
+        const o = this.objects.get(id);
+        if (o) this.objectsByTile.delete(`${o.x},${o.y}`);
+        this.objects.delete(id);
+      }
+      this.emit('objects', [], ids);
+    });
     socket.on('session:end', ({ reason }) => {
       this.ended = true;
       this.ui.set({ status: 'ended', statusMessage: reason });
@@ -205,6 +228,9 @@ export class GameClient {
     this.seq = Math.max(this.seq, p.ack);
     this.serverOffset = p.serverTime - Date.now();
     this.remotes.clear();
+    this.objects.clear();
+    this.objectsByTile.clear();
+    for (const o of p.objects) this.putObject(o);
     const prevMap = this.ui.get().mapId;
     this.ui.set((s) => ({
       status: 'online',
@@ -212,11 +238,13 @@ export class GameClient {
       self: p.self,
       inventory: p.inventory,
       mapId: map.id,
-      mapName: map.name,
+      mapName: p.map.name,
+      mapOwnerId: p.map.owner?.id ?? null,
+      plotMenu: null,
       nearby: 0,
       chat: prevMap === null && s.chat.length === 0 ? p.recentChat : s.chat,
     }));
-    if (prevMap && prevMap !== map.id) pushNotice(this.ui, 'info', `Entering ${map.name}`);
+    if (prevMap && prevMap !== map.id) pushNotice(this.ui, 'info', `Entering ${p.map.name}`);
     this.emit('enter', p);
   }
 
@@ -294,6 +322,65 @@ export class GameClient {
     }
   }
 
+  private putObject(o: WorldObject): void {
+    const old = this.objects.get(o.id);
+    if (old) this.objectsByTile.delete(`${old.x},${old.y}`);
+    this.objects.set(o.id, o);
+    this.objectsByTile.set(`${o.x},${o.y}`, o);
+  }
+
+  objectAt(tx: number, ty: number): WorldObject | undefined {
+    return this.objectsByTile.get(`${tx},${ty}`);
+  }
+
+  /** Current server time estimate (crop growth is computed from server timestamps). */
+  serverNow(): number {
+    return Date.now() + (this.serverOffset ?? 0);
+  }
+
+  /** The tile in front of the player's feet. */
+  targetTile(): { x: number; y: number } {
+    const fx = Math.floor(this.pos.x / TILE_SIZE);
+    const fy = Math.floor((this.pos.y - 4) / TILE_SIZE);
+    const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[this.dir] as [number, number];
+    return { x: fx + dx, y: fy + dy };
+  }
+
+  /** The object the action key would use: the one in front, else the one underfoot. */
+  actionTarget(): WorldObject | null {
+    const t = this.targetTile();
+    const front = this.objectAt(t.x, t.y);
+    if (front) return front;
+    const under = this.objectAt(Math.floor(this.pos.x / TILE_SIZE), Math.floor((this.pos.y - 4) / TILE_SIZE));
+    return under ?? null;
+  }
+
+  /** Describe what pressing the action key on an object will do. */
+  describeAction(o: WorldObject): string | null {
+    if (o.kind !== 'plot') return null;
+    const self = this.ui.get().self;
+    const owner = this.ui.get().mapOwnerId;
+    if (!self || owner !== self.characterId) return null;
+    if (o.locked) return 'Locked plot';
+    const now = this.serverNow();
+    if (o.crop) {
+      const def = getCrop(o.crop.cropId);
+      if (!def) return null;
+      const st = cropStatus(o.crop, def, now);
+      if (st.ready) return `Harvest ${def.name}`;
+      if (!st.watered) return `Water ${def.name}`;
+      return `${def.name} ${Math.floor(st.progress * 100)}%`;
+    }
+    if (!o.tilled) return 'Till soil';
+    const inv = this.ui.get().inventory;
+    const sel = inv?.slots.find((s) => s.slot === this.ui.get().selectedSlot);
+    const selDef = sel ? getItem(sel.itemId) : undefined;
+    if (selDef?.tool?.kind === 'can') return 'Water';
+    const seed = selDef?.category === 'seed' ? selDef : inv?.slots.map((s) => getItem(s.itemId)).find((d) => d?.category === 'seed');
+    if (seed) return `Plant ${seed.name.replace(/ Seed$/, '')}`;
+    return o.wetUntil > now ? 'No seeds' : 'Water';
+  }
+
   nearestNpc(): NpcPublic | null {
     let best: NpcPublic | null = null;
     let bestD = INTERACT_RANGE - 4;
@@ -319,6 +406,89 @@ export class GameClient {
     });
   }
 
+  /** The action key / button: talk to a nearby NPC, else use the tile in front. */
+  primaryAction(): void {
+    if (this.ui.get().dialogue) return;
+    if (this.nearestNpc()) return this.interact();
+    const o = this.actionTarget();
+    if (o) this.act(o.x, o.y);
+  }
+
+  /** Use the action key on a tile (server decides: till, plant, water, harvest...). */
+  act(tx: number, ty: number, mode?: ActRequest['mode']): void {
+    const s = this.socket;
+    if (!s?.connected) return;
+    const req: ActRequest = { tx, ty, slot: this.ui.get().selectedSlot, ...(mode ? { mode } : {}) };
+    s.emit('act', req, (res) => {
+      if (!res.ok) {
+        if (!/slow down/i.test(res.error)) pushNotice(this.ui, 'error', res.error, 2500);
+        return;
+      }
+      this.emit('acted', { tx, ty, message: res.data.message });
+      const o = this.objectAt(tx, ty);
+      const info = res.data.message && /% grown/.test(res.data.message);
+      if (info && o) this.ui.set({ plotMenu: o.id });
+      else if (res.data.message) pushNotice(this.ui, 'success', res.data.message, 2500);
+    });
+  }
+
+  private request<T>(event: string, ...args: unknown[]): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const s = this.socket as unknown as { connected: boolean; timeout: (ms: number) => { emit: (...a: unknown[]) => void } } | null;
+      if (!s?.connected) return reject(new Error('Not connected.'));
+      s.timeout(8000).emit(event, ...args, (err: unknown, res: { ok: boolean; data?: T; error?: string }) => {
+        if (err) return reject(new Error('The server did not answer. Try again.'));
+        if (!res.ok) return reject(new Error(res.error ?? 'Failed.'));
+        resolve(res.data as T);
+      });
+    });
+  }
+
+  /** Run a request; show its message (or error) as a notice. */
+  private async run<T extends { message?: string }>(event: string, ...args: unknown[]): Promise<T | null> {
+    try {
+      const data = await this.request<T>(event, ...args);
+      if (data?.message) pushNotice(this.ui, 'success', data.message);
+      return data;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
+  }
+
+  async openShop(npcId: string): Promise<void> {
+    try {
+      const shop = await this.request<import('@terrago/shared').ShopView>('shop:get', npcId);
+      this.ui.set({ shop, serviceNpc: npcId, panel: 'shop' });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  buy(itemId: string, quantity: number) {
+    return this.run('shop:buy', { npcId: this.ui.get().serviceNpc, itemId, quantity });
+  }
+
+  sell(slot: number, quantity: number) {
+    return this.run('shop:sell', { npcId: this.ui.get().serviceNpc, slot, quantity });
+  }
+
+  farmInfo(npcId: string): Promise<FarmUpgradeView> {
+    return this.request<FarmUpgradeView>('farm:info', npcId);
+  }
+
+  farmUpgrade(npcId: string) {
+    return this.run('farm:upgrade', npcId);
+  }
+
+  repairQuote(npcId: string): Promise<{ cost: number; items: number }> {
+    return this.request('repair:quote', npcId);
+  }
+
+  repairAll(npcId: string) {
+    return this.run('repair:all', npcId);
+  }
+
   sendChat(text: string): Promise<boolean> {
     return new Promise((resolve) => {
       const t = text.trim().slice(0, CHAT.maxLength);
@@ -339,6 +509,10 @@ export class GameClient {
       if (res.ok) this.ui.set({ inventory: res.data });
       else pushNotice(this.ui, 'error', res.error);
     });
+  }
+
+  selectSlot(slot: number): void {
+    this.ui.set({ selectedSlot: slot });
   }
 
   useItem(slot: number): void {

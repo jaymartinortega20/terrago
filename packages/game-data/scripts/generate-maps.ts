@@ -292,37 +292,44 @@ function sunfield(): MapDef {
   const m = new MapBuilder(W, H);
 
   m.rect(28, 0, 4, 22, '='); // road from Greenhaven
-  m.rect(8, 20, 46, 3, '='); // east-west farm lane
+  m.rect(5, 20, 49, 3, '='); // east-west farm lane; its west end leads to the homesteads
 
-  // Surveyed homestead plots (player farms arrive in v0.2)
-  const plots = [
-    [8, 9], [19, 9], [36, 9], [46, 9],
-    [8, 25], [19, 25], [36, 25], [46, 25],
+  // Old commons fields (decorative), south of the lane
+  const fields = [
+    [10, 26],
+    [19, 26],
+    [38, 26],
+    [47, 26],
   ] as const;
-  for (const [px, py] of plots) {
-    m.rect(px + 1, py + 1, 6, 5, 'd');
-    // The gate faces the farm lane: bottom fence for northern plots, top fence for southern ones.
-    const gateRow = py < 20 ? py + 6 : py;
+  for (const [px, py] of fields) {
+    m.rect(px + 1, py + 1, 6, 4, 'd');
     for (let x = px; x < px + 8; x++) {
-      const isGate = x === px + 3 || x === px + 4;
-      if (!(isGate && gateRow === py)) m.prop('fence_h', x, py);
-      if (!(isGate && gateRow === py + 6)) m.prop('fence_h', x, py + 6);
+      if (x !== px + 3 && x !== px + 4) m.prop('fence_h', x, py);
+      m.prop('fence_h', x, py + 5);
     }
-    for (let y = py + 1; y < py + 6; y++) {
+    for (let y = py + 1; y < py + 5; y++) {
       m.prop('fence_v', px, y);
       m.prop('fence_v', px + 7, y);
     }
-    m.reserve(px - 1, py - 1, 10, 9);
+    m.reserve(px - 1, py - 1, 10, 8);
   }
-  m.prop('scarecrow', 33, 14);
+  m.prop('scarecrow', 14, 28);
+  m.prop('scarecrow', 42, 28);
+
+  // Homestead gate at the west end of the lane
+  m.prop('lamp', 6, 19);
+  m.prop('lamp', 6, 23);
+  m.prop('sign', 8, 19, 'Homesteads — follow the lane west to your own farm.');
+  m.reserve(4, 18, 6, 7);
+
   m.prop('hay_bale', 25, 16);
   m.prop('hay_bale', 26, 16);
   m.prop('hay_bale', 36, 34);
-  m.prop('sign', 32, 3, 'Sunfield Homesteads — plots surveyed, deeds issued soon.');
+  m.prop('sign', 32, 3, 'Sunfield Plains — homesteads to the west. Mind the slimes after dark.');
   m.prop('lamp', 27, 2);
   m.prop('lamp', 32, 2);
 
-  // Small irrigation pond between the southern plots
+  // Irrigation pond between the southern fields
   m.rect(28, 29, 6, 5, '~', true);
   m.rect(27, 30, 1, 3, 'w', true);
   m.rect(34, 30, 1, 3, 'w', true);
@@ -330,7 +337,10 @@ function sunfield(): MapDef {
   m.rect(29, 34, 4, 1, 'w', true);
 
   m.reserve(27, 1, 6, 4);
-  m.forestBorder(r, 2, 3, [{ side: 'n', from: 28, to: 31 }]);
+  m.forestBorder(r, 2, 3, [
+    { side: 'n', from: 28, to: 31 },
+    { side: 'w', from: 19, to: 23 },
+  ]);
   m.scatterGround(r, 0.09, ',');
   m.scatterGround(r, 0.05, '*');
   m.scatterProps(r, ['tree_oak', 'tree_fruit', 'bush', 'rock', 'rock', 'stump'], 40);
@@ -343,11 +353,85 @@ function sunfield(): MapDef {
     spawn: { x: 30, y: 3, dir: 'down' },
     portals: [
       { id: 'sf_north_road', x: 28, y: 0, w: 4, h: 1, to: 'greenhaven', toX: 31, toY: 45, toDir: 'up', label: 'Greenhaven' },
+      { id: 'sf_homesteads', x: 4, y: 20, w: 1, h: 3, to: 'homestead', toX: 19, toY: 27, toDir: 'up', label: 'Your Homestead', instance: 'self' },
     ],
   });
 }
 
-for (const map of [greenhaven(), sunfield()]) {
+/** A personal farm. Every character gets their own instance of this map. */
+function homestead(): MapDef {
+  const W = 40;
+  const H = 30;
+  const r = rng(5150);
+  const m = new MapBuilder(W, H);
+
+  // Field: plots unlock in growing rectangles (tier 1 → 5).
+  const fx = 12;
+  const fy = 9;
+  const tiers: [number, number][] = [
+    [6, 2],
+    [6, 4],
+    [10, 5],
+    [20, 5],
+    [20, 10],
+  ];
+  const plots: [number, number][] = [];
+  const seen = new Set<string>();
+  for (const [w, h] of tiers) {
+    for (let y = fy; y < fy + h; y++)
+      for (let x = fx; x < fx + w; x++) {
+        const k = `${x},${y}`;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        plots.push([x, y]);
+      }
+  }
+  m.reserve(fx - 1, fy - 1, 22, 12);
+
+  // Paths
+  m.rect(18, 20, 4, 10, '='); // to the exit
+  m.rect(9, 10, 1, 10, '='); // cottage to field
+  m.rect(9, 19, 13, 1, '=');
+  m.rect(4, 19, 5, 1, '=');
+
+  m.building('cottage', 'Homestead', 3, 3, 8, 6, '#8a5a3c', '#ecdcb6', 4);
+  m.reserve(6, 9, 3, 2);
+  m.prop('well', 4, 12);
+  m.prop('barrel', 11, 7);
+  m.prop('crate', 12, 7);
+  m.prop('hay_bale', 3, 16);
+  m.prop('hay_bale', 4, 16);
+  m.prop('scarecrow', 34, 12);
+  m.prop('sign', 22, 21, 'Your homestead. Till, plant, water, harvest — upgrades from Farmer Rowan.');
+  m.prop('lamp', 17, 27);
+  m.prop('lamp', 22, 27);
+
+  // Small pond
+  m.rect(30, 21, 6, 4, '~', true);
+  m.rect(29, 22, 1, 2, 'w', true);
+  m.rect(36, 22, 1, 2, 'w', true);
+  m.rect(31, 20, 4, 1, 'w', true);
+  m.rect(31, 25, 4, 1, 'w', true);
+
+  m.reserve(17, 24, 6, 6);
+  m.forestBorder(r, 2, 3, [{ side: 's', from: 18, to: 21 }]);
+  m.scatterGround(r, 0.07, ',');
+  m.scatterGround(r, 0.04, '*');
+  m.scatterProps(r, ['tree_oak', 'tree_fruit', 'bush', 'stump'], 18);
+
+  return m.toMap({
+    id: 'homestead',
+    name: 'Homestead',
+    safeZone: true,
+    music: 'field_sunfield',
+    spawn: { x: 19, y: 26, dir: 'up' },
+    portals: [{ id: 'hs_exit', x: 18, y: 29, w: 4, h: 1, to: 'sunfield_plains', toX: 7, toY: 21, toDir: 'right', label: 'Sunfield Plains' }],
+    instanced: true,
+    farmPlots: plots,
+  });
+}
+
+for (const map of [greenhaven(), sunfield(), homestead()]) {
   const errors = validateMapDef(map);
   if (errors.length) {
     console.error(errors.join('\n'));

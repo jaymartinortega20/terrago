@@ -102,7 +102,7 @@ export async function newPlayer(base: string, opts: { name?: string; classId?: s
   const email = `p${id}@example.com`;
   const reg = await b.post('/api/auth/register', { email, password: 'correct horse battery staple' });
   if (reg.status !== 200) throw new Error(`register failed: ${JSON.stringify(reg.data)}`);
-  const name = opts.name ?? `T${id}`.slice(0, 16);
+  const name = opts.name ?? `T${id.replace(/[0-9]/g, (d) => 'abcdefghij'[Number(d)]!)}`.slice(0, 16);
   const created = await b.post('/api/characters', {
     name,
     classId: opts.classId ?? 'warrior',
@@ -136,5 +136,13 @@ export function ack<T = any>(socket: TestSocket, event: string, ...args: unknown
       clearTimeout(t);
       resolve(res);
     });
+  });
+}
+
+/** Log out of the world (the server closes the socket right away) and wait until it's gone. */
+export function leaveWorld(socket: TestSocket): Promise<void> {
+  return new Promise((resolve) => {
+    socket.once('disconnect', () => resolve());
+    socket.emit('logout', () => {});
   });
 }

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { ChatMessage, DialogueResult, InventoryState, SelfState } from '@terrago/shared';
+import type { ChatMessage, DialogueResult, InventoryState, SelfState, ShopView } from '@terrago/shared';
 
 /** Minimal observable store shared by the Phaser scene and the React HUD. */
 export class Store<T extends object> {
@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'map' | 'settings' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -46,6 +46,8 @@ export interface UiState {
   self: SelfState | null;
   mapId: string | null;
   mapName: string;
+  /** Owner of the instanced map you're in (your homestead), else null. */
+  mapOwnerId: string | null;
   inventory: InventoryState | null;
   chat: ChatMessage[];
   dialogue: DialogueResult | null;
@@ -55,7 +57,16 @@ export interface UiState {
   ping: number | null;
   nearby: number;
   interactHint: string | null;
+  /** What the action key would do right now (e.g. "Till", "Harvest Carrot"). */
+  actionHint: string | null;
   tile: { x: number; y: number };
+  /** Selected hotbar slot (0-8): which seed to plant, which food to eat... */
+  selectedSlot: number;
+  /** NPC whose service panel (shop, farm, repair) is open. */
+  serviceNpc: string | null;
+  shop: ShopView | null;
+  /** Plot whose detail menu is open (fertilize / remove). */
+  plotMenu: string | null;
 }
 
 export const initialUi: UiState = {
@@ -64,6 +75,7 @@ export const initialUi: UiState = {
   self: null,
   mapId: null,
   mapName: '',
+  mapOwnerId: null,
   inventory: null,
   chat: [],
   dialogue: null,
@@ -73,7 +85,12 @@ export const initialUi: UiState = {
   ping: null,
   nearby: 0,
   interactHint: null,
+  actionHint: null,
   tile: { x: 0, y: 0 },
+  selectedSlot: 0,
+  serviceNpc: null,
+  shop: null,
+  plotMenu: null,
 };
 
 let noticeId = 0;

@@ -16,6 +16,7 @@ import { savePositions } from './services/characters';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
+import { loadMapObjects } from './net/gameplay';
 
 export interface GameServer {
   config: Config;
@@ -49,6 +50,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     savePositions: (s) => savePositions(pool, s),
     onChat: (e) => chatLog.add({ channel: 'local', ...e }),
     security,
+    loadObjects: (def, owner) => loadMapObjects(pool, def, owner),
   });
   const metrics = new Metrics(world, pool);
   const tickets = new TicketStore();

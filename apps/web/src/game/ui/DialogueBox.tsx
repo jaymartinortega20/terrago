@@ -81,7 +81,24 @@ export function DialogueBox({ client }: { client: GameClient }) {
             })}
           </div>
         )}
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex flex-wrap justify-end gap-2">
+          {last &&
+            shown >= text.length &&
+            dialogue.actions?.map((a) => (
+              <button
+                key={a.id}
+                className="px-btn green small"
+                data-testid={`dialogue-action-${a.id}`}
+                onClick={() => {
+                  const npcId = dialogue.npcId;
+                  client.ui.set({ dialogue: null });
+                  if (a.id === 'shop') void client.openShop(npcId);
+                  else client.ui.set({ serviceNpc: npcId, panel: a.id === 'farm_upgrade' ? 'farm' : 'repair' });
+                }}
+              >
+                {a.label}
+              </button>
+            ))}
           <button className="px-btn small" onClick={advance} data-testid="dialogue-next">
             {shown < text.length ? '…' : last ? 'Farewell' : 'Next ▶'}
           </button>

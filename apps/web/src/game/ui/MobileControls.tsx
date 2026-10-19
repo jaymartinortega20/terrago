@@ -14,6 +14,7 @@ export function MobileControls({ client, openPanel }: { client: GameClient; open
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const pointer = useRef<number | null>(null);
   const hint = useStore(client.ui, (s) => s.interactHint);
+  const action = useStore(client.ui, (s) => s.actionHint);
   const R = 42;
 
   const update = (e: React.PointerEvent) => {
@@ -64,8 +65,13 @@ export function MobileControls({ client, openPanel }: { client: GameClient; open
         />
       </div>
       <div className="absolute right-3 bottom-4 grid grid-cols-2 gap-2">
-        <button className={`${btn} ${hint ? 'bg-gold text-ink' : 'bg-night-3/80 text-parchment/60'}`} style={{ borderWidth: 3 }} onClick={() => client.interact()} aria-label="Interact">
-          Talk
+        <button
+          className={`${btn} ${hint || action ? 'bg-gold text-ink' : 'bg-night-3/80 text-parchment/60'}`}
+          style={{ borderWidth: 3 }}
+          onClick={() => client.primaryAction()}
+          aria-label={hint ? `Talk to ${hint}` : (action ?? 'Interact')}
+        >
+          {hint ? 'Talk' : 'Use'}
         </button>
         <button className={`${btn} bg-night-3/80 text-parchment/50`} style={{ borderWidth: 3 }} disabled aria-label="Attack (coming in v0.5)" title="Combat arrives in v0.5">
           Attack

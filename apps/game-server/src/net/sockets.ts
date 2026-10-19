@@ -22,6 +22,7 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
+import { act, npcServices } from './gameplay';
 
 interface SocketData {
   userId: string;
@@ -259,6 +260,18 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
         }),
       ),
     );
+
+    const g = { pool, world, log };
+    const serial = <T>(ack: unknown, fn: () => Promise<T> | T) => respond(ack, () => p.serial(async () => fn()));
+
+    socket.on('act', (req, ack) => serial(ack, () => act(g, p, req)));
+    socket.on('shop:get', (npcId, ack) => serial(ack, () => npcServices.shopGet(g, p, npcId)));
+    socket.on('shop:buy', (req, ack) => serial(ack, () => npcServices.shopBuy(g, p, req)));
+    socket.on('shop:sell', (req, ack) => serial(ack, () => npcServices.shopSell(g, p, req)));
+    socket.on('farm:info', (npcId, ack) => serial(ack, () => npcServices.farmInfo(g, p, npcId)));
+    socket.on('farm:upgrade', (npcId, ack) => serial(ack, () => npcServices.farmUpgrade(g, p, npcId)));
+    socket.on('repair:quote', (npcId, ack) => serial(ack, () => npcServices.repairQuote(g, p, npcId)));
+    socket.on('repair:all', (npcId, ack) => serial(ack, () => npcServices.repair(g, p, npcId)));
 
     socket.on('ping:check', (_t, ack) => {
       if (typeof ack === 'function') ack(Date.now());

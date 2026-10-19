@@ -1,15 +1,19 @@
 import Phaser from 'phaser';
+import { getCrop } from '@terrago/game-data';
 import {
   CHAT,
   MAX_VIEW,
   TILE_SIZE,
+  cropStatus,
   tileCenter,
   type Appearance,
   type ChatMessage,
   type Direction,
   type MoveInput,
   type NpcAccessory,
+  type WorldObject,
 } from '@terrago/shared';
+import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
 import { buildCharacterSheet, characterSheetKey } from '../art/characters';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
@@ -19,6 +23,11 @@ const DIR_ROW: Record<Direction, number> = { down: 0, left: 1, right: 2, up: 3 }
 const WALK_CYCLE = [1, 0, 2, 0];
 const LABEL_FONT = '"Pixelify Sans", monospace';
 const LABEL_DEPTH = 1_000_000;
+
+interface ObjectView {
+  key: string;
+  parts: Phaser.GameObjects.Image[];
+}
 
 interface Avatar {
   sprite: Phaser.GameObjects.Sprite;
@@ -45,6 +54,10 @@ export class WorldScene extends Phaser.Scene {
   private unsubs: (() => void)[] = [];
   private lastHint: string | null = null;
   private lastTileKey = '';
+  private objectViews = new Map<string, ObjectView>();
+  private cursor!: Phaser.GameObjects.Graphics;
+  private lastObjectRefresh = 0;
+  private lastActionHint: string | null = null;
 
   constructor() {
     super('world');
@@ -73,8 +86,8 @@ export class WorldScene extends Phaser.Scene {
       space: k(K.SPACE),
     };
     const interact = () => {
-      if (isTyping() || this.client.ui.get().dialogue) return;
-      this.client.interact();
+      if (isTyping()) return;
+      this.client.primaryAction();
     };
     this.keys.e.on('down', interact);
     this.keys.space.on('down', interact);
@@ -86,6 +99,20 @@ export class WorldScene extends Phaser.Scene {
       .setResolution(2)
       .setVisible(false);
 
+    this.cursor = this.add.graphics().setDepth(LABEL_DEPTH - 3);
+    // Click / tap a nearby tile to use it.
+    this.input.on('pointerdown', (ptr: Phaser.Input.Pointer) => {
+      if (ptr.button !== 0 || this.client.ui.get().dialogue) return;
+      const wp = this.cameras.main.getWorldPoint(ptr.x, ptr.y);
+      const tx = Math.floor(wp.x / TILE_SIZE);
+      const ty = Math.floor(wp.y / TILE_SIZE);
+      const o = this.client.objectAt(tx, ty);
+      if (!o) return;
+      const cx = tx * TILE_SIZE + TILE_SIZE / 2;
+      const cy = ty * TILE_SIZE + TILE_SIZE / 2;
+      if (Math.hypot(cx - this.client.pos.x, cy - (this.client.pos.y - 8)) <= 1.7 * TILE_SIZE) this.client.act(tx, ty);
+    });
+
     this.cameras.main.setRoundPixels(true);
     this.scale.on('resize', this.updateZoom, this);
     this.updateZoom();
@@ -95,6 +122,11 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('add', (r) => this.addRemote(r)),
       this.client.on('remove', (id) => this.removeRemote(id)),
       this.client.on('chat', (m) => this.showBubble(m)),
+      this.client.on('objects', (changed, removed) => {
+        for (const id of removed) this.destroyObjectView(id);
+        for (const o of changed) this.syncObject(o);
+      }),
+      this.client.on('acted', ({ tx, ty }) => this.puff(tx, ty)),
     );
     if (this.client.map) this.buildMap();
 
@@ -211,6 +243,9 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
+    for (const id of [...this.objectViews.keys()]) this.destroyObjectView(id);
+    for (const o of this.client.objects.values()) this.syncObject(o);
+
     for (const n of this.client.npcs) {
       const c = tileCenter(n.x, n.y);
       const av = this.makeAvatar(c.x, c.y, n.appearance, n.name, '#b9f08a', n.accessory);
@@ -228,6 +263,74 @@ export class WorldScene extends Phaser.Scene {
     cam.startFollow(this.local.sprite, true, 0.18, 0.18, 0, 24);
     cam.centerOn(this.client.pos.x, this.client.pos.y);
     this.updateZoom();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Objects (farm plots)
+  // ---------------------------------------------------------------------------
+
+  private bufferTexture(key: string, make: () => { toCanvas: () => HTMLCanvasElement }): string {
+    return this.canvasTexture(key, () => make().toCanvas());
+  }
+
+  /** Visual state of an object; when it changes, the view is rebuilt. */
+  private objectKey(o: WorldObject, now: number): string {
+    if (o.kind !== 'plot') return '';
+    if (o.locked) return 'wild';
+    const soil: SoilState = !o.tilled ? 'farmland' : o.wetUntil > now ? 'wet' : 'tilled';
+    if (!o.crop) return soil;
+    const def = getCrop(o.crop.cropId);
+    if (!def) return soil;
+    const st = cropStatus(o.crop, def, now);
+    const badge = st.ready ? 'ready' : !st.watered ? 'dry' : '';
+    return `${soil}|${def.id}:${st.stage}|${badge}`;
+  }
+
+  private syncObject(o: WorldObject): void {
+    const key = this.objectKey(o, this.client.serverNow());
+    const cur = this.objectViews.get(o.id);
+    if (cur && cur.key === key) return;
+    if (cur) cur.parts.forEach((p) => p.destroy());
+    const parts: Phaser.GameObjects.Image[] = [];
+    const x = o.x * TILE_SIZE;
+    const y = o.y * TILE_SIZE;
+    if (o.kind === 'plot') {
+      const [soil, crop, badge] = key.split('|');
+      const variant = (o.x * 3 + o.y * 5) % 3;
+      const soilKey = this.bufferTexture(`soil:${soil}:${variant}`, () => soilArt(soil as SoilState, variant));
+      parts.push(this.add.image(x, y, soilKey).setOrigin(0, 0).setDepth(-5));
+      if (crop) {
+        const [cropId, stage] = crop.split(':');
+        const def = getCrop(cropId!);
+        if (def) {
+          const ck = this.bufferTexture(`crop:${cropId}:${stage}`, () => cropArt(def, Number(stage)));
+          parts.push(this.add.image(x + TILE_SIZE / 2, y + TILE_SIZE - 2, ck).setOrigin(0.5, 1).setDepth(y + TILE_SIZE - 6));
+        }
+      }
+      if (badge === 'dry') parts.push(this.add.image(x + TILE_SIZE - 6, y + 2, this.bufferTexture('badge:dry', needsWaterArt)).setOrigin(0.5, 1).setDepth(LABEL_DEPTH - 4).setAlpha(0.9));
+      if (badge === 'ready') {
+        const sp = this.add.image(x + TILE_SIZE - 6, y + 4, this.bufferTexture('badge:ready', readyArt)).setOrigin(0.5, 1).setDepth(LABEL_DEPTH - 4);
+        this.tweens.add({ targets: sp, alpha: 0.35, yoyo: true, repeat: -1, duration: 600 });
+        parts.push(sp);
+      }
+    }
+    this.objectViews.set(o.id, { key, parts });
+  }
+
+  private destroyObjectView(id: string): void {
+    this.objectViews.get(id)?.parts.forEach((p) => p.destroy());
+    this.objectViews.delete(id);
+  }
+
+  /** Tiny dust puff where an action happened. */
+  private puff(tx: number, ty: number): void {
+    const cx = tx * TILE_SIZE + TILE_SIZE / 2;
+    const cy = ty * TILE_SIZE + TILE_SIZE / 2;
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const dot = this.add.rectangle(cx, cy, 4, 4, i % 2 ? 0xc9a36b : 0xe8dcc0).setDepth(LABEL_DEPTH - 5);
+      this.tweens.add({ targets: dot, x: cx + Math.cos(a) * 14, y: cy + Math.sin(a) * 10 - 6, alpha: 0, duration: 380, onComplete: () => dot.destroy() });
+    }
   }
 
   private addRemote(r: RemotePlayer): void {
@@ -344,6 +447,25 @@ export class WorldScene extends Phaser.Scene {
     if (hint !== this.lastHint) {
       this.lastHint = hint;
       client.ui.set({ interactHint: hint });
+    }
+
+    // Crops grow on their own: refresh visuals a couple of times per second.
+    if (nowMs - this.lastObjectRefresh > 400) {
+      this.lastObjectRefresh = nowMs;
+      for (const o of client.objects.values()) this.syncObject(o);
+    }
+
+    // Target cursor + what the action key would do.
+    const target = !npc && !ui.dialogue ? client.actionTarget() : null;
+    const hintText = target ? client.describeAction(target) : null;
+    this.cursor.clear();
+    if (target && hintText) {
+      this.cursor.lineStyle(2, 0xffe48a, 0.95).strokeRect(target.x * TILE_SIZE + 1, target.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+      this.cursor.lineStyle(2, 0x2a2030, 0.6).strokeRect(target.x * TILE_SIZE + 3, target.y * TILE_SIZE + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+    }
+    if (hintText !== this.lastActionHint) {
+      this.lastActionHint = hintText;
+      client.ui.set({ actionHint: hintText });
     }
 
     // Signs show their text when you stand next to them.

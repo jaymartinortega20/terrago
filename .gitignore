@@ -12,3 +12,4 @@ test-results/
 *.tsbuildinfo
 next-env.d.ts
 dist-preview/
+apps/web/AGENTS.md

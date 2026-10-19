@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, mock, test } from 'node:test';
-import { DEFAULT_APPEARANCE, PLAYER_SPEED, SIM, TILE_SIZE, tileCenter, type InventoryState, type ServerToClientEvents } from '@terrago/shared';
+import { DEFAULT_APPEARANCE, PLAYER_SPEED, SIM, TILE_SIZE, emptySkills, tileCenter, type InventoryState, type ServerToClientEvents } from '@terrago/shared';
 import { createLogger } from '../../src/logger';
 import type { CharacterRecord, PositionSave } from '../../src/world/characterState';
 import type { Connection } from '../../src/world/connection';
@@ -57,6 +57,7 @@ function record(over: Partial<CharacterRecord> = {}): CharacterRecord {
     mp: 10,
     energy: 60,
     energyUpdatedAt: Date.now(),
+    skills: emptySkills({ baseXp: 40, exponent: 1.9, maxLevel: 100 }),
     ...over,
   };
 }

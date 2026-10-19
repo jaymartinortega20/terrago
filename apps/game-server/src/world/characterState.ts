@@ -11,6 +11,7 @@ import {
   type ClassId,
   type Direction,
   type SelfState,
+  type SkillSet,
 } from '@terrago/shared';
 import { collisionGridFor } from './grids';
 
@@ -33,6 +34,7 @@ export interface CharacterRecord {
   mp: number;
   energy: number;
   energyUpdatedAt: number;
+  skills: SkillSet;
 }
 
 export interface PositionSave {
@@ -83,5 +85,6 @@ export function buildSelfState(rec: CharacterRecord, now = Date.now()): SelfStat
     stats: rec.stats,
     derived: derivedStats(rec.level, rec.stats),
     appearance: rec.appearance,
+    skills: rec.skills,
   };
 }

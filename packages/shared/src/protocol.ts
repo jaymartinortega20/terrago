@@ -2,10 +2,13 @@ import type {
   ChatMessage,
   DialogueResult,
   Direction,
+  FarmUpgradeView,
   InventoryState,
   NpcPublic,
   PublicPlayer,
   SelfState,
+  ShopView,
+  WorldObject,
 } from './types';
 
 /**
@@ -45,6 +48,8 @@ export interface MapInfo {
   id: string;
   name: string;
   safeZone: boolean;
+  /** For instanced maps (homesteads): whose instance this is. */
+  owner: { id: string; name: string } | null;
 }
 
 export interface EnterWorldPayload {
@@ -61,6 +66,22 @@ export interface EnterWorldPayload {
   ack: number;
   /** Recent local chat so a reconnecting player has context. */
   recentChat: ChatMessage[];
+  /** Interactive objects in this map (farm plots...). */
+  objects: WorldObject[];
+}
+
+/** Use whatever is at a tile: till, plant, water, harvest... The server decides. */
+export interface ActRequest {
+  tx: number;
+  ty: number;
+  /** Preferred bag slot (selected hotbar item), e.g. which seed to plant. */
+  slot?: number;
+  /** Explicit secondary actions from the plot menu. */
+  mode?: 'clear' | 'fertilize';
+}
+
+export interface ActResult {
+  message: string | null;
 }
 
 export interface NoticePayload {
@@ -80,6 +101,9 @@ export interface ServerToClientEvents {
   'self:update': (self: Partial<SelfState>) => void;
   'inventory:update': (inventory: InventoryState) => void;
   'notice': (notice: NoticePayload) => void;
+  /** Objects added or changed in the current map. */
+  'objects:set': (objects: WorldObject[]) => void;
+  'objects:remove': (ids: string[]) => void;
   /** The server is closing this session (logged in elsewhere, banned, shutdown...). */
   'session:end': (info: { reason: string }) => void;
 }
@@ -92,6 +116,14 @@ export interface ClientToServerEvents {
   'inventory:move': (req: { from: number; to: number }, ack: Ack<InventoryState>) => void;
   'inventory:use': (req: { slot: number }, ack: Ack<{ inventory: InventoryState; message: string }>) => void;
   'portal:use': (portalId: string, ack: Ack<{ mapId: string }>) => void;
+  'act': (req: ActRequest, ack: Ack<ActResult>) => void;
+  'shop:get': (npcId: string, ack: Ack<ShopView>) => void;
+  'shop:buy': (req: { npcId: string; itemId: string; quantity: number }, ack: Ack<{ message: string }>) => void;
+  'shop:sell': (req: { npcId: string; slot: number; quantity: number }, ack: Ack<{ message: string }>) => void;
+  'farm:info': (npcId: string, ack: Ack<FarmUpgradeView>) => void;
+  'farm:upgrade': (npcId: string, ack: Ack<{ message: string }>) => void;
+  'repair:quote': (npcId: string, ack: Ack<{ cost: number; items: number }>) => void;
+  'repair:all': (npcId: string, ack: Ack<{ message: string }>) => void;
   'ping:check': (clientTime: number, ack: (serverTime: number) => void) => void;
   'logout': (ack: Ack<null>) => void;
 }

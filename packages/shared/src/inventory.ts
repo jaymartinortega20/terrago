@@ -114,6 +114,33 @@ export function removeFromSlot(slots: Slots, slot: number, quantity: number): Re
   return { ok: true, slots: next, removed: { ...s, quantity } };
 }
 
+/**
+ * Remove `quantity` of an item spread over any number of stacks (smallest
+ * stacks first, any quality). All-or-nothing.
+ */
+export function removeItemById(slots: Slots, itemId: string, quantity: number): Result<{ slots: Slots; changed: number[]; removed: { slot: number; quality: number; quantity: number }[] }> {
+  if (!Number.isInteger(quantity) || quantity <= 0) return { ok: false, error: 'Invalid quantity.' };
+  if (countItem(slots, itemId) < quantity) return { ok: false, error: 'Not enough items.' };
+  const next = slots.map((x) => (x ? { ...x } : null));
+  const order = next
+    .map((s, i) => ({ s, i }))
+    .filter((x): x is { s: SlotItem; i: number } => !!x.s && x.s.itemId === itemId)
+    .sort((a, b) => a.s.quantity - b.s.quantity || a.s.quality - b.s.quality);
+  let left = quantity;
+  const changed: number[] = [];
+  const removed: { slot: number; quality: number; quantity: number }[] = [];
+  for (const { s, i } of order) {
+    if (left === 0) break;
+    const take = Math.min(left, s.quantity);
+    s.quantity -= take;
+    left -= take;
+    if (s.quantity === 0) next[i] = null;
+    changed.push(i);
+    removed.push({ slot: i, quality: s.quality, quantity: take });
+  }
+  return { ok: true, slots: next, changed, removed };
+}
+
 /** Move a stack: into an empty slot, merge with a matching stack, or swap. */
 export function moveItem(slots: Slots, from: number, to: number, lookup: ItemLookup): Result<{ slots: Slots; changed: number[] }> {
   const valid = (i: number) => Number.isInteger(i) && i >= 0 && i < slots.length;

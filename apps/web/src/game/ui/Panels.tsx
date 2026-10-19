@@ -8,20 +8,7 @@ import { audio, loadAudioSettings, type AudioSettings } from '../audio';
 import type { GameClient } from '../net/client';
 import { useStore, type Panel } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
-
-function Window({ title, onClose, children, testId }: { title: string; onClose: () => void; children: React.ReactNode; testId?: string }) {
-  return (
-    <section className="px-panel pointer-events-auto max-h-[min(80dvh,calc(100dvh-16px))] w-[min(92vw,380px)] overflow-y-auto p-3" data-testid={testId} role="dialog" aria-label={title}>
-      <header className="mb-2 flex items-center">
-        <h2 className="text-lg font-bold text-wood-dark">{title}</h2>
-        <button className="px-btn ghost small ml-auto" onClick={onClose} aria-label="Close">
-          ✕
-        </button>
-      </header>
-      {children}
-    </section>
-  );
-}
+import { Window } from './Window';
 
 export function InventoryPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const inv = useStore(client.ui, (s) => s.inventory);
@@ -84,6 +71,11 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
             <button className="px-btn ghost small" onClick={() => setMoving(true)}>
               Move
             </button>
+            {sel.slot < 9 && (
+              <button className="px-btn ghost small" onClick={() => client.selectSlot(sel.slot)}>
+                Hold
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -224,7 +216,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>
       <p className="text-xs leading-relaxed">
-        Move: WASD / Arrows · Talk: E or Space · Chat: Enter · Inventory: I · Character: C · Map: M · Hotbar: 1–9 · Close: Esc
+        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Close: Esc
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button className="px-btn ghost small" onClick={onSwitch}>
@@ -241,7 +233,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
 export const MENU: { id: Exclude<Panel, null> | string; label: string; key: string; version?: string }[] = [
   { id: 'character', label: 'Character', key: 'C' },
   { id: 'inventory', label: 'Inventory', key: 'I' },
-  { id: 'skills', label: 'Skills', key: 'K', version: 'v0.5' },
+  { id: 'skills', label: 'Skills', key: 'K' },
   { id: 'quests', label: 'Quests', key: 'Q', version: 'v0.6' },
   { id: 'map', label: 'Map', key: 'M' },
   { id: 'crafting', label: 'Crafting', key: 'R', version: 'v0.8' },

@@ -1,4 +1,6 @@
 import type { DIRECTIONS } from './constants';
+import type { CropState } from './farming';
+import type { SkillSet } from './skills';
 
 export type Direction = (typeof DIRECTIONS)[number];
 
@@ -72,7 +74,25 @@ export interface SelfState {
   stats: BaseStats;
   derived: DerivedStats;
   appearance: Appearance;
+  skills: SkillSet;
 }
+
+/** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */
+export interface PlotObject {
+  kind: 'plot';
+  id: string;
+  /** Tile position. */
+  x: number;
+  y: number;
+  index: number;
+  locked: boolean;
+  tilled: boolean;
+  wetUntil: number;
+  crop: CropState | null;
+}
+
+/** Interactive things placed in a map at runtime (farm plots; nodes and drops later). */
+export type WorldObject = PlotObject;
 
 /** What other players can see about a player entity. */
 export interface PublicPlayer {
@@ -114,7 +134,13 @@ export interface ItemDef {
   /** Max durability for tools/equipment; null for items without durability. */
   maxDurability: number | null;
   consumable?: { energy?: number; hp?: number; mp?: number };
+  /** Gathering/farming tools. Higher tiers cost less Energy and reach harder nodes. */
+  tool?: { kind: ToolKind; tier: number };
+  /** Mixed into a planted plot: quality bonus and growth speed multiplier. */
+  fertilizer?: { quality: number; speed: number };
 }
+
+export type ToolKind = 'hoe' | 'can' | 'pickaxe' | 'axe' | 'rod' | 'sickle';
 
 export interface InventorySlot {
   slot: number;
@@ -163,4 +189,40 @@ export interface DialogueResult {
   lines: string[];
   /** Items or gold granted by this conversation (already applied server-side). */
   rewards?: { itemId: string; quantity: number }[];
+  /** Services this NPC offers (shop, farm upgrades...). */
+  actions?: DialogueAction[];
+}
+
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair';
+
+export interface DialogueAction {
+  id: DialogueActionId;
+  label: string;
+}
+
+export interface ShopEntry {
+  itemId: string;
+  price: number;
+  /** Farming/other level needed to buy (e.g. advanced seeds). */
+  requires?: { skill: string; level: number };
+}
+
+export interface ShopView {
+  npcId: string;
+  name: string;
+  sells: ShopEntry[];
+  /** Item categories this shop buys from players. */
+  buys: ItemCategory[];
+}
+
+export interface FarmUpgradeView {
+  tier: number;
+  plots: number;
+  next: null | {
+    tier: number;
+    plots: number;
+    gold: number;
+    farmingLevel: number;
+    materials: { itemId: string; quantity: number }[];
+  };
 }

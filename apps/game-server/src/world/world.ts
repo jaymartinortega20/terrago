@@ -24,6 +24,7 @@ import {
   type PortalDef,
   type PublicPlayer,
   type SnapshotEntity,
+  type WorldObject,
 } from '@terrago/shared';
 import { randomUUID } from 'node:crypto';
 import type { Logger } from '../logger';
@@ -34,13 +35,21 @@ import { collisionGridFor } from './grids';
 import { Player } from './player';
 import { SpatialGrid } from './spatialGrid';
 
-interface MapRuntime {
+export interface MapRuntime {
+  /** `mapId` for shared maps, `mapId:ownerId` for instances (homesteads). */
+  key: string;
   def: MapDef;
+  owner: { id: string; name: string } | null;
   grid: CollisionGrid;
   players: Set<Player>;
   spatial: SpatialGrid<Player>;
   npcs: NpcDef[];
   recentChat: { msg: ChatMessage; x: number; y: number }[];
+  objects: Map<string, WorldObject>;
+  /** Objects are loaded asynchronously for instanced maps. */
+  loaded: boolean;
+  loading: Promise<void> | null;
+  emptySince: number | null;
 }
 
 export interface WorldDeps {
@@ -50,6 +59,8 @@ export interface WorldDeps {
   security?: Pick<SecurityEvents, 'record'>;
   /** Called when a player leaves the world for good (after grace, logout or kick). */
   onLeave?: (player: Player) => void;
+  /** Load runtime objects for a map instance (e.g. a homestead's farm plots). */
+  loadObjects?: (def: MapDef, owner: { id: string; name: string } | null) => Promise<WorldObject[]>;
   now?: () => number;
 }
 
@@ -59,6 +70,9 @@ export interface WorldStats {
   maps: Record<string, number>;
   tick: number;
 }
+
+/** Instanced runtimes with nobody inside are dropped after this long. */
+const INSTANCE_IDLE_MS = 60_000;
 
 /**
  * The authoritative game world. Owns every in-world player's runtime state,
@@ -76,38 +90,97 @@ export class World {
   }
 
   // ---------------------------------------------------------------------------
-  // Maps
+  // Maps and instances
   // ---------------------------------------------------------------------------
 
-  private runtime(mapId: string): MapRuntime {
-    let rt = this.maps.get(mapId);
+  static runtimeKey(mapId: string, ownerId: string | null): string {
+    return ownerId ? `${mapId}:${ownerId}` : mapId;
+  }
+
+  private runtime(mapId: string, owner: { id: string; name: string } | null): MapRuntime {
+    const def = getMap(mapId);
+    if (!def) throw new Error(`Unknown map ${mapId}`);
+    const own = def.instanced ? owner : null;
+    if (def.instanced && !own) throw new Error(`Map ${mapId} needs an instance owner`);
+    const key = World.runtimeKey(mapId, own?.id ?? null);
+    let rt = this.maps.get(key);
     if (!rt) {
-      const def = getMap(mapId);
-      if (!def) throw new Error(`Unknown map ${mapId}`);
       rt = {
+        key,
         def,
+        owner: own,
         grid: collisionGridFor(def),
         players: new Set(),
         spatial: new SpatialGrid<Player>(512),
         npcs: npcsForMap(mapId),
         recentChat: [],
+        objects: new Map(),
+        loaded: !this.deps.loadObjects,
+        loading: null,
+        emptySince: null,
       };
-      this.maps.set(mapId, rt);
+      this.maps.set(key, rt);
+      if (this.deps.loadObjects) {
+        const target = rt;
+        target.loading = this.deps
+          .loadObjects(def, own)
+          .then((objs) => {
+            for (const o of objs) target.objects.set(o.id, o);
+          })
+          .catch((err) => this.deps.log.error('objects_load_failed', { err, map: key }))
+          .finally(() => {
+            target.loaded = true;
+            target.loading = null;
+          });
+      }
     }
     return rt;
   }
 
-  private addToMap(p: Player): void {
-    const rt = this.runtime(p.mapId);
+  /** The runtime a player is currently in. */
+  runtimeOf(p: Player): MapRuntime {
+    return this.runtime(p.mapId, p.instanceOwner);
+  }
+
+  getRuntime(key: string): MapRuntime | undefined {
+    return this.maps.get(key);
+  }
+
+  private addToMap(p: Player): MapRuntime {
+    const rt = this.runtimeOf(p);
+    // Re-read an idle instance from the database when someone walks back in,
+    // so it never serves stale state (the DB is always the source of truth).
+    if (rt.owner && rt.players.size === 0 && rt.loaded && !rt.loading && this.deps.loadObjects) {
+      rt.loaded = false;
+      rt.loading = this.deps
+        .loadObjects(rt.def, rt.owner)
+        .then((objs) => {
+          rt.objects.clear();
+          for (const o of objs) rt.objects.set(o.id, o);
+        })
+        .catch((err) => this.deps.log.error('objects_load_failed', { err, map: rt.key }))
+        .finally(() => {
+          rt.loaded = true;
+          rt.loading = null;
+        });
+    }
     rt.players.add(p);
     rt.spatial.insert(p);
+    rt.emptySince = null;
+    return rt;
   }
 
   private removeFromMap(p: Player): void {
-    const rt = this.maps.get(p.mapId);
+    const rt = this.maps.get(World.runtimeKey(p.mapId, p.instanceOwner?.id ?? null));
     if (!rt) return;
     rt.players.delete(p);
     rt.spatial.remove(p);
+    if (rt.players.size === 0) rt.emptySince = this.now();
+  }
+
+  /** Owner info for a saved map: instanced maps (homesteads) always load as your own. */
+  private ownerFor(rec: CharacterRecord, mapId: string): { id: string; name: string } | null {
+    return getMap(mapId)?.instanced ? { id: rec.id, name: rec.name } : null;
   }
 
   // ---------------------------------------------------------------------------
@@ -148,6 +221,7 @@ export class World {
       // Keep the in-memory state (it is fresher than the database).
     } else {
       p = new Player(rec);
+      p.instanceOwner = this.ownerFor(rec, rec.mapId);
       this.players.set(p.id, p);
       this.addToMap(p);
     }
@@ -156,13 +230,18 @@ export class World {
     p.sessionId = meta.sessionId;
     p.ip = meta.ip;
     p.lastEnergySent = -1;
-    this.sendEnter(p, inventory);
+    await this.whenLoaded(this.runtimeOf(p));
+    if (p.conn === conn) this.sendEnter(p, inventory);
     this.deps.log.info('player_joined', { characterId: p.id, name: p.name, map: p.mapId, online: this.players.size });
     return p;
   }
 
+  private async whenLoaded(rt: MapRuntime): Promise<void> {
+    if (!rt.loaded && rt.loading) await rt.loading;
+  }
+
   private sendEnter(p: Player, inventory: InventoryState): void {
-    const rt = this.runtime(p.mapId);
+    const rt = this.runtimeOf(p);
     p.known = new Set();
     p.inputs = [];
     p.budgetMs = 0;
@@ -178,12 +257,13 @@ export class World {
       tickRate: SIM.tickRate,
       snapshotRate: SIM.tickRate / SIM.snapshotEveryTicks,
       self,
-      map: { id: rt.def.id, name: rt.def.name, safeZone: rt.def.safeZone },
+      map: { id: rt.def.id, name: rt.owner ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
       position: { x: p.x, y: p.y, dir: p.dir },
       npcs: rt.npcs.map(toNpcPublic),
       inventory,
       ack: p.lastSeq,
       recentChat,
+      objects: [...rt.objects.values()],
     });
   }
 
@@ -246,7 +326,7 @@ export class World {
     p.inputs.push([seq, dx, dy]);
   }
 
-  private badPacket(p: Player, what: string): void {
+  badPacket(p: Player, what: string): void {
     this.deps.security?.record('invalid_packet', { userId: p.userId, characterId: p.id, ip: p.ip, details: { what } }, 60_000);
   }
 
@@ -263,12 +343,25 @@ export class World {
     if (this.tickCount % SIM.snapshotEveryTicks === 0) {
       for (const rt of this.maps.values()) this.broadcast(rt, now);
     }
+    if (this.tickCount % 100 === 0) this.dropIdleInstances(now);
+  }
+
+  private dropIdleInstances(now: number): void {
+    for (const [key, rt] of this.maps) {
+      if (rt.owner && rt.players.size === 0 && rt.emptySince !== null && now - rt.emptySince > INSTANCE_IDLE_MS && rt.loaded) {
+        this.maps.delete(key);
+      }
+    }
   }
 
   private simulate(p: Player, rt: MapRuntime, dtMs: number, now: number): void {
     // Real time grants movement budget; each command spends one step.
     // A client sending commands faster than real time just fills its queue.
     p.budgetMs = Math.min(p.budgetMs + dtMs, MOVEMENT_GUARD.maxBudgetMs);
+    if (p.changingMap) {
+      p.inputs = [];
+      return;
+    }
     while (p.inputs.length > 0 && p.budgetMs >= SIM.stepMs) {
       const [seq, dx, dy] = p.inputs.shift()!;
       p.budgetMs -= SIM.stepMs;
@@ -301,16 +394,29 @@ export class World {
   private async usePortal(p: Player, portal: PortalDef): Promise<void> {
     const target = getMap(portal.to);
     if (!target) return;
-    const dest = tileCenter(portal.toX, portal.toY);
+    const owner = target.instanced ? { id: p.id, name: p.name } : null;
+    await this.moveTo(p, target.id, owner, portal.toX, portal.toY, portal.toDir);
+  }
+
+  /** Move a player to a map (or instance) and tile. Used by portals and respawns. */
+  async moveTo(p: Player, mapId: string, owner: { id: string; name: string } | null, tx: number, ty: number, dir: PortalDef['toDir']): Promise<void> {
+    const dest = tileCenter(tx, ty);
     this.removeFromMap(p);
-    p.mapId = target.id;
+    p.mapId = mapId;
+    p.instanceOwner = owner;
     p.x = dest.x;
     p.y = dest.y;
-    p.dir = portal.toDir;
+    p.dir = dir;
     p.dirty = true;
-    this.addToMap(p);
-    this.deps.log.info('map_change', { characterId: p.id, to: target.id });
+    const rt = this.addToMap(p);
+    this.deps.log.info('map_change', { characterId: p.id, to: rt.key });
     void this.saveNow([p]);
+    if (!rt.loaded) {
+      p.changingMap = true;
+      await this.whenLoaded(rt);
+      p.changingMap = false;
+      if (this.runtimeOf(p) !== rt) return; // moved again meanwhile
+    }
     const inv = this.inventoryCache.get(p.id);
     if (p.conn && inv) this.sendEnter(p, inv);
     else if (p.conn) this.deps.log.warn('map_change_without_inventory', { characterId: p.id });
@@ -323,7 +429,7 @@ export class World {
     const near: Player[] = [];
     for (const p of rt.players) {
       const conn = p.conn;
-      if (!conn) continue;
+      if (!conn || p.changingMap) continue;
       near.length = 0;
       rt.spatial.query(p.x - AOI.leaveHalfWidth, p.y - AOI.leaveHalfHeight, p.x + AOI.leaveHalfWidth, p.y + AOI.leaveHalfHeight, near);
       const nextKnown = new Set<string>();
@@ -350,6 +456,45 @@ export class World {
   }
 
   // ---------------------------------------------------------------------------
+  // Objects (farm plots, ...)
+  // ---------------------------------------------------------------------------
+
+  /** Objects at a tile in the player's current map. */
+  objectsAt(p: Player, tx: number, ty: number): WorldObject[] {
+    const out: WorldObject[] = [];
+    for (const o of this.runtimeOf(p).objects.values()) if (o.x === tx && o.y === ty) out.push(o);
+    return out;
+  }
+
+  /** Upsert objects in a runtime and tell everyone inside. */
+  setObjects(key: string, objs: WorldObject[]): void {
+    const rt = this.maps.get(key);
+    if (!rt || objs.length === 0) return;
+    for (const o of objs) rt.objects.set(o.id, o);
+    for (const p of rt.players) if (!p.changingMap) p.conn?.send('objects:set', objs);
+  }
+
+  /** Replace all objects of a runtime (e.g. after a farm upgrade). */
+  replaceObjects(key: string, objs: WorldObject[]): void {
+    const rt = this.maps.get(key);
+    if (!rt) return;
+    const removed = [...rt.objects.keys()].filter((id) => !objs.some((o) => o.id === id));
+    rt.objects.clear();
+    for (const o of objs) rt.objects.set(o.id, o);
+    for (const p of rt.players) {
+      if (removed.length) p.conn?.send('objects:remove', removed);
+      p.conn?.send('objects:set', objs);
+    }
+  }
+
+  /** Is the tile within reach of the player (used for every tile action)? */
+  tileInReach(p: Player, tx: number, ty: number, tiles = 1.75): boolean {
+    const c = { x: tx * TILE_SIZE + TILE_SIZE / 2, y: ty * TILE_SIZE + TILE_SIZE / 2 };
+    // The player's position is their feet; measure from the body centre.
+    return Math.hypot(c.x - p.x, c.y - (p.y - 8)) <= tiles * TILE_SIZE;
+  }
+
+  // ---------------------------------------------------------------------------
   // Chat and interaction
   // ---------------------------------------------------------------------------
 
@@ -370,7 +515,7 @@ export class World {
       text: maskProfanity(text),
       ts: this.now(),
     };
-    const rt = this.runtime(p.mapId);
+    const rt = this.runtimeOf(p);
     const r = CHAT.localRadius;
     for (const q of rt.spatial.query(p.x - r, p.y - r, p.x + r, p.y + r)) {
       if (q.conn && Math.hypot(q.x - p.x, q.y - p.y) <= r) q.conn.send('chat', msg);
@@ -381,17 +526,22 @@ export class World {
     return { ok: true, id: msg.id };
   }
 
+  /** Send a system line to one player's chat. */
+  system(p: Player, text: string): void {
+    p.conn?.send('chat', { id: randomUUID(), channel: 'system', fromId: null, fromName: 'System', text, ts: this.now() });
+  }
+
   private command(p: Player, text: string): { ok: true; id: string } | { ok: false; error: string } {
     const [cmd] = text.slice(1).split(' ');
     const reply = (t: string) => {
-      p.conn?.send('chat', { id: randomUUID(), channel: 'system', fromId: null, fromName: 'System', text: t, ts: this.now() });
+      this.system(p, t);
       return { ok: true as const, id: 'system' };
     };
     switch ((cmd ?? '').toLowerCase()) {
       case 'who':
         return reply(`${this.players.size} adventurer${this.players.size === 1 ? '' : 's'} online.`);
       case 'where':
-        return reply(`${this.runtime(p.mapId).def.name} (${Math.floor(p.x / TILE_SIZE)}, ${Math.floor(p.y / TILE_SIZE)})`);
+        return reply(`${this.runtimeOf(p).def.name} (${Math.floor(p.x / TILE_SIZE)}, ${Math.floor(p.y / TILE_SIZE)})`);
       case 'help':
         return reply('Commands: /who — players online, /where — your location.');
       default:

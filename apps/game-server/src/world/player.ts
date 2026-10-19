@@ -10,6 +10,12 @@ export class Player {
   readonly rec: CharacterRecord;
 
   mapId: string;
+  /** Owner of the instance the player is in (homesteads); null on shared maps. */
+  instanceOwner: { id: string; name: string } | null = null;
+  /** True while the destination of a map change is still loading. */
+  changingMap = false;
+  /** Earliest time the next tile action (till, mine...) is accepted. */
+  nextActAt = 0;
   x: number;
   y: number;
   dir: Direction;

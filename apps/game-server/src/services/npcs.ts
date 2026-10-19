@@ -1,5 +1,5 @@
 import { NPCS, type NpcDef } from '@terrago/game-data';
-import type { DialogueResult, InventoryState } from '@terrago/shared';
+import type { DialogueAction, DialogueActionId, DialogueResult, InventoryState } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
 import { grantItemsTx, lockCharacter, toState } from './inventory';
 
@@ -7,6 +7,20 @@ const byId = new Map(NPCS.map((n) => [n.id, n]));
 
 export function getNpc(id: unknown): NpcDef | undefined {
   return typeof id === 'string' ? byId.get(id) : undefined;
+}
+
+const ACTION_LABELS: Record<DialogueActionId, string> = {
+  shop: 'Shop',
+  farm_upgrade: 'Expand my farm',
+  repair: 'Repair my tools',
+};
+
+function actionFor(id: DialogueActionId): DialogueAction {
+  return { id, label: ACTION_LABELS[id] };
+}
+
+export function npcOffers(npc: NpcDef, service: DialogueActionId): boolean {
+  return !!npc.services?.includes(service);
 }
 
 /**
@@ -21,7 +35,7 @@ export async function talkToNpc(
   npc: NpcDef,
   rand: () => number = Math.random,
 ): Promise<{ dialogue: DialogueResult; inventory: InventoryState | null }> {
-  const base = { npcId: npc.id, name: npc.name, title: npc.title };
+  const base = { npcId: npc.id, name: npc.name, title: npc.title, ...(npc.services?.length ? { actions: npc.services.map(actionFor) } : {}) };
 
   try {
     return await withTransaction(pool, async (tx) => {

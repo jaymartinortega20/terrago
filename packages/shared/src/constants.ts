@@ -8,7 +8,7 @@
  */
 
 /** Bumped whenever the socket protocol changes incompatibly. */
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 /** World tile size in pixels. Art is authored at 16px and drawn 2x. */
 export const TILE_SIZE = 32;

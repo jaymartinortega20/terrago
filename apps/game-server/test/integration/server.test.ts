@@ -301,7 +301,7 @@ describe('NPCs and inventory', () => {
   test('inventory move and use persist, consumables restore Energy, tools cannot be eaten', async () => {
     const A = await newPlayer(base);
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
-    assert.equal(a.enter.self.energy, 60);
+    assert.equal(a.enter.self.energy, 80);
     const breadSlot = a.enter.inventory.slots.find((s) => s.itemId === 'travelers_bread')!.slot;
 
     const moved = await ack(a.socket, 'inventory:move', { from: breadSlot, to: 15 });
@@ -311,7 +311,7 @@ describe('NPCs and inventory', () => {
     const energyUpdate = once<any>(a.socket, 'self:update');
     const used = await ack(a.socket, 'inventory:use', { slot: 15 });
     assert.equal(used.ok, true, JSON.stringify(used));
-    assert.equal((await energyUpdate).energy, 75);
+    assert.equal((await energyUpdate).energy, 95);
     assert.equal(used.data.inventory.slots.find((s: any) => s.slot === 15).quantity, 2);
 
     const hoe = await ack(a.socket, 'inventory:use', { slot: 0 });
@@ -323,7 +323,7 @@ describe('NPCs and inventory', () => {
     const row = await db.query(`SELECT slot, quantity FROM inventory_items WHERE character_id = $1 AND item_id = 'travelers_bread'`, [A.character.id]);
     assert.deepEqual(row.rows[0], { slot: 15, quantity: 2 });
     const st = await db.query('SELECT energy FROM character_stats WHERE character_id = $1', [A.character.id]);
-    assert.equal(st.rows[0].energy, 75);
+    assert.equal(st.rows[0].energy, 95);
     const consumed = await db.query(`SELECT count(*)::int AS n FROM item_transactions WHERE from_character_id = $1 AND reason = 'consume'`, [A.character.id]);
     assert.equal(consumed.rows[0].n, 1);
     a.socket.disconnect();

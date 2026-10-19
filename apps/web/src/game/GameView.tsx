@@ -14,6 +14,7 @@ import { Hud } from './ui/Hud';
 import { ItemSlot } from './ui/ItemSlot';
 import { MobileControls } from './ui/MobileControls';
 import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
+import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 
 declare global {
   interface Window {
@@ -100,8 +101,17 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
   const ping = useStore(ui, (s) => s.ping);
   const notices = useStore(ui, (s) => s.notices);
   const inv = useStore(ui, (s) => s.inventory);
+  const selected = useStore(ui, (s) => s.selectedSlot);
+  const actionHint = useStore(ui, (s) => s.actionHint);
+  const interactHint = useStore(ui, (s) => s.interactHint);
 
   const open = (p: Panel) => ui.set((s) => ({ panel: s.panel === p ? null : p }));
+  /** Hotbar: first press selects the slot, pressing a selected food eats it. */
+  const pressSlot = (slot: number) => {
+    const item = ui.get().inventory?.slots.find((s) => s.slot === slot);
+    if (ui.get().selectedSlot === slot && item && getItem(item.itemId)?.consumable) client.useItem(slot);
+    else client.selectSlot(slot);
+  };
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -115,11 +125,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'i' || k === 'b') open('inventory');
       else if (k === 'c') open('character');
       else if (k === 'm') open('map');
-      else if (/^[1-9]$/.test(k)) {
-        const slot = Number(k) - 1;
-        const item = ui.get().inventory?.slots.find((s) => s.slot === slot);
-        if (item && getItem(item.itemId)?.consumable) client.useItem(slot);
-      }
+      else if (k === 'k') open('skills');
+      else if (/^[1-9]$/.test(k)) pressSlot(Number(k) - 1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -184,6 +191,10 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'inventory' && <InventoryPanel client={client} onClose={() => open(null)} />}
           {panel === 'character' && <CharacterPanel client={client} onClose={() => open(null)} />}
           {panel === 'map' && <MapPanel client={client} onClose={() => open(null)} />}
+          {panel === 'skills' && <SkillsPanel client={client} onClose={() => open(null)} />}
+          {panel === 'shop' && <ShopPanel client={client} onClose={() => open(null)} />}
+          {panel === 'farm' && <FarmPanel client={client} onClose={() => open(null)} />}
+          {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
           )}
@@ -210,27 +221,23 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       </div>
 
       {/* Bottom: dialogue, hotbar, chat */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 sm:bottom-20">
+      <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 sm:bottom-20">
+        <PlotMenu client={client} />
         <DialogueBox client={client} />
+        {!touch && (actionHint || interactHint) && (
+          <div className="px-panel-dark px-2 py-0.5 text-xs font-bold text-gold" data-testid="action-hint">
+            [E] {interactHint ? `Talk to ${interactHint}` : actionHint}
+          </div>
+        )}
       </div>
-      {!touch && (
-        <div className="px-panel-dark pointer-events-auto absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1 p-1" data-testid="hotbar">
-          {Array.from({ length: 9 }, (_, i) => (
-            <ItemSlot
-              key={i}
-              slot={i}
-              item={bySlot.get(i)}
-              hotkey={String(i + 1)}
-              size={40}
-              onClick={() => {
-                const it = bySlot.get(i);
-                if (it && getItem(it.itemId)?.consumable) client.useItem(i);
-                else open('inventory');
-              }}
-            />
-          ))}
-        </div>
-      )}
+      <div
+        className={`px-panel-dark pointer-events-auto absolute left-1/2 flex -translate-x-1/2 gap-1 p-1 ${touch ? 'bottom-2 max-[560px]:hidden' : 'bottom-2'}`}
+        data-testid="hotbar"
+      >
+        {Array.from({ length: touch ? 5 : 9 }, (_, i) => (
+          <ItemSlot key={i} slot={i} item={bySlot.get(i)} hotkey={touch ? undefined : String(i + 1)} size={touch ? 34 : 40} selected={selected === i} onClick={() => pressSlot(i)} />
+        ))}
+      </div>
       <div className={`absolute left-2 ${touch ? 'top-[82px]' : 'bottom-2'}`}>
         <ChatBox client={client} compact={touch} />
       </div>
