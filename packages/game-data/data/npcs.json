@@ -129,6 +129,7 @@
       ]
     ],
     "services": [
+      "shop",
       "repair"
     ]
   },
@@ -205,6 +206,9 @@
       [
         "Crystal Lake's bridge is still out. Until then, this little pond keeps me sane."
       ]
+    ],
+    "services": [
+      "shop"
     ]
   },
   {
@@ -241,6 +245,9 @@
       [
         "The rockslide should be cleared any day now. I've been saying that for a week."
       ]
+    ],
+    "services": [
+      "shop"
     ]
   },
   {

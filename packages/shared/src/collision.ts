@@ -74,6 +74,7 @@ export function buildCollisionGrid(map: MapDef, blockers: { x: number; y: number
     }
   }
 
+  for (const n of map.nodes ?? []) if (n.solid) mark(n.x, n.y);
   for (const b of blockers) mark(b.x, b.y);
 
   return new CollisionGrid(map.width, map.height, map.tileSize, solid);

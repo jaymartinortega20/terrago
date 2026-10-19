@@ -1,6 +1,7 @@
 import type { DIRECTIONS } from './constants';
 import type { CropState } from './farming';
 import type { SkillSet } from './skills';
+import type { NodeObject } from './gathering';
 
 export type Direction = (typeof DIRECTIONS)[number];
 
@@ -91,8 +92,8 @@ export interface PlotObject {
   crop: CropState | null;
 }
 
-/** Interactive things placed in a map at runtime (farm plots; nodes and drops later). */
-export type WorldObject = PlotObject;
+/** Interactive things placed in a map at runtime: farm plots, resource nodes (and later drops). */
+export type WorldObject = PlotObject | NodeObject;
 
 /** What other players can see about a player entity. */
 export interface PublicPlayer {
@@ -193,7 +194,7 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift';
 
 export interface DialogueAction {
   id: DialogueActionId;

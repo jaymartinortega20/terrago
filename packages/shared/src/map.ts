@@ -19,7 +19,21 @@ export const GROUND_TILES = {
   'w': { name: 'shallow_water', solid: true },
   '#': { name: 'cliff', solid: true },
   'b': { name: 'bridge', solid: false },
+  'c': { name: 'cave_floor', solid: false },
+  'r': { name: 'cave_wall', solid: true },
+  'f': { name: 'forest_floor', solid: false },
+  'n': { name: 'snow', solid: false },
+  'I': { name: 'ice_water', solid: true },
+  'L': { name: 'lava', solid: true },
+  'a': { name: 'ash', solid: false },
+  'u': { name: 'mud', solid: false },
+  'q': { name: 'swamp_water', solid: true },
+  'k': { name: 'ruin_floor', solid: false },
+  'h': { name: 'dune', solid: false },
 } as const;
+
+/** Tiles you can fish from (when facing them). */
+export const FISHABLE_TILES = new Set(['~', 'w', 'I', 'L', 'q']);
 
 export type GroundTileKey = keyof typeof GROUND_TILES;
 
@@ -45,7 +59,38 @@ export const PROP_TYPES = {
   flower_bed: { w: 2, h: 1, solid: false },
   hay_bale: { w: 1, h: 1, solid: true },
   scarecrow: { w: 1, h: 1, solid: true },
+  tree_dead: { w: 1, h: 1, solid: true },
+  tree_snow: { w: 1, h: 1, solid: true },
+  tree_swamp: { w: 1, h: 1, solid: true },
+  tree_ancient: { w: 1, h: 1, solid: true },
+  cactus: { w: 1, h: 1, solid: true },
+  crystal: { w: 1, h: 1, solid: true },
+  stalagmite: { w: 1, h: 1, solid: true },
+  ruin_pillar: { w: 1, h: 1, solid: true },
+  bones: { w: 1, h: 1, solid: false },
+  mushroom_big: { w: 1, h: 1, solid: true },
+  reeds: { w: 1, h: 1, solid: false },
+  ladder_down: { w: 1, h: 1, solid: false },
+  ladder_up: { w: 1, h: 1, solid: false },
+  mine_entrance: { w: 3, h: 2, solid: true },
+  torch: { w: 1, h: 1, solid: true },
+  dock_post: { w: 1, h: 1, solid: true },
+  tent: { w: 2, h: 2, solid: true },
+  campfire: { w: 1, h: 1, solid: true },
+  furnace: { w: 2, h: 2, solid: true },
+  anvil: { w: 1, h: 1, solid: true },
+  workbench: { w: 2, h: 1, solid: true },
+  cooking_pot: { w: 1, h: 1, solid: true },
+  alchemy_table: { w: 2, h: 1, solid: true },
+  mill: { w: 2, h: 2, solid: true },
+  loom: { w: 2, h: 1, solid: true },
+  enhance_altar: { w: 2, h: 1, solid: true },
+  dungeon_gate: { w: 3, h: 2, solid: true },
 } as const;
+
+/** Crafting stations: props you stand next to and use. */
+export const STATION_PROPS = ['furnace', 'anvil', 'workbench', 'cooking_pot', 'alchemy_table', 'mill', 'loom', 'enhance_altar'] as const;
+export type StationType = (typeof STATION_PROPS)[number];
 
 export type PropType = keyof typeof PROP_TYPES;
 
@@ -72,6 +117,15 @@ export interface PropDef {
   y: number;
   /** Optional text for signs. */
   text?: string;
+}
+
+/** A gatherable resource (rock, tree, herb...). Definitions live in game-data nodes.json. */
+export interface NodePlacement {
+  id: string;
+  type: string;
+  x: number;
+  y: number;
+  solid: boolean;
 }
 
 export type MapObject = BuildingDef | PropDef;
@@ -110,6 +164,16 @@ export interface MapDef {
   instanced?: boolean;
   /** Farm plot tile positions in unlock order (homesteads). */
   farmPlots?: [number, number][];
+  /** Gatherable nodes (ore rocks, choppable trees, herbs...). */
+  nodes?: NodePlacement[];
+  /** Fish table used when fishing from water tiles here. */
+  fishing?: string;
+  /** Visual theme (ground palette, ambient tint). */
+  theme?: 'meadow' | 'forest' | 'lake' | 'cave' | 'volcano' | 'snow' | 'desert' | 'swamp' | 'ruins' | 'peak';
+  /** Recommended level range shown on entry. */
+  levels?: [number, number];
+  /** Where you respawn after dying here: map + tile. */
+  respawn?: { mapId: string; x: number; y: number };
 }
 
 /** Tile -> pixel helpers. A position is the bottom-centre of an entity's feet. */

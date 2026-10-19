@@ -1,0 +1,1010 @@
+[
+ {
+  "id": "smelt_copper",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 1,
+  "xp": 8,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "copper_ore",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "copper_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "smelt_iron",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 10,
+  "xp": 15,
+  "fee": 3,
+  "inputs": [
+   {
+    "itemId": "iron_ore",
+    "quantity": 3
+   },
+   {
+    "itemId": "coal",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "iron_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "smelt_silver",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 20,
+  "xp": 26,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "silver_ore",
+    "quantity": 3
+   },
+   {
+    "itemId": "coal",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "silver_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "smelt_gold",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 30,
+  "xp": 40,
+  "fee": 8,
+  "inputs": [
+   {
+    "itemId": "gold_ore",
+    "quantity": 3
+   },
+   {
+    "itemId": "coal",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "smelt_mithril",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 40,
+  "xp": 60,
+  "fee": 12,
+  "inputs": [
+   {
+    "itemId": "mithril_ore",
+    "quantity": 3
+   },
+   {
+    "itemId": "coal",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "smelt_obsidian",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 55,
+  "xp": 85,
+  "fee": 18,
+  "inputs": [
+   {
+    "itemId": "obsidian_ore",
+    "quantity": 3
+   },
+   {
+    "itemId": "coal",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "smelt_star_metal",
+  "station": "furnace",
+  "skill": "smithing",
+  "level": 70,
+  "xp": 130,
+  "fee": 30,
+  "inputs": [
+   {
+    "itemId": "star_metal_ore",
+    "quantity": 3
+   },
+   {
+    "itemId": "coal",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_bar",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_copper_pickaxe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 3,
+  "xp": 20,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_pickaxe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_copper_axe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 3,
+  "xp": 20,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_axe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_copper_hoe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 5,
+  "xp": 24,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_hoe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_copper_can",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 5,
+  "xp": 24,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 5
+   }
+  ],
+  "output": {
+   "itemId": "copper_watering_can",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_iron_pickaxe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 12,
+  "xp": 45,
+  "fee": 15,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_pickaxe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_iron_axe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 12,
+  "xp": 45,
+  "fee": 15,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_axe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_iron_hoe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 15,
+  "xp": 50,
+  "fee": 15,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_hoe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_iron_can",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 15,
+  "xp": 50,
+  "fee": 15,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 6
+   }
+  ],
+  "output": {
+   "itemId": "iron_watering_can",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_mithril_pickaxe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 42,
+  "xp": 140,
+  "fee": 60,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_pickaxe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_mithril_axe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 42,
+  "xp": 140,
+  "fee": 60,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_axe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_obsidian_pickaxe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 58,
+  "xp": 220,
+  "fee": 120,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_pickaxe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_star_metal_pickaxe",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 72,
+  "xp": 400,
+  "fee": 300,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_pickaxe",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "saw_softwood",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 1,
+  "xp": 4,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "softwood_log",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "softwood_plank",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "saw_hardwood",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 10,
+  "xp": 10,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "hardwood_log",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "hardwood_plank",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "saw_elderwood",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 25,
+  "xp": 24,
+  "fee": 3,
+  "inputs": [
+   {
+    "itemId": "elderwood_log",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "elderwood_plank",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "saw_spiritwood",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 45,
+  "xp": 50,
+  "fee": 6,
+  "inputs": [
+   {
+    "itemId": "spiritwood_log",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "spiritwood_plank",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "twist_rope",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 1,
+  "xp": 3,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "plant_fiber",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "rope",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_oak_rod",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 12,
+  "xp": 35,
+  "fee": 10,
+  "inputs": [
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 3
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "oak_rod",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_iron_rod",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 22,
+  "xp": 70,
+  "fee": 25,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 2
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_rod",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_mithril_rod",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 45,
+  "xp": 160,
+  "fee": 80,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 2
+   },
+   {
+    "itemId": "rope",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "mithril_rod",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "mix_fertilizer",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 2,
+  "xp": 5,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "plant_fiber",
+    "quantity": 2
+   },
+   {
+    "itemId": "wild_herb",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "basic_fertilizer",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "mill_flour",
+  "station": "mill",
+  "skill": "cooking",
+  "level": 1,
+  "xp": 3,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "wheat",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "flour",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "bake_bread",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 2,
+  "xp": 6,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "flour",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "bread",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_carrot_soup",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 3,
+  "xp": 10,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "carrot",
+    "quantity": 3
+   },
+   {
+    "itemId": "potato",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "carrot_soup",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_grilled_fish",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 4,
+  "xp": 8,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "carp",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "grilled_fish",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_berry_jam",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 6,
+  "xp": 10,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "wild_berries",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "berry_jam",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_fish_skewer",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 8,
+  "xp": 16,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "perch",
+    "quantity": 2
+   },
+   {
+    "itemId": "tomato",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "fish_skewer",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_mushroom_stew",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 10,
+  "xp": 20,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "brown_mushroom",
+    "quantity": 2
+   },
+   {
+    "itemId": "potato",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "mushroom_stew",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_fried_rice",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 14,
+  "xp": 26,
+  "fee": 2,
+  "inputs": [
+   {
+    "itemId": "rice",
+    "quantity": 2
+   },
+   {
+    "itemId": "carrot",
+    "quantity": 1
+   },
+   {
+    "itemId": "corn",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "fried_rice",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "bake_pumpkin_pie",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 18,
+  "xp": 40,
+  "fee": 3,
+  "inputs": [
+   {
+    "itemId": "pumpkin",
+    "quantity": 1
+   },
+   {
+    "itemId": "flour",
+    "quantity": 2
+   },
+   {
+    "itemId": "wild_berries",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "pumpkin_pie",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_hearty_stew",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 22,
+  "xp": 44,
+  "fee": 3,
+  "inputs": [
+   {
+    "itemId": "trout",
+    "quantity": 1
+   },
+   {
+    "itemId": "potato",
+    "quantity": 2
+   },
+   {
+    "itemId": "brown_mushroom",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "hearty_stew",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_salmon_steak",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 30,
+  "xp": 60,
+  "fee": 4,
+  "inputs": [
+   {
+    "itemId": "salmon",
+    "quantity": 1
+   },
+   {
+    "itemId": "wild_herb",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "salmon_steak",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_minor_health",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 1,
+  "xp": 8,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "wild_herb",
+    "quantity": 2
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "minor_health_potion",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_minor_mana",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 5,
+  "xp": 12,
+  "fee": 2,
+  "inputs": [
+   {
+    "itemId": "glowcap",
+    "quantity": 1
+   },
+   {
+    "itemId": "wild_herb",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "minor_mana_potion",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_energy_tonic",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 8,
+  "xp": 14,
+  "fee": 2,
+  "inputs": [
+   {
+    "itemId": "wild_berries",
+    "quantity": 2
+   },
+   {
+    "itemId": "wild_herb",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "energy_tonic",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_growth_tonic",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 10,
+  "xp": 16,
+  "fee": 3,
+  "inputs": [
+   {
+    "itemId": "silverleaf",
+    "quantity": 1
+   },
+   {
+    "itemId": "plant_fiber",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "growth_tonic",
+   "quantity": 2
+  }
+ },
+ {
+  "id": "brew_health",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 15,
+  "xp": 30,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "silverleaf",
+    "quantity": 2
+   },
+   {
+    "itemId": "wild_berries",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "health_potion",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_mana",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 20,
+  "xp": 40,
+  "fee": 6,
+  "inputs": [
+   {
+    "itemId": "spirit_herb",
+    "quantity": 1
+   },
+   {
+    "itemId": "glowcap",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "mana_potion",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_greater_health",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 30,
+  "xp": 70,
+  "fee": 12,
+  "inputs": [
+   {
+    "itemId": "moonflower",
+    "quantity": 1
+   },
+   {
+    "itemId": "silverleaf",
+    "quantity": 2
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "greater_health_potion",
+   "quantity": 1
+  }
+ }
+]

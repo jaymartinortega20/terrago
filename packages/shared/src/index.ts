@@ -12,3 +12,4 @@ export * from './inventory';
 export * from './protocol';
 export * from './skills';
 export * from './farming';
+export * from './gathering';

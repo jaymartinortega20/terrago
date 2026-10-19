@@ -1,4 +1,4 @@
-import { BALANCE, getMap, npcsForMap, toNpcPublic, type NpcDef } from '@terrago/game-data';
+import { BALANCE, getMap, getNode, npcsForMap, toNpcPublic, type NpcDef } from '@terrago/game-data';
 import {
   AOI,
   CHAT,
@@ -21,6 +21,7 @@ import {
   type CollisionGrid,
   type InventoryState,
   type MapDef,
+  type NodeObject,
   type PortalDef,
   type PublicPlayer,
   type SnapshotEntity,
@@ -46,6 +47,8 @@ export interface MapRuntime {
   npcs: NpcDef[];
   recentChat: { msg: ChatMessage; x: number; y: number }[];
   objects: Map<string, WorldObject>;
+  /** Successful gathers left per node before it depletes. */
+  nodeYields: Map<string, number>;
   /** Objects are loaded asynchronously for instanced maps. */
   loaded: boolean;
   loading: Promise<void> | null;
@@ -115,11 +118,13 @@ export class World {
         npcs: npcsForMap(mapId),
         recentChat: [],
         objects: new Map(),
+        nodeYields: new Map(),
         loaded: !this.deps.loadObjects,
         loading: null,
         emptySince: null,
       };
       this.maps.set(key, rt);
+      this.spawnNodes(rt);
       if (this.deps.loadObjects) {
         const target = rt;
         target.loading = this.deps
@@ -146,6 +151,65 @@ export class World {
     return this.maps.get(key);
   }
 
+  /** Resource nodes come from the map definition; their depletion lives only in memory. */
+  private spawnNodes(rt: MapRuntime): void {
+    for (const n of rt.def.nodes ?? []) {
+      const def = getNode(n.type);
+      if (!def) continue;
+      const obj: NodeObject = { kind: 'node', id: `node:${n.id}`, x: n.x, y: n.y, type: n.type, depletedUntil: 0 };
+      rt.objects.set(obj.id, obj);
+      rt.nodeYields.set(obj.id, def.yields);
+    }
+  }
+
+  /**
+   * Reserve one gather from a node. Returns false if it is depleted. The caller
+   * must call `nodeGathered` on success or `nodeRelease` if nothing was taken.
+   */
+  nodeReserve(rt: MapRuntime, id: string): boolean {
+    const o = rt.objects.get(id);
+    if (!o || o.kind !== 'node' || o.depletedUntil > this.now()) return false;
+    const left = rt.nodeYields.get(id) ?? 0;
+    if (left <= 0) return false;
+    rt.nodeYields.set(id, left - 1);
+    return true;
+  }
+
+  nodeRelease(rt: MapRuntime, id: string): void {
+    const def = this.nodeDefOf(rt, id);
+    if (def) rt.nodeYields.set(id, Math.min(def.yields, (rt.nodeYields.get(id) ?? 0) + 1));
+  }
+
+  /** After a successful gather: deplete the node if that was its last yield. */
+  nodeGathered(rt: MapRuntime, id: string): void {
+    const o = rt.objects.get(id);
+    const def = this.nodeDefOf(rt, id);
+    if (!o || o.kind !== 'node' || !def) return;
+    if ((rt.nodeYields.get(id) ?? 0) <= 0) {
+      const depleted: NodeObject = { ...o, depletedUntil: this.now() + def.respawnMs };
+      this.setObjects(rt.key, [depleted]);
+    }
+  }
+
+  private nodeDefOf(rt: MapRuntime, id: string) {
+    const o = rt.objects.get(id);
+    return o?.kind === 'node' ? getNode(o.type) : undefined;
+  }
+
+  /** Bring depleted nodes back once their respawn time has passed. */
+  private respawnNodes(now: number): void {
+    for (const rt of this.maps.values()) {
+      const back: NodeObject[] = [];
+      for (const o of rt.objects.values()) {
+        if (o.kind === 'node' && o.depletedUntil > 0 && o.depletedUntil <= now) {
+          back.push({ ...o, depletedUntil: 0 });
+          rt.nodeYields.set(o.id, getNode(o.type)?.yields ?? 1);
+        }
+      }
+      if (back.length) this.setObjects(rt.key, back);
+    }
+  }
+
   private addToMap(p: Player): MapRuntime {
     const rt = this.runtimeOf(p);
     // Re-read an idle instance from the database when someone walks back in,
@@ -155,7 +219,7 @@ export class World {
       rt.loading = this.deps
         .loadObjects(rt.def, rt.owner)
         .then((objs) => {
-          rt.objects.clear();
+          for (const [id, o] of rt.objects) if (o.kind !== 'node') rt.objects.delete(id);
           for (const o of objs) rt.objects.set(o.id, o);
         })
         .catch((err) => this.deps.log.error('objects_load_failed', { err, map: rt.key }))
@@ -344,6 +408,7 @@ export class World {
       for (const rt of this.maps.values()) this.broadcast(rt, now);
     }
     if (this.tickCount % 100 === 0) this.dropIdleInstances(now);
+    if (this.tickCount % 20 === 0) this.respawnNodes(now);
   }
 
   private dropIdleInstances(now: number): void {
@@ -478,8 +543,8 @@ export class World {
   replaceObjects(key: string, objs: WorldObject[]): void {
     const rt = this.maps.get(key);
     if (!rt) return;
-    const removed = [...rt.objects.keys()].filter((id) => !objs.some((o) => o.id === id));
-    rt.objects.clear();
+    const removed = [...rt.objects.entries()].filter(([id, o]) => o.kind !== 'node' && !objs.some((n) => n.id === id)).map(([id]) => id);
+    for (const id of removed) rt.objects.delete(id);
     for (const o of objs) rt.objects.set(o.id, o);
     for (const p of rt.players) {
       if (removed.length) p.conn?.send('objects:remove', removed);

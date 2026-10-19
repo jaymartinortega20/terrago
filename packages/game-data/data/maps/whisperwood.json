@@ -1,0 +1,4342 @@
+{
+ "id": "whisperwood",
+ "name": "Whisperwood Forest",
+ "safeZone": false,
+ "music": "forest",
+ "spawn": {
+  "x": 60,
+  "y": 23,
+  "dir": "left"
+ },
+ "portals": [
+  {
+   "id": "ww_east",
+   "x": 63,
+   "y": 21,
+   "w": 1,
+   "h": 4,
+   "to": "greenhaven",
+   "toX": 1,
+   "toY": 23,
+   "toDir": "right",
+   "label": "Greenhaven"
+  }
+ ],
+ "theme": "forest",
+ "fishing": "river",
+ "levels": [
+  10,
+  20
+ ],
+ "respawn": {
+  "mapId": "greenhaven",
+  "x": 31,
+  "y": 26
+ },
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "fffffffffffffff,fffff,ff,,fff,ffffffffff,,f,,ffffff,,f,fff,fff,f",
+  "ff,fff,ff,f,fff,f,ffff,fffffww,fffffffffffff,f,ffff,ffff,fff,fff",
+  "fffffffffffffff,ffffffff,fffwwfffffff,ffffffff,fff,fffffffffffff",
+  "ff,ff,fff,ffffff,ffffff,f,ffwwwfffff,fffffffff,ffff,f,fffffffff,",
+  ",ffffffffffff,fff,ffff,fff,fwwwffffffff,fffff,ff,fffffffffffffff",
+  "ffffffffffffffffffffff,fffffwwwf,fff,fff,ffffff,ff,fffffffffff,f",
+  "ffffffffff,f,ffff,fffffffffffww,ffff,ff,,fff,fffffffffffffffffff",
+  "ff,ff,ffffffffff,ff,fffff,,ffww,fffffffffff,f,fffffffffffffff,,f",
+  "ff,ffffffff,ffffff,ffffffffffwwffffffffffffffffffffffff,ffffff,f",
+  "f,,,,fffffffff,f,ffffffffffffwwwfff,ffffff,ffff,ffffffffffffffff",
+  ",ffffff,fffffffff,ffffffffff,wwwfffffffffffffffffffff,f,ffffffff",
+  "ffffffffffff,ffff,fffff,ff,f,,wwffffffffffffffffffff,,ff,fffffff",
+  "ffffffffffff,fffffff,fffffffffwwwfffffffffffff,f,fffffffffff,fff",
+  "ffffffffffffffffff,f,fffff,fffwwwfffffffff,fff,f,,ffffffffffffff",
+  "ffffffffffffffffff,fffffffffffwwwfffffffff,ffffff,f,ff,,ffffffff",
+  "ffffffffffffffffff,fffff,fffffwwfff,ff,ffffff,fffff,,fffffffffff",
+  "f,ffff,ffffff,ff,fffffff,fff,fwwff,ffff,ffffffffffffff,fffffffff",
+  "fffff,ffffff,fffffffffffffffffwwffffffffffffffff,f,ffff,fffff,ff",
+  "ff,,fffffffffffffffffff,fff,fwwwfffffffff,ffffffffffffffffffffff",
+  "fffffffffffffffff,ff,ffffffffwwwfffffffffffffffffffffff,ffffffff",
+  "f,ffffff===================bbb===========fffffffffffffffffffffff",
+  ",fffffff===================bbb==================================",
+  ",fff,fff,ffffffffffffffff,ffwwffffff,f,f========================",
+  "ffffffffff,fff,ff,ffff,f,ff,ww,fffffffff========================",
+  "ffff,ffffffffff,,,fffffff,fwww,fffffff,f========================",
+  "ffffffffff,,fffffffffffffffwwffffffffffffffffffffffff,,fffffffff",
+  "ff,,ffffffff,ffff,fffffffffwwfffffffffffffff:::::::fffffffffffff",
+  "fffff,ffffff,ffffffff,fffffwwfffffffffffffff:::::::ffff,ff,ff,ff",
+  "fffffff,f,ffffffffffffffffwwwfffffffffffffff:::::::ff,ffffffffff",
+  "ffffffff,fffffffffff,,ff,fwwwfffff,fffff,fff:::::::ff,ffffffffff",
+  "ff,ffffff,ff,fffffffffff,,wwwf,fffffff,fffff:::::::ffffffff,f,ff",
+  "ff,ffffffffffff,ffffffffffwwffffff,ff,ffffffffffffffffff,f,fffff",
+  "fffff,ffffffffffff,ffff,ffwwf,fffffffffffffffffffffffff,ff,ff,f,",
+  "fffff,fffffffffff,ffffff,fwwfffffffff,ffffff,fffffffffffffff,fff",
+  "ffffff,fffffffffffff,ffffwwwff,fffffffffffff,fffffffffffffffffff",
+  "ffffffff,ffffffff,ffff,ffwwwfff,ffffffffff,,f,f,fffffffffffff,ff",
+  "ff,ff,fffff,ffff,,ff,ffffwww,fff,ff,fffff,fff,ff,fffffffffffffff",
+  "fff,,fff,ffffff,ffff,ffffwwwffffff,,ffff,f,ffffffff,fffff,f,ffff",
+  "ffffffffffffffffffffffffffwwfff,fffffffff,ffffffffffffffff,fffff",
+  "ff,ffff,ffffff,fffffffffffwwfffffffffffffffffffffffff,ffffffffff",
+  "ffffffffffffffffffffffffffwwffffffffffffff,fffffff,ff,ffff,f,fff",
+  "fffffffffff,fffff,ffffffffww,ffff,fffffffffffffffff,ff,,fffff,ff",
+  "ffffff,,fffffff,ffffffffffwwwffff,f,fffffffffff,ffffffffffff,f,,",
+  "fffffffffffff,ff,fffffff,ffww,fffff,f,ffff,,,,ffffff,fffffffffff",
+  "fffffffffffffffff,ff,,fffffwwffffffffffffffff,fffffff,fffff,,ff,",
+  ",ffffffffff,,ffffffffffffffww,fff,fffffffffff,fff,ff,fffffff,fff",
+  ",fffffffffff,f,ffffffffffffwwffffffffffffffff,f,,fffffffffffffff",
+  "f,,ffff,ffff,fffffffff,,fffwwfff,fffffffffffffffffffffffffffffff"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 45,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 48,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 50,
+   "y": 26,
+   "text": "Whisperwood Ranger Camp. Hardwood grows deep in the forest; elder trees deeper still."
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 4,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 4,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 4,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 4,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 4,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 4,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 5,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 5,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 5,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 5,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 5,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 6,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 6,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 6,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 6,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 7,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 7,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 7,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 7,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 8,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 8,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 8,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 8,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 8,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 9,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 9,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 9,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 9,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 9,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 10,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 10,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 10,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 10,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 10,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 11,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 11,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 11,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 11,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 11,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 11,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 12,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 12,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 12,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 12,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 12,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 12,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 13,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 13,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 13,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 13,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 13,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 13,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 14,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 14,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 14,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 14,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 14,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 14,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 15,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 15,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 15,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 15,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 15,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 15,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 16,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 16,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 16,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 16,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 16,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 17,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 17,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 17,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 17,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 17,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 17,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 18,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 18,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 18,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 18,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 18,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 18,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 18,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 19,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 19,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 19,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 19,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 19,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 19,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 19,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 20,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 20,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 20,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 20,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 20,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 20,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 20,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 20,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 21,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 21,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 21,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 21,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 21,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 21,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 21,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 22,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 22,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 22,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 22,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 22,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 22,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 22,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 23,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 23,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 23,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 24,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 24,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 24,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 32,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 32,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 32,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 33,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 33,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 34,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 34,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 34,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 34,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 35,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 35,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 35,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 35,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 35,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 36,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 36,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 36,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 36,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 36,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 37,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 37,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 37,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 37,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 37,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 38,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 38,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 38,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 38,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 38,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 38,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 39,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 39,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 39,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 39,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 39,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 39,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 40,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 40,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 40,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 40,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 40,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 40,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 41,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 41,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 41,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 41,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 41,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 41,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 42,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 42,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 42,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 42,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 42,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 42,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 43,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 43,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 43,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 43,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 43,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 44,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 44,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 44,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 44,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 44,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 44,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 45,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 45,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 45,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 45,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 45,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 45,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 45,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 46,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 46,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 46,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 46,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 46,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 46,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 46,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 47,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 47,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 47,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 47,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 47,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 47,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 47,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 47,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 48,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 48,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 48,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 48,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 48,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 48,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 48,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 49,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 49,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 49,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 49,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 49,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 49,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 49,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 50,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 50,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 50,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 50,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 50,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 50,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 50,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 51,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 51,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 51,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 51,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 51,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 51,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 52,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 52,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 52,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 52,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 52,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 52,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 52,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 53,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 53,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 53,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 53,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 53,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 53,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 54,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 54,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 54,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 54,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 54,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 54,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 55,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 55,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 55,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 55,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 55,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 55,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 56,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 56,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 56,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 56,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 56,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 56,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 56,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 57,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 57,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 57,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 57,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 57,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 57,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 58,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 58,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 58,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 58,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 58,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 58,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 59,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 59,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 59,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 59,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 59,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 60,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 0
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 1
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 46
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 47
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 61,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 61,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 61,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 61,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 21
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 21
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 60,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 61,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 61,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 60,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 61,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 0,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 60,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 62,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 3,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 1,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 2,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 62,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 0,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 1,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 3,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 63,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 2,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 3,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 63,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 0,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 1,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 2,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 62,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 63,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "stump",
+   "x": 20,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 41,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 32,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 40,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 14,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "stump",
+   "x": 10,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 26,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 30,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "stump",
+   "x": 34,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 42,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 54,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 26,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "stump",
+   "x": 30,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 19,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 56,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 50,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 44,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 40,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 9,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 50,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 34,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 15,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 12,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 47,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 7,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 24,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 48,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 20,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 32,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 4,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 44,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 34,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 12,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 21,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 5,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 53,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 32,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 36,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 57,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 47,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 23,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 27,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 36,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 34,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 38,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 15,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 38,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 53,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 10,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 51,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 34,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 15,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 9,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 11,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 57,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "stump",
+   "x": 20,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 22,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 21,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 58,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 9,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 21,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 41,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 40,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 58,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 12,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "stump",
+   "x": 32,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 58,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 48,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 10,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 15,
+   "y": 15
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "tree_hardwood",
+   "x": 32,
+   "y": 2,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "tree_hardwood",
+   "x": 47,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "tree_softwood",
+   "x": 21,
+   "y": 5,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "tree_hardwood",
+   "x": 12,
+   "y": 32,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "tree_hardwood",
+   "x": 42,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "tree_hardwood",
+   "x": 45,
+   "y": 11,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "tree_hardwood",
+   "x": 34,
+   "y": 40,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "tree_hardwood",
+   "x": 56,
+   "y": 7,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "tree_hardwood",
+   "x": 50,
+   "y": 40,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "tree_hardwood",
+   "x": 15,
+   "y": 5,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "tree_softwood",
+   "x": 42,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "tree_hardwood",
+   "x": 42,
+   "y": 4,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "tree_hardwood",
+   "x": 49,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "tree_softwood",
+   "x": 22,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n14",
+   "type": "tree_hardwood",
+   "x": 38,
+   "y": 35,
+   "solid": true
+  },
+  {
+   "id": "n15",
+   "type": "tree_hardwood",
+   "x": 22,
+   "y": 18,
+   "solid": true
+  },
+  {
+   "id": "n16",
+   "type": "tree_hardwood",
+   "x": 13,
+   "y": 6,
+   "solid": true
+  },
+  {
+   "id": "n17",
+   "type": "tree_softwood",
+   "x": 15,
+   "y": 17,
+   "solid": true
+  },
+  {
+   "id": "n18",
+   "type": "tree_hardwood",
+   "x": 11,
+   "y": 36,
+   "solid": true
+  },
+  {
+   "id": "n19",
+   "type": "tree_hardwood",
+   "x": 53,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n20",
+   "type": "tree_hardwood",
+   "x": 34,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n21",
+   "type": "tree_hardwood",
+   "x": 15,
+   "y": 12,
+   "solid": true
+  },
+  {
+   "id": "n22",
+   "type": "tree_hardwood",
+   "x": 12,
+   "y": 14,
+   "solid": true
+  },
+  {
+   "id": "n23",
+   "type": "tree_softwood",
+   "x": 39,
+   "y": 17,
+   "solid": true
+  },
+  {
+   "id": "n24",
+   "type": "tree_softwood",
+   "x": 50,
+   "y": 18,
+   "solid": true
+  },
+  {
+   "id": "n25",
+   "type": "tree_hardwood",
+   "x": 7,
+   "y": 40,
+   "solid": true
+  },
+  {
+   "id": "n26",
+   "type": "tree_hardwood",
+   "x": 30,
+   "y": 27,
+   "solid": true
+  },
+  {
+   "id": "n27",
+   "type": "tree_hardwood",
+   "x": 41,
+   "y": 13,
+   "solid": true
+  },
+  {
+   "id": "n28",
+   "type": "tree_hardwood",
+   "x": 36,
+   "y": 35,
+   "solid": true
+  },
+  {
+   "id": "n29",
+   "type": "tree_softwood",
+   "x": 20,
+   "y": 30,
+   "solid": true
+  },
+  {
+   "id": "n30",
+   "type": "tree_elder",
+   "x": 12,
+   "y": 18,
+   "solid": true
+  },
+  {
+   "id": "n31",
+   "type": "tree_elder",
+   "x": 11,
+   "y": 42,
+   "solid": true
+  },
+  {
+   "id": "n32",
+   "type": "tree_elder",
+   "x": 8,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n33",
+   "type": "tree_elder",
+   "x": 17,
+   "y": 13,
+   "solid": true
+  },
+  {
+   "id": "n34",
+   "type": "plant_silverleaf",
+   "x": 34,
+   "y": 43,
+   "solid": false
+  },
+  {
+   "id": "n35",
+   "type": "plant_herb",
+   "x": 21,
+   "y": 33,
+   "solid": false
+  },
+  {
+   "id": "n36",
+   "type": "plant_berry",
+   "x": 45,
+   "y": 15,
+   "solid": true
+  },
+  {
+   "id": "n37",
+   "type": "plant_herb",
+   "x": 16,
+   "y": 42,
+   "solid": false
+  },
+  {
+   "id": "n38",
+   "type": "plant_mushroom",
+   "x": 38,
+   "y": 10,
+   "solid": false
+  },
+  {
+   "id": "n39",
+   "type": "plant_mushroom",
+   "x": 7,
+   "y": 9,
+   "solid": false
+  },
+  {
+   "id": "n40",
+   "type": "plant_mushroom",
+   "x": 14,
+   "y": 30,
+   "solid": false
+  },
+  {
+   "id": "n41",
+   "type": "plant_mushroom",
+   "x": 13,
+   "y": 40,
+   "solid": false
+  },
+  {
+   "id": "n42",
+   "type": "plant_mushroom",
+   "x": 42,
+   "y": 6,
+   "solid": false
+  },
+  {
+   "id": "n43",
+   "type": "plant_mushroom",
+   "x": 45,
+   "y": 38,
+   "solid": false
+  },
+  {
+   "id": "n44",
+   "type": "plant_mushroom",
+   "x": 7,
+   "y": 36,
+   "solid": false
+  },
+  {
+   "id": "n45",
+   "type": "plant_mushroom",
+   "x": 37,
+   "y": 39,
+   "solid": false
+  },
+  {
+   "id": "n46",
+   "type": "plant_herb",
+   "x": 17,
+   "y": 27,
+   "solid": false
+  },
+  {
+   "id": "n47",
+   "type": "plant_mushroom",
+   "x": 56,
+   "y": 38,
+   "solid": false
+  },
+  {
+   "id": "n48",
+   "type": "plant_fiber",
+   "x": 35,
+   "y": 23,
+   "solid": false
+  },
+  {
+   "id": "n49",
+   "type": "plant_mushroom",
+   "x": 38,
+   "y": 12,
+   "solid": false
+  },
+  {
+   "id": "n50",
+   "type": "plant_herb",
+   "x": 43,
+   "y": 33,
+   "solid": false
+  },
+  {
+   "id": "n51",
+   "type": "plant_mushroom",
+   "x": 17,
+   "y": 8,
+   "solid": false
+  },
+  {
+   "id": "n52",
+   "type": "plant_mushroom",
+   "x": 56,
+   "y": 16,
+   "solid": false
+  },
+  {
+   "id": "n53",
+   "type": "plant_silverleaf",
+   "x": 53,
+   "y": 37,
+   "solid": false
+  },
+  {
+   "id": "n54",
+   "type": "plant_mushroom",
+   "x": 52,
+   "y": 12,
+   "solid": false
+  },
+  {
+   "id": "n55",
+   "type": "plant_herb",
+   "x": 36,
+   "y": 13,
+   "solid": false
+  },
+  {
+   "id": "n56",
+   "type": "plant_mushroom",
+   "x": 9,
+   "y": 28,
+   "solid": false
+  },
+  {
+   "id": "n57",
+   "type": "plant_berry",
+   "x": 10,
+   "y": 15,
+   "solid": true
+  },
+  {
+   "id": "n58",
+   "type": "plant_mushroom",
+   "x": 58,
+   "y": 5,
+   "solid": false
+  },
+  {
+   "id": "n59",
+   "type": "plant_fiber",
+   "x": 19,
+   "y": 7,
+   "solid": false
+  }
+ ]
+}

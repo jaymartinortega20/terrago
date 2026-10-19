@@ -10,149 +10,10 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PROP_TYPES, TILE_SIZE, validateMapDef, type MapDef, type MapObject, type PropType } from '@terrago/shared';
+import { validateMapDef, type MapDef } from '@terrago/shared';
+import { MapBuilder, ladderRowsFor, rng } from '../src/mapgen';
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'maps');
-
-function rng(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-class MapBuilder {
-  grid: string[][];
-  objects: MapObject[] = [];
-  /** Tiles that must stay clear of scatter (roads, doors, NPC spots...). */
-  reserved: boolean[][];
-  occupied: boolean[][];
-
-  constructor(
-    readonly width: number,
-    readonly height: number,
-    fill = '.',
-  ) {
-    this.grid = Array.from({ length: height }, () => Array.from({ length: width }, () => fill));
-    this.reserved = Array.from({ length: height }, () => Array.from({ length: width }, () => false));
-    this.occupied = Array.from({ length: height }, () => Array.from({ length: width }, () => false));
-  }
-
-  inside(x: number, y: number) {
-    return x >= 0 && y >= 0 && x < this.width && y < this.height;
-  }
-
-  rect(x: number, y: number, w: number, h: number, tile: string, reserve = true) {
-    for (let j = y; j < y + h; j++)
-      for (let i = x; i < x + w; i++) {
-        if (!this.inside(i, j)) continue;
-        this.grid[j]![i] = tile;
-        if (reserve) this.reserved[j]![i] = true;
-      }
-  }
-
-  reserve(x: number, y: number, w = 1, h = 1) {
-    for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (this.inside(i, j)) this.reserved[j]![i] = true;
-  }
-
-  free(x: number, y: number, w: number, h: number) {
-    for (let j = y; j < y + h; j++)
-      for (let i = x; i < x + w; i++) {
-        if (!this.inside(i, j) || this.occupied[j]![i] || this.reserved[j]![i]) return false;
-        const t = this.grid[j]![i]!;
-        if (t === '~' || t === 'w' || t === '#') return false;
-      }
-    return true;
-  }
-
-  occupy(x: number, y: number, w: number, h: number) {
-    for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (this.inside(i, j)) this.occupied[j]![i] = true;
-  }
-
-  prop(type: PropType, x: number, y: number, text?: string) {
-    const d = PROP_TYPES[type];
-    this.objects.push(text ? { kind: 'prop', type, x, y, text } : { kind: 'prop', type, x, y });
-    this.occupy(x, y, d.w, d.h);
-  }
-
-  /** Place a prop only if its footprint is free. */
-  tryProp(type: PropType, x: number, y: number) {
-    const d = PROP_TYPES[type];
-    if (!this.free(x, y, d.w, d.h)) return false;
-    this.prop(type, x, y);
-    return true;
-  }
-
-  building(id: string, name: string, x: number, y: number, w: number, h: number, roof: string, wall: string, doorX: number) {
-    this.objects.push({ kind: 'building', id, name, x, y, w, h, roof, wall, doorX });
-    this.occupy(x, y, w, h);
-    // Keep the tile in front of the door walkable and clear.
-    this.reserve(x + doorX, y + h, 1, 1);
-    // A little margin so scatter doesn't hug walls.
-    this.reserve(x - 1, y - 1, w + 2, h + 2);
-  }
-
-  /** Irregular forest border, leaving gaps where roads exit. */
-  forestBorder(r: () => number, minDepth: number, maxDepth: number, gaps: { side: 'n' | 's' | 'e' | 'w'; from: number; to: number }[]) {
-    const isGap = (side: 'n' | 's' | 'e' | 'w', pos: number) => gaps.some((g) => g.side === side && pos >= g.from && pos <= g.to);
-    const depthAt = (pos: number, salt: number) => minDepth + Math.floor(((Math.sin(pos * 0.7 + salt) + Math.sin(pos * 0.23 + salt * 2)) / 4 + 0.5) * (maxDepth - minDepth + 1));
-    for (let x = 0; x < this.width; x++) {
-      const dn = depthAt(x, 1);
-      const ds = depthAt(x, 5);
-      for (let y = 0; y < dn; y++) if (!isGap('n', x)) this.borderTree(r, x, y);
-      for (let y = this.height - ds; y < this.height; y++) if (!isGap('s', x)) this.borderTree(r, x, y);
-    }
-    for (let y = 0; y < this.height; y++) {
-      const dw = depthAt(y, 9);
-      const de = depthAt(y, 13);
-      for (let x = 0; x < dw; x++) if (!isGap('w', y)) this.borderTree(r, x, y);
-      for (let x = this.width - de; x < this.width; x++) if (!isGap('e', y)) this.borderTree(r, x, y);
-    }
-  }
-
-  private borderTree(r: () => number, x: number, y: number) {
-    if (this.occupied[y]![x] || this.reserved[y]![x]) return;
-    this.prop(r() < 0.55 ? 'tree_pine' : 'tree_oak', x, y);
-  }
-
-  scatterGround(r: () => number, chance: number, tile: string, on = '.') {
-    for (let y = 0; y < this.height; y++)
-      for (let x = 0; x < this.width; x++) {
-        if (this.grid[y]![x] === on && !this.reserved[y]![x] && r() < chance) this.grid[y]![x] = tile;
-      }
-  }
-
-  scatterProps(r: () => number, types: PropType[], count: number, area = { x: 0, y: 0, w: this.width, h: this.height }) {
-    let placed = 0;
-    for (let attempt = 0; attempt < count * 40 && placed < count; attempt++) {
-      const x = area.x + Math.floor(r() * area.w);
-      const y = area.y + Math.floor(r() * area.h);
-      const t = types[Math.floor(r() * types.length)]!;
-      // Keep a 1-tile breathing gap around scattered props.
-      const d = PROP_TYPES[t];
-      if (!this.free(x - 1, y - 1, d.w + 2, d.h + 2)) continue;
-      const g = this.grid[y]![x]!;
-      if (!'.,*'.includes(g)) continue;
-      this.prop(t, x, y);
-      placed++;
-    }
-  }
-
-  toMap(meta: Omit<MapDef, 'width' | 'height' | 'tileSize' | 'tiles' | 'objects'>): MapDef {
-    return {
-      ...meta,
-      width: this.width,
-      height: this.height,
-      tileSize: TILE_SIZE,
-      tiles: this.grid.map((row) => row.join('')),
-      objects: this.objects,
-    };
-  }
-}
 
 function greenhaven(): MapDef {
   const W = 64;
@@ -161,10 +22,10 @@ function greenhaven(): MapDef {
   const m = new MapBuilder(W, H);
 
   // --- Roads and plaza ---------------------------------------------------
-  m.rect(30, 0, 4, 16, '='); // north road (to Irondeep, closed)
+  m.rect(30, 0, 4, 16, '='); // north road to Irondeep
   m.rect(30, 30, 4, 18, '='); // south road to Sunfield gate
-  m.rect(0, 21, 22, 4, '='); // west road (to Whisperwood, closed)
-  m.rect(42, 21, 22, 4, '='); // east road (to Crystal Lake, closed)
+  m.rect(0, 21, 22, 4, '='); // west road to Whisperwood
+  m.rect(42, 21, 22, 4, '='); // east road to Crystal Lake
   m.rect(22, 16, 20, 14, ':'); // central cobblestone plaza
   m.rect(27, 19, 10, 8, '_'); // inner plaza ring around the fountain
 
@@ -246,13 +107,18 @@ function greenhaven(): MapDef {
   m.prop('lamp', 20, 38);
   m.prop('sign', 15, 42, 'Teleport Station — waystones are still being attuned.');
 
-  // --- Closed exits (future regions) ----------------------------------------
-  for (let x = 30; x < 34; x++) m.prop('fence_h', x, 2);
-  m.prop('sign', 29, 3, 'North: Irondeep Mine — road closed by a rockslide.');
-  for (let y = 21; y < 25; y++) m.prop('fence_v', 3, y);
-  m.prop('sign', 4, 20, 'West: Whisperwood Forest — wolves sighted, path closed.');
-  for (let y = 21; y < 25; y++) m.prop('fence_v', 60, y);
-  m.prop('sign', 59, 20, 'East: Crystal Lake — bridge under repair.');
+  // --- Exits ------------------------------------------------------------------
+  m.prop('sign', 29, 3, 'North: Irondeep Mine. Bring a pickaxe.');
+  m.prop('sign', 4, 20, 'West: Whisperwood Forest (Lv 10–20). Hardwood, herbs — and wolves.');
+  m.prop('sign', 59, 20, 'East: Crystal Lake. Best fishing in TerraGo.');
+
+  // --- Crafting stations ------------------------------------------------------
+  m.station('furnace', 54, 15);
+  m.station('anvil', 57, 16);
+  m.station('cooking_pot', 27, 9);
+  m.station('mill', 5, 29);
+  m.station('workbench', 4, 14);
+  m.station('alchemy_table', 4, 17);
   m.prop('lamp', 29, 45);
   m.prop('lamp', 34, 45);
   m.prop('sign', 35, 44, 'South gate: Sunfield Plains');
@@ -281,7 +147,13 @@ function greenhaven(): MapDef {
     spawn: { x: 31, y: 26, dir: 'down' },
     portals: [
       { id: 'gh_south_gate', x: 30, y: 47, w: 4, h: 1, to: 'sunfield_plains', toX: 30, toY: 2, toDir: 'down', label: 'Sunfield Plains' },
+      { id: 'gh_north', x: 30, y: 0, w: 4, h: 1, to: 'irondeep_entrance', toX: 20, toY: 27, toDir: 'up', label: 'Irondeep Mine' },
+      { id: 'gh_west', x: 0, y: 21, w: 1, h: 4, to: 'whisperwood', toX: 62, toY: 23, toDir: 'left', label: 'Whisperwood Forest' },
+      { id: 'gh_east', x: 63, y: 21, w: 1, h: 4, to: 'crystal_lake', toX: 1, toY: 22, toDir: 'right', label: 'Crystal Lake' },
     ],
+    theme: 'meadow',
+    fishing: 'pond',
+    levels: [1, 5],
   });
 }
 
@@ -343,7 +215,11 @@ function sunfield(): MapDef {
   ]);
   m.scatterGround(r, 0.09, ',');
   m.scatterGround(r, 0.05, '*');
-  m.scatterProps(r, ['tree_oak', 'tree_fruit', 'bush', 'rock', 'rock', 'stump'], 40);
+  // Starter resources: north meadows for stone, copper and pine; herbs everywhere.
+  m.scatterNodes(r, [{ type: 'rock_stone', solid: true, weight: 3 }, { type: 'rock_copper', solid: true, weight: 2 }], 12, { x: 36, y: 3, w: 20, h: 15 });
+  m.scatterNodes(r, [{ type: 'tree_softwood', solid: true, weight: 1 }], 10, { x: 4, y: 3, w: 22, h: 15 });
+  m.scatterNodes(r, [{ type: 'plant_fiber', solid: false, weight: 3 }, { type: 'plant_herb', solid: false, weight: 2 }, { type: 'plant_berry', solid: true, weight: 1 }], 16);
+  m.scatterProps(r, ['tree_oak', 'tree_fruit', 'bush', 'rock', 'stump'], 30);
 
   return m.toMap({
     id: 'sunfield_plains',
@@ -355,6 +231,10 @@ function sunfield(): MapDef {
       { id: 'sf_north_road', x: 28, y: 0, w: 4, h: 1, to: 'greenhaven', toX: 31, toY: 45, toDir: 'up', label: 'Greenhaven' },
       { id: 'sf_homesteads', x: 4, y: 20, w: 1, h: 3, to: 'homestead', toX: 19, toY: 27, toDir: 'up', label: 'Your Homestead', instance: 'self' },
     ],
+    theme: 'meadow',
+    fishing: 'pond',
+    levels: [1, 8],
+    respawn: { mapId: 'greenhaven', x: 31, y: 26 },
   });
 }
 
@@ -415,6 +295,10 @@ function homestead(): MapDef {
 
   m.reserve(17, 24, 6, 6);
   m.forestBorder(r, 2, 3, [{ side: 's', from: 18, to: 21 }]);
+  for (const [x, y] of [[5, 22], [8, 25]] as const) m.tryNode('rock_stone', x, y, true);
+  for (const [x, y] of [[26, 4], [30, 6], [35, 4]] as const) m.tryNode('tree_softwood', x, y, true);
+  for (const [x, y] of [[25, 23], [12, 24], [36, 16]] as const) m.tryNode('plant_fiber', x, y, false);
+  m.tryNode('plant_herb', 27, 17, false);
   m.scatterGround(r, 0.07, ',');
   m.scatterGround(r, 0.04, '*');
   m.scatterProps(r, ['tree_oak', 'tree_fruit', 'bush', 'stump'], 18);
@@ -428,10 +312,146 @@ function homestead(): MapDef {
     portals: [{ id: 'hs_exit', x: 18, y: 29, w: 4, h: 1, to: 'sunfield_plains', toX: 7, toY: 21, toDir: 'right', label: 'Sunfield Plains' }],
     instanced: true,
     farmPlots: plots,
+    theme: 'meadow',
+    fishing: 'pond',
   });
 }
 
-for (const map of [greenhaven(), sunfield(), homestead()]) {
+/** West of Greenhaven: old forest, hardwood, herbs, a river — and (later) wolves. */
+function whisperwood(): MapDef {
+  const W = 64;
+  const H = 48;
+  const r = rng(31337);
+  const m = new MapBuilder(W, H, 'f');
+  m.rect(40, 21, 24, 4, '='); // road from Greenhaven
+  m.rect(8, 20, 33, 2, '=', true); // old trail west
+  m.reserve(56, 19, 8, 8);
+  m.stream(r, 30, 0, 26, 47, 2);
+  m.rect(27, 20, 3, 2, 'b'); // bridge over the river
+  m.reserve(26, 19, 5, 4);
+  // Ranger camp
+  m.rect(44, 26, 7, 5, ':');
+  m.prop('tent', 45, 26);
+  m.prop('campfire', 48, 28);
+  m.prop('sign', 50, 26, 'Whisperwood Ranger Camp. Hardwood grows deep in the forest; elder trees deeper still.');
+  m.reserve(43, 25, 9, 7);
+  m.border(r, 2, 4, [{ side: 'e', from: 21, to: 24 }, { side: 'n', from: 25, to: 33 }, { side: 's', from: 23, to: 31 }], ['tree_pine', 'tree_oak', 'tree_ancient']);
+  m.scatterGround(r, 0.12, ',', 'f');
+  m.scatterNodes(r, [{ type: 'tree_hardwood', solid: true, weight: 6 }, { type: 'tree_softwood', solid: true, weight: 2 }], 30);
+  m.scatterNodes(r, [{ type: 'tree_elder', solid: true, weight: 1 }], 4, { x: 4, y: 4, w: 18, h: 40 });
+  m.scatterNodes(r, [
+    { type: 'plant_silverleaf', solid: false, weight: 2 },
+    { type: 'plant_mushroom', solid: false, weight: 3 },
+    { type: 'plant_berry', solid: true, weight: 2 },
+    { type: 'plant_herb', solid: false, weight: 3 },
+    { type: 'plant_fiber', solid: false, weight: 2 },
+  ], 26);
+  m.scatterProps(r, ['tree_oak', 'tree_pine', 'tree_ancient', 'bush', 'mushroom_big', 'stump', 'rock'], 70, undefined, 'f,');
+  return m.toMap({
+    id: 'whisperwood',
+    name: 'Whisperwood Forest',
+    safeZone: false,
+    music: 'forest',
+    spawn: { x: 60, y: 23, dir: 'left' },
+    portals: [{ id: 'ww_east', x: 63, y: 21, w: 1, h: 4, to: 'greenhaven', toX: 1, toY: 23, toDir: 'right', label: 'Greenhaven' }],
+    theme: 'forest',
+    fishing: 'river',
+    levels: [10, 20],
+    respawn: { mapId: 'greenhaven', x: 31, y: 26 },
+  });
+}
+
+/** East of Greenhaven: a wide lake with a dock — the best fishing around. */
+function crystalLake(): MapDef {
+  const W = 60;
+  const H = 44;
+  const r = rng(424242);
+  const m = new MapBuilder(W, H);
+  m.rect(0, 21, 18, 3, '='); // road from Greenhaven
+  m.reserve(0, 19, 6, 7);
+  // The lake: an ellipse of deep water with a shallow rim and a sandy shore.
+  const cx = 36;
+  const cy = 22;
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) {
+      const d = ((x - cx) / 17) ** 2 + ((y - cy) / 13) ** 2;
+      if (d < 0.78) m.grid[y]![x] = '~';
+      else if (d < 1) m.grid[y]![x] = 'w';
+      else if (d < 1.35) m.grid[y]![x] = 's';
+    }
+  // Dock out into the water from the west shore
+  m.rect(17, 22, 7, 1, 'b');
+  m.rect(16, 21, 2, 3, 's');
+  m.reserve(15, 20, 10, 5);
+  m.prop('dock_post', 23, 21);
+  m.prop('dock_post', 23, 23);
+  m.prop('sign', 15, 19, 'Crystal Lake. Old Whiskers, the lake legend, only bites at night.');
+  m.prop('campfire', 12, 26);
+  m.prop('tent', 9, 25);
+  m.reserve(8, 24, 7, 5);
+  m.forestBorder(r, 2, 3, [{ side: 'w', from: 20, to: 24 }]);
+  m.scatterProps(r, ['reeds', 'reeds', 'reeds'], 22, undefined, 's');
+  m.scatterGround(r, 0.06, ',');
+  m.scatterGround(r, 0.04, '*');
+  m.scatterNodes(r, [{ type: 'rock_copper', solid: true, weight: 2 }, { type: 'rock_iron', solid: true, weight: 1 }, { type: 'rock_stone', solid: true, weight: 2 }], 7, { x: 4, y: 3, w: 52, h: 6 });
+  m.scatterNodes(r, [{ type: 'tree_softwood', solid: true, weight: 2 }, { type: 'plant_fiber', solid: false, weight: 2 }, { type: 'plant_herb', solid: false, weight: 2 }, { type: 'plant_berry', solid: true, weight: 1 }], 14);
+  m.scatterProps(r, ['tree_oak', 'bush', 'rock', 'tree_fruit'], 24);
+  return m.toMap({
+    id: 'crystal_lake',
+    name: 'Crystal Lake',
+    safeZone: false,
+    music: 'lake',
+    spawn: { x: 2, y: 22, dir: 'right' },
+    portals: [{ id: 'cl_west', x: 0, y: 20, w: 1, h: 4, to: 'greenhaven', toX: 62, toY: 22, toDir: 'left', label: 'Greenhaven' }],
+    theme: 'lake',
+    fishing: 'lake',
+    levels: [5, 25],
+    respawn: { mapId: 'greenhaven', x: 31, y: 26 },
+  });
+}
+
+/** North of Greenhaven: the mountain path and the mouth of Irondeep Mine. */
+function irondeepEntrance(): MapDef {
+  const W = 40;
+  const H = 30;
+  const r = rng(80085);
+  const m = new MapBuilder(W, H);
+  // Mountain walls
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) {
+      const edge = Math.min(x, W - 1 - x, y);
+      if (edge < 3 + Math.floor((Math.sin(x * 0.8) + Math.sin(y * 0.6 + 1)) * 1.2 + 1)) m.grid[y]![x] = '#';
+    }
+  m.rect(18, 9, 4, 21, '='); // path up to the mine
+  m.rect(14, 8, 12, 4, ':'); // mine yard
+  m.reserve(13, 6, 14, 7);
+  m.prop('mine_entrance', 19, 6);
+  m.rect(19, 5, 3, 1, '#');
+  m.prop('torch', 18, 7);
+  m.prop('torch', 22, 7);
+  m.prop('sign', 24, 10, 'Irondeep Mine. Forty floors deep. Floors 1–5: stone and copper. Iron below 6, silver below 11, gold below 21.');
+  m.prop('crate', 15, 9);
+  m.prop('barrel', 16, 9);
+  m.scatterGround(r, 0.08, ',');
+  m.scatterNodes(r, [{ type: 'rock_stone', solid: true, weight: 4 }, { type: 'rock_copper', solid: true, weight: 2 }, { type: 'rock_coal', solid: true, weight: 1 }], 12);
+  m.scatterProps(r, ['rock', 'tree_pine', 'stump', 'bush'], 16);
+  return m.toMap({
+    id: 'irondeep_entrance',
+    name: 'Irondeep Mine',
+    safeZone: true,
+    music: 'mountain',
+    spawn: { x: 20, y: 11, dir: 'down' },
+    portals: [
+      { id: 'ie_south', x: 18, y: 29, w: 4, h: 1, to: 'greenhaven', toX: 31, toY: 1, toDir: 'down', label: 'Greenhaven' },
+      { id: 'ie_mine', x: 19, y: 8, w: 3, h: 1, to: 'irondeep_1', toX: 4, toY: ladderRowsFor(1).up, toDir: 'right', label: 'Floor 1' },
+    ],
+    theme: 'meadow',
+    levels: [1, 10],
+    respawn: { mapId: 'greenhaven', x: 31, y: 26 },
+  });
+}
+
+for (const map of [greenhaven(), sunfield(), homestead(), whisperwood(), crystalLake(), irondeepEntrance()]) {
   const errors = validateMapDef(map);
   if (errors.length) {
     console.error(errors.join('\n'));

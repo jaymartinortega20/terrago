@@ -120,6 +120,18 @@
    {
     "itemId": "travelers_bread",
     "price": 10
+   },
+   {
+    "itemId": "glass_vial",
+    "price": 5
+   },
+   {
+    "itemId": "minor_health_potion",
+    "price": 35
+   },
+   {
+    "itemId": "minor_mana_potion",
+    "price": 35
    }
   ],
   "buys": [
@@ -131,6 +143,72 @@
    "tool",
    "weapon",
    "armor"
+  ]
+ },
+ {
+  "npcId": "miner_bram",
+  "name": "Bram's Mining Supplies",
+  "sells": [
+   {
+    "itemId": "worn_pickaxe",
+    "price": 25
+   },
+   {
+    "itemId": "copper_pickaxe",
+    "price": 180,
+    "requires": {
+     "skill": "mining",
+     "level": 8
+    }
+   }
+  ],
+  "buys": [
+   "material"
+  ]
+ },
+ {
+  "npcId": "fisher_olan",
+  "name": "Olan's Tackle",
+  "sells": [
+   {
+    "itemId": "bamboo_rod",
+    "price": 30
+   },
+   {
+    "itemId": "oak_rod",
+    "price": 260,
+    "requires": {
+     "skill": "fishing",
+     "level": 10
+    }
+   }
+  ],
+  "buys": [
+   "fish"
+  ]
+ },
+ {
+  "npcId": "blacksmith_toren",
+  "name": "Toren's Forge",
+  "sells": [
+   {
+    "itemId": "worn_axe",
+    "price": 25
+   },
+   {
+    "itemId": "copper_axe",
+    "price": 180,
+    "requires": {
+     "skill": "woodcutting",
+     "level": 8
+    }
+   }
+  ],
+  "buys": [
+   "tool",
+   "weapon",
+   "armor",
+   "material"
   ]
  }
 ]

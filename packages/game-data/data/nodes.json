@@ -1,0 +1,599 @@
+[
+ {
+  "id": "rock_stone",
+  "name": "Stone Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 0,
+  "level": 1,
+  "yields": 4,
+  "respawnMs": 60000,
+  "xp": 4,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "stone",
+    "chance": 1,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "coal",
+    "chance": 0.05,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#9a968e"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_copper",
+  "name": "Copper Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 0,
+  "level": 1,
+  "yields": 4,
+  "respawnMs": 75000,
+  "xp": 7,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "copper_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "stone",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "amethyst",
+    "chance": 0.01,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#d9822b"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_coal",
+  "name": "Coal Seam",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 0,
+  "level": 5,
+  "yields": 5,
+  "respawnMs": 80000,
+  "xp": 9,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "coal",
+    "chance": 1,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "stone",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#2a2030"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_iron",
+  "name": "Iron Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 1,
+  "level": 10,
+  "yields": 4,
+  "respawnMs": 100000,
+  "xp": 14,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "iron_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "sapphire",
+    "chance": 0.01,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#b5533a"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_silver",
+  "name": "Silver Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 2,
+  "level": 20,
+  "yields": 3,
+  "respawnMs": 140000,
+  "xp": 24,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "silver_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "emerald",
+    "chance": 0.012,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#e2e6ee"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_gold",
+  "name": "Gold Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 2,
+  "level": 30,
+  "yields": 3,
+  "respawnMs": 180000,
+  "xp": 36,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "gold_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "ruby",
+    "chance": 0.012,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#f2c14e"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_mithril",
+  "name": "Mithril Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 3,
+  "level": 40,
+  "yields": 3,
+  "respawnMs": 240000,
+  "xp": 55,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "mithril_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "diamond",
+    "chance": 0.008,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#7fe0d8"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_crystal",
+  "name": "Crystal Cluster",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 3,
+  "level": 45,
+  "yields": 3,
+  "respawnMs": 260000,
+  "xp": 62,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "crystal_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "diamond",
+    "chance": 0.012,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "crystal",
+   "color": "#b6a4ff"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_obsidian",
+  "name": "Obsidian Rock",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 4,
+  "level": 55,
+  "yields": 3,
+  "respawnMs": 300000,
+  "xp": 80,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "obsidian_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "ruby",
+    "chance": 0.02,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#5a4670"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_starmetal",
+  "name": "Star Metal Meteorite",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 5,
+  "level": 70,
+  "yields": 2,
+  "respawnMs": 600000,
+  "xp": 130,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "star_metal_ore",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "diamond",
+    "chance": 0.03,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "rock",
+   "color": "#ffe9a8"
+  },
+  "solid": true
+ },
+ {
+  "id": "rock_dragonstone",
+  "name": "Dragonstone Vein",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 5,
+  "level": 80,
+  "yields": 1,
+  "respawnMs": 1200000,
+  "xp": 220,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "dragonstone",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "crystal",
+   "color": "#e0483a"
+  },
+  "solid": true
+ },
+ {
+  "id": "tree_softwood",
+  "name": "Pine Tree",
+  "skill": "woodcutting",
+  "tool": "axe",
+  "toolTier": 0,
+  "level": 1,
+  "yields": 4,
+  "respawnMs": 90000,
+  "xp": 6,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "softwood_log",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "plant_fiber",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "tree",
+   "color": "#2f7a46"
+  },
+  "solid": true
+ },
+ {
+  "id": "tree_hardwood",
+  "name": "Old Oak",
+  "skill": "woodcutting",
+  "tool": "axe",
+  "toolTier": 1,
+  "level": 10,
+  "yields": 4,
+  "respawnMs": 140000,
+  "xp": 14,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "hardwood_log",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "tree",
+   "color": "#3f6f2c"
+  },
+  "solid": true
+ },
+ {
+  "id": "tree_elder",
+  "name": "Elder Tree",
+  "skill": "woodcutting",
+  "tool": "axe",
+  "toolTier": 2,
+  "level": 25,
+  "yields": 3,
+  "respawnMs": 240000,
+  "xp": 30,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "elderwood_log",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "tree",
+   "color": "#6a4f8a"
+  },
+  "solid": true
+ },
+ {
+  "id": "tree_spirit",
+  "name": "Spirit Tree",
+  "skill": "woodcutting",
+  "tool": "axe",
+  "toolTier": 3,
+  "level": 45,
+  "yields": 2,
+  "respawnMs": 420000,
+  "xp": 60,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "spiritwood_log",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "tree",
+   "color": "#5fc49a"
+  },
+  "solid": true
+ },
+ {
+  "id": "plant_fiber",
+  "name": "Fiber Grass",
+  "skill": "gathering",
+  "tool": null,
+  "toolTier": 0,
+  "level": 1,
+  "yields": 3,
+  "respawnMs": 45000,
+  "xp": 3,
+  "energy": 1,
+  "drops": [
+   {
+    "itemId": "plant_fiber",
+    "chance": 1,
+    "min": 1,
+    "max": 3
+   }
+  ],
+  "art": {
+   "kind": "grass",
+   "color": "#b8a35a"
+  },
+  "solid": false
+ },
+ {
+  "id": "plant_herb",
+  "name": "Herb Patch",
+  "skill": "gathering",
+  "tool": null,
+  "toolTier": 0,
+  "level": 1,
+  "yields": 2,
+  "respawnMs": 60000,
+  "xp": 5,
+  "energy": 1,
+  "drops": [
+   {
+    "itemId": "wild_herb",
+    "chance": 1,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "kind": "herb",
+   "color": "#5ca84a"
+  },
+  "solid": false
+ },
+ {
+  "id": "plant_berry",
+  "name": "Berry Bush",
+  "skill": "gathering",
+  "tool": null,
+  "toolTier": 0,
+  "level": 3,
+  "yields": 3,
+  "respawnMs": 70000,
+  "xp": 6,
+  "energy": 1,
+  "drops": [
+   {
+    "itemId": "wild_berries",
+    "chance": 1,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "kind": "bush",
+   "color": "#6a3fb0"
+  },
+  "solid": true
+ },
+ {
+  "id": "plant_mushroom",
+  "name": "Mushroom Ring",
+  "skill": "gathering",
+  "tool": null,
+  "toolTier": 0,
+  "level": 5,
+  "yields": 2,
+  "respawnMs": 80000,
+  "xp": 8,
+  "energy": 1,
+  "drops": [
+   {
+    "itemId": "brown_mushroom",
+    "chance": 1,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "kind": "mushroom",
+   "color": "#8a5d33"
+  },
+  "solid": false
+ },
+ {
+  "id": "plant_silverleaf",
+  "name": "Silverleaf",
+  "skill": "gathering",
+  "tool": null,
+  "toolTier": 0,
+  "level": 12,
+  "yields": 2,
+  "respawnMs": 140000,
+  "xp": 16,
+  "energy": 1,
+  "drops": [
+   {
+    "itemId": "silverleaf",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "herb",
+   "color": "#c8d8e0"
+  },
+  "solid": false
+ },
+ {
+  "id": "plant_glowcap",
+  "name": "Glowcap Cluster",
+  "skill": "gathering",
+  "tool": null,
+  "toolTier": 0,
+  "level": 15,
+  "yields": 2,
+  "respawnMs": 160000,
+  "xp": 18,
+  "energy": 1,
+  "drops": [
+   {
+    "itemId": "glowcap",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "mushroom",
+   "color": "#5fd4e6"
+  },
+  "solid": false
+ }
+]

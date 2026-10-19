@@ -1,0 +1,169 @@
+[
+ {
+  "itemId": "minnow",
+  "level": 1,
+  "difficulty": 10,
+  "xp": 5,
+  "tables": [
+   "pond",
+   "lake",
+   "river"
+  ],
+  "weight": 30
+ },
+ {
+  "itemId": "carp",
+  "level": 1,
+  "difficulty": 22,
+  "xp": 8,
+  "tables": [
+   "pond",
+   "lake"
+  ],
+  "weight": 22
+ },
+ {
+  "itemId": "perch",
+  "level": 3,
+  "difficulty": 28,
+  "xp": 10,
+  "tables": [
+   "pond",
+   "lake",
+   "river"
+  ],
+  "weight": 18
+ },
+ {
+  "itemId": "sunfish",
+  "level": 4,
+  "difficulty": 30,
+  "xp": 11,
+  "tables": [
+   "pond"
+  ],
+  "time": [
+   "day",
+   "morning"
+  ],
+  "weight": 12
+ },
+ {
+  "itemId": "trout",
+  "level": 8,
+  "difficulty": 40,
+  "xp": 18,
+  "tables": [
+   "river",
+   "lake"
+  ],
+  "weight": 12
+ },
+ {
+  "itemId": "bass",
+  "level": 10,
+  "difficulty": 45,
+  "xp": 20,
+  "tables": [
+   "lake"
+  ],
+  "weight": 10
+ },
+ {
+  "itemId": "catfish",
+  "level": 12,
+  "difficulty": 52,
+  "xp": 24,
+  "tables": [
+   "lake",
+   "pond",
+   "river"
+  ],
+  "time": [
+   "evening",
+   "night"
+  ],
+  "weight": 8
+ },
+ {
+  "itemId": "pike",
+  "level": 18,
+  "difficulty": 62,
+  "xp": 38,
+  "tables": [
+   "lake",
+   "river"
+  ],
+  "weight": 5
+ },
+ {
+  "itemId": "salmon",
+  "level": 22,
+  "difficulty": 60,
+  "xp": 40,
+  "tables": [
+   "river"
+  ],
+  "weight": 5
+ },
+ {
+  "itemId": "glass_eel",
+  "level": 25,
+  "difficulty": 72,
+  "xp": 55,
+  "tables": [
+   "lake"
+  ],
+  "time": [
+   "night"
+  ],
+  "weight": 3
+ },
+ {
+  "itemId": "blind_cavefish",
+  "level": 12,
+  "difficulty": 48,
+  "xp": 22,
+  "tables": [
+   "cave"
+  ],
+  "weight": 14
+ },
+ {
+  "itemId": "crystal_crab",
+  "level": 28,
+  "difficulty": 68,
+  "xp": 60,
+  "tables": [
+   "cave"
+  ],
+  "weight": 4
+ },
+ {
+  "itemId": "golden_koi",
+  "level": 35,
+  "difficulty": 80,
+  "xp": 120,
+  "tables": [
+   "pond",
+   "lake"
+  ],
+  "time": [
+   "morning"
+  ],
+  "weight": 1
+ },
+ {
+  "itemId": "old_whiskers",
+  "level": 45,
+  "difficulty": 93,
+  "xp": 400,
+  "tables": [
+   "lake"
+  ],
+  "time": [
+   "night"
+  ],
+  "weight": 0.2
+ }
+]

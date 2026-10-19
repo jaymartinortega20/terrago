@@ -82,6 +82,18 @@ export interface ActRequest {
 
 export interface ActResult {
   message: string | null;
+  /** Set when a fishing line was cast: wait for 'fish:bite'. */
+  fishing?: { id: string; x: number; y: number };
+  /** Node / tile action feedback for effects: 'hit' (a swing), 'gathered' (items received). */
+  effect?: 'hit' | 'gathered' | 'miss';
+}
+
+export interface FishingRound {
+  id: string;
+  seed: number;
+  difficulty: number;
+  zone: number;
+  maxSteps: number;
 }
 
 export interface NoticePayload {
@@ -104,6 +116,8 @@ export interface ServerToClientEvents {
   /** Objects added or changed in the current map. */
   'objects:set': (objects: WorldObject[]) => void;
   'objects:remove': (ids: string[]) => void;
+  /** A fish is nibbling: hook it now! */
+  'fish:bite': (info: { id: string }) => void;
   /** The server is closing this session (logged in elsewhere, banned, shutdown...). */
   'session:end': (info: { reason: string }) => void;
 }
@@ -124,6 +138,12 @@ export interface ClientToServerEvents {
   'farm:upgrade': (npcId: string, ack: Ack<{ message: string }>) => void;
   'repair:quote': (npcId: string, ack: Ack<{ cost: number; items: number }>) => void;
   'repair:all': (npcId: string, ack: Ack<{ message: string }>) => void;
+  'fish:hook': (id: string, ack: Ack<FishingRound>) => void;
+  'fish:reel': (req: { id: string; toggles: number[]; steps: number }, ack: Ack<{ caught: boolean; message: string }>) => void;
+  'fish:cancel': () => void;
+  'craft': (req: { recipeId: string; times: number }, ack: Ack<{ message: string }>) => void;
+  'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;
+  'lift:go': (req: { npcId: string; floor: number }, ack: Ack<{ message: string }>) => void;
   'ping:check': (clientTime: number, ack: (serverTime: number) => void) => void;
   'logout': (ack: Ack<null>) => void;
 }
