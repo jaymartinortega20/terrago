@@ -52,7 +52,7 @@ type ClientEvents = {
   chat: [ChatMessage];
 };
 
-type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 /**
  * Network side of the game client.
@@ -87,7 +87,11 @@ export class GameClient {
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private ended = false;
 
-  constructor(private readonly characterId: string) {}
+  constructor(
+    private readonly characterId: string,
+    /** Lets the offline preview plug in an in-browser server instead of Socket.IO. */
+    private readonly opts: { socketFactory?: () => GameSocket } = {},
+  ) {}
 
   on<K extends keyof ClientEvents>(event: K, fn: (...a: ClientEvents[K]) => void): () => void {
     let set = this.listeners.get(event);
@@ -102,14 +106,16 @@ export class GameClient {
   }
 
   connect(): void {
-    const socket: GameSocket = io(GAME_SERVER_URL, {
-      path: '/socket.io',
-      withCredentials: true,
-      transports: ['websocket', 'polling'],
-      auth: { characterId: this.characterId, protocol: PROTOCOL_VERSION },
-      reconnectionDelay: 500,
-      reconnectionDelayMax: 4000,
-    });
+    const socket: GameSocket =
+      this.opts.socketFactory?.() ??
+      io(GAME_SERVER_URL, {
+        path: '/socket.io',
+        withCredentials: true,
+        transports: ['websocket', 'polling'],
+        auth: { characterId: this.characterId, protocol: PROTOCOL_VERSION },
+        reconnectionDelay: 500,
+        reconnectionDelayMax: 4000,
+      });
     this.socket = socket;
 
     socket.on('connect', () => {

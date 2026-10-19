@@ -1,10 +1,8 @@
 'use client';
 
 import Phaser from 'phaser';
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { getItem } from '@terrago/game-data';
-import { api } from '@/lib/api';
 import { audio } from './audio';
 import { isTyping } from './input';
 import { GameClient } from './net/client';
@@ -24,8 +22,21 @@ declare global {
   }
 }
 
-export default function GameView({ characterId }: { characterId: string }) {
-  const router = useRouter();
+export type ExitTarget = '/' | '/characters';
+
+export default function GameView({
+  characterId,
+  onExit,
+  createClient = (id) => new GameClient(id),
+  badge,
+}: {
+  characterId: string;
+  /** Leave the game: '/' logs out of the account, '/characters' returns to character select. */
+  onExit: (to: ExitTarget) => void;
+  createClient?: (characterId: string) => GameClient;
+  /** Small label shown at the top of the screen (e.g. "Offline preview"). */
+  badge?: string;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const [client, setClient] = useState<GameClient | null>(null);
   const [touch, setTouch] = useState(false);
@@ -33,7 +44,7 @@ export default function GameView({ characterId }: { characterId: string }) {
   useEffect(() => {
     setTouch(window.matchMedia('(pointer: coarse)').matches);
     audio.init();
-    const c = new GameClient(characterId);
+    const c = createClient(characterId);
     c.connect();
     window.__terrago = { client: c };
     let game: Phaser.Game | null = null;
@@ -67,17 +78,18 @@ export default function GameView({ characterId }: { characterId: string }) {
       c.disconnect();
       if (window.__terrago?.client === c) delete window.__terrago;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [characterId]);
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-night no-select">
       <div ref={host} className="absolute inset-0" data-testid="game-canvas" />
-      {client && <Overlay client={client} touch={touch} onExit={(to) => router.push(to)} />}
+      {client && <Overlay client={client} touch={touch} onExit={onExit} badge={badge} />}
     </div>
   );
 }
 
-function Overlay({ client, touch, onExit }: { client: GameClient; touch: boolean; onExit: (to: string) => void }) {
+function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: boolean; onExit: (to: ExitTarget) => void; badge?: string }) {
   const ui = client.ui;
   const status = useStore(ui, (s) => s.status);
   const statusMessage = useStore(ui, (s) => s.statusMessage);
@@ -114,9 +126,8 @@ function Overlay({ client, touch, onExit }: { client: GameClient; touch: boolean
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client]);
 
-  const leave = async (to: string) => {
+  const leave = async (to: ExitTarget) => {
     await client.logout();
-    if (to === '/') await api.logout().catch(() => {});
     onExit(to);
   };
 
@@ -178,6 +189,12 @@ function Overlay({ client, touch, onExit }: { client: GameClient; touch: boolean
           )}
         </div>
       </div>
+
+      {badge && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 border-2 border-ink bg-gold px-2 py-0.5 text-[11px] font-bold text-ink" data-testid="badge">
+          {badge}
+        </div>
+      )}
 
       {/* Notices */}
       <div className="absolute top-20 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">

@@ -45,8 +45,9 @@ export function ChatBox({ client, compact }: { client: GameClient; compact?: boo
       return;
     }
     setText('');
+    // Enter sends and returns control to the game (like most MMOs); Enter again reopens chat.
+    inputRef.current?.blur();
     await client.sendChat(t);
-    if (compact) inputRef.current?.blur();
   }
 
   const shown = compact ? chat.slice(-3) : chat;

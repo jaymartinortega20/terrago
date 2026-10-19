@@ -13,6 +13,7 @@ import {
   type Appearance,
   type CharacterSummary,
   type ClassId,
+  type CreateCharacterInput,
 } from '@terrago/shared';
 import { api, ApiError } from '@/lib/api';
 import { CharacterPreview } from './CharacterPreview';
@@ -50,7 +51,15 @@ function Cycler({ label, options, value, onChange }: { label: string; options: r
   );
 }
 
-export function CharacterCreator({ onCreated, onCancel }: { onCreated: (c: CharacterSummary) => void; onCancel?: () => void }) {
+export function CharacterCreator({
+  onCreated,
+  onCancel,
+  create = async (input) => (await api.createCharacter(input)).character,
+}: {
+  onCreated: (c: CharacterSummary) => void;
+  onCancel?: () => void;
+  create?: (input: CreateCharacterInput) => Promise<CharacterSummary>;
+}) {
   const [name, setName] = useState('');
   const [classId, setClassId] = useState<ClassId>('warrior');
   const [look, setLook] = useState<Appearance>(DEFAULT_APPEARANCE);
@@ -79,10 +88,9 @@ export function CharacterCreator({ onCreated, onCancel }: { onCreated: (c: Chara
     setBusy(true);
     setError(null);
     try {
-      const { character } = await api.createCharacter({ name: check.name, classId, appearance: look });
-      onCreated(character);
+      onCreated(await create({ name: check.name, classId, appearance: look }));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not create character.');
+      setError(err instanceof ApiError || err instanceof Error ? err.message : 'Could not create character.');
       setBusy(false);
     }
   }

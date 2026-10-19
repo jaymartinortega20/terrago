@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { api } from '@/lib/api';
 import { Suspense } from 'react';
 
 // Phaser touches `window` on import, so the game is client-only.
@@ -13,6 +14,7 @@ const GameView = dynamic(() => import('@/game/GameView'), {
 
 function Play() {
   const id = useSearchParams().get('c');
+  const router = useRouter();
   if (!id) {
     return (
       <main className="flex min-h-dvh items-center justify-center">
@@ -25,7 +27,15 @@ function Play() {
       </main>
     );
   }
-  return <GameView characterId={id} />;
+  return (
+    <GameView
+      characterId={id}
+      onExit={async (to) => {
+        if (to === '/') await api.logout().catch(() => {});
+        router.push(to);
+      }}
+    />
+  );
 }
 
 export default function PlayPage() {
