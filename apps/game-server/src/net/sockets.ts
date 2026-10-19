@@ -6,7 +6,8 @@ import {
   type ClientToServerEvents,
   type ServerToClientEvents,
 } from '@terrago/shared';
-import { SESSION_COOKIE, accountBlockReason, getSession, parseCookies } from '../auth/sessions';
+import { SESSION_COOKIE, accountBlockReason, getSession, parseCookies, type SessionUser } from '../auth/sessions';
+import type { TicketStore } from '../auth/tickets';
 import type { Config } from '../config';
 import { GameError, type Pool } from '../db';
 import { clientIp } from '../http/router';
@@ -40,6 +41,7 @@ interface Deps {
   log: Logger;
   security: SecurityEvents;
   metrics: Metrics;
+  tickets: TicketStore;
 }
 
 type UntypedEmitter = { emit: (event: string, ...args: unknown[]) => boolean };
@@ -75,7 +77,24 @@ function toConnection(socket: GameSocket, metrics: Metrics): Connection {
 }
 
 export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
-  const { config, pool, world, log, security, metrics } = deps;
+  const { config, pool, world, log, security, metrics, tickets } = deps;
+
+  /** Resolve the player from a one-time ticket (cross-site deployments) or the session cookie. */
+  async function authenticate(auth: { ticket?: unknown; characterId?: unknown }, cookieHeader: string | undefined): Promise<SessionUser | null> {
+    if (auth.ticket !== undefined) {
+      const t = tickets.consume(auth.ticket);
+      if (!t || t.characterId !== auth.characterId) return null;
+      const { rows } = await pool.query(
+        `SELECT u.email, u.roles, u.status, u.banned_until
+           FROM player_sessions s JOIN users u ON u.id = s.user_id
+          WHERE s.id = $1 AND s.user_id = $2 AND s.revoked_at IS NULL AND s.expires_at > now()`,
+        [t.sessionId, t.userId],
+      );
+      const r = rows[0];
+      return r ? { sessionId: t.sessionId, userId: t.userId, email: r.email, roles: r.roles, status: r.status, bannedUntil: r.banned_until } : null;
+    }
+    return getSession(pool, parseCookies(cookieHeader)[SESSION_COOKIE], config.sessionTtlMs);
+  }
 
   const io: GameIo = new Server(httpServer, {
     path: '/socket.io',
@@ -98,10 +117,9 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
   io.use(async (socket, next) => {
     const ip = clientIp(socket.request, config.trustProxy);
     try {
-      const auth = socket.handshake.auth as { characterId?: unknown; protocol?: unknown };
+      const auth = socket.handshake.auth as { characterId?: unknown; protocol?: unknown; ticket?: unknown };
       if (auth.protocol !== PROTOCOL_VERSION) return next(new Error('Game client is out of date. Please refresh the page.'));
-      const cookies = parseCookies(socket.request.headers.cookie);
-      const user = await getSession(pool, cookies[SESSION_COOKIE], config.sessionTtlMs);
+      const user = await authenticate(auth, socket.request.headers.cookie);
       if (!user) {
         security.record('socket_auth_failed', { ip, details: { reason: 'no_session' } }, 10_000);
         return next(new Error('Please log in again.'));

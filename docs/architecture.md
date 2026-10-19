@@ -83,7 +83,8 @@ Every inventory or Gold mutation: **lock the character row → load → apply a 
 
 * Passwords: Node's built-in scrypt (N=2^14, r=8, p=5, per-user salt, versioned hash format with rehash-on-login). Login runs a dummy hash for unknown emails so timing doesn't reveal accounts.
 * Sessions: 256-bit random tokens; only SHA-256 hashes are stored. Cookie is `HttpOnly; SameSite=Lax; Secure` (production), sliding 30-day expiry, revoked on logout.
-* CSRF: POSTs require an allowed `Origin` and `application/json`. WebSocket upgrades are refused from any origin not in `WEB_ORIGINS` (cross-site WebSocket hijacking).
+* The website proxies `/api/*` to the game server (Next.js rewrite), so the session cookie is always first-party on the website's own domain. The game's WebSocket connects to the game server directly and authenticates with a **one-time ticket** (random, 60 s, single-use, bound to the session and character) fetched from `/api/game/ticket` on every (re)connect. This works when web and game server live on different sites (e.g. `*.vercel.app` + `*.onrender.com`) without relying on third-party cookies; on a shared domain the cookie also works.
+* CSRF: a POST carrying an `Origin` header must come from `WEB_ORIGINS`; browser requests flagged `Sec-Fetch-Site: cross-site` are refused; bodies must be `application/json` (forces a CORS preflight cross-site) and the cookie is `SameSite=Lax`. WebSocket upgrades are refused from any origin not in `WEB_ORIGINS` (cross-site WebSocket hijacking).
 * Rate limits on register/login (per IP and per email) and character creation; chat token bucket; socket event flood guard.
 * Input validation with zod on every API body; all SQL is parameterised.
 * XSS: chat and names are rendered as text (React/Phaser), never HTML; invisible/bidi control characters are stripped. CSP and security headers on the site.

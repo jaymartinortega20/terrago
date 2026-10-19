@@ -10,6 +10,7 @@ import {
   sessionCookie,
   type SessionUser,
 } from '../auth/sessions';
+import type { TicketStore } from '../auth/tickets';
 import type { Config } from '../config';
 import { GameError, isUniqueViolation, type Pool } from '../db';
 import type { Logger } from '../logger';
@@ -27,10 +28,11 @@ interface Deps {
   security: SecurityEvents;
   world: World;
   metrics: Metrics;
+  tickets: TicketStore;
 }
 
 export function buildRouter(deps: Deps): Router {
-  const { config, pool, log, security, world, metrics } = deps;
+  const { config, pool, log, security, world, metrics, tickets } = deps;
   const router = new Router({ allowedOrigins: config.webOrigins, trustProxy: config.trustProxy, log });
 
   const limits = {
@@ -158,6 +160,14 @@ export function buildRouter(deps: Deps): Router {
       if (err instanceof GameError) throw new HttpError(err.status, err.message);
       throw err;
     }
+  });
+
+  /** One-time pass for the game connection (works even when web and game server are on different sites). */
+  router.post('/api/game/ticket', async (ctx) => {
+    const user = await requireUser(ctx);
+    const characterId = (ctx.body as { characterId?: unknown })?.characterId;
+    if (typeof characterId !== 'string' || !/^[0-9a-f-]{36}$/i.test(characterId)) throw new HttpError(400, 'Choose a character.');
+    return tickets.issue({ userId: user.userId, sessionId: user.sessionId, characterId });
   });
 
   return router;

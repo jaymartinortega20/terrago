@@ -1,7 +1,14 @@
 import type { CharacterSummary, CreateCharacterInput } from '@terrago/shared';
 
-/** Where the authoritative game server lives (REST API + Socket.IO). */
+/** Where the authoritative game server lives. The game connects here directly (WebSocket). */
 export const GAME_SERVER_URL = (process.env.NEXT_PUBLIC_GAME_SERVER_URL ?? 'http://localhost:4000').replace(/\/$/, '');
+
+/**
+ * REST calls go to this website's own /api path, which Next.js forwards to the
+ * game server (see next.config.ts). The session cookie is therefore first-party
+ * on the website's domain, even when the game server is on another site.
+ */
+const API_BASE = '';
 
 export class ApiError extends Error {
   constructor(
@@ -15,9 +22,9 @@ export class ApiError extends Error {
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${GAME_SERVER_URL}${path}`, {
+    res = await fetch(`${API_BASE}${path}`, {
       ...init,
-      credentials: 'include',
+      credentials: 'same-origin',
       headers: init.body ? { 'Content-Type': 'application/json', ...init.headers } : init.headers,
     });
   } catch {
@@ -43,4 +50,7 @@ export const api = {
   characters: () => request<{ characters: CharacterSummary[] }>('/api/characters'),
   createCharacter: (input: CreateCharacterInput) =>
     request<{ character: CharacterSummary }>('/api/characters', { method: 'POST', body: JSON.stringify(input) }),
+  /** One-time pass (60 s) that lets the game connection prove who you are. */
+  gameTicket: (characterId: string) =>
+    request<{ ticket: string; expiresInMs: number }>('/api/game/ticket', { method: 'POST', body: JSON.stringify({ characterId }) }),
 };

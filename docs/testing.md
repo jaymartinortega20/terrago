@@ -3,7 +3,7 @@
 | Suite | Command | What it covers | Result (v0.1) |
 | --- | --- | --- | --- |
 | Unit | `npm run test:unit` | Movement determinism, wall collision, corner assist, diagonal speed, map bounds; inventory stacking/move/remove and item conservation; names and profanity; XP curve; timestamp Energy; password hashing; cookies; rate limiters; config; world runtime (visibility, area of interest, speed-hack and malformed-packet rejection, portals, chat radius and rate limit, reconnect grace, duplicate login, one character per account, shutdown save); game-data integrity (every spawn, NPC and portal reachable) | **62 / 62 pass** |
-| Integration | `npm run test:integration` | Real PostgreSQL + Socket.IO clients against the real server: registration/login/logout, generic login errors + security log, CSRF/Origin checks, character creation through the Gold/item ledgers, name uniqueness and slot limit, the v0.1 flow at protocol level, foreign-character and anonymous socket rejection, cross-site WebSocket refusal, teleport/garbage packets ignored, flood disconnect, NPC range check, **welcome gift granted exactly once under 5 concurrent requests**, inventory move/use persisted, **40 concurrent inventory moves conserve every item**, positions and inventory survive a **server restart** | **16 / 16 pass** |
+| Integration | `npm run test:integration` | Real PostgreSQL + Socket.IO clients against the real server: registration/login/logout, generic login errors + security log, CSRF/Origin checks, character creation through the Gold/item ledgers, name uniqueness and slot limit, the v0.1 flow at protocol level, foreign-character and anonymous socket rejection, cross-site WebSocket refusal, teleport/garbage packets ignored, flood disconnect, NPC range check, **welcome gift granted exactly once under 5 concurrent requests**, inventory move/use persisted, **40 concurrent inventory moves conserve every item**, positions and inventory survive a **server restart**, one-time game tickets (connect without cookies, single use, bound to character, revoked by logout) | **17 / 17 pass** |
 | End-to-end | `npm run test:e2e` | The v0.1 success test in two real Chromium browsers with separate sessions (below) | **12 / 12 checks pass** |
 | Load | `npm run loadtest -- --bots 100 --duration 120` | Bots connect, walk, change maps, chat, request inventory; server metrics sampled every 5 s | See below |
 
@@ -28,6 +28,10 @@ Integration tests use the `terrago_test` database (created by `docker compose up
 | Bonus: B walks to Mayor Lina, talks, receives Charter + 2 Honey Buns, opens the bag | ✅ |
 
 \* The ~430 ms is measured from Playwright's key press in one headless browser to a position change observed by polling another headless browser, on a 2-vCPU machine that is also running the server, database and website with software-rendered WebGL (~25 FPS). It includes up to 50 ms input sampling, up to 50 ms server tick, up to 100 ms until the next snapshot, and the **deliberate 160 ms interpolation buffer** that keeps remote movement smooth. On real hardware the browser-side overhead mostly disappears; internet latency is added on top.
+
+The same 12 checks also pass in the **cross-site production shape** used for free hosting: website on `localhost:3000`, game server on `127.0.0.1:4000` (browsers treat these as different sites, like `*.vercel.app` and `*.onrender.com`), server in `NODE_ENV=production`, REST through the website's `/api` proxy and the game connection authenticated by one-time tickets.
+
+The offline preview page (`npm run build:preview -w @terrago/web`) was tested in Chromium: character creation, three labelled bots visible and moving, walking, chat, Mayor Lina's gift, and reload-and-continue at the same position with the same bag, with no page errors.
 
 Mobile (iPhone 13 landscape emulation): the virtual joystick moves the character, chat can be opened and sent from the Chat button, and the Menu → Inventory sheet opens and scrolls.
 

@@ -3,6 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { runMigrations } from '@terrago/database';
 import { BALANCE, validateGameData } from '@terrago/game-data';
 import { SIM } from '@terrago/shared';
+import { TicketStore } from './auth/tickets';
 import type { Config } from './config';
 import { createPool, type Pool } from './db';
 import { buildRouter } from './http/routes';
@@ -50,7 +51,8 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     security,
   });
   const metrics = new Metrics(world, pool);
-  const router = buildRouter({ config, pool, log, security, world, metrics });
+  const tickets = new TicketStore();
+  const router = buildRouter({ config, pool, log, security, world, metrics, tickets });
 
   const http = createServer((req, res) => {
     router.handle(req, res).catch((err) => {
@@ -60,7 +62,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   });
   http.headersTimeout = 15_000;
   http.requestTimeout = 20_000;
-  const io = attachSockets(http, { config, pool, world, log, security, metrics });
+  const io = attachSockets(http, { config, pool, world, log, security, metrics, tickets });
 
   // --- Fixed-rate simulation loop (self-correcting, no drift) -------------------
   let running = true;

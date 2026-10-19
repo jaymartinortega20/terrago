@@ -1,0 +1,29 @@
+# Render Blueprint: the TerraGo game server on Render's free plan (Singapore).
+# Render → New → Blueprint → pick this repository. You will be asked for the two
+# values marked `sync: false` (DATABASE_URL from Neon, WEB_ORIGINS = your Vercel URL).
+services:
+  - type: web
+    name: terrago-game-server
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm ci -w @terrago/game-server --include-workspace-root && npm run build -w @terrago/game-server
+    startCommand: node --enable-source-maps apps/game-server/dist/index.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '22'
+      - key: TRUST_PROXY
+        value: 'true'
+      - key: MIGRATIONS_DIR
+        value: apps/game-server/dist/migrations
+      - key: DB_POOL_MAX
+        value: '5'
+      - key: METRICS_TOKEN
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: WEB_ORIGINS
+        sync: false

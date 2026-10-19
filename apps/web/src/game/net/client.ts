@@ -25,7 +25,7 @@ import {
   type ServerToClientEvents,
   type Snapshot,
 } from '@terrago/shared';
-import { GAME_SERVER_URL } from '@/lib/api';
+import { api, GAME_SERVER_URL } from '@/lib/api';
 import { initialUi, pushNotice, Store, type UiState } from '../store';
 
 interface Sample {
@@ -112,7 +112,15 @@ export class GameClient {
         path: '/socket.io',
         withCredentials: true,
         transports: ['websocket', 'polling'],
-        auth: { characterId: this.characterId, protocol: PROTOCOL_VERSION },
+        // Called on every (re)connect: fetch a fresh one-time ticket. Falls back to the
+        // session cookie when the game server shares the website's site.
+        auth: (cb) => {
+          const base = { characterId: this.characterId, protocol: PROTOCOL_VERSION };
+          api.gameTicket(this.characterId).then(
+            ({ ticket }) => cb({ ...base, ticket }),
+            () => cb(base),
+          );
+        },
         reconnectionDelay: 500,
         reconnectionDelayMax: 4000,
       });

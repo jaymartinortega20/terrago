@@ -100,8 +100,11 @@ export class Router {
     const cookiesToSet: string[] = [];
     try {
       if (req.method === 'POST') {
-        // CSRF: state-changing requests must come from our web origin as JSON.
-        if (!originAllowed) throw new HttpError(403, 'Origin not allowed.');
+        // CSRF: browsers always send Origin on POST, so a present Origin must be ours,
+        // and a browser-flagged cross-site request is refused. Requests without either
+        // header are non-browser clients (or a same-origin proxy hop), which CSRF can't
+        // abuse. JSON-only bodies plus SameSite=Lax cookies close the remaining gaps.
+        if (origin ? !originAllowed : req.headers['sec-fetch-site'] === 'cross-site') throw new HttpError(403, 'Origin not allowed.');
         const ct = req.headers['content-type'] ?? '';
         if (!ct.toLowerCase().startsWith('application/json')) throw new HttpError(415, 'Expected application/json.');
       }

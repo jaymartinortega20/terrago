@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Workspace packages ship TypeScript source.
   transpilePackages: ['@terrago/shared', '@terrago/game-data'],
+  // The REST API is served through this site so the login cookie is first-party.
+  async rewrites() {
+    return [{ source: '/api/:path*', destination: `${gameServer}/api/:path*` }];
+  },
   async headers() {
     return [
       {

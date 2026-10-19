@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';
 import pg from 'pg';
-import { CODE_DIR, type Snapshot } from '@terrago/shared';
+import { io as ioClient } from 'socket.io-client';
+import { CODE_DIR, PROTOCOL_VERSION, type Snapshot } from '@terrago/shared';
 import type { GameServer } from '../../src/app';
 import {
   Browser,
+  ORIGIN,
   TEST_DB,
+  type TestSocket,
   ack,
   connectSocket,
   enterWorld,
@@ -74,9 +77,13 @@ describe('accounts and sessions', () => {
     assert.ok(ev.rows[0].n >= 2);
   });
 
-  test('CSRF: state-changing requests need our Origin and JSON', async () => {
-    const noOrigin = await new Browser(base, null).post('/api/auth/register', { email: 'x1@example.com', password: 'a long enough password' });
-    assert.equal(noOrigin.status, 403);
+  test('CSRF: cross-site browser requests are refused; JSON only', async () => {
+    const crossSite = await fetch(`${base}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'sec-fetch-site': 'cross-site' },
+      body: JSON.stringify({ email: 'x1@example.com', password: 'a long enough password' }),
+    });
+    assert.equal(crossSite.status, 403);
     const evil = await new Browser(base, 'https://evil.example').post('/api/auth/register', { email: 'x2@example.com', password: 'a long enough password' });
     assert.equal(evil.status, 403);
     const form = await fetch(`${base}/api/auth/register`, {
@@ -184,6 +191,45 @@ describe('multiplayer world', () => {
     const err2 = await once<Error>(anon as any, 'connect_error');
     assert.match(err2.message, /log in/i);
     anon.disconnect();
+  });
+
+  test('one-time game tickets let the game connect from another site, exactly once', async () => {
+    const A = await newPlayer(base);
+    const B = await newPlayer(base);
+    const issue = (who: typeof A, characterId: string) => who.browser.post('/api/game/ticket', { characterId });
+    const t1 = (await issue(A, A.character.id)).data.ticket as string;
+    assert.ok(t1 && t1.length >= 32);
+
+    const connectWithTicket = (ticket: string, characterId: string) =>
+      ioClient(base, {
+        transports: ['websocket'],
+        forceNew: true,
+        reconnection: false,
+        extraHeaders: { origin: ORIGIN }, // no cookie: like a browser on vercel.app talking to onrender.com
+        auth: { characterId, protocol: PROTOCOL_VERSION, ticket },
+      }) as unknown as TestSocket;
+
+    const ok = connectWithTicket(t1, A.character.id);
+    const enter = await once<any>(ok, 'world:enter');
+    assert.equal(enter.self.name, A.character.name);
+    ok.disconnect();
+
+    const reused = connectWithTicket(t1, A.character.id);
+    assert.match((await once<Error>(reused as any, 'connect_error')).message, /log in/i);
+    reused.disconnect();
+
+    const t2 = (await issue(A, A.character.id)).data.ticket as string;
+    const wrongChar = connectWithTicket(t2, B.character.id);
+    await once(wrongChar as any, 'connect_error');
+    wrongChar.disconnect();
+
+    const t3 = (await issue(A, A.character.id)).data.ticket as string;
+    await A.browser.post('/api/auth/logout');
+    const afterLogout = connectWithTicket(t3, A.character.id);
+    await once(afterLogout as any, 'connect_error');
+    afterLogout.disconnect();
+
+    assert.equal((await new Browser(base).post('/api/game/ticket', { characterId: A.character.id })).status, 401);
   });
 
   test('cross-site WebSocket connections are refused', async () => {
