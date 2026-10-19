@@ -1,0 +1,19 @@
+{
+  "_comment": "Balance values read by the server at startup. Tune here, not in code.",
+  "xpCurve": { "baseXp": 100, "exponent": 1.8, "maxLevel": 100 },
+  "energy": { "max": 100, "regenIntervalMs": 180000, "startingEnergy": 60 },
+  "character": {
+    "startingGold": 25,
+    "startingMap": "greenhaven",
+    "inventoryCapacity": 20,
+    "starterItems": [
+      { "itemId": "worn_hoe", "quantity": 1 },
+      { "itemId": "leaky_watering_can", "quantity": 1 },
+      { "itemId": "carrot_seed", "quantity": 6 },
+      { "itemId": "travelers_bread", "quantity": 3 }
+    ]
+  },
+  "persistence": {
+    "positionSaveIntervalMs": 30000
+  }
+}

@@ -1,0 +1,139 @@
+import { TILE_SIZE } from './constants';
+import type { Direction } from './types';
+
+/**
+ * Ground tiles. Each map row is a string; each character is a key in this legend.
+ * Tall things (trees, buildings, fences...) are objects, not tiles, so they can be
+ * depth-sorted against players.
+ */
+export const GROUND_TILES = {
+  '.': { name: 'grass', solid: false },
+  ',': { name: 'grass_tall', solid: false },
+  '*': { name: 'flowers', solid: false },
+  '=': { name: 'dirt_path', solid: false },
+  ':': { name: 'cobblestone', solid: false },
+  '_': { name: 'plaza', solid: false },
+  's': { name: 'sand', solid: false },
+  'd': { name: 'soil', solid: false },
+  '~': { name: 'water', solid: true },
+  'w': { name: 'shallow_water', solid: true },
+  '#': { name: 'cliff', solid: true },
+  'b': { name: 'bridge', solid: false },
+} as const;
+
+export type GroundTileKey = keyof typeof GROUND_TILES;
+
+export const PROP_TYPES = {
+  tree_oak: { w: 1, h: 1, solid: true },
+  tree_pine: { w: 1, h: 1, solid: true },
+  tree_fruit: { w: 1, h: 1, solid: true },
+  bush: { w: 1, h: 1, solid: true },
+  rock: { w: 1, h: 1, solid: true },
+  stump: { w: 1, h: 1, solid: true },
+  fence_h: { w: 1, h: 1, solid: true },
+  fence_v: { w: 1, h: 1, solid: true },
+  lamp: { w: 1, h: 1, solid: true },
+  sign: { w: 1, h: 1, solid: true },
+  barrel: { w: 1, h: 1, solid: true },
+  crate: { w: 1, h: 1, solid: true },
+  well: { w: 2, h: 2, solid: true },
+  fountain: { w: 4, h: 3, solid: true },
+  market_stall: { w: 3, h: 2, solid: true },
+  bench: { w: 2, h: 1, solid: true },
+  notice_board: { w: 2, h: 1, solid: true },
+  teleport_pad: { w: 3, h: 3, solid: false },
+  flower_bed: { w: 2, h: 1, solid: false },
+  hay_bale: { w: 1, h: 1, solid: true },
+  scarecrow: { w: 1, h: 1, solid: true },
+} as const;
+
+export type PropType = keyof typeof PROP_TYPES;
+
+export interface BuildingDef {
+  kind: 'building';
+  id: string;
+  /** Label shown on the sign above the door. */
+  name: string;
+  /** Tile coordinates of the top-left corner and size in tiles. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  roof: string;
+  wall: string;
+  /** Door column, relative to x. The door is on the bottom row. */
+  doorX: number;
+}
+
+export interface PropDef {
+  kind: 'prop';
+  type: PropType;
+  x: number;
+  y: number;
+  /** Optional text for signs. */
+  text?: string;
+}
+
+export type MapObject = BuildingDef | PropDef;
+
+export interface PortalDef {
+  id: string;
+  /** Trigger rectangle in tiles. */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  to: string;
+  /** Arrival position in tiles (centre of the tile). */
+  toX: number;
+  toY: number;
+  toDir: Direction;
+  label: string;
+}
+
+export interface MapDef {
+  id: string;
+  name: string;
+  /** Size in tiles. */
+  width: number;
+  height: number;
+  tileSize: number;
+  safeZone: boolean;
+  music: string | null;
+  spawn: { x: number; y: number; dir: Direction };
+  tiles: string[];
+  objects: MapObject[];
+  portals: PortalDef[];
+}
+
+/** Tile -> pixel helpers. A position is the bottom-centre of an entity's feet. */
+export function tileCenter(tx: number, ty: number): { x: number; y: number } {
+  return { x: tx * TILE_SIZE + TILE_SIZE / 2, y: ty * TILE_SIZE + TILE_SIZE / 2 + 6 };
+}
+
+export function pixelToTile(px: number): number {
+  return Math.floor(px / TILE_SIZE);
+}
+
+export function validateMapDef(map: MapDef): string[] {
+  const errors: string[] = [];
+  if (map.tiles.length !== map.height) errors.push(`${map.id}: expected ${map.height} rows, got ${map.tiles.length}`);
+  map.tiles.forEach((row, y) => {
+    if (row.length !== map.width) errors.push(`${map.id}: row ${y} has width ${row.length}, expected ${map.width}`);
+    for (const ch of row) {
+      if (!(ch in GROUND_TILES)) errors.push(`${map.id}: unknown tile '${ch}' on row ${y}`);
+    }
+  });
+  for (const obj of map.objects) {
+    const w = obj.kind === 'building' ? obj.w : PROP_TYPES[obj.type]?.w;
+    const h = obj.kind === 'building' ? obj.h : PROP_TYPES[obj.type]?.h;
+    if (w === undefined || h === undefined) {
+      errors.push(`${map.id}: unknown object ${JSON.stringify(obj)}`);
+      continue;
+    }
+    if (obj.x < 0 || obj.y < 0 || obj.x + w > map.width || obj.y + h > map.height) {
+      errors.push(`${map.id}: object out of bounds ${JSON.stringify(obj)}`);
+    }
+  }
+  return errors;
+}

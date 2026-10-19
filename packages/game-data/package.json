@@ -1,0 +1,14 @@
+{
+  "name": "@terrago/game-data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TerraGo items, classes, NPCs, maps and balance values.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./data/*": "./data/*"
+  },
+  "dependencies": {
+    "@terrago/shared": "0.1.0"
+  }
+}

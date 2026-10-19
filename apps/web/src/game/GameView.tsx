@@ -1,0 +1,249 @@
+'use client';
+
+import Phaser from 'phaser';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { getItem } from '@terrago/game-data';
+import { api } from '@/lib/api';
+import { audio } from './audio';
+import { isTyping } from './input';
+import { GameClient } from './net/client';
+import { WorldScene } from './scenes/WorldScene';
+import { useStore, type Panel } from './store';
+import { ChatBox } from './ui/ChatBox';
+import { DialogueBox } from './ui/DialogueBox';
+import { Hud } from './ui/Hud';
+import { ItemSlot } from './ui/ItemSlot';
+import { MobileControls } from './ui/MobileControls';
+import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
+
+declare global {
+  interface Window {
+    /** Read-only debug handle used by automated tests. */
+    __terrago?: { client: GameClient; game?: Phaser.Game };
+  }
+}
+
+export default function GameView({ characterId }: { characterId: string }) {
+  const router = useRouter();
+  const host = useRef<HTMLDivElement>(null);
+  const [client, setClient] = useState<GameClient | null>(null);
+  const [touch, setTouch] = useState(false);
+
+  useEffect(() => {
+    setTouch(window.matchMedia('(pointer: coarse)').matches);
+    audio.init();
+    const c = new GameClient(characterId);
+    c.connect();
+    window.__terrago = { client: c };
+    let game: Phaser.Game | null = null;
+    let cancelled = false;
+    const start = async () => {
+      // Pixel font must be ready before Phaser rasterises any text.
+      await document.fonts.load('12px "Pixelify Sans"').catch(() => {});
+      // React StrictMode mounts effects twice in dev: never start a game for a torn-down mount.
+      if (cancelled || !host.current) return;
+      game = new Phaser.Game({
+        type: Phaser.AUTO,
+        parent: host.current,
+        backgroundColor: '#12141f',
+        pixelArt: true,
+        roundPixels: true,
+        disableContextMenu: true,
+        scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
+        fps: { target: 60 },
+        banner: false,
+        audio: { noAudio: true },
+      });
+      game.scene.add('world', WorldScene, true, { client: c });
+      if (window.__terrago?.client === c) window.__terrago.game = game;
+    };
+    void start();
+    setClient(c);
+    return () => {
+      cancelled = true;
+      game?.destroy(true);
+      game = null;
+      c.disconnect();
+      if (window.__terrago?.client === c) delete window.__terrago;
+    };
+  }, [characterId]);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden bg-night no-select">
+      <div ref={host} className="absolute inset-0" data-testid="game-canvas" />
+      {client && <Overlay client={client} touch={touch} onExit={(to) => router.push(to)} />}
+    </div>
+  );
+}
+
+function Overlay({ client, touch, onExit }: { client: GameClient; touch: boolean; onExit: (to: string) => void }) {
+  const ui = client.ui;
+  const status = useStore(ui, (s) => s.status);
+  const statusMessage = useStore(ui, (s) => s.statusMessage);
+  const panel = useStore(ui, (s) => s.panel);
+  const mapName = useStore(ui, (s) => s.mapName);
+  const tile = useStore(ui, (s) => s.tile);
+  const nearby = useStore(ui, (s) => s.nearby);
+  const ping = useStore(ui, (s) => s.ping);
+  const notices = useStore(ui, (s) => s.notices);
+  const inv = useStore(ui, (s) => s.inventory);
+
+  const open = (p: Panel) => ui.set((s) => ({ panel: s.panel === p ? null : p }));
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (isTyping()) return;
+      const k = e.key.toLowerCase();
+      if (k === 'escape') {
+        if (ui.get().dialogue) return;
+        ui.set((s) => ({ panel: s.panel ? null : 'settings' }));
+      } else if (ui.get().dialogue) return;
+      else if (k === 'i' || k === 'b') open('inventory');
+      else if (k === 'c') open('character');
+      else if (k === 'm') open('map');
+      else if (/^[1-9]$/.test(k)) {
+        const slot = Number(k) - 1;
+        const item = ui.get().inventory?.slots.find((s) => s.slot === slot);
+        if (item && getItem(item.itemId)?.consumable) client.useItem(slot);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client]);
+
+  const leave = async (to: string) => {
+    await client.logout();
+    if (to === '/') await api.logout().catch(() => {});
+    onExit(to);
+  };
+
+  const bySlot = new Map((inv?.slots ?? []).map((s) => [s.slot, s]));
+
+  return (
+    <div className="pointer-events-none absolute inset-0 text-parchment">
+      {/* Top-left: status */}
+      <div className="absolute top-2 left-2">
+        <Hud client={client} compact={touch} />
+      </div>
+
+      {/* Top-right: location + menu */}
+      <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
+        <div className="px-panel-dark pointer-events-auto px-3 py-1 text-right text-xs" data-testid="location">
+          <span className="font-bold text-gold">{mapName}</span>
+          <span className="ml-2 text-parchment/70">
+            ({tile.x}, {tile.y})
+          </span>
+          <span className="ml-2 text-parchment/70">👥 {nearby}</span>
+          <span className="ml-2 text-parchment/70">{ping === null ? '' : `${ping}ms`}</span>
+        </div>
+        {touch && (
+          <button className="px-btn ghost small pointer-events-auto" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} data-testid="menu-toggle">
+            ☰ Menu
+          </button>
+        )}
+        <nav
+          className={`pointer-events-auto flex justify-end gap-1 ${touch ? (menuOpen ? 'max-w-[45vw] flex-wrap' : 'hidden') : 'max-w-[60vw] flex-wrap'}`}
+          aria-label="Game menu"
+        >
+          {MENU.filter((m) => !touch || !m.version).map((m) => (
+            <button
+              key={m.id}
+              disabled={!!m.version}
+              title={m.version ? `${m.label} — arrives in ${m.version}` : `${m.label} (${m.key})`}
+              onClick={() => {
+                open(m.id as Panel);
+                setMenuOpen(false);
+              }}
+              className={`border-2 border-ink px-1.5 py-0.5 text-[11px] font-bold ${
+                m.version ? 'cursor-not-allowed bg-night-2/80 text-parchment/35' : panel === m.id ? 'bg-gold text-ink' : 'bg-night-3/90 text-parchment hover:bg-wood'
+              }`}
+              data-testid={`menu-${m.id}`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </nav>
+        <div
+          className={touch && panel ? 'pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-night/50 p-2' : 'mt-1'}
+          onClick={(e) => touch && e.target === e.currentTarget && open(null)}
+        >
+          {panel === 'inventory' && <InventoryPanel client={client} onClose={() => open(null)} />}
+          {panel === 'character' && <CharacterPanel client={client} onClose={() => open(null)} />}
+          {panel === 'map' && <MapPanel client={client} onClose={() => open(null)} />}
+          {panel === 'settings' && (
+            <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
+          )}
+        </div>
+      </div>
+
+      {/* Notices */}
+      <div className="absolute top-20 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">
+        {notices.map((n) => (
+          <div
+            key={n.id}
+            className={`px-panel-dark px-3 py-1 text-sm font-bold ${n.kind === 'error' ? 'text-[#ff8a7a]' : n.kind === 'success' ? 'text-leaf' : 'text-gold'}`}
+            role="status"
+          >
+            {n.text}
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom: dialogue, hotbar, chat */}
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 sm:bottom-20">
+        <DialogueBox client={client} />
+      </div>
+      {!touch && (
+        <div className="px-panel-dark pointer-events-auto absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1 p-1" data-testid="hotbar">
+          {Array.from({ length: 9 }, (_, i) => (
+            <ItemSlot
+              key={i}
+              slot={i}
+              item={bySlot.get(i)}
+              hotkey={String(i + 1)}
+              size={40}
+              onClick={() => {
+                const it = bySlot.get(i);
+                if (it && getItem(it.itemId)?.consumable) client.useItem(i);
+                else open('inventory');
+              }}
+            />
+          ))}
+        </div>
+      )}
+      <div className={`absolute left-2 ${touch ? 'top-[82px]' : 'bottom-2'}`}>
+        <ChatBox client={client} compact={touch} />
+      </div>
+
+      {touch && <MobileControls client={client} openPanel={open} />}
+
+      {/* Connection state */}
+      {status !== 'online' && (
+        <div className="pointer-events-auto absolute inset-0 flex items-center justify-center bg-night/70" data-testid="status-overlay">
+          <div className="px-panel max-w-sm p-5 text-center">
+            <p className="text-lg font-bold text-wood-dark">
+              {status === 'connecting' && 'Entering TerraGo…'}
+              {status === 'reconnecting' && 'Reconnecting…'}
+              {status === 'ended' && 'Disconnected'}
+              {status === 'error' && 'Could not connect'}
+            </p>
+            {statusMessage && <p className="mt-2 text-sm">{statusMessage}</p>}
+            {(status === 'ended' || status === 'error') && (
+              <div className="mt-4 flex justify-center gap-2">
+                <button className="px-btn green small" onClick={() => location.reload()}>
+                  Reconnect
+                </button>
+                <button className="px-btn ghost small" onClick={() => onExit('/characters')}>
+                  Characters
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

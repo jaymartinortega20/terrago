@@ -1,0 +1,25 @@
+{
+  "name": "@terrago/game-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TerraGo authoritative multiplayer game server (HTTP API + Socket.IO + world simulation).",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
+    "start": "node --enable-source-maps dist/index.js",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@terrago/database": "0.1.0",
+    "@terrago/game-data": "0.1.0",
+    "@terrago/shared": "0.1.0",
+    "pg": "^8.23.1",
+    "socket.io": "^4.8.4",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "esbuild": "^0.28.2",
+    "socket.io-client": "^4.8.4"
+  }
+}

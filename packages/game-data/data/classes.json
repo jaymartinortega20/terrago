@@ -1,0 +1,57 @@
+[
+  {
+    "id": "warrior",
+    "name": "Warrior",
+    "summary": "Front-line fighter with high HP and heavy melee blows.",
+    "weapons": ["sword", "axe", "spear", "shield"],
+    "baseStats": { "strength": 9, "agility": 5, "intelligence": 2, "vitality": 9, "luck": 3 },
+    "hpBase": 70,
+    "hpPerLevel": 14,
+    "mpBase": 12,
+    "mpPerLevel": 2
+  },
+  {
+    "id": "ranger",
+    "name": "Ranger",
+    "summary": "Patient hunter who strikes from range with bows and crossbows.",
+    "weapons": ["bow", "crossbow"],
+    "baseStats": { "strength": 5, "agility": 10, "intelligence": 3, "vitality": 6, "luck": 4 },
+    "hpBase": 55,
+    "hpPerLevel": 10,
+    "mpBase": 18,
+    "mpPerLevel": 3
+  },
+  {
+    "id": "mage",
+    "name": "Mage",
+    "summary": "Scholar of the elements. Fragile, but devastating from afar.",
+    "weapons": ["staff", "wand"],
+    "baseStats": { "strength": 2, "agility": 5, "intelligence": 11, "vitality": 5, "luck": 5 },
+    "hpBase": 45,
+    "hpPerLevel": 8,
+    "mpBase": 40,
+    "mpPerLevel": 7
+  },
+  {
+    "id": "priest",
+    "name": "Priest",
+    "summary": "Keeps the party standing with healing and protective blessings.",
+    "weapons": ["staff", "mace"],
+    "baseStats": { "strength": 4, "agility": 4, "intelligence": 9, "vitality": 7, "luck": 4 },
+    "hpBase": 52,
+    "hpPerLevel": 9,
+    "mpBase": 34,
+    "mpPerLevel": 6
+  },
+  {
+    "id": "rogue",
+    "name": "Rogue",
+    "summary": "Quick, precise and hard to pin down. Lives by the dagger and luck.",
+    "weapons": ["dagger"],
+    "baseStats": { "strength": 6, "agility": 10, "intelligence": 3, "vitality": 5, "luck": 6 },
+    "hpBase": 50,
+    "hpPerLevel": 9,
+    "mpBase": 20,
+    "mpPerLevel": 3
+  }
+]

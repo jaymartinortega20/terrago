@@ -1,0 +1,35 @@
+{
+  "name": "terrago",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TerraGo \u2014 Farm. Trade. Fight. Grow. A browser multiplayer pixel MMORPG.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:server": "npm run dev -w @terrago/game-server",
+    "dev:web": "npm run dev -w @terrago/web",
+    "db:migrate": "npm run migrate -w @terrago/database",
+    "maps:generate": "tsx packages/game-data/scripts/generate-maps.ts",
+    "build": "npm run build -w @terrago/game-server && npm run build -w @terrago/web",
+    "typecheck": "tsc -p packages/shared && tsc -p packages/game-data && tsc -p packages/database && tsc -p apps/game-server && tsc -p apps/web",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "tsx --test \"packages/*/test/**/*.test.ts\" \"apps/game-server/test/unit/**/*.test.ts\"",
+    "test:integration": "tsx --test --test-concurrency=1 \"apps/game-server/test/integration/**/*.test.ts\"",
+    "test:e2e": "node scripts/e2e-two-players.mjs",
+    "loadtest": "tsx scripts/load-test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "playwright": "1.56.1",
+    "socket.io-client": "^4.8.4",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

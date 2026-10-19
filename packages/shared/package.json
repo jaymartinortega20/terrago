@@ -1,0 +1,13 @@
+{
+  "name": "@terrago/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Types, network protocol and deterministic game rules shared by the TerraGo client and server.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  }
+}

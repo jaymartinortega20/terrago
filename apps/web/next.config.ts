@@ -1,0 +1,41 @@
+import type { NextConfig } from 'next';
+
+const gameServer = process.env.NEXT_PUBLIC_GAME_SERVER_URL ?? 'http://localhost:4000';
+const wsServer = gameServer.replace(/^http/, 'ws');
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+  // Workspace packages ship TypeScript source.
+  transpilePackages: ['@terrago/shared', '@terrago/game-data'],
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              `connect-src 'self' ${gameServer} ${wsServer}`,
+              "img-src 'self' data: blob:",
+              "style-src 'self' 'unsafe-inline'",
+              // Next.js injects inline bootstrap scripts; Phaser needs eval-free WebGL only.
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
+              "font-src 'self' data:",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
+        ],
+      },
+    ];
+  },
+};
+
+export default nextConfig;
