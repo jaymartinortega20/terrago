@@ -7,7 +7,7 @@ services:
     runtime: node
     region: singapore
     plan: free
-    buildCommand: npm ci -w @terrago/game-server --include-workspace-root && npm run build -w @terrago/game-server
+    buildCommand: npm ci --include=dev -w @terrago/game-server --include-workspace-root && npm run build -w @terrago/game-server
     startCommand: node --enable-source-maps apps/game-server/dist/index.js
     healthCheckPath: /healthz
     envVars:
