@@ -7,6 +7,7 @@ import {
   PROP_TYPES,
   TILE_SIZE,
   type NodeObject,
+  type DropObject,
   maxHp,
   maxMp,
   xpToNext,
@@ -29,6 +30,8 @@ import type { ProgressDelta } from '../services/progress';
 import { buyFromShop, repairAll, repairCost, sellToShop, shopView } from '../services/shops';
 import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gathering';
 import { cast } from './fishing';
+import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
+import type { CombatHooks } from '../world/combat';
 import type { Player } from '../world/player';
 import { World } from '../world/world';
 
@@ -84,9 +87,12 @@ export async function loadMapObjects(pool: Pool, def: MapDef, owner: { id: strin
 
 export function pushInventory(world: World, p: Player, inv: Inventory | null): void {
   if (!inv) return;
-  world.inventoryCache.set(p.id, inv);
+  const prev = world.inventoryCache.get(p.id);
+  const full = { ...inv, equipment: inv.equipment ?? prev?.equipment ?? [] };
+  world.inventoryCache.set(p.id, full);
   p.rec.gold = inv.gold;
-  p.conn?.send('inventory:update', inv);
+  if (inv.equipment) world.setEquipment(p, inv.equipment);
+  p.conn?.send('inventory:update', full);
 }
 
 export function applyDelta(world: World, p: Player, delta: ProgressDelta): void {
@@ -116,7 +122,15 @@ export function applyDelta(world: World, p: Player, delta: ProgressDelta): void 
       maxHp: maxHp(p.rec.level, p.rec.stats, cls),
       maxMp: maxMp(p.rec.level, p.rec.stats, cls),
     });
-    if (leveled) p.conn?.send('notice', { kind: 'success', text: `Level up! You are now level ${p.rec.level}.` });
+    if (leveled) {
+      p.conn?.send('notice', { kind: 'success', text: `Level up! You are now level ${p.rec.level}.` });
+      world.refreshProfile(p);
+      p.rec.hp = p.profile.maxHp;
+      p.rec.mp = p.profile.maxMp;
+      patch.hp = p.rec.hp;
+      patch.mp = p.rec.mp;
+      Object.assign(patch, { maxHp: p.profile.maxHp, maxMp: p.profile.maxMp, stats: p.profile.stats, derived: p.profile.derived });
+    }
   }
   if (Object.keys(patch).length) p.conn?.send('self:update', patch);
 }
@@ -183,6 +197,14 @@ export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<
 
   const rt = world.runtimeOf(p);
   const here = world.objectsAt(p, tx, ty);
+  const drop = here.find((o): o is DropObject => o.kind === 'drop');
+  if (drop) {
+    if (drop.ownerId !== p.id) throw new GameError("That isn't yours.");
+    const inv = await pickUp(pool, p.id, drop.itemId, drop.quantity, drop.quality);
+    world.removeObject(rt, drop.id);
+    pushInventory(world, p, inv);
+    return { message: `Picked up ${drop.quantity}× ${getItem(drop.itemId)?.name}.` };
+  }
   const node = here.find((o): o is NodeObject => o.kind === 'node');
   if (node) return gatherNode(deps, p, node, req.slot);
   const plot = here.find((o): o is PlotObject => o.kind === 'plot');
@@ -348,7 +370,7 @@ export const npcServices = {
     const inv = deps.world.inventoryCache.get(p.id);
     let cost = 0;
     let items = 0;
-    for (const s of inv?.slots ?? []) {
+    for (const s of [...(inv?.slots ?? []), ...(inv?.equipment ?? [])]) {
       const c = repairCost(s.itemId, s.durability);
       if (c > 0) {
         cost += c;
@@ -378,3 +400,76 @@ export const npcServices = {
     return { message: res.message };
   },
 };
+
+// ---------------------------------------------------------------------------
+// Combat glue: equipment, enhancement, and the async side of combat events
+// ---------------------------------------------------------------------------
+
+export const gear = {
+  async equip(deps: GameplayDeps, p: Player, req: unknown) {
+    const inv = await equip(deps.pool, p.id, (req as { from?: unknown })?.from, p.rec.level, p.rec.classId);
+    pushInventory(deps.world, p, inv);
+    return null;
+  },
+  async unequip(deps: GameplayDeps, p: Player, req: unknown) {
+    const inv = await unequip(deps.pool, p.id, (req as { slot?: unknown })?.slot);
+    pushInventory(deps.world, p, inv);
+    return null;
+  },
+  async enhance(deps: GameplayDeps, p: Player, req: unknown) {
+    if (!nearStation(deps.world, p, 'enhance_altar')) throw new GameError('Stand at the Enhancement Altar in Greenhaven.');
+    const res = await enhance(deps.pool, p.id, (req as { equipSlot?: unknown })?.equipSlot);
+    pushInventory(deps.world, p, res.inventory);
+    return { success: res.success, message: res.message };
+  },
+};
+
+export function combatHooks(deps: () => GameplayDeps): CombatHooks {
+  return {
+    onKill: (rewards) => {
+      for (const r of rewards) {
+        const d = deps();
+        const rt = d.world.runtimeOf(r.player);
+        void r.player
+          .serial(async () => {
+            const res = await grantKillRewards(d.pool, r.player.id, { xp: r.xp, gold: r.gold, items: r.items, monster: r.monster.def.id });
+            pushInventory(d.world, r.player, res.inventory);
+            applyDelta(d.world, r.player, res.delta);
+            const parts = [`+${r.xp} XP`, r.gold ? `+${r.gold} Gold` : '', ...r.items.map((i) => `${i.quantity}× ${getItem(i.itemId)?.name}`)].filter(Boolean);
+            r.player.conn?.send('notice', { kind: 'success', text: `${r.monster.def.name} defeated: ${parts.join(', ')}` });
+            for (const o of res.overflow) d.world.addDrop(rt, r.monster.x, r.monster.y, o.itemId, o.quantity, r.player.id);
+            if (res.overflow.length) r.player.conn?.send('notice', { kind: 'info', text: 'Your bag is full — loot was left on the ground.' });
+          })
+          .catch((err) => d.log.error('kill_rewards_failed', { err }));
+      }
+    },
+    onDeath: (p) => {
+      const d = deps();
+      void p
+        .serial(async () => {
+          const eq = await deathPenalty(d.pool, p.id);
+          if (eq) {
+            const inv = d.world.inventoryCache.get(p.id);
+            if (inv) pushInventory(d.world, p, { ...inv, equipment: toSlots(eq) });
+          }
+        })
+        .catch((err) => d.log.error('death_penalty_failed', { err }));
+    },
+    onWear: (p, slots) => {
+      const d = deps();
+      void p
+        .serial(async () => {
+          const eq = await wearEquipment(d.pool, p.id, slots);
+          if (eq) {
+            const inv = d.world.inventoryCache.get(p.id);
+            if (inv) pushInventory(d.world, p, { ...inv, equipment: toSlots(eq) });
+          }
+        })
+        .catch((err) => d.log.error('wear_failed', { err }));
+    },
+  };
+}
+
+function toSlots(eq: (import('@terrago/shared').SlotItem | null)[]) {
+  return eq.flatMap((s, slot) => (s ? [{ slot, ...s }] : []));
+}

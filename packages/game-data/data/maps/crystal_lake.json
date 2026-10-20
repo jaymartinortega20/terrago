@@ -33,6 +33,36 @@
   "x": 31,
   "y": 26
  },
+ "spawns": [
+  {
+   "monster": "blue_slime",
+   "level": [
+    4,
+    6
+   ],
+   "count": 5,
+   "area": {
+    "x": 6,
+    "y": 28,
+    "w": 14,
+    "h": 12
+   }
+  },
+  {
+   "monster": "goblin_scout",
+   "level": [
+    7,
+    9
+   ],
+   "count": 5,
+   "area": {
+    "x": 20,
+    "y": 3,
+    "w": 34,
+    "h": 5
+   }
+  }
+ ],
  "width": 60,
  "height": 44,
  "tileSize": 32,

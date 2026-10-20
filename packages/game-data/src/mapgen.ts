@@ -326,7 +326,18 @@ export function generateMineFloor(n: number): MapDef {
   ];
   if (n < MINE_FLOORS) portals.push({ id: 'down', x: downX + 1, y: downY, w: 1, h: 1, to: mineFloorId(n + 1), toX: upX + 1, toY: ladderRowsFor(n + 1).up, toDir: 'right', label: `Floor ${n + 1}` });
 
+  const spawns: MapDef['spawns'] = [];
+  const area = { x: 6, y: 2, w: W - 10, h: H - 4 };
+  const lv = (a: number, b: number): [number, number] => [Math.max(1, n + a), n + b];
+  spawns.push({ monster: 'cave_bat', level: lv(1, 3), count: 3 + Math.floor(n / 8), area });
+  if (n >= 6) spawns.push({ monster: 'skeleton', level: lv(2, 4), count: 2 + Math.floor(n / 10), area });
+  if (n >= 11) spawns.push({ monster: 'giant_spider', level: lv(2, 4), count: 2, area });
+  if (n >= 21) spawns.push({ monster: 'orc', level: lv(3, 5), count: 3, area });
+  if (n >= 28) spawns.push({ monster: 'stone_golem', level: lv(3, 6), count: 2, area });
+  if (n >= 33) spawns.push({ monster: 'dark_mage', level: lv(4, 6), count: 2, area });
+
   const map = m.toMap({
+    spawns,
     id: mineFloorId(n),
     name: `Irondeep Mine — Floor ${n}`,
     safeZone: false,

@@ -1,7 +1,7 @@
 {
  "id": "sunfield_plains",
  "name": "Sunfield Plains",
- "safeZone": true,
+ "safeZone": false,
  "music": "field_sunfield",
  "spawn": {
   "x": 30,
@@ -46,6 +46,64 @@
   "x": 31,
   "y": 26
  },
+ "spawns": [
+  {
+   "monster": "green_slime",
+   "level": [
+    1,
+    2
+   ],
+   "count": 6,
+   "area": {
+    "x": 34,
+    "y": 4,
+    "w": 22,
+    "h": 14
+   }
+  },
+  {
+   "monster": "green_slime",
+   "level": [
+    2,
+    3
+   ],
+   "count": 4,
+   "area": {
+    "x": 6,
+    "y": 4,
+    "w": 20,
+    "h": 13
+   }
+  },
+  {
+   "monster": "field_rat",
+   "level": [
+    2,
+    4
+   ],
+   "count": 5,
+   "area": {
+    "x": 36,
+    "y": 24,
+    "w": 20,
+    "h": 12
+   }
+  },
+  {
+   "monster": "wild_boar",
+   "level": [
+    4,
+    6
+   ],
+   "count": 3,
+   "area": {
+    "x": 8,
+    "y": 32,
+    "w": 18,
+    "h": 5
+   }
+  }
+ ],
  "width": 60,
  "height": 40,
  "tileSize": 32,

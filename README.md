@@ -4,7 +4,7 @@
 
 TerraGo is an original browser multiplayer pixel MMORPG: a shared online world where players start with almost nothing and grow into farmers, smiths, merchants, monster hunters and guild leaders — no download required.
 
-This repository is **Version 0.1**: the multiplayer foundation everything else builds on.
+Current version: **0.5** — multiplayer world, farming, gathering, fishing, crafting and combat. Trading, social systems, dungeons and world events come next.
 
 ![Two players meeting at the Greenhaven fountain](docs/screenshots/chat.png)
 
@@ -26,7 +26,15 @@ This repository is **Version 0.1**: the multiplayer foundation everything else b
 | 17 | NPCs with original dialogue; Mayor Lina's one-time welcome gift | `game-data/data/npcs.json`, `services/npcs.ts` |
 | 18–19 | Logout and persistent state (position, map, inventory, Gold, Energy) | `world.ts`, migrations |
 
-Not in v0.1 (by design): farming (v0.2), gathering (v0.3), trading/marketplace (v0.4), combat (v0.5), social systems (v0.6). Menu entries for them are visible but disabled with their target version.
+Added since v0.1:
+
+| Version | What | Where |
+| --- | --- | --- |
+| 0.2 | Personal homesteads, 14 crops (timestamp growth, quality), shops, farm tiers, Farming skill | `services/farming.ts`, `packages/shared/src/farming.ts` |
+| 0.3 | Mining (40 procedural Irondeep floors), woodcutting, gathering, fishing minigame (server-replayed), 46+ recipes, Whisperwood Forest, Crystal Lake | `services/gathering.ts`, `net/fishing.ts`, `game-data/src/mapgen.ts` |
+| 0.5 | Real-time PvE: monsters with AI, attacks, 15 class skills, buffs/debuffs/DoTs, equipment (9 slots), durability, death & respawn, enhancement +1..+10, loot | `world/combat.ts`, `services/equipment.ts`, `packages/shared/src/combat.ts` |
+
+Not yet: trading/marketplace (v0.4), social systems (v0.6), dungeons and bosses (v0.7), weather/seasons (v0.8), live-game systems (v0.9). Their menu entries are visible but disabled.
 
 ## Quick start
 

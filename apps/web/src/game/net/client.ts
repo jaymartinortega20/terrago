@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { getCrop, getItem, getMap, getNode } from '@terrago/game-data';
+import { getCrop, getItem, getMap, getNode, skillsForClass } from '@terrago/game-data';
 import {
   CHAT,
   CODE_DIR,
@@ -18,6 +18,8 @@ import {
   STATION_PROPS,
   type ActRequest,
   type FishingRound,
+  type CombatEvent,
+  type PublicMonster,
   type ChatMessage,
   type FarmUpgradeView,
   type ClientToServerEvents,
@@ -51,6 +53,18 @@ export interface RemotePlayer {
   y: number;
   dir: Direction;
   moving: boolean;
+  hp: number;
+}
+
+export interface RemoteMonster {
+  info: PublicMonster;
+  samples: Sample[];
+  x: number;
+  y: number;
+  dir: Direction;
+  moving: boolean;
+  /** HP percent (0-100). */
+  hp: number;
 }
 
 export interface ActionTarget {
@@ -77,6 +91,9 @@ type ClientEvents = {
   enter: [EnterWorldPayload];
   add: [RemotePlayer];
   remove: [string];
+  monsterAdd: [RemoteMonster];
+  monsterRemove: [string];
+  combat: [CombatEvent[]];
   chat: [ChatMessage];
   /** Objects added/changed (ids) or removed. */
   objects: [WorldObject[], string[]];
@@ -115,6 +132,9 @@ export class GameClient {
   private pending: MoveCommand[] = [];
   private serverOffset: number | null = null;
   readonly remotes = new Map<string, RemotePlayer>();
+  readonly monsters = new Map<string, RemoteMonster>();
+  private nextAttackAt = 0;
+  private attackInFlight = false;
   readonly objects = new Map<string, WorldObject>();
   /** Tile index for quick "what's here?" lookups. */
   private objectsByTile = new Map<string, WorldObject>();
@@ -181,7 +201,13 @@ export class GameClient {
     socket.on('snap', (s) => this.onSnapshot(s));
     socket.on('entity:add', (list) => {
       for (const info of list) {
-        const r: RemotePlayer = { info, samples: [], x: info.x, y: info.y, dir: info.dir, moving: false };
+        if (info.kind === 'monster') {
+          const m: RemoteMonster = { info, samples: [], x: info.x, y: info.y, dir: info.dir, moving: false, hp: Math.round((info.hp / info.maxHp) * 100) };
+          this.monsters.set(info.id, m);
+          this.emit('monsterAdd', m);
+          continue;
+        }
+        const r: RemotePlayer = { info, samples: [], x: info.x, y: info.y, dir: info.dir, moving: false, hp: 100 };
         this.remotes.set(info.id, r);
         this.emit('add', r);
       }
@@ -189,17 +215,27 @@ export class GameClient {
     });
     socket.on('entity:remove', (ids) => {
       for (const id of ids) {
+        if (this.monsters.delete(id)) {
+          this.emit('monsterRemove', id);
+          if (this.ui.get().targetId === id) this.ui.set({ targetId: null, autoAttack: false });
+          continue;
+        }
         this.remotes.delete(id);
         this.emit('remove', id);
       }
       this.ui.set({ nearby: this.remotes.size });
     });
+    socket.on('combat', (events) => {
+      for (const e of events) if (e.k === 'death' && e.t === this.ui.get().targetId) this.ui.set({ targetId: null, autoAttack: false });
+      this.emit('combat', events);
+    });
+    socket.on('effects', ({ effects, cooldowns }) => this.ui.set({ effects, cooldowns }));
     socket.on('chat', (m) => {
       this.ui.set((s) => ({ chat: [...s.chat.slice(-79), m] }));
       this.emit('chat', m);
     });
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
-    socket.on('inventory:update', (inventory) => this.ui.set({ inventory }));
+    socket.on('inventory:update', (inventory) => this.ui.set((s) => ({ inventory: { ...inventory, equipment: inventory.equipment ?? s.inventory?.equipment ?? [] } })));
     socket.on('notice', (n) => pushNotice(this.ui, n.kind, n.text));
     socket.on('fish:bite', ({ id }) => {
       const f = this.ui.get().fishing;
@@ -256,6 +292,7 @@ export class GameClient {
     this.seq = Math.max(this.seq, p.ack);
     this.serverOffset = p.serverTime - Date.now();
     this.remotes.clear();
+    this.monsters.clear();
     this.objects.clear();
     this.objectsByTile.clear();
     for (const o of p.objects) this.putObject(o);
@@ -297,9 +334,10 @@ export class GameClient {
     }
     if (this.pending.length === 0) this.dir = CODE_DIR[s.dir] ?? this.dir;
 
-    for (const [id, x, y, d, moving] of s.e) {
-      const r = this.remotes.get(id);
+    for (const [id, x, y, d, moving, hp] of s.e) {
+      const r = this.remotes.get(id) ?? this.monsters.get(id);
       if (!r) continue;
+      r.hp = hp ?? r.hp;
       r.samples.push({ t: s.t, x, y, dir: CODE_DIR[d] ?? 'down', moving: moving === 1 });
       if (r.samples.length > 30) r.samples.splice(0, r.samples.length - 30);
     }
@@ -310,6 +348,8 @@ export class GameClient {
     this.prevPos = { ...this.pos };
     const s = this.socket;
     if (!this.grid || !s?.connected || this.ui.get().status !== 'online') return;
+    this.combatStep();
+    if ((this.ui.get().self?.hp ?? 1) <= 0) return; // defeated: wait for respawn
     if (input.dx === 0 && input.dy === 0) {
       if (performance.now() - this.lastMoveAt > 120) this.moving = false;
       return;
@@ -329,7 +369,7 @@ export class GameClient {
   /** Move remote players to where they were `interpolationDelayMs` ago. */
   interpolateRemotes(): void {
     const renderT = Date.now() + (this.serverOffset ?? 0) - SIM.interpolationDelayMs;
-    for (const r of this.remotes.values()) {
+    for (const r of [...this.remotes.values(), ...this.monsters.values()]) {
       const s = r.samples;
       if (s.length === 0) continue;
       let i = s.length - 1;
@@ -398,7 +438,7 @@ export class GameClient {
       const d = PROP_TYPES[p.type];
       if (tx >= p.x && tx < p.x + d.w && ty >= p.y && ty < p.y + d.h) {
         const name = STATION_NAMES[p.type] ?? p.type;
-        return { x: p.x, y: p.y, w: d.w, h: d.h, hint: `Use ${name}`, run: () => this.ui.set({ panel: 'craft', station: p.type }) };
+        return { x: p.x, y: p.y, w: d.w, h: d.h, hint: `Use ${name}`, run: () => this.ui.set(p.type === 'enhance_altar' ? { panel: 'enhance' } : { panel: 'craft', station: p.type }) };
       }
     }
     const tile = map.tiles[ty]?.[tx];
@@ -418,6 +458,7 @@ export class GameClient {
 
   /** Describe what pressing the action key on an object will do. */
   describeAction(o: WorldObject): string | null {
+    if (o.kind === 'drop') return o.ownerId === this.ui.get().self?.characterId ? `Pick up ${getItem(o.itemId)?.name ?? 'loot'}` : null;
     if (o.kind === 'node') {
       const def = getNode(o.type);
       if (!def) return null;
@@ -474,6 +515,84 @@ export class GameClient {
     this.socket.emit('npc:interact', npc.id, (res) => {
       if (res.ok) this.ui.set({ dialogue: res.data });
       else pushNotice(this.ui, 'error', res.error);
+    });
+  }
+
+  // --- Combat ------------------------------------------------------------------
+
+  /** Pixel distance from the player to a monster (as the server measures it). */
+  private reach(m: RemoteMonster): number {
+    return Math.hypot(this.pos.x - m.x, this.pos.y - 5 - (m.y - 6));
+  }
+
+  /** Nearest living monster within `tiles`. */
+  nearestMonster(tiles = 9): RemoteMonster | null {
+    let best: RemoteMonster | null = null;
+    let bestD = tiles * TILE_SIZE;
+    for (const m of this.monsters.values()) {
+      const d = this.reach(m);
+      if (m.hp > 0 && d < bestD) {
+        best = m;
+        bestD = d;
+      }
+    }
+    return best;
+  }
+
+  setTarget(id: string | null, engage = false): void {
+    this.ui.set({ targetId: id, autoAttack: engage && !!id });
+  }
+
+  /** Attack key: engage the current target, or the nearest monster. */
+  attackKey(): void {
+    const ui = this.ui.get();
+    let id = ui.targetId && this.monsters.has(ui.targetId) ? ui.targetId : null;
+    if (!id) id = this.nearestMonster()?.info.id ?? null;
+    if (!id) return pushNotice(this.ui, 'info', 'No monster nearby.', 1500);
+    this.setTarget(id, true);
+    this.nextAttackAt = 0;
+  }
+
+  /** Auto-attack while engaged and in range (the server checks everything again). */
+  private combatStep(): void {
+    const ui = this.ui.get();
+    if (!ui.autoAttack || !ui.targetId || this.attackInFlight) return;
+    const m = this.monsters.get(ui.targetId);
+    if (!m) return this.setTarget(null);
+    const range = this.weaponRange();
+    if (this.reach(m) > (range + 0.4) * TILE_SIZE || performance.now() < this.nextAttackAt) return;
+    this.attackInFlight = true;
+    this.socket?.emit('attack', m.info.id, (res) => {
+      this.attackInFlight = false;
+      if (res.ok) this.nextAttackAt = performance.now() + res.data.cooldownMs;
+      else if (res.error === 'cooldown') this.nextAttackAt = performance.now() + 150;
+      else {
+        this.nextAttackAt = performance.now() + 500;
+        if (!/far/i.test(res.error)) pushNotice(this.ui, 'error', res.error, 1500);
+        if (/No target|No fighting/.test(res.error)) this.setTarget(null);
+      }
+    });
+  }
+
+  weaponRange(): number {
+    const eq = this.ui.get().inventory?.equipment?.find((e) => e.slot === 0);
+    return (eq && getItem(eq.itemId)?.equip?.range) || 1.4;
+  }
+
+  /** Use class skill number `n` (0-based) on the current target. */
+  useSkill(n: number): void {
+    const self = this.ui.get().self;
+    if (!self) return;
+    const sk = skillsForClass(self.classId)[n];
+    if (!sk) return;
+    if (self.level < sk.level) return pushNotice(this.ui, 'info', `${sk.name} unlocks at level ${sk.level}.`, 2000);
+    let target = this.ui.get().targetId;
+    if ((sk.kind === 'attack' || sk.kind === 'debuff' || (sk.kind === 'aoe' && sk.range > 0)) && !(target && this.monsters.has(target))) {
+      target = this.nearestMonster()?.info.id ?? null;
+      if (target) this.setTarget(target, true);
+    }
+    this.socket?.emit('skill', { skillId: sk.id, targetId: target }, (res) => {
+      if (!res.ok && res.error !== 'cooldown') pushNotice(this.ui, 'error', res.error, 1800);
     });
   }
 
@@ -629,6 +748,23 @@ export class GameClient {
       if (res.ok) this.ui.set({ inventory: res.data });
       else pushNotice(this.ui, 'error', res.error);
     });
+  }
+
+  equip(from: number) {
+    return this.run('equip', { from });
+  }
+
+  unequip(slot: number) {
+    return this.run('unequip', { slot });
+  }
+
+  async enhance(equipSlot: number): Promise<void> {
+    try {
+      const r = await this.request<{ success: boolean; message: string }>('enhance', { equipSlot });
+      pushNotice(this.ui, r.success ? 'success' : 'error', r.message, 4000);
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
   }
 
   selectSlot(slot: number): void {

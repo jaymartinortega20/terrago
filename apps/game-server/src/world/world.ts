@@ -23,6 +23,8 @@ import {
   type MapDef,
   type NodeObject,
   type PortalDef,
+  type InventorySlot,
+  type PublicMonster,
   type PublicPlayer,
   type SnapshotEntity,
   type WorldObject,
@@ -30,7 +32,8 @@ import {
 import { randomUUID } from 'node:crypto';
 import type { Logger } from '../logger';
 import type { SecurityEvents } from '../security/events';
-import { buildSelfState, type CharacterRecord, type PositionSave } from './characterState';
+import { buildSelfState, profileFor, type CharacterRecord, type PositionSave } from './characterState';
+import { Combat, type CombatHooks, type Monster } from './combat';
 import type { Connection } from './connection';
 import { collisionGridFor } from './grids';
 import { Player } from './player';
@@ -49,6 +52,7 @@ export interface MapRuntime {
   objects: Map<string, WorldObject>;
   /** Successful gathers left per node before it depletes. */
   nodeYields: Map<string, number>;
+  monsters: Map<string, Monster>;
   /** Objects are loaded asynchronously for instanced maps. */
   loaded: boolean;
   loading: Promise<void> | null;
@@ -64,6 +68,9 @@ export interface WorldDeps {
   onLeave?: (player: Player) => void;
   /** Called after a player arrives in a new map. */
   onMapEnter?: (player: Player) => void;
+  /** Async side effects of combat (rewards, death penalty, durability). */
+  combat?: CombatHooks;
+  rand?: () => number;
   /** Load runtime objects for a map instance (e.g. a homestead's farm plots). */
   loadObjects?: (def: MapDef, owner: { id: string; name: string } | null) => Promise<WorldObject[]>;
   now?: () => number;
@@ -90,8 +97,34 @@ export class World {
   private tickCount = 0;
   private readonly now: () => number;
 
+  readonly combat: Combat;
+
   constructor(private readonly deps: WorldDeps) {
     this.now = deps.now ?? Date.now;
+    this.combat = new Combat(
+      {
+        ...deps.combat,
+        respawn: (p) => {
+          const pt = Combat.respawnPoint(this.runtimeOf(p));
+          void this.moveTo(p, pt.mapId, null, pt.x, pt.y, 'down');
+        },
+      },
+      this.now,
+      deps.rand,
+    );
+  }
+
+  /** Worn equipment changed: recompute stats and tell the client. */
+  setEquipment(p: Player, equipment: InventorySlot[]): void {
+    p.rec.equipment = equipment;
+    this.refreshProfile(p);
+  }
+
+  refreshProfile(p: Player): void {
+    p.profile = profileFor(p.rec);
+    p.rec.hp = Math.min(p.rec.hp, p.profile.maxHp);
+    p.rec.mp = Math.min(p.rec.mp, p.profile.maxMp);
+    p.conn?.send('self:update', { stats: p.profile.stats, derived: p.profile.derived, maxHp: p.profile.maxHp, maxMp: p.profile.maxMp, hp: p.rec.hp, mp: p.rec.mp });
   }
 
   // ---------------------------------------------------------------------------
@@ -121,12 +154,14 @@ export class World {
         recentChat: [],
         objects: new Map(),
         nodeYields: new Map(),
+        monsters: new Map(),
         loaded: !this.deps.loadObjects,
         loading: null,
         emptySince: null,
       };
       this.maps.set(key, rt);
       this.spawnNodes(rt);
+      if (!own) this.combat.spawnMonsters(rt);
       if (this.deps.loadObjects) {
         const target = rt;
         target.loading = this.deps
@@ -198,9 +233,25 @@ export class World {
     return o?.kind === 'node' ? getNode(o.type) : undefined;
   }
 
-  /** Bring depleted nodes back once their respawn time has passed. */
+  private dropSeq = 0;
+
+  /** Loot that didn't fit in a bag: a pile only its owner can pick up for 2 minutes. */
+  addDrop(rt: MapRuntime, x: number, y: number, itemId: string, quantity: number, ownerId: string): void {
+    const tx = Math.floor(x / TILE_SIZE);
+    const ty = Math.floor((y - 4) / TILE_SIZE);
+    const drop = { kind: 'drop' as const, id: `drop:${++this.dropSeq}`, x: tx, y: ty, itemId, quantity, quality: 0, ownerId, until: this.now() + 120_000 };
+    this.setObjects(rt.key, [drop]);
+  }
+
+  removeObject(rt: MapRuntime, id: string): void {
+    if (!rt.objects.delete(id)) return;
+    for (const p of rt.players) p.conn?.send('objects:remove', [id]);
+  }
+
+  /** Bring depleted nodes back once their respawn time has passed (and clear expired loot). */
   private respawnNodes(now: number): void {
     for (const rt of this.maps.values()) {
+      for (const o of [...rt.objects.values()]) if (o.kind === 'drop' && o.until <= now) this.removeObject(rt, o.id);
       const back: NodeObject[] = [];
       for (const o of rt.objects.values()) {
         if (o.kind === 'node' && o.depletedUntil > 0 && o.depletedUntil <= now) {
@@ -287,6 +338,8 @@ export class World {
       // Keep the in-memory state (it is fresher than the database).
     } else {
       p = new Player(rec);
+      p.profile = profileFor(rec);
+      if (p.rec.hp <= 0) p.rec.hp = Math.round(p.profile.maxHp * 0.5);
       p.instanceOwner = this.ownerFor(rec, rec.mapId);
       this.players.set(p.id, p);
       this.addToMap(p);
@@ -315,7 +368,7 @@ export class World {
     const recentChat = rt.recentChat
       .filter((c) => now - c.msg.ts < 5 * 60_000 && Math.hypot(c.x - p.x, c.y - p.y) <= CHAT.localRadius)
       .map((c) => c.msg);
-    const self = buildSelfState(p.rec, now);
+    const self = buildSelfState(p.rec, now, p.profile);
     p.lastEnergySent = self.energy;
     p.conn?.send('world:enter', {
       protocol: PROTOCOL_VERSION,
@@ -405,6 +458,7 @@ export class World {
     const now = this.now();
     for (const rt of [...this.maps.values()]) {
       for (const p of [...rt.players]) this.simulate(p, rt, dtMs, now);
+      if (rt.monsters.size || rt.players.size) this.combat.tick(rt, dtMs);
     }
     if (this.tickCount % SIM.snapshotEveryTicks === 0) {
       for (const rt of this.maps.values()) this.broadcast(rt, now);
@@ -425,7 +479,8 @@ export class World {
     // Real time grants movement budget; each command spends one step.
     // A client sending commands faster than real time just fills its queue.
     p.budgetMs = Math.min(p.budgetMs + dtMs, MOVEMENT_GUARD.maxBudgetMs);
-    if (p.changingMap) {
+    if (p.changingMap || p.dead) {
+      if (p.inputs.length) p.lastSeq = p.inputs[p.inputs.length - 1]![0];
       p.inputs = [];
       return;
     }
@@ -501,18 +556,25 @@ export class World {
       near.length = 0;
       rt.spatial.query(p.x - AOI.leaveHalfWidth, p.y - AOI.leaveHalfHeight, p.x + AOI.leaveHalfWidth, p.y + AOI.leaveHalfHeight, near);
       const nextKnown = new Set<string>();
-      const added: PublicPlayer[] = [];
+      const added: (PublicPlayer | PublicMonster)[] = [];
       const rows: SnapshotEntity[] = [];
-      for (const q of near) {
-        if (q === p) continue;
+      const consider = (q: Player | Monster, hpPct: number) => {
         const dx = Math.abs(q.x - p.x);
         const dy = Math.abs(q.y - p.y);
         const knew = p.known.has(q.id);
         const inside = knew ? dx <= AOI.leaveHalfWidth && dy <= AOI.leaveHalfHeight : dx <= AOI.enterHalfWidth && dy <= AOI.enterHalfHeight;
-        if (!inside) continue;
+        if (!inside) return;
         nextKnown.add(q.id);
         if (!knew) added.push(q.toPublic());
-        rows.push([q.id, q.x, q.y, DIR_CODE[q.dir], q.isMoving(now) ? 1 : 0]);
+        rows.push([q.id, q.x, q.y, DIR_CODE[q.dir], q.isMoving(now) ? 1 : 0, hpPct]);
+      };
+      for (const q of near) {
+        if (q === p || q.dead) continue;
+        consider(q, Math.round((q.rec.hp / Math.max(1, q.profile.maxHp)) * 100));
+      }
+      for (const m of rt.monsters.values()) {
+        if (!m.alive) continue;
+        consider(m, Math.round((m.hp / m.stats.maxHp) * 100));
       }
       const removed: string[] = [];
       for (const id of p.known) if (!nextKnown.has(id)) removed.push(id);
@@ -629,7 +691,7 @@ export class World {
   // ---------------------------------------------------------------------------
 
   async saveNow(players: Player[]): Promise<void> {
-    const saves = players.map((p) => ({ id: p.id, mapId: p.mapId, x: p.x, y: p.y, dir: p.dir }));
+    const saves = players.map((p) => ({ id: p.id, mapId: p.mapId, x: p.x, y: p.y, dir: p.dir, hp: p.rec.hp, mp: p.rec.mp }));
     players.forEach((p) => (p.dirty = false));
     try {
       await this.deps.savePositions(saves);

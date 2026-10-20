@@ -5,6 +5,7 @@ import type {
   FarmUpgradeView,
   InventoryState,
   NpcPublic,
+  PublicMonster,
   PublicPlayer,
   SelfState,
   ShopView,
@@ -28,8 +29,21 @@ export type MoveCommand = [seq: number, dx: -1 | 0 | 1, dy: -1 | 0 | 1];
 export const DIR_CODE: Record<Direction, number> = { down: 0, left: 1, right: 2, up: 3 };
 export const CODE_DIR: Direction[] = ['down', 'left', 'right', 'up'];
 
-/** Compact entity row in a snapshot: [id, x, y, dirCode, moving(0|1)]. */
-export type SnapshotEntity = [id: string, x: number, y: number, dir: number, moving: 0 | 1];
+/** Compact entity row in a snapshot: [id, x, y, dirCode, moving(0|1), hp% (0-100)]. */
+export type SnapshotEntity = [id: string, x: number, y: number, dir: number, moving: 0 | 1, hp: number];
+
+/** One combat event, for floating numbers and effects. */
+export interface CombatEvent {
+  /** Source entity id. */
+  s: string;
+  /** Target entity id. */
+  t: string;
+  /** Amount (damage, or healing for kind 'heal'). */
+  a: number;
+  k: 'hit' | 'crit' | 'miss' | 'heal' | 'dot' | 'death';
+  /** Skill id, if any. */
+  sk?: string;
+}
 
 export interface Snapshot {
   /** Server time (ms since epoch) when the snapshot was taken. */
@@ -105,7 +119,10 @@ export interface ServerToClientEvents {
   /** Sent when the character enters the world or changes map. */
   'world:enter': (payload: EnterWorldPayload) => void;
   /** Players that came into view. */
-  'entity:add': (players: PublicPlayer[]) => void;
+  'entity:add': (entities: (PublicPlayer | PublicMonster)[]) => void;
+  'combat': (events: CombatEvent[]) => void;
+  /** Your active buffs/debuffs and skill cooldowns (ends: ms since epoch). */
+  'effects': (info: { effects: { id: string; name: string; until: number }[]; cooldowns: Record<string, number> }) => void;
   /** Players that left view (or the map). */
   'entity:remove': (ids: string[]) => void;
   'snap': (snapshot: Snapshot) => void;
@@ -142,6 +159,11 @@ export interface ClientToServerEvents {
   'fish:reel': (req: { id: string; toggles: number[]; steps: number }, ack: Ack<{ caught: boolean; message: string }>) => void;
   'fish:cancel': () => void;
   'craft': (req: { recipeId: string; times: number }, ack: Ack<{ message: string }>) => void;
+  'attack': (targetId: string, ack: Ack<{ cooldownMs: number }>) => void;
+  'skill': (req: { skillId: string; targetId: string | null }, ack: Ack<{ cooldownMs: number }>) => void;
+  'equip': (req: { from: number }, ack: Ack<null>) => void;
+  'unequip': (req: { slot: number }, ack: Ack<null>) => void;
+  'enhance': (req: { equipSlot: number }, ack: Ack<{ success: boolean; message: string }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;
   'lift:go': (req: { npcId: string; floor: number }, ack: Ack<{ message: string }>) => void;
   'ping:check': (clientTime: number, ack: (serverTime: number) => void) => void;

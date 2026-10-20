@@ -1,0 +1,277 @@
+[
+ {
+  "id": "power_strike",
+  "classId": "warrior",
+  "name": "Power Strike",
+  "description": "A heavy blow for 180% damage.",
+  "level": 1,
+  "mp": 6,
+  "cooldownMs": 5000,
+  "kind": "attack",
+  "mult": 1.8,
+  "magic": false,
+  "range": 1.6,
+  "icon": "weapon:sword:2"
+ },
+ {
+  "id": "war_cry",
+  "classId": "warrior",
+  "name": "War Cry",
+  "description": "Roar: deal 30% more damage for 15s.",
+  "level": 5,
+  "mp": 10,
+  "cooldownMs": 30000,
+  "kind": "buff",
+  "mult": 0,
+  "magic": false,
+  "range": 0,
+  "icon": "essence:e0483a",
+  "effect": {
+   "id": "war_cry",
+   "name": "War Cry",
+   "durationMs": 15000,
+   "mods": {
+    "dmg": 1.3
+   }
+  }
+ },
+ {
+  "id": "whirlwind",
+  "classId": "warrior",
+  "name": "Whirlwind",
+  "description": "Spin, hitting every enemy around you for 120%.",
+  "level": 12,
+  "mp": 16,
+  "cooldownMs": 10000,
+  "kind": "aoe",
+  "mult": 1.2,
+  "magic": false,
+  "range": 0,
+  "icon": "weapon:axe:3",
+  "radius": 1.8,
+  "maxTargets": 6
+ },
+ {
+  "id": "aimed_shot",
+  "classId": "ranger",
+  "name": "Aimed Shot",
+  "description": "A careful shot for 200% damage.",
+  "level": 1,
+  "mp": 6,
+  "cooldownMs": 6000,
+  "kind": "attack",
+  "mult": 2.0,
+  "magic": false,
+  "range": 7,
+  "icon": "weapon:bow:2"
+ },
+ {
+  "id": "hunters_mark",
+  "classId": "ranger",
+  "name": "Hunter's Mark",
+  "description": "Mark a target: it takes 25% more damage for 12s.",
+  "level": 5,
+  "mp": 8,
+  "cooldownMs": 20000,
+  "kind": "debuff",
+  "mult": 0,
+  "magic": false,
+  "range": 7,
+  "icon": "essence:e8a03a",
+  "effect": {
+   "id": "marked",
+   "name": "Marked",
+   "durationMs": 12000,
+   "mods": {
+    "taken": 1.25
+   }
+  }
+ },
+ {
+  "id": "volley",
+  "classId": "ranger",
+  "name": "Volley",
+  "description": "Rain arrows on up to 4 enemies near the target for 90%.",
+  "level": 12,
+  "mp": 14,
+  "cooldownMs": 9000,
+  "kind": "aoe",
+  "mult": 0.9,
+  "magic": false,
+  "range": 6,
+  "icon": "weapon:bow:4",
+  "radius": 2.0,
+  "maxTargets": 4
+ },
+ {
+  "id": "fireball",
+  "classId": "mage",
+  "name": "Fireball",
+  "description": "Hurl fire for 220% magic damage.",
+  "level": 1,
+  "mp": 8,
+  "cooldownMs": 4000,
+  "kind": "attack",
+  "mult": 2.2,
+  "magic": true,
+  "range": 6,
+  "icon": "essence:f5a623"
+ },
+ {
+  "id": "frost_nova",
+  "classId": "mage",
+  "name": "Frost Nova",
+  "description": "Freeze nearby enemies: 100% damage and 50% slower for 6s.",
+  "level": 5,
+  "mp": 14,
+  "cooldownMs": 12000,
+  "kind": "aoe",
+  "mult": 1.0,
+  "magic": true,
+  "range": 0,
+  "icon": "essence:8fe0ff",
+  "radius": 2.2,
+  "maxTargets": 6,
+  "effect": {
+   "id": "chilled",
+   "name": "Chilled",
+   "durationMs": 6000,
+   "mods": {
+    "slow": 0.5
+   }
+  }
+ },
+ {
+  "id": "arcane_shield",
+  "classId": "mage",
+  "name": "Arcane Shield",
+  "description": "A barrier absorbs damage (4\u00d7 Intelligence) for 20s.",
+  "level": 12,
+  "mp": 16,
+  "cooldownMs": 30000,
+  "kind": "buff",
+  "mult": 0,
+  "magic": true,
+  "range": 0,
+  "icon": "essence:4a7fd6",
+  "effect": {
+   "id": "arcane_shield",
+   "name": "Arcane Shield",
+   "durationMs": 20000,
+   "mods": {
+    "shield": 4
+   },
+   "scale": "int"
+  }
+ },
+ {
+  "id": "heal",
+  "classId": "priest",
+  "name": "Heal",
+  "description": "Restore HP to yourself or an ally (40 + 3\u00d7 Intelligence).",
+  "level": 1,
+  "mp": 10,
+  "cooldownMs": 3000,
+  "kind": "heal",
+  "mult": 0,
+  "magic": true,
+  "range": 6,
+  "icon": "potion:7cc35a"
+ },
+ {
+  "id": "smite",
+  "classId": "priest",
+  "name": "Smite",
+  "description": "Holy light for 170% magic damage.",
+  "level": 5,
+  "mp": 8,
+  "cooldownMs": 5000,
+  "kind": "attack",
+  "mult": 1.7,
+  "magic": true,
+  "range": 6,
+  "icon": "essence:ffe48a"
+ },
+ {
+  "id": "blessing",
+  "classId": "priest",
+  "name": "Blessing",
+  "description": "Regenerate HP (1\u00d7 Intelligence per second) for 15s.",
+  "level": 12,
+  "mp": 14,
+  "cooldownMs": 25000,
+  "kind": "buff",
+  "mult": 0,
+  "magic": true,
+  "range": 0,
+  "icon": "essence:fff6c8",
+  "effect": {
+   "id": "blessing",
+   "name": "Blessing",
+   "durationMs": 15000,
+   "mods": {
+    "regen": 1
+   },
+   "scale": "int"
+  }
+ },
+ {
+  "id": "backstab",
+  "classId": "rogue",
+  "name": "Backstab",
+  "description": "A vicious stab for 230% damage.",
+  "level": 1,
+  "mp": 6,
+  "cooldownMs": 5000,
+  "kind": "attack",
+  "mult": 2.3,
+  "magic": false,
+  "range": 1.4,
+  "icon": "weapon:dagger:2"
+ },
+ {
+  "id": "poison_blade",
+  "classId": "rogue",
+  "name": "Poison Blade",
+  "description": "Poison the target: 80% now, then damage every second for 8s.",
+  "level": 5,
+  "mp": 10,
+  "cooldownMs": 12000,
+  "kind": "attack",
+  "mult": 0.8,
+  "magic": false,
+  "range": 1.4,
+  "icon": "essence:7cc35a",
+  "effect": {
+   "id": "poison",
+   "name": "Poisoned",
+   "durationMs": 8000,
+   "mods": {
+    "dot": 1
+   },
+   "scale": "str"
+  }
+ },
+ {
+  "id": "evasion",
+  "classId": "rogue",
+  "name": "Evasion",
+  "description": "Double your evasion for 8s.",
+  "level": 12,
+  "mp": 10,
+  "cooldownMs": 25000,
+  "kind": "buff",
+  "mult": 0,
+  "magic": false,
+  "range": 0,
+  "icon": "essence:9a948a",
+  "effect": {
+   "id": "evasion",
+   "name": "Evasion",
+   "durationMs": 8000,
+   "mods": {
+    "eva": 2.0
+   }
+  }
+ }
+]

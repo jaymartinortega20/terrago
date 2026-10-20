@@ -202,6 +202,42 @@
      "skill": "woodcutting",
      "level": 8
     }
+   },
+   {
+    "itemId": "training_sword",
+    "price": 40
+   },
+   {
+    "itemId": "training_bow",
+    "price": 40
+   },
+   {
+    "itemId": "training_staff",
+    "price": 40
+   },
+   {
+    "itemId": "training_mace",
+    "price": 40
+   },
+   {
+    "itemId": "training_dagger",
+    "price": 40
+   },
+   {
+    "itemId": "padded_head",
+    "price": 30
+   },
+   {
+    "itemId": "padded_chest",
+    "price": 50
+   },
+   {
+    "itemId": "padded_gloves",
+    "price": 25
+   },
+   {
+    "itemId": "padded_boots",
+    "price": 25
    }
   ],
   "buys": [

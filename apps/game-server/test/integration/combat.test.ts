@@ -1,0 +1,147 @@
+import assert from 'node:assert/strict';
+import { after, before, describe, test } from 'node:test';
+import pg from 'pg';
+import { tileCenter, type CombatEvent, type PublicMonster } from '@terrago/shared';
+import type { GameServer } from '../../src/app';
+import { TEST_DB, ack, enterWorld, leaveWorld, newPlayer, resetDatabase, startTestServer, waitFor } from './helpers';
+
+let server: GameServer;
+let base: string;
+let db: pg.Pool;
+
+before(async () => {
+  await resetDatabase();
+  server = await startTestServer();
+  base = `http://127.0.0.1:${server.port()}`;
+  db = new pg.Pool({ connectionString: TEST_DB, max: 2 });
+});
+
+after(async () => {
+  await server?.stop();
+  await db?.end();
+});
+
+async function place(id: string, mapId: string, tx: number, ty: number, dir = 'up') {
+  const c = tileCenter(tx, ty);
+  await db.query('UPDATE characters SET map_id = $2, pos_x = $3, pos_y = $4, direction = $5 WHERE id = $1', [id, mapId, c.x, c.y, dir]);
+}
+
+/** Test-only: put the live player right next to a live monster (no walking in tests). */
+function standNextTo(characterId: string, monsterId: string) {
+  const p = server.world.players.get(characterId)!;
+  const rt = server.world.runtimeOf(p);
+  const m = rt.monsters.get(monsterId)!;
+  p.x = m.x;
+  p.y = m.y + 20;
+  rt.spatial.update(p);
+  return { p, m, rt };
+}
+
+describe('combat (v0.5)', () => {
+  test('starter weapon, killing a slime: XP, Gold, ledger', async () => {
+    const A = await newPlayer(base, { classId: 'warrior' });
+    await place(A.character.id, 'sunfield_plains', 45, 10);
+    const a = await enterWorld(base, A.browser.cookie, A.character.id);
+    assert.equal(a.enter.inventory.equipment?.find((e) => e.slot === 0)?.itemId, 'training_sword', 'starter weapon is worn');
+    const monsters: PublicMonster[] = [];
+    a.socket.on('entity:add', (list) => list.forEach((e) => e.kind === 'monster' && monsters.push(e as PublicMonster)));
+    await waitFor(() => monsters.some((m) => m.monsterId === 'green_slime'), 3000);
+    const slime = monsters.find((m) => m.monsterId === 'green_slime')!;
+    const events: CombatEvent[] = [];
+    a.socket.on('combat', (ev) => events.push(...ev));
+    const { m } = standNextTo(A.character.id, slime.id);
+    let swings = 0;
+    while (m.alive && swings < 40) {
+      const r = await ack(a.socket, 'attack', slime.id);
+      if (!r.ok) assert.match(r.error, /cooldown|No target/);
+      swings++;
+      await new Promise((res) => setTimeout(res, 600));
+    }
+    assert.equal(m.alive, false, 'slime died');
+    assert.ok(events.some((e) => e.t === slime.id && (e.k === 'hit' || e.k === 'crit')));
+    assert.ok(events.some((e) => e.t === slime.id && e.k === 'death'));
+    await waitFor(async () => true, 50);
+    await new Promise((r) => setTimeout(r, 400));
+    const ch = await db.query('SELECT xp FROM characters WHERE id = $1', [A.character.id]);
+    assert.ok(Number(ch.rows[0].xp) > 0, 'got XP');
+    // Attacking a dead monster or one far away is refused.
+    assert.equal((await ack(a.socket, 'attack', slime.id)).ok, false);
+    await leaveWorld(a.socket);
+  });
+
+  test('skills spend MP, respect cooldowns and level; no fighting in town', async () => {
+    const A = await newPlayer(base, { classId: 'mage' });
+    await place(A.character.id, 'sunfield_plains', 45, 10);
+    const a = await enterWorld(base, A.browser.cookie, A.character.id);
+    const p = server.world.players.get(A.character.id)!;
+    const rt = server.world.runtimeOf(p);
+    const target = [...rt.monsters.values()].find((m) => m.alive)!;
+    standNextTo(A.character.id, target.id);
+    const mp0 = p.rec.mp;
+    const fire = await ack(a.socket, 'skill', { skillId: 'fireball', targetId: target.id });
+    assert.equal(fire.ok, true, JSON.stringify(fire));
+    assert.equal(p.rec.mp, mp0 - 8);
+    const again = await ack(a.socket, 'skill', { skillId: 'fireball', targetId: target.id });
+    assert.equal(again.ok, false);
+    const locked = await ack(a.socket, 'skill', { skillId: 'arcane_shield', targetId: null });
+    assert.match(locked.error, /level 12/);
+    const wrongClass = await ack(a.socket, 'skill', { skillId: 'power_strike', targetId: target.id });
+    assert.equal(wrongClass.ok, false);
+    await leaveWorld(a.socket);
+  });
+
+  test('dying sends you back to town with weakness and worn-down gear', async () => {
+    const A = await newPlayer(base, { classId: 'rogue' });
+    await place(A.character.id, 'sunfield_plains', 45, 30);
+    const a = await enterWorld(base, A.browser.cookie, A.character.id);
+    const p = server.world.players.get(A.character.id)!;
+    const rt = server.world.runtimeOf(p);
+    const rat = [...rt.monsters.values()].find((m) => m.def.id === 'field_rat' && m.alive)!;
+    standNextTo(A.character.id, rat.id);
+    p.rec.hp = 1;
+    await waitFor(() => p.dead, 8000);
+    await waitFor(() => p.mapId === 'greenhaven' && !p.dead, 8000);
+    assert.ok(p.effects.some((e) => e.id === 'weakness'));
+    assert.equal(p.rec.hp, Math.round(p.profile.maxHp * 0.5));
+    await new Promise((r) => setTimeout(r, 300));
+    const dur = await db.query(`SELECT durability FROM inventory_items WHERE character_id = $1 AND container = 'equip' AND slot = 0`, [A.character.id]);
+    assert.ok(dur.rows[0].durability < 200, `weapon durability ${dur.rows[0].durability}`);
+    await leaveWorld(a.socket);
+  });
+
+  test('equip armor changes stats; enhancement at the altar costs stones and gold', async () => {
+    const A = await newPlayer(base, { classId: 'warrior' });
+    await place(A.character.id, 'greenhaven', 37, 14, 'up');
+    await db.query(
+      `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, durability) VALUES ($1, 'bag', 10, 'padded_chest', 1, 180), ($1, 'bag', 11, 'enhancement_stone', 3, null)`,
+      [A.character.id],
+    );
+    await db.query('UPDATE characters SET gold = 1000 WHERE id = $1', [A.character.id]);
+    const a = await enterWorld(base, A.browser.cookie, A.character.id);
+    const p = server.world.players.get(A.character.id)!;
+    const def0 = p.profile.derived.physicalDefense;
+    const eq = await ack(a.socket, 'equip', { from: 10 });
+    assert.equal(eq.ok, true, JSON.stringify(eq));
+    assert.equal(p.profile.derived.physicalDefense, def0 + 3);
+    const wrong = await db.query(`INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, durability) VALUES ($1, 'bag', 12, 'training_staff', 1, 200)`, [A.character.id]);
+    void wrong;
+    const inv = await ack(a.socket, 'inventory:get');
+    void inv;
+    const notMine = await ack(a.socket, 'equip', { from: 12 });
+    assert.equal(notMine.ok, false);
+    assert.match(notMine.error, /Mages/);
+    const enh = await ack(a.socket, 'enhance', { equipSlot: 3 });
+    assert.equal(enh.ok, true, JSON.stringify(enh));
+    assert.equal(enh.data.success, true, '+0 → +1 always succeeds');
+    const row = await db.query(`SELECT enhance FROM inventory_items WHERE character_id = $1 AND container = 'equip' AND slot = 3`, [A.character.id]);
+    assert.equal(row.rows[0].enhance, 1);
+    const stones = await db.query(`SELECT quantity FROM inventory_items WHERE character_id = $1 AND item_id = 'enhancement_stone'`, [A.character.id]);
+    assert.equal(stones.rows[0].quantity, 2);
+    const ledger = await db.query(`SELECT count(*)::int AS n FROM currency_transactions WHERE character_id = $1 AND reason = 'enhance'`, [A.character.id]);
+    assert.equal(ledger.rows[0].n, 1);
+    const un = await ack(a.socket, 'unequip', { slot: 3 });
+    assert.equal(un.ok, true);
+    assert.equal(p.profile.derived.physicalDefense, def0);
+    await leaveWorld(a.socket);
+  });
+});

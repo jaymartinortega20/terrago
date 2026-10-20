@@ -1,11 +1,12 @@
 import { BALANCE, getClass, getItem, getMap } from '@terrago/game-data';
-import { ACCOUNT, maxHp, maxMp, settleEnergy, tileCenter, type CharacterSummary, type CreateCharacterInput } from '@terrago/shared';
+import { ACCOUNT, maxHp, maxMp, settleEnergy, tileCenter, toInventorySlots, type CharacterSummary, type CreateCharacterInput } from '@terrago/shared';
 import { GameError, isUniqueViolation, withTransaction, type Pool } from '../db';
 import { sanitizePosition, type CharacterRecord, type PositionSave } from '../world/characterState';
 
 export type { CharacterRecord, PositionSave } from '../world/characterState';
 export { buildSelfState } from '../world/characterState';
 import { consumeFromSlotTx, grantItemsTx, loadSlots, lockCharacter, toState } from './inventory';
+export { loadSlots };
 import { changeGold } from './ledger';
 import { loadSkills } from './progress';
 
@@ -67,7 +68,7 @@ export async function createCharacter(pool: Pool, userId: string, input: CreateC
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [created.id, s.strength, s.agility, s.intelligence, s.vitality, s.luck, maxHp(1, s, cls), maxMp(1, s, cls), BALANCE.energy.startingEnergy],
       );
-      await tx.query(`INSERT INTO inventories (character_id, container, capacity) VALUES ($1, 'bag', $2)`, [
+      await tx.query(`INSERT INTO inventories (character_id, container, capacity) VALUES ($1, 'bag', $2), ($1, 'equip', 9)`, [
         created.id,
         BALANCE.character.inventoryCapacity,
       ]);
@@ -113,6 +114,7 @@ export async function loadCharacter(pool: Pool, userId: string, characterId: str
     energy: r.energy,
     energyUpdatedAt: new Date(r.energy_updated_at).getTime(),
     skills: await loadSkills(pool, characterId),
+    equipment: toInventorySlots((await loadSlots(pool, characterId, 'equip')).slots),
   };
   return sanitizePosition(rec);
 }
@@ -127,6 +129,14 @@ export async function savePositions(pool: Pool, saves: PositionSave[]): Promise<
       WHERE c.id = v.id`,
     [saves.map((s) => s.id), saves.map((s) => s.mapId), saves.map((s) => s.x), saves.map((s) => s.y), saves.map((s) => s.dir)],
   );
+  const withHp = saves.filter((s) => s.hp !== undefined);
+  if (withHp.length) {
+    await pool.query(
+      `UPDATE character_stats cs SET hp = GREATEST(0, v.hp), mp = GREATEST(0, v.mp)
+         FROM unnest($1::uuid[], $2::int[], $3::int[]) AS v(id, hp, mp) WHERE cs.character_id = v.id`,
+      [withHp.map((s) => s.id), withHp.map((s) => Math.round(s.hp!)), withHp.map((s) => Math.round(s.mp ?? 0))],
+    );
+  }
 }
 
 /**
@@ -137,7 +147,7 @@ export async function useItem(
   pool: Pool,
   characterId: string,
   slot: number,
-): Promise<{ inventory: ReturnType<typeof toState>; energy: number; energyUpdatedAt: number; message: string }> {
+): Promise<{ inventory: ReturnType<typeof toState>; energy: number; energyUpdatedAt: number; message: string; hp: number; mp: number }> {
   return withTransaction(pool, async (tx) => {
     const { gold } = await lockCharacter(tx, characterId);
     const { slots } = await loadSlots(tx, characterId);
@@ -153,7 +163,9 @@ export async function useItem(
     const now = Date.now();
     const settled = settleEnergy(st.rows[0]!.energy, new Date(st.rows[0]!.energy_updated_at).getTime(), now, BALANCE.energy);
     const gain = def.consumable.energy ?? 0;
-    if (gain > 0 && settled.energy >= BALANCE.energy.max) throw new GameError("You're full of energy already.");
+    const hpGain = def.consumable.hp ?? 0;
+    const mpGain = def.consumable.mp ?? 0;
+    if (gain > 0 && hpGain === 0 && mpGain === 0 && settled.energy >= BALANCE.energy.max) throw new GameError("You're full of energy already.");
 
     const res = await consumeFromSlotTx(tx, characterId, slot, 1, 'consume');
     const energy = Math.min(BALANCE.energy.max, settled.energy + gain);
@@ -167,7 +179,9 @@ export async function useItem(
       inventory: toState(res.capacity, gold, res.slots),
       energy,
       energyUpdatedAt,
-      message: `You eat the ${def.name}. Energy +${energy - settled.energy}.`,
+      message: [`You use the ${def.name}.`, gain ? `Energy +${energy - settled.energy}` : '', hpGain ? `HP +${hpGain}` : '', mpGain ? `MP +${mpGain}` : ''].filter(Boolean).join(' '),
+      hp: hpGain,
+      mp: mpGain,
     };
   });
 }

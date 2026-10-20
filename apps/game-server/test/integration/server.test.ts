@@ -308,7 +308,15 @@ describe('NPCs and inventory', () => {
     assert.equal(moved.ok, true);
     assert.equal(moved.data.slots.find((s: any) => s.itemId === 'travelers_bread').slot, 15);
 
-    const energyUpdate = once<any>(a.socket, 'self:update');
+    const energyUpdate = new Promise<any>((resolve) => {
+      const on = (u: any) => {
+        if (u.energy !== undefined) {
+          a.socket.off('self:update', on);
+          resolve(u);
+        }
+      };
+      a.socket.on('self:update', on);
+    });
     const used = await ack(a.socket, 'inventory:use', { slot: 15 });
     assert.equal(used.ok, true, JSON.stringify(used));
     assert.equal((await energyUpdate).energy, 95);
@@ -335,7 +343,7 @@ describe('NPCs and inventory', () => {
     const ops = Array.from({ length: 40 }, (_, i) => ack(a.socket, 'inventory:move', { from: i % 5, to: (i * 7) % 20 }));
     await Promise.all(ops);
     const totals = await db.query(
-      `SELECT item_id, sum(quantity)::int AS n FROM inventory_items WHERE character_id = $1 GROUP BY item_id ORDER BY item_id`,
+      `SELECT item_id, sum(quantity)::int AS n FROM inventory_items WHERE character_id = $1 AND container = 'bag' GROUP BY item_id ORDER BY item_id`,
       [A.character.id],
     );
     assert.deepEqual(

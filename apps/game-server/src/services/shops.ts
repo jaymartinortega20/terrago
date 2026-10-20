@@ -102,19 +102,28 @@ export async function repairAll(pool: Pool, characterId: string): Promise<{ mess
   return withTransaction(pool, async (tx) => {
     await lockCharacter(tx, characterId);
     const { capacity, slots } = await loadSlots(tx, characterId);
+    const eq = await loadSlots(tx, characterId, 'equip');
     let total = 0;
-    const changed: number[] = [];
-    const next = slots.map((s, i) => {
-      if (!s) return s;
-      const cost = repairCost(s.itemId, s.durability);
-      if (cost <= 0) return s;
-      total += cost;
-      changed.push(i);
-      return { ...s, durability: getItem(s.itemId)!.maxDurability };
-    });
-    if (total === 0) throw new GameError('Nothing in your bag needs repairing.');
+    let count = 0;
+    const fix = (list: typeof slots) => {
+      const changed: number[] = [];
+      const next = list.map((s, i) => {
+        if (!s) return s;
+        const cost = repairCost(s.itemId, s.durability);
+        if (cost <= 0) return s;
+        total += cost;
+        count++;
+        changed.push(i);
+        return { ...s, durability: getItem(s.itemId)!.maxDurability };
+      });
+      return { next, changed };
+    };
+    const b = fix(slots);
+    const e = fix(eq.slots);
+    if (total === 0) throw new GameError('Nothing you carry or wear needs repairing.');
     const { after } = await changeGold(tx, characterId, -total, 'repair', { type: 'npc', id: 'blacksmith_toren' });
-    await writeSlots(tx, characterId, next, changed);
-    return { message: `Repaired ${changed.length} item${changed.length === 1 ? '' : 's'} for ${total} Gold.`, inventory: toState(capacity, after, next) };
+    await writeSlots(tx, characterId, b.next, b.changed);
+    await writeSlots(tx, characterId, e.next, e.changed, 'equip');
+    return { message: `Repaired ${count} item${count === 1 ? '' : 's'} for ${total} Gold.`, inventory: toState(capacity, after, b.next, e.next) };
   });
 }

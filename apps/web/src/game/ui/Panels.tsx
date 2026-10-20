@@ -9,6 +9,7 @@ import type { GameClient } from '../net/client';
 import { useStore, type Panel } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
 import { Window } from './Window';
+import { EquipmentGrid } from './CombatUi';
 
 export function InventoryPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const inv = useStore(client.ui, (s) => s.inventory);
@@ -56,6 +57,16 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
           <ul className="mt-1 text-xs text-wood-dark/90">
             <li>Level {def.levelRequirement}+ · Sells to shops for {def.vendorValue} Gold</li>
             <li>{def.tradable && !sel.bound ? 'Tradable' : 'Bound — cannot be traded'}</li>
+            {def.equip && (
+              <li className="font-bold text-ink">
+                {def.equip.slot}
+                {def.equip.classes ? ` · ${def.equip.classes.join('/')}` : ''} ·{' '}
+                {Object.entries(def.equip.stats)
+                  .map(([k, v]) => `${k.toUpperCase()} +${v}`)
+                  .join(', ')}
+                {def.equip.range ? ` · range ${def.equip.range}` : ''}
+              </li>
+            )}
             {sel.durability !== null && def.maxDurability && (
               <li>
                 Durability {sel.durability}/{def.maxDurability}
@@ -66,6 +77,11 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
             {def.consumable && (
               <button className="px-btn green small" onClick={() => client.useItem(sel.slot)} data-testid="use-item">
                 Use
+              </button>
+            )}
+            {def.equip && (
+              <button className="px-btn green small" onClick={() => client.equip(sel.slot)} data-testid="equip-item">
+                Equip
               </button>
             )}
             <button className="px-btn ghost small" onClick={() => setMoving(true)}>
@@ -130,6 +146,8 @@ export function CharacterPanel({ client, onClose }: { client: GameClient; onClos
           </div>
         ))}
       </div>
+      <h3 className="mt-3 text-sm font-bold text-wood-dark">Equipment</h3>
+      <EquipmentGrid client={client} />
       <table className="mt-3 w-full text-sm">
         <tbody>
           {rows.map(([k, v]) => (
@@ -216,7 +234,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>
       <p className="text-xs leading-relaxed">
-        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Close: Esc
+        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Attack: F (or click a monster) · Skills: Q R T · Next target: Tab · Close: Esc
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button className="px-btn ghost small" onClick={onSwitch}>

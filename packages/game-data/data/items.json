@@ -1885,5 +1885,2198 @@
    "kind": "rod",
    "tier": 3
   }
+ },
+ {
+  "id": "slime_gel",
+  "name": "Slime Gel",
+  "description": "Wobbly and faintly sweet. Alchemists use it as a binder.",
+  "icon": "essence:7cc35a",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 2,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "rat_tail",
+  "name": "Rat Tail",
+  "description": "Proof of pest control. Somebody pays for these.",
+  "icon": "fang:c99a7a",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 2,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "boar_hide",
+  "name": "Boar Hide",
+  "description": "Thick bristly hide. Tanned into leather.",
+  "icon": "hide:8a5d33",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 5,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "wolf_pelt",
+  "name": "Wolf Pelt",
+  "description": "Grey fur, warm and tough.",
+  "icon": "hide:9a948a",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 9,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "spider_silk",
+  "name": "Spider Silk",
+  "description": "Strong as wire, light as air. Weavers want it.",
+  "icon": "fiber",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 10,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "bat_wing",
+  "name": "Bat Wing",
+  "description": "Leathery. Used in a few odd potions.",
+  "icon": "hide:4a3a5a",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 4,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "bone",
+  "name": "Bone",
+  "description": "Old and dry. Useful, somehow.",
+  "icon": "bone",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 3,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "goblin_trinket",
+  "name": "Goblin Trinket",
+  "description": "A shiny something a goblin was very proud of.",
+  "icon": "gem:f2c14e",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 12,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "orc_tusk",
+  "name": "Orc Tusk",
+  "description": "Yellowed and heavy. Smiths grind it into flux.",
+  "icon": "fang:e8dcc0",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 18,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "golem_core",
+  "name": "Golem Core",
+  "description": "Still warm. Hums with stubborn magic.",
+  "icon": "essence:b6a4ff",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 45,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "dark_essence",
+  "name": "Dark Essence",
+  "description": "A shard of shadow. Handle with gloves.",
+  "icon": "essence:4a2a6a",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 40,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "leather",
+  "name": "Leather",
+  "description": "Tanned hide, ready for armor.",
+  "icon": "hide:a8743f",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 10,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "linen",
+  "name": "Linen",
+  "description": "Woven cloth for robes and capes.",
+  "icon": "cloth:e8dcc0",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 8,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "silk_cloth",
+  "name": "Silk Cloth",
+  "description": "Fine cloth woven from spider silk.",
+  "icon": "cloth:f4f1e6",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 30,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "enhancement_stone",
+  "name": "Enhancement Stone",
+  "description": "Used at the Enhancement Altar to strengthen equipment.",
+  "icon": "stone_enh",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 25,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "training_sword",
+  "name": "Training Sword",
+  "description": "A training sword for warriors.",
+  "icon": "weapon:sword:0",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 6,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 4
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "training_bow",
+  "name": "Training Bow",
+  "description": "A training bow for rangers.",
+  "icon": "weapon:bow:0",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 6,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 3,
+    "agi": 0
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "training_staff",
+  "name": "Training Staff",
+  "description": "A training staff for mages.",
+  "icon": "weapon:staff:0",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 6,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 5,
+    "int": 0,
+    "mp": 0
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "training_mace",
+  "name": "Training Mace",
+  "description": "A training mace for priests.",
+  "icon": "weapon:mace:0",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 6,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 4,
+    "atk": 2,
+    "mp": 0
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "training_dagger",
+  "name": "Training Dagger",
+  "description": "A training dagger for rogues.",
+  "icon": "weapon:dagger:0",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 6,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 3,
+    "crit": 2
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "padded_head",
+  "name": "Padded Helm",
+  "description": "Padded helm. Worn by any class.",
+  "icon": "armor:head:0",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 4,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 180,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 1,
+    "hp": 0
+   }
+  }
+ },
+ {
+  "id": "padded_chest",
+  "name": "Padded Armor",
+  "description": "Padded armor. Worn by any class.",
+  "icon": "armor:chest:0",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 4,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 180,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 3,
+    "hp": 0,
+    "mdef": 0
+   }
+  }
+ },
+ {
+  "id": "padded_gloves",
+  "name": "Padded Gloves",
+  "description": "Padded gloves. Worn by any class.",
+  "icon": "armor:gloves:0",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 4,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 180,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 1,
+    "atk": 0,
+    "matk": 0
+   }
+  }
+ },
+ {
+  "id": "padded_boots",
+  "name": "Padded Boots",
+  "description": "Padded boots. Worn by any class.",
+  "icon": "armor:boots:0",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 4,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 180,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 1,
+    "agi": 0
+   }
+  }
+ },
+ {
+  "id": "copper_sword",
+  "name": "Copper Sword",
+  "description": "A copper sword for warriors.",
+  "icon": "weapon:sword:1",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 30,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 320,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 14
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "copper_bow",
+  "name": "Copper Bow",
+  "description": "A copper bow for rangers.",
+  "icon": "weapon:bow:1",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 30,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 320,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 12,
+    "agi": 1
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "copper_staff",
+  "name": "Copper Staff",
+  "description": "A copper staff for mages.",
+  "icon": "weapon:staff:1",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 30,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 320,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 16,
+    "int": 1,
+    "mp": 10
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "copper_mace",
+  "name": "Copper Mace",
+  "description": "A copper mace for priests.",
+  "icon": "weapon:mace:1",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 30,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 320,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 13,
+    "atk": 5,
+    "mp": 8
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "copper_dagger",
+  "name": "Copper Dagger",
+  "description": "A copper dagger for rogues.",
+  "icon": "weapon:dagger:1",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 30,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 320,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 11,
+    "crit": 3
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "copper_head",
+  "name": "Copper Helm",
+  "description": "Copper helm. Worn by any class.",
+  "icon": "armor:head:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 15,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 280,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 4,
+    "hp": 5
+   }
+  }
+ },
+ {
+  "id": "copper_chest",
+  "name": "Copper Armor",
+  "description": "Copper armor. Worn by any class.",
+  "icon": "armor:chest:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 15,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 280,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 9,
+    "hp": 15,
+    "mdef": 2
+   }
+  }
+ },
+ {
+  "id": "copper_gloves",
+  "name": "Copper Gloves",
+  "description": "Copper gloves. Worn by any class.",
+  "icon": "armor:gloves:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 15,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 280,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 3,
+    "atk": 1,
+    "matk": 1
+   }
+  }
+ },
+ {
+  "id": "copper_boots",
+  "name": "Copper Boots",
+  "description": "Copper boots. Worn by any class.",
+  "icon": "armor:boots:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 15,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 280,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 3,
+    "agi": 0
+   }
+  }
+ },
+ {
+  "id": "iron_sword",
+  "name": "Iron Sword",
+  "description": "A iron sword for warriors.",
+  "icon": "weapon:sword:2",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 90,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 440,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 26
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "iron_bow",
+  "name": "Iron Bow",
+  "description": "A iron bow for rangers.",
+  "icon": "weapon:bow:2",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 90,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 440,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 23,
+    "agi": 2
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "iron_staff",
+  "name": "Iron Staff",
+  "description": "A iron staff for mages.",
+  "icon": "weapon:staff:2",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 90,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 440,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 29,
+    "int": 2,
+    "mp": 20
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "iron_mace",
+  "name": "Iron Mace",
+  "description": "A iron mace for priests.",
+  "icon": "weapon:mace:2",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 90,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 440,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 24,
+    "atk": 8,
+    "mp": 16
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "iron_dagger",
+  "name": "Iron Dagger",
+  "description": "A iron dagger for rogues.",
+  "icon": "weapon:dagger:2",
+  "category": "weapon",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 90,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 440,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 21,
+    "crit": 4
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "iron_head",
+  "name": "Iron Helm",
+  "description": "Iron helm. Worn by any class.",
+  "icon": "armor:head:2",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 45,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 380,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 7,
+    "hp": 10
+   }
+  }
+ },
+ {
+  "id": "iron_chest",
+  "name": "Iron Armor",
+  "description": "Iron armor. Worn by any class.",
+  "icon": "armor:chest:2",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 45,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 380,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 15,
+    "hp": 30,
+    "mdef": 4
+   }
+  }
+ },
+ {
+  "id": "iron_gloves",
+  "name": "Iron Gloves",
+  "description": "Iron gloves. Worn by any class.",
+  "icon": "armor:gloves:2",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 45,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 380,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 5,
+    "atk": 2,
+    "matk": 2
+   }
+  }
+ },
+ {
+  "id": "iron_boots",
+  "name": "Iron Boots",
+  "description": "Iron boots. Worn by any class.",
+  "icon": "armor:boots:2",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 45,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 380,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 5,
+    "agi": 1
+   }
+  }
+ },
+ {
+  "id": "silver_sword",
+  "name": "Silver Sword",
+  "description": "A silver sword for warriors.",
+  "icon": "weapon:sword:3",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 220,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 40
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "silver_bow",
+  "name": "Silver Bow",
+  "description": "A silver bow for rangers.",
+  "icon": "weapon:bow:3",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 220,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 36,
+    "agi": 3
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "silver_staff",
+  "name": "Silver Staff",
+  "description": "A silver staff for mages.",
+  "icon": "weapon:staff:3",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 220,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 44,
+    "int": 3,
+    "mp": 30
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "silver_mace",
+  "name": "Silver Mace",
+  "description": "A silver mace for priests.",
+  "icon": "weapon:mace:3",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 220,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 37,
+    "atk": 11,
+    "mp": 24
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "silver_dagger",
+  "name": "Silver Dagger",
+  "description": "A silver dagger for rogues.",
+  "icon": "weapon:dagger:3",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 220,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 33,
+    "crit": 5
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "silver_head",
+  "name": "Silver Helm",
+  "description": "Silver helm. Worn by any class.",
+  "icon": "armor:head:3",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 110,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 480,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 10,
+    "hp": 15
+   }
+  }
+ },
+ {
+  "id": "silver_chest",
+  "name": "Silver Armor",
+  "description": "Silver armor. Worn by any class.",
+  "icon": "armor:chest:3",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 110,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 480,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 21,
+    "hp": 45,
+    "mdef": 6
+   }
+  }
+ },
+ {
+  "id": "silver_gloves",
+  "name": "Silver Gloves",
+  "description": "Silver gloves. Worn by any class.",
+  "icon": "armor:gloves:3",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 110,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 480,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 7,
+    "atk": 3,
+    "matk": 3
+   }
+  }
+ },
+ {
+  "id": "silver_boots",
+  "name": "Silver Boots",
+  "description": "Silver boots. Worn by any class.",
+  "icon": "armor:boots:3",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 110,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 480,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 7,
+    "agi": 2
+   }
+  }
+ },
+ {
+  "id": "gold_sword",
+  "name": "Gold Sword",
+  "description": "A gold sword for warriors.",
+  "icon": "weapon:sword:4",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 56
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "gold_bow",
+  "name": "Gold Bow",
+  "description": "A gold bow for rangers.",
+  "icon": "weapon:bow:4",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 51,
+    "agi": 4
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "gold_staff",
+  "name": "Gold Staff",
+  "description": "A gold staff for mages.",
+  "icon": "weapon:staff:4",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 61,
+    "int": 4,
+    "mp": 40
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "gold_mace",
+  "name": "Gold Mace",
+  "description": "A gold mace for priests.",
+  "icon": "weapon:mace:4",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 52,
+    "atk": 14,
+    "mp": 32
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "gold_dagger",
+  "name": "Gold Dagger",
+  "description": "A gold dagger for rogues.",
+  "icon": "weapon:dagger:4",
+  "category": "weapon",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 47,
+    "crit": 6
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "gold_head",
+  "name": "Gold Helm",
+  "description": "Gold helm. Worn by any class.",
+  "icon": "armor:head:4",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 225,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 580,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 13,
+    "hp": 20
+   }
+  }
+ },
+ {
+  "id": "gold_chest",
+  "name": "Gold Armor",
+  "description": "Gold armor. Worn by any class.",
+  "icon": "armor:chest:4",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 225,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 580,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 27,
+    "hp": 60,
+    "mdef": 8
+   }
+  }
+ },
+ {
+  "id": "gold_gloves",
+  "name": "Gold Gloves",
+  "description": "Gold gloves. Worn by any class.",
+  "icon": "armor:gloves:4",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 225,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 580,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 9,
+    "atk": 4,
+    "matk": 4
+   }
+  }
+ },
+ {
+  "id": "gold_boots",
+  "name": "Gold Boots",
+  "description": "Gold boots. Worn by any class.",
+  "icon": "armor:boots:4",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 225,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 580,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 9,
+    "agi": 3
+   }
+  }
+ },
+ {
+  "id": "mithril_sword",
+  "name": "Mithril Sword",
+  "description": "A mithril sword for warriors.",
+  "icon": "weapon:sword:5",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 800,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 74
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "mithril_bow",
+  "name": "Mithril Bow",
+  "description": "A mithril bow for rangers.",
+  "icon": "weapon:bow:5",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 800,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 68,
+    "agi": 5
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "mithril_staff",
+  "name": "Mithril Staff",
+  "description": "A mithril staff for mages.",
+  "icon": "weapon:staff:5",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 800,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 80,
+    "int": 5,
+    "mp": 50
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "mithril_mace",
+  "name": "Mithril Mace",
+  "description": "A mithril mace for priests.",
+  "icon": "weapon:mace:5",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 800,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 69,
+    "atk": 17,
+    "mp": 40
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "mithril_dagger",
+  "name": "Mithril Dagger",
+  "description": "A mithril dagger for rogues.",
+  "icon": "weapon:dagger:5",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 800,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 63,
+    "crit": 7
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "mithril_head",
+  "name": "Mithril Helm",
+  "description": "Mithril helm. Worn by any class.",
+  "icon": "armor:head:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 16,
+    "hp": 25
+   }
+  }
+ },
+ {
+  "id": "mithril_chest",
+  "name": "Mithril Armor",
+  "description": "Mithril armor. Worn by any class.",
+  "icon": "armor:chest:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 33,
+    "hp": 75,
+    "mdef": 10
+   }
+  }
+ },
+ {
+  "id": "mithril_gloves",
+  "name": "Mithril Gloves",
+  "description": "Mithril gloves. Worn by any class.",
+  "icon": "armor:gloves:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 11,
+    "atk": 5,
+    "matk": 5
+   }
+  }
+ },
+ {
+  "id": "mithril_boots",
+  "name": "Mithril Boots",
+  "description": "Mithril boots. Worn by any class.",
+  "icon": "armor:boots:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 11,
+    "agi": 4
+   }
+  }
+ },
+ {
+  "id": "obsidian_sword",
+  "name": "Obsidian Sword",
+  "description": "A obsidian sword for warriors.",
+  "icon": "weapon:sword:6",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 1800,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 920,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 94
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "obsidian_bow",
+  "name": "Obsidian Bow",
+  "description": "A obsidian bow for rangers.",
+  "icon": "weapon:bow:6",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 1800,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 920,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 87,
+    "agi": 6
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "obsidian_staff",
+  "name": "Obsidian Staff",
+  "description": "A obsidian staff for mages.",
+  "icon": "weapon:staff:6",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 1800,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 920,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 101,
+    "int": 6,
+    "mp": 60
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "obsidian_mace",
+  "name": "Obsidian Mace",
+  "description": "A obsidian mace for priests.",
+  "icon": "weapon:mace:6",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 1800,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 920,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 88,
+    "atk": 20,
+    "mp": 48
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "obsidian_dagger",
+  "name": "Obsidian Dagger",
+  "description": "A obsidian dagger for rogues.",
+  "icon": "weapon:dagger:6",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 1800,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 920,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 81,
+    "crit": 8
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "obsidian_head",
+  "name": "Obsidian Helm",
+  "description": "Obsidian helm. Worn by any class.",
+  "icon": "armor:head:6",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 780,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 19,
+    "hp": 30
+   }
+  }
+ },
+ {
+  "id": "obsidian_chest",
+  "name": "Obsidian Armor",
+  "description": "Obsidian armor. Worn by any class.",
+  "icon": "armor:chest:6",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 780,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 39,
+    "hp": 90,
+    "mdef": 12
+   }
+  }
+ },
+ {
+  "id": "obsidian_gloves",
+  "name": "Obsidian Gloves",
+  "description": "Obsidian gloves. Worn by any class.",
+  "icon": "armor:gloves:6",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 780,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 13,
+    "atk": 6,
+    "matk": 6
+   }
+  }
+ },
+ {
+  "id": "obsidian_boots",
+  "name": "Obsidian Boots",
+  "description": "Obsidian boots. Worn by any class.",
+  "icon": "armor:boots:6",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 780,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 13,
+    "agi": 5
+   }
+  }
+ },
+ {
+  "id": "star_metal_sword",
+  "name": "Star Metal Sword",
+  "description": "A star metal sword for warriors.",
+  "icon": "weapon:sword:7",
+  "category": "weapon",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 116
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "star_metal_bow",
+  "name": "Star Metal Bow",
+  "description": "A star metal bow for rangers.",
+  "icon": "weapon:bow:7",
+  "category": "weapon",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 108,
+    "agi": 7
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "star_metal_staff",
+  "name": "Star Metal Staff",
+  "description": "A star metal staff for mages.",
+  "icon": "weapon:staff:7",
+  "category": "weapon",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 124,
+    "int": 7,
+    "mp": 70
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "star_metal_mace",
+  "name": "Star Metal Mace",
+  "description": "A star metal mace for priests.",
+  "icon": "weapon:mace:7",
+  "category": "weapon",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 109,
+    "atk": 23,
+    "mp": 56
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "star_metal_dagger",
+  "name": "Star Metal Dagger",
+  "description": "A star metal dagger for rogues.",
+  "icon": "weapon:dagger:7",
+  "category": "weapon",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 101,
+    "crit": 9
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "star_metal_head",
+  "name": "Star Metal Helm",
+  "description": "Star Metal helm. Worn by any class.",
+  "icon": "armor:head:7",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 2000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 880,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 22,
+    "hp": 35
+   }
+  }
+ },
+ {
+  "id": "star_metal_chest",
+  "name": "Star Metal Armor",
+  "description": "Star Metal armor. Worn by any class.",
+  "icon": "armor:chest:7",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 2000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 880,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 45,
+    "hp": 105,
+    "mdef": 14
+   }
+  }
+ },
+ {
+  "id": "star_metal_gloves",
+  "name": "Star Metal Gloves",
+  "description": "Star Metal gloves. Worn by any class.",
+  "icon": "armor:gloves:7",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 2000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 880,
+  "equip": {
+   "slot": "gloves",
+   "stats": {
+    "def": 15,
+    "atk": 7,
+    "matk": 7
+   }
+  }
+ },
+ {
+  "id": "star_metal_boots",
+  "name": "Star Metal Boots",
+  "description": "Star Metal boots. Worn by any class.",
+  "icon": "armor:boots:7",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 2000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 880,
+  "equip": {
+   "slot": "boots",
+   "stats": {
+    "def": 15,
+    "agi": 6
+   }
+  }
+ },
+ {
+  "id": "copper_ring",
+  "name": "Copper Ring",
+  "description": "Copper Ring. Worn by any class.",
+  "icon": "armor:ring:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 20,
+  "levelRequirement": 3,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "atk": 2,
+    "matk": 2
+   }
+  }
+ },
+ {
+  "id": "amethyst_ring",
+  "name": "Amethyst Ring",
+  "description": "Amethyst Ring. Worn by any class.",
+  "icon": "armor:ring:3",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 90,
+  "levelRequirement": 15,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "int": 3,
+    "mp": 25,
+    "matk": 4
+   }
+  }
+ },
+ {
+  "id": "sapphire_ring",
+  "name": "Sapphire Ring",
+  "description": "Sapphire Ring. Worn by any class.",
+  "icon": "armor:ring:3",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 140,
+  "levelRequirement": 20,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "mdef": 10,
+    "vit": 2
+   }
+  }
+ },
+ {
+  "id": "ruby_ring",
+  "name": "Ruby Ring",
+  "description": "Ruby Ring. Worn by any class.",
+  "icon": "armor:ring:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 260,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "atk": 9,
+    "matk": 9
+   }
+  }
+ },
+ {
+  "id": "diamond_ring",
+  "name": "Diamond Ring",
+  "description": "Diamond Ring. Worn by any class.",
+  "icon": "armor:ring:5",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 600,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "crit": 6,
+    "luk": 6
+   }
+  }
+ },
+ {
+  "id": "bone_necklace",
+  "name": "Bone Necklace",
+  "description": "Bone Necklace. Worn by any class.",
+  "icon": "armor:necklace:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 25,
+  "levelRequirement": 6,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "necklace",
+   "stats": {
+    "hp": 25,
+    "str": 1
+   }
+  }
+ },
+ {
+  "id": "emerald_amulet",
+  "name": "Emerald Amulet",
+  "description": "Emerald Amulet. Worn by any class.",
+  "icon": "armor:necklace:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 200,
+  "levelRequirement": 25,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "equip": {
+   "slot": "necklace",
+   "stats": {
+    "hp": 80,
+    "vit": 4
+   }
+  }
+ },
+ {
+  "id": "woven_cape",
+  "name": "Woven Cape",
+  "description": "Woven Cape. Worn by any class.",
+  "icon": "armor:cape:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 18,
+  "levelRequirement": 4,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 300,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "def": 2,
+    "mdef": 2
+   }
+  }
+ },
+ {
+  "id": "silk_cape",
+  "name": "Silk Cape",
+  "description": "Silk Cape. Worn by any class.",
+  "icon": "armor:cape:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 220,
+  "levelRequirement": 28,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 300,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "def": 6,
+    "mdef": 8,
+    "agi": 2
+   }
+  }
  }
 ]

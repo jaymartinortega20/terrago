@@ -119,6 +119,8 @@ function greenhaven(): MapDef {
   m.station('mill', 5, 29);
   m.station('workbench', 4, 14);
   m.station('alchemy_table', 4, 17);
+  m.station('loom', 6, 11);
+  m.station('enhance_altar', 36, 13);
   m.prop('lamp', 29, 45);
   m.prop('lamp', 34, 45);
   m.prop('sign', 35, 44, 'South gate: Sunfield Plains');
@@ -224,7 +226,7 @@ function sunfield(): MapDef {
   return m.toMap({
     id: 'sunfield_plains',
     name: 'Sunfield Plains',
-    safeZone: true,
+    safeZone: false,
     music: 'field_sunfield',
     spawn: { x: 30, y: 3, dir: 'down' },
     portals: [
@@ -235,6 +237,12 @@ function sunfield(): MapDef {
     fishing: 'pond',
     levels: [1, 8],
     respawn: { mapId: 'greenhaven', x: 31, y: 26 },
+    spawns: [
+      { monster: 'green_slime', level: [1, 2], count: 6, area: { x: 34, y: 4, w: 22, h: 14 } },
+      { monster: 'green_slime', level: [2, 3], count: 4, area: { x: 6, y: 4, w: 20, h: 13 } },
+      { monster: 'field_rat', level: [2, 4], count: 5, area: { x: 36, y: 24, w: 20, h: 12 } },
+      { monster: 'wild_boar', level: [4, 6], count: 3, area: { x: 8, y: 32, w: 18, h: 5 } },
+    ],
   });
 }
 
@@ -357,6 +365,12 @@ function whisperwood(): MapDef {
     fishing: 'river',
     levels: [10, 20],
     respawn: { mapId: 'greenhaven', x: 31, y: 26 },
+    spawns: [
+      { monster: 'wild_boar', level: [9, 11], count: 4, area: { x: 34, y: 4, w: 24, h: 14 } },
+      { monster: 'forest_wolf', level: [11, 14], count: 6, area: { x: 33, y: 28, w: 26, h: 16 } },
+      { monster: 'goblin_scout', level: [12, 15], count: 5, area: { x: 6, y: 24, w: 18, h: 18 } },
+      { monster: 'giant_spider', level: [15, 18], count: 4, area: { x: 4, y: 4, w: 18, h: 14 } },
+    ],
   });
 }
 
@@ -406,6 +420,10 @@ function crystalLake(): MapDef {
     fishing: 'lake',
     levels: [5, 25],
     respawn: { mapId: 'greenhaven', x: 31, y: 26 },
+    spawns: [
+      { monster: 'blue_slime', level: [4, 6], count: 5, area: { x: 6, y: 28, w: 14, h: 12 } },
+      { monster: 'goblin_scout', level: [7, 9], count: 5, area: { x: 20, y: 3, w: 34, h: 5 } },
+    ],
   });
 }
 

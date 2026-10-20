@@ -33,7 +33,7 @@ class FakeConn implements Connection {
   }
 }
 
-const inv: InventoryState = { capacity: 20, gold: 0, slots: [] };
+const inv: InventoryState = { capacity: 20, gold: 0, slots: [], equipment: [] };
 let seqUser = 0;
 
 function record(over: Partial<CharacterRecord> = {}): CharacterRecord {
@@ -58,6 +58,7 @@ function record(over: Partial<CharacterRecord> = {}): CharacterRecord {
     energy: 60,
     energyUpdatedAt: Date.now(),
     skills: emptySkills({ baseXp: 40, exponent: 1.9, maxLevel: 100 }),
+    equipment: [],
     ...over,
   };
 }

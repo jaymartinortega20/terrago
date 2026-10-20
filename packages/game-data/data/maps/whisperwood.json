@@ -33,6 +33,64 @@
   "x": 31,
   "y": 26
  },
+ "spawns": [
+  {
+   "monster": "wild_boar",
+   "level": [
+    9,
+    11
+   ],
+   "count": 4,
+   "area": {
+    "x": 34,
+    "y": 4,
+    "w": 24,
+    "h": 14
+   }
+  },
+  {
+   "monster": "forest_wolf",
+   "level": [
+    11,
+    14
+   ],
+   "count": 6,
+   "area": {
+    "x": 33,
+    "y": 28,
+    "w": 26,
+    "h": 16
+   }
+  },
+  {
+   "monster": "goblin_scout",
+   "level": [
+    12,
+    15
+   ],
+   "count": 5,
+   "area": {
+    "x": 6,
+    "y": 24,
+    "w": 18,
+    "h": 18
+   }
+  },
+  {
+   "monster": "giant_spider",
+   "level": [
+    15,
+    18
+   ],
+   "count": 4,
+   "area": {
+    "x": 4,
+    "y": 4,
+    "w": 18,
+    "h": 14
+   }
+  }
+ ],
  "width": 64,
  "height": 48,
  "tileSize": 32,

@@ -1,8 +1,6 @@
-import { BALANCE, getClass, getMap } from '@terrago/game-data';
+import { BALANCE, equipDef, getClass, getMap } from '@terrago/game-data';
 import {
-  derivedStats,
-  maxHp,
-  maxMp,
+  combatProfile,
   settleEnergy,
   tileCenter,
   xpToNext,
@@ -10,6 +8,8 @@ import {
   type BaseStats,
   type ClassId,
   type Direction,
+  type CombatProfile,
+  type InventorySlot,
   type SelfState,
   type SkillSet,
 } from '@terrago/shared';
@@ -35,6 +35,8 @@ export interface CharacterRecord {
   energy: number;
   energyUpdatedAt: number;
   skills: SkillSet;
+  /** Worn items (slot = EQUIP_SLOTS index). */
+  equipment: InventorySlot[];
 }
 
 export interface PositionSave {
@@ -43,6 +45,13 @@ export interface PositionSave {
   x: number;
   y: number;
   dir: Direction;
+  hp?: number;
+  mp?: number;
+}
+
+export function profileFor(rec: CharacterRecord): CombatProfile {
+  const cls = getClass(rec.classId);
+  return combatProfile(rec.level, rec.stats, cls.growth, { base: cls.hpBase, perLevel: cls.hpPerLevel, mpBase: cls.mpBase, mpPerLevel: cls.mpPerLevel }, rec.equipment ?? [], equipDef);
 }
 
 /**
@@ -65,8 +74,7 @@ export function sanitizePosition(rec: CharacterRecord): CharacterRecord {
   return rec;
 }
 
-export function buildSelfState(rec: CharacterRecord, now = Date.now()): SelfState {
-  const cls = getClass(rec.classId);
+export function buildSelfState(rec: CharacterRecord, now = Date.now(), profile = profileFor(rec)): SelfState {
   const energy = settleEnergy(rec.energy, rec.energyUpdatedAt, now, BALANCE.energy);
   return {
     characterId: rec.id,
@@ -76,14 +84,14 @@ export function buildSelfState(rec: CharacterRecord, now = Date.now()): SelfStat
     xp: rec.xp,
     xpToNext: xpToNext(rec.level, BALANCE.xpCurve),
     gold: rec.gold,
-    hp: rec.hp,
-    maxHp: maxHp(rec.level, rec.stats, cls),
-    mp: rec.mp,
-    maxMp: maxMp(rec.level, rec.stats, cls),
+    hp: Math.min(rec.hp, profile.maxHp),
+    maxHp: profile.maxHp,
+    mp: Math.min(rec.mp, profile.maxMp),
+    maxMp: profile.maxMp,
     energy: energy.energy,
     maxEnergy: BALANCE.energy.max,
-    stats: rec.stats,
-    derived: derivedStats(rec.level, rec.stats),
+    stats: profile.stats,
+    derived: profile.derived,
     appearance: rec.appearance,
     skills: rec.skills,
   };

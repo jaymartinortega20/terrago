@@ -1006,5 +1006,1757 @@
    "itemId": "greater_health_potion",
    "quantity": 1
   }
+ },
+ {
+  "id": "forge_w_copper_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 3,
+  "xp": 35,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "copper_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_copper_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 3,
+  "xp": 35,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "softwood_plank",
+    "quantity": 4
+   },
+   {
+    "itemId": "copper_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_copper_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 3,
+  "xp": 35,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "softwood_plank",
+    "quantity": 4
+   },
+   {
+    "itemId": "copper_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_copper_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 3,
+  "xp": 35,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "copper_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_copper_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 3,
+  "xp": 35,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "copper_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_copper_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 4,
+  "xp": 30,
+  "fee": 4,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "leather",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_copper_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 4,
+  "xp": 30,
+  "fee": 4,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "leather",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_copper_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 4,
+  "xp": 30,
+  "fee": 4,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "leather",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_copper_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 4,
+  "xp": 30,
+  "fee": 4,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "leather",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_iron_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 10,
+  "xp": 55,
+  "fee": 20,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_iron_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 10,
+  "xp": 55,
+  "fee": 20,
+  "inputs": [
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 5
+   },
+   {
+    "itemId": "iron_bar",
+    "quantity": 2
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_iron_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 10,
+  "xp": 55,
+  "fee": 20,
+  "inputs": [
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 5
+   },
+   {
+    "itemId": "iron_bar",
+    "quantity": 2
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_iron_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 10,
+  "xp": 55,
+  "fee": 20,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_iron_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 10,
+  "xp": 55,
+  "fee": 20,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_iron_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 11,
+  "xp": 48,
+  "fee": 16,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "iron_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_iron_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 11,
+  "xp": 48,
+  "fee": 16,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "iron_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_iron_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 11,
+  "xp": 48,
+  "fee": 16,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "iron_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_iron_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 11,
+  "xp": 48,
+  "fee": 16,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "iron_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_silver_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 20,
+  "xp": 75,
+  "fee": 45,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "silver_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_silver_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 20,
+  "xp": 75,
+  "fee": 45,
+  "inputs": [
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 6
+   },
+   {
+    "itemId": "silver_bar",
+    "quantity": 2
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "silver_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_silver_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 20,
+  "xp": 75,
+  "fee": 45,
+  "inputs": [
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 6
+   },
+   {
+    "itemId": "silver_bar",
+    "quantity": 2
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "silver_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_silver_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 20,
+  "xp": 75,
+  "fee": 45,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "silver_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_silver_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 20,
+  "xp": 75,
+  "fee": 45,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "silver_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_silver_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 21,
+  "xp": 66,
+  "fee": 36,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "silver_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_silver_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 21,
+  "xp": 66,
+  "fee": 36,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "silver_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_silver_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 21,
+  "xp": 66,
+  "fee": 36,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "silver_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_silver_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 21,
+  "xp": 66,
+  "fee": 36,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "leather",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "silver_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_gold_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 30,
+  "xp": 95,
+  "fee": 80,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "gold_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_gold_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 30,
+  "xp": 95,
+  "fee": 80,
+  "inputs": [
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 7
+   },
+   {
+    "itemId": "gold_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_gold_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 30,
+  "xp": 95,
+  "fee": 80,
+  "inputs": [
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 7
+   },
+   {
+    "itemId": "gold_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_gold_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 30,
+  "xp": 95,
+  "fee": 80,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "gold_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_gold_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 30,
+  "xp": 95,
+  "fee": 80,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "gold_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_gold_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 31,
+  "xp": 84,
+  "fee": 64,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_gold_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 31,
+  "xp": 84,
+  "fee": 64,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_gold_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 31,
+  "xp": 84,
+  "fee": 64,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_gold_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 31,
+  "xp": 84,
+  "fee": 64,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_mithril_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 40,
+  "xp": 115,
+  "fee": 125,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "mithril_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_mithril_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 40,
+  "xp": 115,
+  "fee": 125,
+  "inputs": [
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 8
+   },
+   {
+    "itemId": "mithril_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_mithril_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 40,
+  "xp": 115,
+  "fee": 125,
+  "inputs": [
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 8
+   },
+   {
+    "itemId": "mithril_bar",
+    "quantity": 3
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_mithril_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 40,
+  "xp": 115,
+  "fee": 125,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "mithril_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_mithril_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 40,
+  "xp": 115,
+  "fee": 125,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "elderwood_plank",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "mithril_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_mithril_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 41,
+  "xp": 102,
+  "fee": 100,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_mithril_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 41,
+  "xp": 102,
+  "fee": 100,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_mithril_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 41,
+  "xp": 102,
+  "fee": 100,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_mithril_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 41,
+  "xp": 102,
+  "fee": 100,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_obsidian_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 54,
+  "xp": 135,
+  "fee": 180,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_obsidian_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 54,
+  "xp": 135,
+  "fee": 180,
+  "inputs": [
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 9
+   },
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_obsidian_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 54,
+  "xp": 135,
+  "fee": 180,
+  "inputs": [
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 9
+   },
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_obsidian_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 54,
+  "xp": 135,
+  "fee": 180,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_obsidian_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 54,
+  "xp": 135,
+  "fee": 180,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_obsidian_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 55,
+  "xp": 120,
+  "fee": 144,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_obsidian_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 55,
+  "xp": 120,
+  "fee": 144,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 10
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_obsidian_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 55,
+  "xp": 120,
+  "fee": 144,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_obsidian_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 55,
+  "xp": 120,
+  "fee": 144,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_star_metal_sword",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 68,
+  "xp": 155,
+  "fee": 245,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 10
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_sword",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_star_metal_bow",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 68,
+  "xp": 155,
+  "fee": 245,
+  "inputs": [
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 10
+   },
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "rope",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_bow",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "make_w_star_metal_staff",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 68,
+  "xp": 155,
+  "fee": 245,
+  "inputs": [
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 10
+   },
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_staff",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_star_metal_mace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 68,
+  "xp": 155,
+  "fee": 245,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 10
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_mace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_w_star_metal_dagger",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 68,
+  "xp": 155,
+  "fee": 245,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 10
+   },
+   {
+    "itemId": "spiritwood_plank",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_dagger",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_star_metal_head",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 69,
+  "xp": 138,
+  "fee": 196,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_head",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_star_metal_chest",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 69,
+  "xp": 138,
+  "fee": 196,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 11
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_chest",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_star_metal_gloves",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 69,
+  "xp": 138,
+  "fee": 196,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_gloves",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_a_star_metal_boots",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 69,
+  "xp": 138,
+  "fee": 196,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "silk_cloth",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_boots",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_copper_ring",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 3,
+  "xp": 29,
+  "fee": 9,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_ring",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_amethyst_ring",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 15,
+  "xp": 65,
+  "fee": 45,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "amethyst",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "amethyst_ring",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_sapphire_ring",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 20,
+  "xp": 80,
+  "fee": 60,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "sapphire",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "sapphire_ring",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_ruby_ring",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 30,
+  "xp": 110,
+  "fee": 90,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "ruby",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "ruby_ring",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_diamond_ring",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 42,
+  "xp": 146,
+  "fee": 126,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "diamond",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "diamond_ring",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_bone_necklace",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 6,
+  "xp": 38,
+  "fee": 18,
+  "inputs": [
+   {
+    "itemId": "bone",
+    "quantity": 6
+   },
+   {
+    "itemId": "rope",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "bone_necklace",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_emerald_amulet",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 25,
+  "xp": 95,
+  "fee": 75,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 1
+   },
+   {
+    "itemId": "emerald",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "emerald_amulet",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_woven_cape",
+  "station": "loom",
+  "skill": "crafting",
+  "level": 4,
+  "xp": 32,
+  "fee": 12,
+  "inputs": [
+   {
+    "itemId": "linen",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "woven_cape",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "jewel_silk_cape",
+  "station": "loom",
+  "skill": "crafting",
+  "level": 28,
+  "xp": 104,
+  "fee": 84,
+  "inputs": [
+   {
+    "itemId": "silk_cloth",
+    "quantity": 4
+   },
+   {
+    "itemId": "gold_bar",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "silk_cape",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "tan_boar_hide",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 2,
+  "xp": 6,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "boar_hide",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "leather",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "tan_wolf_pelt",
+  "station": "workbench",
+  "skill": "crafting",
+  "level": 8,
+  "xp": 10,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "wolf_pelt",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "leather",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "weave_linen",
+  "station": "loom",
+  "skill": "crafting",
+  "level": 1,
+  "xp": 4,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "plant_fiber",
+    "quantity": 4
+   }
+  ],
+  "output": {
+   "itemId": "linen",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "weave_silk",
+  "station": "loom",
+  "skill": "crafting",
+  "level": 15,
+  "xp": 18,
+  "fee": 3,
+  "inputs": [
+   {
+    "itemId": "spider_silk",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "silk_cloth",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_enhancement_stone",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 18,
+  "xp": 30,
+  "fee": 10,
+  "inputs": [
+   {
+    "itemId": "amethyst",
+    "quantity": 1
+   },
+   {
+    "itemId": "slime_gel",
+    "quantity": 4
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "enhancement_stone",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "brew_enhancement_stone_2",
+  "station": "alchemy_table",
+  "skill": "alchemy",
+  "level": 28,
+  "xp": 45,
+  "fee": 15,
+  "inputs": [
+   {
+    "itemId": "golem_core",
+    "quantity": 1
+   },
+   {
+    "itemId": "glass_vial",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "enhancement_stone",
+   "quantity": 2
+  }
  }
 ]

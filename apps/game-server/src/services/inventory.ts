@@ -34,54 +34,58 @@ export async function lockCharacter(tx: Tx, characterId: string): Promise<{ gold
   return { gold: Number(rows[0].gold) };
 }
 
-export async function loadSlots(tx: Tx | Pool, characterId: string): Promise<{ capacity: number; slots: Slots }> {
-  const cap = await tx.query<{ capacity: number }>(
-    `SELECT capacity FROM inventories WHERE character_id = $1 AND container = 'bag'`,
-    [characterId],
-  );
-  const capacity = cap.rows[0]?.capacity ?? 0;
+export type Container = 'bag' | 'equip';
+
+export async function loadSlots(tx: Tx | Pool, characterId: string, container: Container = 'bag'): Promise<{ capacity: number; slots: Slots }> {
+  const cap = await tx.query<{ capacity: number }>(`SELECT capacity FROM inventories WHERE character_id = $1 AND container = $2`, [characterId, container]);
+  const capacity = cap.rows[0]?.capacity ?? (container === 'equip' ? 9 : 0);
   const slots = emptySlots(capacity);
   const { rows } = await tx.query(
-    `SELECT slot, item_id, quantity, quality, durability, bound
-       FROM inventory_items WHERE character_id = $1 AND container = 'bag'`,
-    [characterId],
+    `SELECT slot, item_id, quantity, quality, durability, bound, enhance
+       FROM inventory_items WHERE character_id = $1 AND container = $2`,
+    [characterId, container],
   );
   for (const r of rows) {
     if (r.slot < capacity) {
-      slots[r.slot] = { itemId: r.item_id, quantity: r.quantity, quality: r.quality, durability: r.durability, bound: r.bound };
+      slots[r.slot] = { itemId: r.item_id, quantity: r.quantity, quality: r.quality, durability: r.durability, bound: r.bound, enhance: r.enhance };
     }
   }
   return { capacity, slots };
 }
 
-export async function writeSlots(tx: Tx, characterId: string, slots: Slots, changed: number[]): Promise<void> {
+export async function writeSlots(tx: Tx, characterId: string, slots: Slots, changed: number[], container: Container = 'bag'): Promise<void> {
+  if (container === 'equip') {
+    await tx.query(`INSERT INTO inventories (character_id, container, capacity) VALUES ($1, 'equip', 9) ON CONFLICT DO NOTHING`, [characterId]);
+  }
   for (const i of changed) {
     const s = slots[i];
     if (!s) {
-      await tx.query(`DELETE FROM inventory_items WHERE character_id = $1 AND container = 'bag' AND slot = $2`, [characterId, i]);
+      await tx.query(`DELETE FROM inventory_items WHERE character_id = $1 AND container = $3 AND slot = $2`, [characterId, i, container]);
     } else {
       await tx.query(
-        `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, quality, durability, bound)
-         VALUES ($1, 'bag', $2, $3, $4, $5, $6, $7)
+        `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, quality, durability, bound, enhance)
+         VALUES ($1, $9, $2, $3, $4, $5, $6, $7, $8)
          ON CONFLICT (character_id, container, slot)
          DO UPDATE SET item_id = EXCLUDED.item_id, quantity = EXCLUDED.quantity, quality = EXCLUDED.quality,
-                       durability = EXCLUDED.durability, bound = EXCLUDED.bound`,
-        [characterId, i, s.itemId, s.quantity, s.quality, s.durability, s.bound],
+                       durability = EXCLUDED.durability, bound = EXCLUDED.bound, enhance = EXCLUDED.enhance`,
+        [characterId, i, s.itemId, s.quantity, s.quality, s.durability, s.bound, s.enhance ?? 0, container],
       );
     }
   }
 }
 
-export function toState(capacity: number, gold: number, slots: Slots): InventoryState {
-  return { capacity, gold, slots: toInventorySlots(slots) };
+/** Inventory snapshot for the client. Equipment is included when known (otherwise the client keeps what it has). */
+export function toState(capacity: number, gold: number, slots: Slots, equipment?: Slots): InventoryState {
+  return { capacity, gold, slots: toInventorySlots(slots), ...(equipment ? { equipment: toInventorySlots(equipment) } : {}) } as InventoryState;
 }
 
 export async function getInventory(pool: Pool, characterId: string): Promise<InventoryState> {
-  const [{ capacity, slots }, gold] = await Promise.all([
+  const [{ capacity, slots }, equip, gold] = await Promise.all([
     loadSlots(pool, characterId),
+    loadSlots(pool, characterId, 'equip'),
     pool.query<{ gold: number }>('SELECT gold FROM characters WHERE id = $1', [characterId]),
   ]);
-  return toState(capacity, Number(gold.rows[0]?.gold ?? 0), slots);
+  return toState(capacity, Number(gold.rows[0]?.gold ?? 0), slots, equip.slots);
 }
 
 /**
@@ -103,7 +107,7 @@ export async function grantItemsTx(
     if (!def) throw new Error(`Unknown item ${g.itemId}`);
     const res = addItem(
       slots,
-      { itemId: def.id, quality: g.quality ?? 0, durability: def.maxDurability, bound: def.bind === 'pickup' },
+      { itemId: def.id, quality: g.quality ?? 0, durability: def.maxDurability, bound: def.bind === 'pickup', enhance: 0 },
       g.quantity,
       def.stackSize,
     );

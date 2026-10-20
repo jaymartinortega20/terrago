@@ -17,12 +17,14 @@ import type { SecurityEvents } from '../security/events';
 import { TokenBucket } from '../security/rateLimit';
 import { loadCharacter, useItem } from '../services/characters';
 import { getInventory, moveInventoryItem } from '../services/inventory';
+import { getItem } from '@terrago/game-data';
 import { getNpc, talkToNpc } from '../services/npcs';
 import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, craftAt, npcServices } from './gameplay';
+import { act, applyDelta, craftAt, gear, npcServices, pushInventory } from './gameplay';
+import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
 
 interface SocketData {
@@ -168,7 +170,9 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
       try {
         // In-world characters keep their live state; only load from the DB when entering fresh.
         const live = world.players.get(character.id);
+        if (!live) await grantStarterWeapon(pool, character.id, character.classId);
         const inventory = live ? (world.inventoryCache.get(character.id) ?? (await getInventory(pool, character.id))) : await getInventory(pool, character.id);
+        if (!live) character.equipment = inventory.equipment ?? [];
         if (closed) return;
         player = await world.join(live ? live.rec : character, conn, inventory, { sessionId, ip });
         if (closed) world.detach(player.id, conn);
@@ -251,7 +255,16 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
         p.serial(async () => {
           const slot = (req as { slot?: unknown })?.slot;
           if (!Number.isInteger(slot)) throw new GameError('Invalid slot.');
+          const inv = world.inventoryCache.get(p.id)?.slots.find((x) => x.slot === slot);
+          const cons = inv ? getItem(inv.itemId)?.consumable : undefined;
+          if (cons && !cons.energy && ((cons.hp && !cons.mp && p.rec.hp >= p.profile.maxHp) || (cons.mp && !cons.hp && p.rec.mp >= p.profile.maxMp))) {
+            throw new GameError(cons.hp ? "You're already at full health." : 'Your MP is already full.');
+          }
+          if (p.dead) throw new GameError("You can't do that right now.");
           const res = await useItem(pool, p.id, slot as number);
+          p.rec.hp = Math.min(p.profile.maxHp, p.rec.hp + res.hp);
+          p.rec.mp = Math.min(p.profile.maxMp, p.rec.mp + res.mp);
+          p.conn?.send('self:update', { hp: p.rec.hp, mp: p.rec.mp });
           p.rec.energy = res.energy;
           p.rec.energyUpdatedAt = res.energyUpdatedAt;
           p.lastEnergySent = res.energy;
@@ -277,6 +290,24 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('fish:reel', (req, ack) => serial(ack, () => reel(g, p, req)));
     socket.on('fish:cancel', () => cancelFishing(p));
     socket.on('craft', (req, ack) => serial(ack, () => craftAt(g, p, req)));
+    socket.on('equip', (req, ack) => serial(ack, () => gear.equip(g, p, req)));
+    socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));
+    socket.on('enhance', (req, ack) => serial(ack, () => gear.enhance(g, p, req)));
+    socket.on('attack', (targetId, ack) =>
+      respond(ack, () => {
+        const res = world.combat.attack(world.runtimeOf(p), p, targetId);
+        if (typeof res === 'string') throw new GameError(res);
+        return res;
+      }),
+    );
+    socket.on('skill', (req, ack) =>
+      respond(ack, () => {
+        const r = (req ?? {}) as { skillId?: unknown; targetId?: unknown };
+        const res = world.combat.useSkill(world.runtimeOf(p), p, r.skillId, r.targetId, (id) => world.players.get(id));
+        if (typeof res === 'string') throw new GameError(res);
+        return res;
+      }),
+    );
     socket.on('lift:floors', (npcId, ack) => serial(ack, () => npcServices.liftFloors(g, p, npcId)));
     socket.on('lift:go', (req, ack) => serial(ack, () => npcServices.liftGo(g, p, req)));
 

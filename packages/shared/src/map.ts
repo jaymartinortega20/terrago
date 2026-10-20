@@ -174,6 +174,16 @@ export interface MapDef {
   levels?: [number, number];
   /** Where you respawn after dying here: map + tile. */
   respawn?: { mapId: string; x: number; y: number };
+  /** Monster spawn areas. */
+  spawns?: SpawnDef[];
+}
+
+export interface SpawnDef {
+  monster: string;
+  level: [number, number];
+  count: number;
+  /** Tile rectangle monsters spawn and wander in. */
+  area: { x: number; y: number; w: number; h: number };
 }
 
 /** Tile -> pixel helpers. A position is the bottom-centre of an entity's feet. */

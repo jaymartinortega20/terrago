@@ -13,3 +13,4 @@ export * from './protocol';
 export * from './skills';
 export * from './farming';
 export * from './gathering';
+export * from './combat';

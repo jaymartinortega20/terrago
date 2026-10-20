@@ -16,7 +16,7 @@ import { savePositions } from './services/characters';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
-import { loadMapObjects, onMapEntered } from './net/gameplay';
+import { combatHooks, loadMapObjects, onMapEntered, type GameplayDeps } from './net/gameplay';
 
 export interface GameServer {
   config: Config;
@@ -45,13 +45,14 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
 
   const security = new SecurityEvents(pool, log);
   const chatLog = new ChatLog(pool, log);
-  const world = new World({
+  const world: World = new World({
     log,
     savePositions: (s) => savePositions(pool, s),
     onChat: (e) => chatLog.add({ channel: 'local', ...e }),
     security,
     loadObjects: (def, owner) => loadMapObjects(pool, def, owner),
     onMapEnter: (p) => void onMapEntered({ pool, world, log }, p).catch((err) => log.error('map_enter_hook_failed', { err })),
+    combat: combatHooks((): GameplayDeps => ({ pool, world, log })),
   });
   const metrics = new Metrics(world, pool);
   const tickets = new TicketStore();

@@ -1,4 +1,4 @@
-import { CHAT, type Direction, type MoveCommand, type PublicPlayer } from '@terrago/shared';
+import { CHAT, type ActiveEffect, type CombatProfile, type Direction, type MoveCommand, type PublicPlayer } from '@terrago/shared';
 import { TokenBucket } from '../security/rateLimit';
 import type { CharacterRecord } from './characterState';
 import type { Connection } from './connection';
@@ -16,6 +16,25 @@ export class Player {
   changingMap = false;
   /** Earliest time the next tile action (till, mine...) is accepted. */
   nextActAt = 0;
+
+  // --- Combat ---------------------------------------------------------------
+  /** Stats with equipment; recomputed when level or equipment changes. */
+  profile!: CombatProfile;
+  effects: ActiveEffect[] = [];
+  cooldowns = new Map<string, number>();
+  nextAttackAt = 0;
+  lastCombatAt = 0;
+  dead = false;
+  respawnAt = 0;
+  /** Hits dealt/taken since the last durability wear. */
+  hitsDealt = 0;
+  hitsTaken = 0;
+  /** Last HP/MP pushed to the client. */
+  sentHp = -1;
+  sentMp = -1;
+  regenCarry = 0;
+  mpCarry = 0;
+  lastVitalsAt = 0;
   x: number;
   y: number;
   dir: Direction;
@@ -65,6 +84,7 @@ export class Player {
 
   toPublic(): PublicPlayer {
     return {
+      kind: 'player',
       id: this.id,
       name: this.rec.name,
       level: this.rec.level,

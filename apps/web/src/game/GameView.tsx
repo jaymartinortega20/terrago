@@ -16,6 +16,7 @@ import { MobileControls } from './ui/MobileControls';
 import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
+import { EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
 
 declare global {
   interface Window {
@@ -127,6 +128,15 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'c') open('character');
       else if (k === 'm') open('map');
       else if (k === 'k') open('skills');
+      else if (k === 'f') client.attackKey();
+      else if (k === 'q') client.useSkill(0);
+      else if (k === 'r') client.useSkill(1);
+      else if (k === 't') client.useSkill(2);
+      else if (k === 'tab') {
+        e.preventDefault();
+        const ids = [...client.monsters.values()].sort((a, b) => Math.hypot(a.x - client.pos.x, a.y - client.pos.y) - Math.hypot(b.x - client.pos.x, b.y - client.pos.y)).map((m) => m.info.id);
+        if (ids.length) client.setTarget(ids[(ids.indexOf(ui.get().targetId ?? '') + 1) % ids.length]!, false);
+      }
       else if (/^[1-9]$/.test(k)) pressSlot(Number(k) - 1);
     };
     window.addEventListener('keydown', onKey);
@@ -144,8 +154,12 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
   return (
     <div className="pointer-events-none absolute inset-0 text-parchment">
       {/* Top-left: status */}
-      <div className="absolute top-2 left-2">
+      <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
         <Hud client={client} compact={touch} />
+        <EffectsBar client={client} />
+      </div>
+      <div className="absolute top-2 left-1/2 -translate-x-1/2">
+        <TargetFrame client={client} />
       </div>
 
       {/* Top-right: location + menu */}
@@ -198,6 +212,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
           {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'enhance' && <EnhancePanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
           )}
@@ -242,6 +257,11 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           <ItemSlot key={i} slot={i} item={bySlot.get(i)} hotkey={touch ? undefined : String(i + 1)} size={touch ? 34 : 40} selected={selected === i} onClick={() => pressSlot(i)} />
         ))}
       </div>
+      {!touch && (
+        <div className="absolute bottom-2 left-1/2 ml-[214px]">
+          <SkillBar client={client} />
+        </div>
+      )}
       <div className={`absolute left-2 ${touch ? 'top-[82px]' : 'bottom-2'}`}>
         <ChatBox client={client} compact={touch} />
       </div>

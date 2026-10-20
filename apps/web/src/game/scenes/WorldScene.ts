@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
-import { getCrop, getNode } from '@terrago/game-data';
+import { getCrop, getItem, getMonster, getNode } from '@terrago/game-data';
+import { itemIcon } from '../art/world';
+import { monsterSheet } from '../art/monsters';
 import {
   CHAT,
   MAX_VIEW,
@@ -11,6 +13,7 @@ import {
   type Direction,
   type MoveInput,
   type NpcAccessory,
+  type CombatEvent,
   type WorldObject,
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
@@ -18,10 +21,16 @@ import { nodeArt } from '../art/nodes';
 import { buildCharacterSheet, characterSheetKey } from '../art/characters';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
-import type { GameClient, RemotePlayer } from '../net/client';
+import type { GameClient, RemoteMonster, RemotePlayer } from '../net/client';
 
 const DIR_ROW: Record<Direction, number> = { down: 0, left: 1, right: 2, up: 3 };
 const WALK_CYCLE = [1, 0, 2, 0];
+
+/** Monster art (shape/colour/size) from game data. */
+function MONSTER_ART(id: string): { shape: string; color: string; size: number } {
+  const a = getMonster(id)?.art;
+  return { shape: a?.shape ?? 'slime', color: a?.color ?? '#7cc35a', size: a?.size ?? 1 };
+}
 const LABEL_FONT = '"Pixelify Sans", monospace';
 const LABEL_DEPTH = 1_000_000;
 
@@ -46,6 +55,8 @@ export class WorldScene extends Phaser.Scene {
   private mapLayer: Phaser.GameObjects.GameObject[] = [];
   private local: Avatar | null = null;
   private remotes = new Map<string, Avatar>();
+  private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number }>();
+  private targetRing!: Phaser.GameObjects.Graphics;
   private npcAvatars = new Map<string, Avatar>();
   private signs: { x: number; y: number; text: string; label: Phaser.GameObjects.Text }[] = [];
   private prompt!: Phaser.GameObjects.Text;
@@ -101,10 +112,19 @@ export class WorldScene extends Phaser.Scene {
       .setVisible(false);
 
     this.cursor = this.add.graphics().setDepth(LABEL_DEPTH - 3);
+    this.targetRing = this.add.graphics().setDepth(-4);
     // Click / tap a nearby tile to use it.
     this.input.on('pointerdown', (ptr: Phaser.Input.Pointer) => {
       if (ptr.button !== 0 || this.client.ui.get().dialogue) return;
       const wp = this.cameras.main.getWorldPoint(ptr.x, ptr.y);
+      // Clicking a monster targets and attacks it.
+      for (const [id, v] of this.monsterViews) {
+        const b = v.sprite.getBounds();
+        if (b.contains(wp.x, wp.y)) {
+          this.client.setTarget(id, true);
+          return;
+        }
+      }
       const tx = Math.floor(wp.x / TILE_SIZE);
       const ty = Math.floor(wp.y / TILE_SIZE);
       const cx = tx * TILE_SIZE + TILE_SIZE / 2;
@@ -127,6 +147,9 @@ export class WorldScene extends Phaser.Scene {
         for (const o of changed) this.syncObject(o);
       }),
       this.client.on('acted', ({ tx, ty }) => this.puff(tx, ty)),
+      this.client.on('monsterAdd', (m) => this.addMonster(m)),
+      this.client.on('monsterRemove', (id) => this.removeMonster(id)),
+      this.client.on('combat', (ev) => this.showCombat(ev)),
     );
     if (this.client.map) this.buildMap();
 
@@ -194,6 +217,7 @@ export class WorldScene extends Phaser.Scene {
     this.npcAvatars.clear();
     this.remotes.forEach((a) => this.destroyAvatar(a));
     this.remotes.clear();
+    for (const id of [...this.monsterViews.keys()]) this.removeMonster(id);
     if (this.local) this.destroyAvatar(this.local);
 
     const W = map.width * TILE_SIZE;
@@ -257,6 +281,7 @@ export class WorldScene extends Phaser.Scene {
     const self = this.client.ui.get().self!;
     this.local = this.makeAvatar(this.client.pos.x, this.client.pos.y, self.appearance, `${self.name} · Lv ${self.level}`, '#ffe48a');
     for (const r of this.client.remotes.values()) this.addRemote(r);
+    for (const m of this.client.monsters.values()) this.addMonster(m);
 
     const cam = this.cameras.main;
     cam.setBounds(0, 0, W, H);
@@ -276,6 +301,7 @@ export class WorldScene extends Phaser.Scene {
   /** Visual state of an object; when it changes, the view is rebuilt. */
   private objectKey(o: WorldObject, now: number): string {
     if (o.kind === 'node') return `${o.type}|${o.depletedUntil > now ? 'spent' : 'ok'}`;
+    if (o.kind === 'drop') return `drop|${o.itemId}`;
     if (o.locked) return 'wild';
     const soil: SoilState = !o.tilled ? 'farmland' : o.wetUntil > now ? 'wet' : 'tilled';
     if (!o.crop) return soil;
@@ -294,6 +320,15 @@ export class WorldScene extends Phaser.Scene {
     const parts: Phaser.GameObjects.Image[] = [];
     const x = o.x * TILE_SIZE;
     const y = o.y * TILE_SIZE;
+    if (o.kind === 'drop') {
+      const def = getItem(o.itemId);
+      if (def) {
+        const key2 = this.canvasTexture(`icon:${def.icon}`, () => itemIcon(def.icon, 2));
+        const img = this.add.image(x + TILE_SIZE / 2, y + TILE_SIZE / 2, key2).setDepth(y + TILE_SIZE / 2);
+        this.tweens.add({ targets: img, y: y + TILE_SIZE / 2 - 4, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+        parts.push(img);
+      }
+    }
     if (o.kind === 'node') {
       const def = getNode(o.type);
       const spent = key.endsWith('spent');
@@ -369,6 +404,85 @@ export class WorldScene extends Phaser.Scene {
       const a = (i / 6) * Math.PI * 2;
       const dot = this.add.rectangle(cx, cy, 4, 4, i % 2 ? 0xc9a36b : 0xe8dcc0).setDepth(LABEL_DEPTH - 5);
       this.tweens.add({ targets: dot, x: cx + Math.cos(a) * 14, y: cy + Math.sin(a) * 10 - 6, alpha: 0, duration: 380, onComplete: () => dot.destroy() });
+    }
+  }
+
+  private addMonster(m: RemoteMonster): void {
+    if (!this.client.map || this.monsterViews.has(m.info.id)) return;
+    const md = this.monsterDef(m.info.monsterId);
+    const key = `mon:${m.info.monsterId}`;
+    let frameW = 32;
+    if (!this.textures.exists(key)) {
+      const sheet = monsterSheet(md.shape, md.color);
+      const tex = this.textures.addCanvas(key, sheet.canvas)!;
+      tex.add(0, 0, 0, 0, sheet.w * 2, sheet.h * 2);
+      tex.add(1, 0, sheet.w * 2, 0, sheet.w * 2, sheet.h * 2);
+      frameW = sheet.w * 2;
+    } else frameW = this.textures.get(key).get(0).width;
+    const sprite = this.add.sprite(m.x, m.y + 2, key, 0).setOrigin(0.5, 1).setScale(md.size);
+    const lvl = this.client.ui.get().self?.level ?? 1;
+    const diff = m.info.level - lvl;
+    const color = diff >= 10 ? '#ff5a5a' : diff >= 5 ? '#ff9a3a' : diff >= 2 ? '#ffe48a' : diff <= -6 ? '#9a9a9a' : '#ffffff';
+    const label = this.add
+      .text(m.x, m.y - sprite.displayHeight - 8, `${m.info.name} · Lv ${m.info.level}`, { fontFamily: LABEL_FONT, fontSize: '11px', color, stroke: '#2a2030', strokeThickness: 3 })
+      .setOrigin(0.5, 1)
+      .setResolution(2)
+      .setDepth(LABEL_DEPTH - 2);
+    const bar = this.add.graphics().setDepth(LABEL_DEPTH - 2);
+    this.monsterViews.set(m.info.id, { sprite, label, bar, frameW });
+  }
+
+  private monsterArt = new Map<string, { shape: string; color: string; size: number }>();
+  private monsterDef(id: string): { shape: string; color: string; size: number } {
+    let a = this.monsterArt.get(id);
+    if (!a) {
+      a = MONSTER_ART(id);
+      this.monsterArt.set(id, a);
+    }
+    return a;
+  }
+
+  private removeMonster(id: string): void {
+    const v = this.monsterViews.get(id);
+    if (!v) return;
+    this.monsterViews.delete(id);
+    v.label.destroy();
+    v.bar.destroy();
+    this.tweens.add({ targets: v.sprite, alpha: 0, duration: 300, onComplete: () => v.sprite.destroy() });
+  }
+
+  private entityPos(id: string): { x: number; y: number; h: number } | null {
+    const self = this.client.ui.get().self;
+    if (self && id === self.characterId) return { x: this.client.pos.x, y: this.client.pos.y, h: 46 };
+    const mv = this.monsterViews.get(id);
+    if (mv) return { x: mv.sprite.x, y: mv.sprite.y, h: mv.sprite.displayHeight };
+    const r = this.remotes.get(id);
+    if (r) return { x: r.sprite.x, y: r.sprite.y, h: 46 };
+    return null;
+  }
+
+  /** Floating numbers for hits, crits, misses and heals. */
+  private showCombat(events: CombatEvent[]): void {
+    const me = this.client.ui.get().self?.characterId;
+    for (const e of events) {
+      const pos = this.entityPos(e.t);
+      if (!pos) continue;
+      if (e.k === 'death') continue;
+      const mine = e.t === me;
+      const text = e.k === 'miss' ? 'miss' : e.k === 'heal' ? `+${e.a}` : `${e.a}`;
+      const color = e.k === 'heal' ? '#7cf06a' : e.k === 'miss' ? '#c8c8c8' : mine ? '#ff6a5a' : e.k === 'crit' ? '#ffb02e' : e.k === 'dot' ? '#b6f06a' : '#ffffff';
+      const size = e.k === 'crit' ? '18px' : '14px';
+      const t = this.add
+        .text(pos.x + (Math.random() * 16 - 8), pos.y - pos.h - 4, e.k === 'crit' ? `${text}!` : text, { fontFamily: LABEL_FONT, fontSize: size, color, stroke: '#2a2030', strokeThickness: 4 })
+        .setOrigin(0.5, 1)
+        .setResolution(2)
+        .setDepth(LABEL_DEPTH + 30);
+      this.tweens.add({ targets: t, y: t.y - 26, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => t.destroy() });
+      const mv = this.monsterViews.get(e.t);
+      if (mv && (e.k === 'hit' || e.k === 'crit' || e.k === 'dot')) {
+        mv.sprite.setTintFill(0xffffff);
+        this.time.delayedCall(70, () => mv.sprite.clearTint());
+      }
     }
   }
 
@@ -469,6 +583,23 @@ export class WorldScene extends Phaser.Scene {
     for (const [id, r] of client.remotes) {
       const av = this.remotes.get(id);
       if (av) this.placeAvatar(av, r.x, r.y, r.dir, r.moving, time);
+    }
+    this.targetRing.clear();
+    const tid = client.ui.get().targetId;
+    for (const [id, m] of client.monsters) {
+      const v = this.monsterViews.get(id);
+      if (!v) continue;
+      const rx = Math.round(m.x);
+      const ry = Math.round(m.y);
+      v.sprite.setPosition(rx, ry + 2).setDepth(m.y).setFrame(m.moving ? Math.floor(time / 180) % 2 : 0).setFlipX(m.dir === 'left');
+      const top = ry - v.sprite.displayHeight - 2;
+      v.label.setPosition(rx, top - 6);
+      v.bar.clear();
+      if (m.hp < 100 || id === tid) {
+        v.bar.fillStyle(0x2a2030, 1).fillRect(rx - 15, top - 4, 30, 5);
+        v.bar.fillStyle(m.hp > 50 ? 0x5fd45a : m.hp > 25 ? 0xe0a52e : 0xd64545, 1).fillRect(rx - 14, top - 3, Math.max(0, Math.round((28 * m.hp) / 100)), 3);
+      }
+      if (id === tid) this.targetRing.lineStyle(2, 0xff5a5a, 0.9).strokeEllipse(rx, ry, Math.max(26, v.sprite.displayWidth * 0.9), 12);
     }
     for (const av of this.npcAvatars.values()) {
       av.bubble?.setPosition(av.sprite.x, av.sprite.y - 64);

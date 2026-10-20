@@ -2,6 +2,7 @@ import type { DIRECTIONS } from './constants';
 import type { CropState } from './farming';
 import type { SkillSet } from './skills';
 import type { NodeObject } from './gathering';
+import type { EquipDef } from './combat';
 
 export type Direction = (typeof DIRECTIONS)[number];
 
@@ -92,11 +93,40 @@ export interface PlotObject {
   crop: CropState | null;
 }
 
-/** Interactive things placed in a map at runtime: farm plots, resource nodes (and later drops). */
-export type WorldObject = PlotObject | NodeObject;
+/** Loot that didn't fit in a bag: only its owner can pick it up, and it fades after a while. */
+export interface DropObject {
+  kind: 'drop';
+  id: string;
+  x: number;
+  y: number;
+  itemId: string;
+  quantity: number;
+  quality: number;
+  ownerId: string;
+  until: number;
+}
+
+/** Interactive things placed in a map at runtime: farm plots, resource nodes, loot drops. */
+export type WorldObject = PlotObject | NodeObject | DropObject;
+
+/** What players see about a monster. */
+export interface PublicMonster {
+  kind: 'monster';
+  id: string;
+  monsterId: string;
+  name: string;
+  level: number;
+  hp: number;
+  maxHp: number;
+  x: number;
+  y: number;
+  dir: Direction;
+  boss?: boolean;
+}
 
 /** What other players can see about a player entity. */
 export interface PublicPlayer {
+  kind?: 'player';
   id: string;
   name: string;
   level: number;
@@ -139,6 +169,8 @@ export interface ItemDef {
   tool?: { kind: ToolKind; tier: number };
   /** Mixed into a planted plot: quality bonus and growth speed multiplier. */
   fertilizer?: { quality: number; speed: number };
+  /** Wearable: slot and stat bonuses. */
+  equip?: EquipDef;
 }
 
 export type ToolKind = 'hoe' | 'can' | 'pickaxe' | 'axe' | 'rod' | 'sickle';
@@ -151,12 +183,16 @@ export interface InventorySlot {
   quality: number;
   durability: number | null;
   bound: boolean;
+  /** Enhancement level (+0..+10) for equipment. */
+  enhance?: number;
 }
 
 export interface InventoryState {
   capacity: number;
   gold: number;
   slots: InventorySlot[];
+  /** Worn items; `slot` is an index into EQUIP_SLOTS. Omitted in updates that don't change them. */
+  equipment?: InventorySlot[];
 }
 
 export interface NpcPublic {

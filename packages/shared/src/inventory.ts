@@ -12,6 +12,7 @@ export interface SlotItem {
   quality: number;
   durability: number | null;
   bound: boolean;
+  enhance?: number;
 }
 
 export type Slots = (SlotItem | null)[];
@@ -32,7 +33,7 @@ export function fromInventorySlots(list: InventorySlot[], capacity: number): Slo
   const slots = emptySlots(capacity);
   for (const s of list) {
     if (s.slot >= 0 && s.slot < capacity) {
-      slots[s.slot] = { itemId: s.itemId, quantity: s.quantity, quality: s.quality, durability: s.durability, bound: s.bound };
+      slots[s.slot] = { itemId: s.itemId, quantity: s.quantity, quality: s.quality, durability: s.durability, bound: s.bound, ...(s.enhance ? { enhance: s.enhance } : {}) };
     }
   }
   return slots;
@@ -53,7 +54,9 @@ export function canStackTogether(a: SlotItem, b: Omit<SlotItem, 'quantity'>, sta
     a.quality === b.quality &&
     a.bound === b.bound &&
     a.durability === null &&
-    b.durability === null
+    b.durability === null &&
+    (a.enhance ?? 0) === 0 &&
+    (b.enhance ?? 0) === 0
   );
 }
 

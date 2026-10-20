@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { touchInput } from '../input';
 import type { GameClient } from '../net/client';
 import { useStore, type Panel } from '../store';
+import { SkillBar } from './CombatUi';
 
 /**
  * Touch controls: a virtual joystick on the left and a compact action cluster
@@ -64,6 +65,9 @@ export function MobileControls({ client, openPanel }: { client: GameClient; open
           style={{ transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))` }}
         />
       </div>
+      <div className="absolute right-[124px] bottom-4 flex flex-col gap-2">
+        <SkillBar client={client} compact />
+      </div>
       <div className="absolute right-3 bottom-4 grid grid-cols-2 gap-2">
         <button
           className={`${btn} ${hint || action ? 'bg-gold text-ink' : 'bg-night-3/80 text-parchment/60'}`}
@@ -73,7 +77,7 @@ export function MobileControls({ client, openPanel }: { client: GameClient; open
         >
           {hint ? 'Talk' : 'Use'}
         </button>
-        <button className={`${btn} bg-night-3/80 text-parchment/50`} style={{ borderWidth: 3 }} disabled aria-label="Attack (coming in v0.5)" title="Combat arrives in v0.5">
+        <button className={`${btn} bg-[#a8473a] text-parchment`} style={{ borderWidth: 3 }} onClick={() => client.attackKey()} aria-label="Attack">
           Attack
         </button>
         <button className={`${btn} bg-night-3/80 text-parchment`} style={{ borderWidth: 3 }} onClick={() => window.dispatchEvent(new Event('terrago:focus-chat'))} aria-label="Chat">
