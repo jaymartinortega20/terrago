@@ -7,6 +7,7 @@ import type {
   NpcPublic,
   PublicMonster,
   PublicPlayer,
+  QuestState,
   SelfState,
   ShopView,
   WorldObject,
@@ -121,6 +122,11 @@ export interface ServerToClientEvents {
   /** Players that came into view. */
   'entity:add': (entities: (PublicPlayer | PublicMonster)[]) => void;
   'combat': (events: CombatEvent[]) => void;
+  /** A visible player's look changed (mount, weapon). */
+  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null }) => void;
+  'quests': (quests: QuestState[]) => void;
+  /** Duel state: opponent id/name, or null when it ends. */
+  'duel': (info: { with: { id: string; name: string } | null; until?: number }) => void;
   /** Your active buffs/debuffs and skill cooldowns (ends: ms since epoch). */
   'effects': (info: { effects: { id: string; name: string; until: number }[]; cooldowns: Record<string, number> }) => void;
   /** Players that left view (or the map). */
@@ -164,6 +170,7 @@ export interface ClientToServerEvents {
   'equip': (req: { from: number }, ack: Ack<null>) => void;
   'unequip': (req: { slot: number }, ack: Ack<null>) => void;
   'enhance': (req: { equipSlot: number }, ack: Ack<{ success: boolean; message: string }>) => void;
+  'mount:toggle': (ack: Ack<{ mount: string | null }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;
   'lift:go': (req: { npcId: string; floor: number }, ack: Ack<{ message: string }>) => void;
   'ping:check': (clientTime: number, ack: (serverTime: number) => void) => void;

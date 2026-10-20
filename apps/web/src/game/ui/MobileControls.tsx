@@ -67,6 +67,9 @@ export function MobileControls({ client, openPanel }: { client: GameClient; open
       </div>
       <div className="absolute right-[124px] bottom-4 flex flex-col gap-2">
         <SkillBar client={client} compact />
+        <button className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border-ink bg-wood text-[10px] font-bold text-parchment" style={{ borderWidth: 3 }} onClick={() => client.toggleMount()} aria-label="Ride">
+          Ride
+        </button>
       </div>
       <div className="absolute right-3 bottom-4 grid grid-cols-2 gap-2">
         <button

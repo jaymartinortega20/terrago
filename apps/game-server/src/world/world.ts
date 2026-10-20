@@ -104,6 +104,8 @@ export class World {
     this.combat = new Combat(
       {
         ...deps.combat,
+        onDuelEnd: (w, l) => this.duelWon(w, l),
+        dismount: (p) => this.setMount(p, null, 1),
         respawn: (p) => {
           const pt = Combat.respawnPoint(this.runtimeOf(p));
           void this.moveTo(p, pt.mapId, null, pt.x, pt.y, 'down');
@@ -114,10 +116,80 @@ export class World {
     );
   }
 
+  /** Tell every player who can see `p` about a look change. */
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null }): void {
+    for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
+  }
+
+  /** Get on (item id + speed) or off (null) a mount. */
+  setMount(p: Player, mount: string | null, speed: number, notify = true): void {
+    if (p.mount === mount) return;
+    p.mount = mount;
+    p.speed = mount ? speed : 1;
+    p.conn?.send('self:update', { mount: p.mount, speed: p.speed });
+    if (notify) this.broadcastLook(p, { mount: p.mount });
+  }
+
+  // --- Duels -------------------------------------------------------------------
+
+  private endDuel(a: Player, b: Player, text: string): void {
+    a.duel = null;
+    b.duel = null;
+    for (const q of [a, b]) {
+      q.conn?.send('duel', { with: null });
+      this.system(q, text);
+    }
+  }
+
+  duelCommand(p: Player, cmd: string, arg: string): string {
+    const now = this.now();
+    if (cmd === 'duel') {
+      const q = [...this.players.values()].find((x) => x.name.toLowerCase() === arg.toLowerCase());
+      if (!q || q === p) return 'Who? Type /duel followed by a player name.';
+      if (q.mapId !== p.mapId || Math.hypot(q.x - p.x, q.y - p.y) > 12 * TILE_SIZE) return `${q.name} needs to be nearby.`;
+      if (p.duel || q.duel) return 'Someone is already in a duel.';
+      q.duelInvite = { from: p, until: now + 30_000 };
+      this.system(q, `${p.name} challenges you to a duel! Type /accept to fight (nobody dies — first to 1 HP loses).`);
+      return `Duel challenge sent to ${q.name}.`;
+    }
+    if (cmd === 'accept') {
+      const inv = p.duelInvite;
+      p.duelInvite = null;
+      if (!inv || inv.until < now || !this.players.has(inv.from.id) || inv.from.duel || p.duel) return 'No duel challenge to accept.';
+      const q = inv.from;
+      const until = now + 180_000;
+      p.duel = { with: q, until };
+      q.duel = { with: p, until };
+      p.conn?.send('duel', { with: { id: q.id, name: q.name }, until });
+      q.conn?.send('duel', { with: { id: p.id, name: p.name }, until });
+      this.system(q, `${p.name} accepted your duel. Fight!`);
+      return `Duel with ${q.name} — fight! (F to attack; click them to target)`;
+    }
+    if (cmd === 'forfeit') {
+      if (!p.duel) return "You're not in a duel.";
+      const q = p.duel.with;
+      this.endDuel(p, q, `${p.name} forfeits. ${q.name} wins the duel!`);
+      return '';
+    }
+    return '';
+  }
+
+  duelWon(winner: Player, loser: Player): void {
+    if (winner.duel?.with !== loser) return;
+    this.endDuel(winner, loser, `${winner.name} wins the duel against ${loser.name}!`);
+  }
+
+  private expireDuels(now: number): void {
+    for (const p of this.players.values()) if (p.duel && p.duel.until < now) this.endDuel(p, p.duel.with, 'The duel ended in a draw (time).');
+  }
+
   /** Worn equipment changed: recompute stats and tell the client. */
   setEquipment(p: Player, equipment: InventorySlot[]): void {
+    const before = p.rec.equipment?.find((e) => e.slot === 0)?.itemId ?? null;
     p.rec.equipment = equipment;
     this.refreshProfile(p);
+    const after = equipment.find((e) => e.slot === 0)?.itemId ?? null;
+    if (before !== after) this.broadcastLook(p, { weapon: after });
   }
 
   refreshProfile(p: Player): void {
@@ -368,7 +440,9 @@ export class World {
     const recentChat = rt.recentChat
       .filter((c) => now - c.msg.ts < 5 * 60_000 && Math.hypot(c.x - p.x, c.y - p.y) <= CHAT.localRadius)
       .map((c) => c.msg);
-    const self = buildSelfState(p.rec, now, p.profile);
+    // Mounts can't squeeze into mine tunnels.
+    if (p.mount && rt.def.theme === 'cave') this.setMount(p, null, 1, false);
+    const self = { ...buildSelfState(p.rec, now, p.profile), mount: p.mount, speed: p.speed };
     p.lastEnergySent = self.energy;
     p.conn?.send('world:enter', {
       protocol: PROTOCOL_VERSION,
@@ -409,6 +483,7 @@ export class World {
     if (this.players.get(p.id) !== p) return;
     if (p.graceTimer) clearTimeout(p.graceTimer);
     p.graceTimer = null;
+    if (p.duel) this.endDuel(p, p.duel.with, `${p.name} left. The duel is over.`);
     this.players.delete(p.id);
     this.inventoryCache.delete(p.id);
     this.removeFromMap(p);
@@ -464,7 +539,10 @@ export class World {
       for (const rt of this.maps.values()) this.broadcast(rt, now);
     }
     if (this.tickCount % 100 === 0) this.dropIdleInstances(now);
-    if (this.tickCount % 20 === 0) this.respawnNodes(now);
+    if (this.tickCount % 20 === 0) {
+      this.respawnNodes(now);
+      this.expireDuels(now);
+    }
   }
 
   private dropIdleInstances(now: number): void {
@@ -488,7 +566,7 @@ export class World {
       const [seq, dx, dy] = p.inputs.shift()!;
       p.budgetMs -= SIM.stepMs;
       p.lastSeq = seq;
-      const next = stepMovement({ x: p.x, y: p.y }, { dx, dy }, rt.grid, PLAYER_SPEED, SIM.stepMs);
+      const next = stepMovement({ x: p.x, y: p.y }, { dx, dy }, rt.grid, PLAYER_SPEED * p.speed, SIM.stepMs);
       p.dir = facingFor({ dx, dy }, p.dir);
       if (next.x !== p.x || next.y !== p.y) {
         p.x = next.x;
@@ -673,7 +751,13 @@ export class World {
       case 'where':
         return reply(`${this.runtimeOf(p).def.name} (${Math.floor(p.x / TILE_SIZE)}, ${Math.floor(p.y / TILE_SIZE)})`);
       case 'help':
-        return reply('Commands: /who — players online, /where — your location.');
+        return reply('Commands: /who, /where, /duel <name>, /accept, /forfeit.');
+      case 'duel':
+      case 'accept':
+      case 'forfeit': {
+        const out = this.duelCommand(p, cmd!.toLowerCase(), text.slice(1 + cmd!.length).trim());
+        return out ? reply(out) : { ok: true as const, id: 'system' };
+      }
       default:
         return { ok: false, error: `Unknown command /${cmd}. Try /help.` };
     }

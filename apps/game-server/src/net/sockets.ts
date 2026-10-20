@@ -23,7 +23,7 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, applyDelta, craftAt, gear, npcServices, pushInventory } from './gameplay';
+import { act, craftAt, gear, npcServices, questEvent, startQuests, toggleMount } from './gameplay';
 import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
 
@@ -176,7 +176,13 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
         if (closed) return;
         player = await world.join(live ? live.rec : character, conn, inventory, { sessionId, ip });
         if (closed) world.detach(player.id, conn);
-        else registerHandlers(socket, player);
+        else {
+          registerHandlers(socket, player);
+          if (live) player.conn?.send('quests', player.quests);
+          else await startQuests({ pool, world, log }, player);
+          if (player.mount) player.conn?.send('self:update', { mount: player.mount, speed: player.speed });
+          if (player.duel) player.conn?.send('duel', { with: { id: player.duel.with.id, name: player.duel.with.name }, until: player.duel.until });
+        }
       } catch (err) {
         log.error('join_failed', { err, characterId: character.id });
         socket.emit('session:end', { reason: 'Could not enter the world. Please try again.' });
@@ -218,6 +224,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
           if (!npc) throw new GameError('Nobody is there.');
           if (!world.npcInRange(p, npc)) throw new GameError("You're too far away to talk.");
           const { dialogue, inventory } = await talkToNpc(pool, p.id, npc);
+          questEvent({ pool, world, log }, p, 'talk', npc.id);
           if (inventory) {
             world.inventoryCache.set(p.id, inventory);
             p.conn?.send('inventory:update', inventory);
@@ -291,6 +298,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('fish:cancel', () => cancelFishing(p));
     socket.on('craft', (req, ack) => serial(ack, () => craftAt(g, p, req)));
     socket.on('equip', (req, ack) => serial(ack, () => gear.equip(g, p, req)));
+    socket.on('mount:toggle', (ack) => respond(ack, () => toggleMount(g, p)));
     socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));
     socket.on('enhance', (req, ack) => serial(ack, () => gear.enhance(g, p, req)));
     socket.on('attack', (targetId, ack) =>

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { getCrop, getItem, getMonster, getNode } from '@terrago/game-data';
 import { itemIcon } from '../art/world';
 import { monsterSheet } from '../art/monsters';
+import { mountSheet } from '../art/mounts';
 import {
   CHAT,
   MAX_VIEW,
@@ -40,6 +41,8 @@ interface ObjectView {
 }
 
 interface Avatar {
+  mount?: Phaser.GameObjects.Sprite | null;
+  mountId?: string | null;
   sprite: Phaser.GameObjects.Sprite;
   label: Phaser.GameObjects.Text;
   bubble: Phaser.GameObjects.Container | null;
@@ -117,6 +120,14 @@ export class WorldScene extends Phaser.Scene {
     this.input.on('pointerdown', (ptr: Phaser.Input.Pointer) => {
       if (ptr.button !== 0 || this.client.ui.get().dialogue) return;
       const wp = this.cameras.main.getWorldPoint(ptr.x, ptr.y);
+      const duel = this.client.ui.get().duel;
+      if (duel) {
+        const av = this.remotes.get(duel.id);
+        if (av && av.sprite.getBounds().contains(wp.x, wp.y)) {
+          this.client.setTarget(duel.id, true);
+          return;
+        }
+      }
       // Clicking a monster targets and attacks it.
       for (const [id, v] of this.monsterViews) {
         const b = v.sprite.getBounds();
@@ -150,6 +161,11 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('monsterAdd', (m) => this.addMonster(m)),
       this.client.on('monsterRemove', (id) => this.removeMonster(id)),
       this.client.on('combat', (ev) => this.showCombat(ev)),
+      this.client.on('look', (id) => {
+        const r = this.client.remotes.get(id);
+        const av = this.remotes.get(id);
+        if (r && av) this.setAvatarMount(av, r.info.mount);
+      }),
     );
     if (this.client.map) this.buildMap();
 
@@ -200,7 +216,26 @@ export class WorldScene extends Phaser.Scene {
     return { sprite, label: text, bubble: null, bubbleTimer: null };
   }
 
+  /** Show (or hide) the mount under an avatar. */
+  private setAvatarMount(av: Avatar, mountId: string | null | undefined): void {
+    if ((av.mountId ?? null) === (mountId ?? null)) return;
+    av.mount?.destroy();
+    av.mount = null;
+    av.mountId = mountId ?? null;
+    const def = mountId ? getItem(mountId)?.mount : undefined;
+    if (!def) return;
+    const key = `mount:${def.kind}:${def.color}`;
+    if (!this.textures.exists(key)) {
+      const sh = mountSheet(def.kind, def.color);
+      const tex = this.textures.addCanvas(key, sh.canvas)!;
+      tex.add(0, 0, 0, 0, sh.w * 2, sh.h * 2);
+      tex.add(1, 0, sh.w * 2, 0, sh.w * 2, sh.h * 2);
+    }
+    av.mount = this.add.sprite(av.sprite.x, av.sprite.y, key, 0).setOrigin(0.5, 1);
+  }
+
   private destroyAvatar(av: Avatar): void {
+    av.mount?.destroy();
     av.bubbleTimer?.remove();
     av.bubble?.destroy();
     av.sprite.destroy();
@@ -468,6 +503,7 @@ export class WorldScene extends Phaser.Scene {
       const pos = this.entityPos(e.t);
       if (!pos) continue;
       if (e.k === 'death') continue;
+      this.projectile(e);
       const mine = e.t === me;
       const text = e.k === 'miss' ? 'miss' : e.k === 'heal' ? `+${e.a}` : `${e.a}`;
       const color = e.k === 'heal' ? '#7cf06a' : e.k === 'miss' ? '#c8c8c8' : mine ? '#ff6a5a' : e.k === 'crit' ? '#ffb02e' : e.k === 'dot' ? '#b6f06a' : '#ffffff';
@@ -486,9 +522,56 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /** What flies from attacker to target: arrows for bows, orbs for magic. */
+  private projectileKind(e: CombatEvent): { color: number; arrow: boolean; size: number } | null {
+    const bySkill: Record<string, { color: number; arrow: boolean; size: number }> = {
+      fireball: { color: 0xf5a623, arrow: false, size: 6 },
+      smite: { color: 0xfff6a0, arrow: false, size: 5 },
+      aimed_shot: { color: 0xe8dcc0, arrow: true, size: 3 },
+      volley: { color: 0xe8dcc0, arrow: true, size: 3 },
+      hunters_mark: { color: 0xe8a03a, arrow: true, size: 3 },
+    };
+    if (e.sk) return bySkill[e.sk] ?? null;
+    if (e.k === 'heal' || e.k === 'dot') return null;
+    const self = this.client.ui.get().self;
+    let weaponItem: string | null | undefined = null;
+    if (self && e.s === self.characterId) weaponItem = this.client.ui.get().inventory?.equipment?.find((x) => x.slot === 0)?.itemId;
+    else if (this.client.remotes.has(e.s)) weaponItem = this.client.remotes.get(e.s)!.info.weapon;
+    else {
+      const m = this.client.monsters.get(e.s);
+      if (m && getMonster(m.info.monsterId)?.magic) return { color: 0xb06ad6, arrow: false, size: 5 };
+      return null;
+    }
+    const w = weaponItem ? getItem(weaponItem)?.equip : undefined;
+    if (!w?.weapon) return null;
+    if (w.weapon === 'bow') return { color: 0xe8dcc0, arrow: true, size: 3 };
+    if (w.weapon === 'staff' || w.weapon === 'wand') return { color: 0x8fd0ff, arrow: false, size: 5 };
+    return null;
+  }
+
+  private projectile(e: CombatEvent): void {
+    const kind = this.projectileKind(e);
+    const from = this.entityPos(e.s);
+    const to = this.entityPos(e.t);
+    if (!kind || !from || !to) return;
+    const fx = from.x;
+    const fy = from.y - from.h * 0.6;
+    const tx = to.x;
+    const ty = to.y - to.h * 0.5;
+    if (Math.hypot(tx - fx, ty - fy) < 40) return;
+    const angle = Math.atan2(ty - fy, tx - fx);
+    const obj = kind.arrow
+      ? this.add.rectangle(fx, fy, 14, kind.size, kind.color).setStrokeStyle(1, 0x2a2030).setRotation(angle)
+      : this.add.circle(fx, fy, kind.size, kind.color).setStrokeStyle(2, 0xffffff, 0.6);
+    obj.setDepth(LABEL_DEPTH + 25);
+    this.tweens.add({ targets: obj, x: tx, y: ty, duration: Math.min(260, Math.hypot(tx - fx, ty - fy) * 1.1), onComplete: () => obj.destroy() });
+  }
+
   private addRemote(r: RemotePlayer): void {
     if (!this.client.map || this.remotes.has(r.info.id)) return;
-    this.remotes.set(r.info.id, this.makeAvatar(r.x, r.y, r.info.appearance, `${r.info.name} · Lv ${r.info.level}`, '#ffffff'));
+    const av = this.makeAvatar(r.x, r.y, r.info.appearance, `${r.info.name} · Lv ${r.info.level}`, '#ffffff');
+    this.remotes.set(r.info.id, av);
+    this.setAvatarMount(av, r.info.mount);
   }
 
   private removeRemote(id: string): void {
@@ -543,10 +626,12 @@ export class WorldScene extends Phaser.Scene {
   private placeAvatar(av: Avatar, x: number, y: number, dir: Direction, moving: boolean, time: number): void {
     const rx = Math.round(x);
     const ry = Math.round(y);
-    const col = moving ? WALK_CYCLE[Math.floor(time / 130) % 4]! : 0;
-    av.sprite.setPosition(rx, ry + 2).setFrame(DIR_ROW[dir] * 3 + col).setDepth(y);
-    av.label.setPosition(rx, ry - 46);
-    av.bubble?.setPosition(rx, ry - 62);
+    const lift = av.mount ? 14 : 0;
+    const col = av.mount ? 0 : moving ? WALK_CYCLE[Math.floor(time / 130) % 4]! : 0;
+    av.sprite.setPosition(rx, ry + 2 - lift).setFrame(DIR_ROW[dir] * 3 + col).setDepth(y + 0.5);
+    if (av.mount) av.mount.setPosition(rx, ry + 4).setFlipX(dir === 'left').setFrame(moving ? Math.floor(time / 110) % 2 : 0).setDepth(dir === 'up' ? y + 1 : y);
+    av.label.setPosition(rx, ry - 46 - lift);
+    av.bubble?.setPosition(rx, ry - 62 - lift);
   }
 
   override update(time: number): void {
@@ -577,6 +662,7 @@ export class WorldScene extends Phaser.Scene {
 
     const lx = client.prevPos.x + (client.pos.x - client.prevPos.x) * alpha + client.correction.x;
     const ly = client.prevPos.y + (client.pos.y - client.prevPos.y) * alpha + client.correction.y;
+    this.setAvatarMount(this.local, client.ui.get().self?.mount);
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time);
 
     client.interpolateRemotes();
@@ -600,6 +686,10 @@ export class WorldScene extends Phaser.Scene {
         v.bar.fillStyle(m.hp > 50 ? 0x5fd45a : m.hp > 25 ? 0xe0a52e : 0xd64545, 1).fillRect(rx - 14, top - 3, Math.max(0, Math.round((28 * m.hp) / 100)), 3);
       }
       if (id === tid) this.targetRing.lineStyle(2, 0xff5a5a, 0.9).strokeEllipse(rx, ry, Math.max(26, v.sprite.displayWidth * 0.9), 12);
+    }
+    if (tid && this.remotes.has(tid)) {
+      const av = this.remotes.get(tid)!;
+      this.targetRing.lineStyle(2, 0xff5a5a, 0.9).strokeEllipse(av.sprite.x, av.sprite.y, 28, 12);
     }
     for (const av of this.npcAvatars.values()) {
       av.bubble?.setPosition(av.sprite.x, av.sprite.y - 64);

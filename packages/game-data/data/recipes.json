@@ -2758,5 +2758,159 @@
    "itemId": "enhancement_stone",
    "quantity": 2
   }
+ },
+ {
+  "id": "forge_shield_copper_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 4,
+  "xp": 32,
+  "fee": 4,
+  "inputs": [
+   {
+    "itemId": "copper_bar",
+    "quantity": 4
+   },
+   {
+    "itemId": "softwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "copper_shield",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_shield_iron_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 11,
+  "xp": 50,
+  "fee": 16,
+  "inputs": [
+   {
+    "itemId": "iron_bar",
+    "quantity": 5
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "iron_shield",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_shield_silver_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 21,
+  "xp": 68,
+  "fee": 36,
+  "inputs": [
+   {
+    "itemId": "silver_bar",
+    "quantity": 6
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "silver_shield",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_shield_gold_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 31,
+  "xp": 86,
+  "fee": 64,
+  "inputs": [
+   {
+    "itemId": "gold_bar",
+    "quantity": 7
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "gold_shield",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_shield_mithril_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 41,
+  "xp": 104,
+  "fee": 100,
+  "inputs": [
+   {
+    "itemId": "mithril_bar",
+    "quantity": 8
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "mithril_shield",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_shield_obsidian_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 55,
+  "xp": 122,
+  "fee": 144,
+  "inputs": [
+   {
+    "itemId": "obsidian_bar",
+    "quantity": 9
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "obsidian_shield",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "forge_shield_star_metal_shield",
+  "station": "anvil",
+  "skill": "smithing",
+  "level": 69,
+  "xp": 140,
+  "fee": 196,
+  "inputs": [
+   {
+    "itemId": "star_metal_bar",
+    "quantity": 10
+   },
+   {
+    "itemId": "hardwood_plank",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "star_metal_shield",
+   "quantity": 1
+  }
  }
 ]

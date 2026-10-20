@@ -4,7 +4,7 @@ import { FISHING_STEP_MS, fishingZone, rollQuality, simulateFishing, timeOfDay, 
 import { GameError } from '../db';
 import { castLine, landFish } from '../services/gathering';
 import type { Player } from '../world/player';
-import { applyDelta, pushInventory, type GameplayDeps } from './gameplay';
+import { applyDelta, pushInventory, questEvent, type GameplayDeps } from './gameplay';
 
 /**
  * Fishing: cast → wait for a bite → hook in time → reel (minigame).
@@ -118,6 +118,7 @@ export async function reel(deps: GameplayDeps, p: Player, req: unknown): Promise
   const res = await landFish(deps.pool, p.id, s.fish.itemId, quality, s.fish.xp);
   pushInventory(deps.world, p, res.inventory);
   applyDelta(deps.world, p, res.delta);
+  questEvent(deps, p, 'fish', s.fish.itemId);
   return { caught: true, message: res.message };
 }
 

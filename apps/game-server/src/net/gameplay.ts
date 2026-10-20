@@ -7,6 +7,7 @@ import {
   PROP_TYPES,
   TILE_SIZE,
   type NodeObject,
+  type QuestStepType,
   type DropObject,
   maxHp,
   maxMp,
@@ -32,6 +33,7 @@ import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gather
 import { cast } from './fishing';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
+import { loadQuests, questEvent as questEventTx } from '../services/quests';
 import type { Player } from '../world/player';
 import { World } from '../world/world';
 
@@ -234,7 +236,11 @@ export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<
   const canTier = hasTool(world, p, 'can');
   const doWater = () => run(water(pool, p.id, wateringArea(rt.def, tx, ty, canTier, p.dir), selDef?.tool?.kind === 'can' ? prefer : undefined));
 
-  if (status?.ready) return run(harvest(pool, p.id, plot.index));
+  if (status?.ready) {
+    const r = await run(harvest(pool, p.id, plot.index));
+    questEvent(deps, p, 'harvest', crop!.cropId);
+    return r;
+  }
   if (!plot.tilled) return run(till(pool, p.id, plot.index, selDef?.tool?.kind === 'hoe' ? prefer : undefined));
   if (!crop) {
     if (selDef?.tool?.kind === 'can') return doWater();
@@ -282,8 +288,10 @@ async function gatherNode(deps: GameplayDeps, p: Player, node: NodeObject, slot:
     world.nodeRelease(rt, node.id);
     throw err;
   }
-  if (success) world.nodeGathered(rt, node.id);
-  else world.nodeRelease(rt, node.id);
+  if (success) {
+    world.nodeGathered(rt, node.id);
+    for (const it of res.items) questEvent(deps, p, 'gather', it.itemId, it.quantity);
+  } else world.nodeRelease(rt, node.id);
   pushInventory(world, p, res.inventory);
   applyDelta(world, p, res.delta);
   return { message: res.message, effect: success ? 'gathered' : 'miss' };
@@ -310,11 +318,13 @@ export async function craftAt(deps: GameplayDeps, p: Player, req: unknown): Prom
   const res = await craftRecipe(deps.pool, p.id, recipe.id, r.times);
   pushInventory(deps.world, p, res.inventory);
   applyDelta(deps.world, p, res.delta);
+  for (const it of res.items) questEvent(deps, p, 'craft', it.itemId, it.quantity);
   return { message: res.message };
 }
 
 /** Remember the deepest mine checkpoints (every 5th floor) for the lift. */
 export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void> {
+  questEvent(deps, p, 'visit', p.mapId);
   const floor = mineFloorNumber(p.mapId);
   if (floor && floor % 5 === 0) {
     await deps.pool.query('INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING', [p.id, `mine:${floor}`]);
@@ -342,6 +352,7 @@ export const npcServices = {
     const npc = npcService(deps.world, p, r.npcId, 'shop');
     const res = await buyFromShop(deps.pool, p.id, npc.id, r.itemId, r.quantity);
     pushInventory(deps.world, p, res.inventory);
+    questEvent(deps, p, 'buy', String(r.itemId), Number(r.quantity) || 1);
     return { message: res.message };
   },
   async shopSell(deps: GameplayDeps, p: Player, req: unknown) {
@@ -432,6 +443,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
         const rt = d.world.runtimeOf(r.player);
         void r.player
           .serial(async () => {
+            questEvent(d, r.player, 'kill', r.monster.def.id);
             const res = await grantKillRewards(d.pool, r.player.id, { xp: r.xp, gold: r.gold, items: r.items, monster: r.monster.def.id });
             pushInventory(d.world, r.player, res.inventory);
             applyDelta(d.world, r.player, res.delta);
@@ -472,4 +484,54 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
 
 function toSlots(eq: (import('@terrago/shared').SlotItem | null)[]) {
   return eq.flatMap((s, slot) => (s ? [{ slot, ...s }] : []));
+}
+
+// ---------------------------------------------------------------------------
+// Quests and mounts
+// ---------------------------------------------------------------------------
+
+const questChains = new WeakMap<Player, Promise<unknown>>();
+
+/** Feed a game event to the player's quests (queued, so events never race). */
+export function questEvent(deps: GameplayDeps, p: Player, type: QuestStepType, target: string | null, n = 1): void {
+  const run = async () => {
+    const out = await questEventTx(deps.pool, p.id, p.quests, type, target, n);
+    if (!out) return;
+    p.quests = out.quests;
+    p.conn?.send('quests', p.quests);
+    pushInventory(deps.world, p, out.inventory);
+    applyDelta(deps.world, p, out.delta);
+    for (const m of out.messages) p.conn?.send('notice', { kind: 'success', text: m });
+    const rt = deps.world.runtimeOf(p);
+    for (const o of out.overflow) deps.world.addDrop(rt, p.x, p.y, o.itemId, o.quantity, p.id);
+  };
+  const next = (questChains.get(p) ?? Promise.resolve()).then(run, run).catch((err) => deps.log.error('quest_event_failed', { err }));
+  questChains.set(p, next);
+}
+
+export async function startQuests(deps: GameplayDeps, p: Player): Promise<void> {
+  p.quests = await loadQuests(deps.pool, p.id);
+  p.conn?.send('quests', p.quests);
+}
+
+/** Z: ride the best mount you own, or get off. */
+export function toggleMount(deps: GameplayDeps, p: Player): { mount: string | null } {
+  const { world } = deps;
+  if (p.mount) {
+    world.setMount(p, null, 1);
+    return { mount: null };
+  }
+  if (p.dead) throw new GameError("You can't ride right now.");
+  if (world.runtimeOf(p).def.theme === 'cave') throw new GameError('Mounts refuse to go into the mine tunnels.');
+  if (Date.now() - p.lastCombatAt < 4000) throw new GameError("You can't mount up in the middle of a fight.");
+  let best: { id: string; speed: number } | null = null;
+  for (const s of world.inventoryCache.get(p.id)?.slots ?? []) {
+    const def = getItem(s.itemId);
+    if (!def?.mount || p.rec.level < def.levelRequirement) continue;
+    if (!best || def.mount.speed > best.speed) best = { id: def.id, speed: def.mount.speed };
+  }
+  if (!best) throw new GameError("You don't own a mount yet. Stablemaster Hana in Greenhaven can help.");
+  world.setMount(p, best.id, best.speed);
+  questEvent(deps, p, 'mount', null);
+  return { mount: best.id };
 }

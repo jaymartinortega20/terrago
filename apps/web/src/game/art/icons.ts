@@ -346,6 +346,14 @@ export function drawExtraIcon(icon: string, b: PixelBuffer): boolean {
     case 'stone_enh':
       b.ellipse(3, 2, 10, 12, '#4a7fd6').ellipse(5, 4, 4, 5, '#8fb8f0').set(9, 9, '#ffffff');
       return true;
+    case 'mount': {
+      const col = hex(c, '#8a5d33');
+      b.ellipse(1, 6, 11, 6, col).rect(10, 3, 3, 6, col).ellipse(10, 1, 6, 4, col).set(14, 2, '#2a2030');
+      for (const x of [3, 5, 8, 10]) b.vline(x, 11, 14, shade(col, -0.3));
+      if (a === 'stag') b.set(10, 0, '#d6c79f').set(12, 0, '#d6c79f');
+      b.rect(5, 5, 4, 2, '#7a3a2a');
+      return true;
+    }
     case 'chest':
       b.rect(2, 5, 12, 9, '#a8743f').rect(2, 3, 12, 4, '#b8844d').hline(2, 13, 7, '#6b4628').rect(7, 6, 2, 3, '#f2c14e');
       return true;

@@ -17,6 +17,7 @@ import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from '.
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 import { EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
+import { QuestTracker, QuestsPanel } from './ui/QuestUi';
 
 declare global {
   interface Window {
@@ -129,6 +130,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'm') open('map');
       else if (k === 'k') open('skills');
       else if (k === 'f') client.attackKey();
+      else if (k === 'z') client.toggleMount();
+      else if (k === 'j') open('quests');
       else if (k === 'q') client.useSkill(0);
       else if (k === 'r') client.useSkill(1);
       else if (k === 't') client.useSkill(2);
@@ -199,6 +202,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
             </button>
           ))}
         </nav>
+        {!panel && <QuestTracker client={client} compact={touch} />}
         <div
           className={touch && panel ? 'pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-night/50 p-2' : 'mt-1'}
           onClick={(e) => touch && e.target === e.currentTarget && open(null)}
@@ -207,6 +211,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'character' && <CharacterPanel client={client} onClose={() => open(null)} />}
           {panel === 'map' && <MapPanel client={client} onClose={() => open(null)} />}
           {panel === 'skills' && <SkillsPanel client={client} onClose={() => open(null)} />}
+          {panel === 'quests' && <QuestsPanel client={client} onClose={() => open(null)} />}
           {panel === 'shop' && <ShopPanel client={client} onClose={() => open(null)} />}
           {panel === 'farm' && <FarmPanel client={client} onClose={() => open(null)} />}
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}

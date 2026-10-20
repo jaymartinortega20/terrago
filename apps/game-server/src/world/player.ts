@@ -34,6 +34,14 @@ export class Player {
   sentMp = -1;
   regenCarry = 0;
   mpCarry = 0;
+  /** Duel in progress. */
+  duel: { with: Player; until: number } | null = null;
+  duelInvite: { from: Player; until: number } | null = null;
+  /** Mount being ridden (item id) and speed multiplier. */
+  mount: string | null = null;
+  speed = 1;
+  /** Starter quest chain progress (loaded at join). */
+  quests: import('@terrago/shared').QuestState[] = [];
   lastVitalsAt = 0;
   x: number;
   y: number;
@@ -93,6 +101,8 @@ export class Player {
       x: this.x,
       y: this.y,
       dir: this.dir,
+      mount: this.mount,
+      weapon: this.rec.equipment?.find((e) => e.slot === 0)?.itemId ?? null,
     };
   }
 

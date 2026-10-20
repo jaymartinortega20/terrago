@@ -1,327 +1,363 @@
 [
-  {
-    "id": "mayor_lina",
-    "name": "Mayor Lina",
-    "title": "Mayor of Greenhaven",
-    "mapId": "greenhaven",
-    "x": 28,
-    "y": 22,
-    "dir": "right",
-    "appearance": {
-      "bodyType": "b",
-      "skinTone": 2,
-      "hairStyle": 4,
-      "hairColor": 4,
-      "eyeColor": 1,
-      "outfit": 5
-    },
-    "accessory": "cape",
-    "firstMeeting": {
-      "lines": [
-        "Ah, a new face! Welcome to Greenhaven, traveler. I'm Lina \u2014 mayor, baker, and part-time settler of fence disputes.",
-        "Every great farmer, smith and adventurer in TerraGo started right where you're standing: tired, a little lost, and nearly broke.",
-        "Here \u2014 your Greenhaven Charter, so the guards know you belong. And two of my honey buns. The road takes it out of you.",
-        "Sunfield Plains lies through the south gate. The farmland there is waiting for someone with patience. That could be you."
-      ],
-      "rewards": [
-        {
-          "itemId": "greenhaven_charter",
-          "quantity": 1
-        },
-        {
-          "itemId": "honey_bun",
-          "quantity": 2
-        }
-      ]
-    },
-    "greetings": [
-      [
-        "The fountain was built by the first settlers. They say a coin tossed in brings rain to Sunfield.",
-        "Personally, I think it brings coins to whoever cleans the fountain."
-      ],
-      [
-        "Don't let the quiet fool you. Greenhaven is growing \u2014 every season brings new faces and new trouble."
-      ],
-      [
-        "Short on Energy? Eat something! Nobody tills a field on an empty stomach."
-      ],
-      [
-        "Talk to Rowan about farming, Toren about tools, and Mira about anything with a price tag."
-      ]
-    ]
+ {
+  "id": "mayor_lina",
+  "name": "Mayor Lina",
+  "title": "Mayor of Greenhaven",
+  "mapId": "greenhaven",
+  "x": 28,
+  "y": 22,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 2,
+   "hairStyle": 4,
+   "hairColor": 4,
+   "eyeColor": 1,
+   "outfit": 5
   },
-  {
-    "id": "farmer_rowan",
-    "name": "Farmer Rowan",
-    "title": "Farm Supplier",
-    "mapId": "greenhaven",
-    "x": 12,
-    "y": 34,
-    "dir": "down",
-    "appearance": {
-      "bodyType": "a",
-      "skinTone": 3,
-      "hairStyle": 0,
-      "hairColor": 2,
-      "eyeColor": 2,
-      "outfit": 0
+  "accessory": "cape",
+  "firstMeeting": {
+   "lines": [
+    "Ah, a new face! Welcome to Greenhaven, traveler. I'm Lina \u2014 mayor, baker, and part-time settler of fence disputes.",
+    "Every great farmer, smith and adventurer in TerraGo started right where you're standing: tired, a little lost, and nearly broke.",
+    "Here \u2014 your Greenhaven Charter, so the guards know you belong. And two of my honey buns. The road takes it out of you.",
+    "Sunfield Plains lies through the south gate. The farmland there is waiting for someone with patience. That could be you."
+   ],
+   "rewards": [
+    {
+     "itemId": "greenhaven_charter",
+     "quantity": 1
     },
-    "accessory": "hat",
-    "firstMeeting": {
-      "lines": [
-        "Name's Rowan. I sell seeds and I know dirt \u2014 the good kind.",
-        "That hoe of yours has seen better decades. Still, a worn tool in patient hands beats a fine one in lazy hands.",
-        "Carrots are the honest crop. Cheap seeds, modest price. You won't get rich off them, but they'll teach you the rhythm. Your homestead is waiting at the west end of the Sunfield lane."
-      ]
-    },
-    "greetings": [
-      [
-        "Your homestead's at the west end of the Sunfield lane. Till it, plant it, water it \u2014 and come back for more seeds."
-      ],
-      [
-        "Water in the morning, harvest when it's ready, and never trust a cloud that promises rain."
-      ],
-      [
-        "Quality is what separates a farmer from someone who owns a hoe. Gold-quality carrots? Now that's a conversation."
-      ],
-      [
-        "Soil stays wet for about an hour after watering. Dry soil means a crop that sits and sulks."
-      ]
-    ],
-    "services": [
-      "shop",
-      "farm_upgrade"
-    ]
+    {
+     "itemId": "honey_bun",
+     "quantity": 2
+    }
+   ]
   },
-  {
-    "id": "blacksmith_toren",
-    "name": "Blacksmith Toren",
-    "title": "Blacksmith",
-    "mapId": "greenhaven",
-    "x": 46,
-    "y": 20,
-    "dir": "down",
-    "appearance": {
-      "bodyType": "a",
-      "skinTone": 4,
-      "hairStyle": 5,
-      "hairColor": 0,
-      "eyeColor": 5,
-      "outfit": 1
-    },
-    "accessory": "apron",
-    "firstMeeting": {
-      "lines": [
-        "Hmph. Another fresh arrival with soft hands.",
-        "I'm Toren. I forge tools, blades and armor \u2014 and I repair what you break, for a fee.",
-        "Bring me ore from Irondeep once the road reopens and I'll show you what real iron looks like."
-      ]
-    },
-    "greetings": [
-      [
-        "Everything breaks eventually. That's what keeps me in business."
-      ],
-      [
-        "The rockslide on the mine road? Bram swears it'll be cleared any day now. Bram swears a lot."
-      ],
-      [
-        "A +10 blade is a fine thing. A +10 blade that cost you nothing is a lie."
-      ]
-    ],
-    "services": [
-      "shop",
-      "repair"
-    ]
+  "greetings": [
+   [
+    "The fountain was built by the first settlers. They say a coin tossed in brings rain to Sunfield.",
+    "Personally, I think it brings coins to whoever cleans the fountain."
+   ],
+   [
+    "Don't let the quiet fool you. Greenhaven is growing \u2014 every season brings new faces and new trouble."
+   ],
+   [
+    "Short on Energy? Eat something! Nobody tills a field on an empty stomach."
+   ],
+   [
+    "Talk to Rowan about farming, Toren about tools, and Mira about anything with a price tag."
+   ]
+  ]
+ },
+ {
+  "id": "farmer_rowan",
+  "name": "Farmer Rowan",
+  "title": "Farm Supplier",
+  "mapId": "greenhaven",
+  "x": 12,
+  "y": 34,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 3,
+   "hairStyle": 0,
+   "hairColor": 2,
+   "eyeColor": 2,
+   "outfit": 0
   },
-  {
-    "id": "merchant_mira",
-    "name": "Merchant Mira",
-    "title": "Market Trader",
-    "mapId": "greenhaven",
-    "x": 47,
-    "y": 25,
-    "dir": "down",
-    "appearance": {
-      "bodyType": "b",
-      "skinTone": 1,
-      "hairStyle": 3,
-      "hairColor": 5,
-      "eyeColor": 2,
-      "outfit": 4
-    },
-    "accessory": "bandana",
-    "firstMeeting": {
-      "lines": [
-        "Well, well! A customer \u2014 or a competitor? In Greenhaven those are often the same person.",
-        "I'm Mira. I buy low, sell high, and remember every face that haggles.",
-        "Soon these stalls open to everyone. List your goods, set your price, and let the market decide what you're worth."
-      ]
-    },
-    "greetings": [
-      [
-        "The shops pay pennies. Real profit comes from other players \u2014 remember that."
-      ],
-      [
-        "Rare fish, fine ingots, gold-quality crops... scarcity is where fortunes are made."
-      ],
-      [
-        "A word of advice? Never sell the first thing you find. Learn what it's worth first."
-      ]
-    ],
-    "services": [
-      "shop"
-    ]
+  "accessory": "hat",
+  "firstMeeting": {
+   "lines": [
+    "Name's Rowan. I sell seeds and I know dirt \u2014 the good kind.",
+    "That hoe of yours has seen better decades. Still, a worn tool in patient hands beats a fine one in lazy hands.",
+    "Carrots are the honest crop. Cheap seeds, modest price. You won't get rich off them, but they'll teach you the rhythm. Your homestead is waiting at the west end of the Sunfield lane."
+   ]
   },
-  {
-    "id": "fisher_olan",
-    "name": "Fisher Olan",
-    "title": "Fisherman",
-    "mapId": "greenhaven",
-    "x": 45,
-    "y": 39,
-    "dir": "right",
-    "appearance": {
-      "bodyType": "a",
-      "skinTone": 1,
-      "hairStyle": 6,
-      "hairColor": 4,
-      "eyeColor": 1,
-      "outfit": 3
-    },
-    "accessory": "hat",
-    "firstMeeting": {
-      "lines": [
-        "Shh... you'll scare the perch.",
-        "Olan. I fish. Mostly I wait, which is the bigger part of fishing.",
-        "Anyone who tells you fishing is just clicking a button has never fought a Crystal Lake pike."
-      ]
-    },
-    "greetings": [
-      [
-        "The big ones bite at dawn and dusk. The really big ones bite whenever they please."
-      ],
-      [
-        "Rain makes the fish hungry. Storms make them bold."
-      ],
-      [
-        "Crystal Lake's bridge is still out. Until then, this little pond keeps me sane."
-      ]
-    ],
-    "services": [
-      "shop"
-    ]
+  "greetings": [
+   [
+    "Your homestead's at the west end of the Sunfield lane. Till it, plant it, water it \u2014 and come back for more seeds."
+   ],
+   [
+    "Water in the morning, harvest when it's ready, and never trust a cloud that promises rain."
+   ],
+   [
+    "Quality is what separates a farmer from someone who owns a hoe. Gold-quality carrots? Now that's a conversation."
+   ],
+   [
+    "Soil stays wet for about an hour after watering. Dry soil means a crop that sits and sulks."
+   ]
+  ],
+  "services": [
+   "shop",
+   "farm_upgrade"
+  ]
+ },
+ {
+  "id": "blacksmith_toren",
+  "name": "Blacksmith Toren",
+  "title": "Blacksmith",
+  "mapId": "greenhaven",
+  "x": 46,
+  "y": 20,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 4,
+   "hairStyle": 5,
+   "hairColor": 0,
+   "eyeColor": 5,
+   "outfit": 1
   },
-  {
-    "id": "miner_bram",
-    "name": "Miner Bram",
-    "title": "Miner",
-    "mapId": "greenhaven",
-    "x": 35,
-    "y": 12,
-    "dir": "left",
-    "appearance": {
-      "bodyType": "a",
-      "skinTone": 2,
-      "hairStyle": 1,
-      "hairColor": 5,
-      "eyeColor": 3,
-      "outfit": 3
-    },
-    "accessory": "helmet",
-    "firstMeeting": {
-      "lines": [
-        "Bram's the name, Irondeep's the game! Well \u2014 it will be, once the road's cleared.",
-        "Copper on the upper floors, iron deeper down, and below that... things that glitter and things that bite.",
-        "Bring a good pickaxe and plenty of food. The mine eats Energy like I eat breakfast."
-      ]
-    },
-    "greetings": [
-      [
-        "Floor one's safe enough. Floor twenty? Bring friends. Floor thirty? Bring better friends."
-      ],
-      [
-        "I've heard whispers of Star Metal at the very bottom. Whispers, mind you. And one very loud cave bat."
-      ],
-      [
-        "The rockslide should be cleared any day now. I've been saying that for a week."
-      ]
-    ],
-    "services": [
-      "shop"
-    ]
+  "accessory": "apron",
+  "firstMeeting": {
+   "lines": [
+    "Hmph. Another fresh arrival with soft hands.",
+    "I'm Toren. I forge tools, blades and armor \u2014 and I repair what you break, for a fee.",
+    "Bring me ore from Irondeep once the road reopens and I'll show you what real iron looks like."
+   ]
   },
-  {
-    "id": "guildmaster_kael",
-    "name": "Guildmaster Kael",
-    "title": "Guildmaster",
-    "mapId": "greenhaven",
-    "x": 42,
-    "y": 12,
-    "dir": "down",
-    "appearance": {
-      "bodyType": "a",
-      "skinTone": 5,
-      "hairStyle": 2,
-      "hairColor": 0,
-      "eyeColor": 4,
-      "outfit": 2
-    },
-    "accessory": "cape",
-    "firstMeeting": {
-      "lines": [
-        "Welcome to the Guild Hall. I am Kael, keeper of the guild registry.",
-        "Alone, a player can farm, mine and fight. Together, a guild can topple a Stoneheart Golem and hold the market.",
-        "When you've made a name for yourself \u2014 and saved enough for the charter fee \u2014 come back and found a guild of your own."
-      ]
-    },
-    "greetings": [
-      [
-        "The strongest guilds aren't the ones with the best fighters. They're the ones where the farmers feed the fighters."
-      ],
-      [
-        "The Ancient Wyvern of Dragonspire has never fallen. Fifteen to twenty-five brave souls, they say, would be needed."
-      ],
-      [
-        "Trust is the rarest currency in TerraGo. Spend it carefully."
-      ]
-    ]
+  "greetings": [
+   [
+    "Everything breaks eventually. That's what keeps me in business."
+   ],
+   [
+    "The rockslide on the mine road? Bram swears it'll be cleared any day now. Bram swears a lot."
+   ],
+   [
+    "A +10 blade is a fine thing. A +10 blade that cost you nothing is a lie."
+   ]
+  ],
+  "services": [
+   "shop",
+   "repair"
+  ]
+ },
+ {
+  "id": "merchant_mira",
+  "name": "Merchant Mira",
+  "title": "Market Trader",
+  "mapId": "greenhaven",
+  "x": 47,
+  "y": 25,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 1,
+   "hairStyle": 3,
+   "hairColor": 5,
+   "eyeColor": 2,
+   "outfit": 4
   },
-  {
-    "id": "lift_gus",
-    "name": "Gus",
-    "title": "Lift Operator",
-    "mapId": "irondeep_entrance",
-    "x": 16,
-    "y": 11,
-    "dir": "right",
-    "appearance": {
-      "bodyType": "a",
-      "skinTone": 1,
-      "hairStyle": 2,
-      "hairColor": 3,
-      "eyeColor": 2,
-      "outfit": 1
-    },
-    "accessory": "helmet",
-    "firstMeeting": {
-      "lines": [
-        "Name's Gus. I run the lift. Forty floors down, and every one of 'em hungry for pickaxes.",
-        "Reach floor five, ten, fifteen and so on, and I can take you straight back down there. Saves the knees."
-      ]
-    },
-    "greetings": [
-      [
-        "Lift's running. Where to?"
-      ],
-      [
-        "Deeper floors, better ore \u2014 and worse company. Bring food."
-      ],
-      [
-        "Floors 1\u20135 are copper and stone. Iron from 6, silver from 11, gold from 21. Below that... ask me when you get there."
-      ]
-    ],
-    "services": [
-      "lift"
-    ]
-  }
+  "accessory": "bandana",
+  "firstMeeting": {
+   "lines": [
+    "Well, well! A customer \u2014 or a competitor? In Greenhaven those are often the same person.",
+    "I'm Mira. I buy low, sell high, and remember every face that haggles.",
+    "Soon these stalls open to everyone. List your goods, set your price, and let the market decide what you're worth."
+   ]
+  },
+  "greetings": [
+   [
+    "The shops pay pennies. Real profit comes from other players \u2014 remember that."
+   ],
+   [
+    "Rare fish, fine ingots, gold-quality crops... scarcity is where fortunes are made."
+   ],
+   [
+    "A word of advice? Never sell the first thing you find. Learn what it's worth first."
+   ]
+  ],
+  "services": [
+   "shop"
+  ]
+ },
+ {
+  "id": "fisher_olan",
+  "name": "Fisher Olan",
+  "title": "Fisherman",
+  "mapId": "greenhaven",
+  "x": 45,
+  "y": 39,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 1,
+   "hairStyle": 6,
+   "hairColor": 4,
+   "eyeColor": 1,
+   "outfit": 3
+  },
+  "accessory": "hat",
+  "firstMeeting": {
+   "lines": [
+    "Shh... you'll scare the perch.",
+    "Olan. I fish. Mostly I wait, which is the bigger part of fishing.",
+    "Anyone who tells you fishing is just clicking a button has never fought a Crystal Lake pike."
+   ]
+  },
+  "greetings": [
+   [
+    "The big ones bite at dawn and dusk. The really big ones bite whenever they please."
+   ],
+   [
+    "Rain makes the fish hungry. Storms make them bold."
+   ],
+   [
+    "Crystal Lake's bridge is still out. Until then, this little pond keeps me sane."
+   ]
+  ],
+  "services": [
+   "shop"
+  ]
+ },
+ {
+  "id": "miner_bram",
+  "name": "Miner Bram",
+  "title": "Miner",
+  "mapId": "greenhaven",
+  "x": 35,
+  "y": 12,
+  "dir": "left",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 2,
+   "hairStyle": 1,
+   "hairColor": 5,
+   "eyeColor": 3,
+   "outfit": 3
+  },
+  "accessory": "helmet",
+  "firstMeeting": {
+   "lines": [
+    "Bram's the name, Irondeep's the game! Well \u2014 it will be, once the road's cleared.",
+    "Copper on the upper floors, iron deeper down, and below that... things that glitter and things that bite.",
+    "Bring a good pickaxe and plenty of food. The mine eats Energy like I eat breakfast."
+   ]
+  },
+  "greetings": [
+   [
+    "Floor one's safe enough. Floor twenty? Bring friends. Floor thirty? Bring better friends."
+   ],
+   [
+    "I've heard whispers of Star Metal at the very bottom. Whispers, mind you. And one very loud cave bat."
+   ],
+   [
+    "The rockslide should be cleared any day now. I've been saying that for a week."
+   ]
+  ],
+  "services": [
+   "shop"
+  ]
+ },
+ {
+  "id": "guildmaster_kael",
+  "name": "Guildmaster Kael",
+  "title": "Guildmaster",
+  "mapId": "greenhaven",
+  "x": 42,
+  "y": 12,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 5,
+   "hairStyle": 2,
+   "hairColor": 0,
+   "eyeColor": 4,
+   "outfit": 2
+  },
+  "accessory": "cape",
+  "firstMeeting": {
+   "lines": [
+    "Welcome to the Guild Hall. I am Kael, keeper of the guild registry.",
+    "Alone, a player can farm, mine and fight. Together, a guild can topple a Stoneheart Golem and hold the market.",
+    "When you've made a name for yourself \u2014 and saved enough for the charter fee \u2014 come back and found a guild of your own."
+   ]
+  },
+  "greetings": [
+   [
+    "The strongest guilds aren't the ones with the best fighters. They're the ones where the farmers feed the fighters."
+   ],
+   [
+    "The Ancient Wyvern of Dragonspire has never fallen. Fifteen to twenty-five brave souls, they say, would be needed."
+   ],
+   [
+    "Trust is the rarest currency in TerraGo. Spend it carefully."
+   ]
+  ]
+ },
+ {
+  "id": "lift_gus",
+  "name": "Gus",
+  "title": "Lift Operator",
+  "mapId": "irondeep_entrance",
+  "x": 16,
+  "y": 11,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 1,
+   "hairStyle": 2,
+   "hairColor": 3,
+   "eyeColor": 2,
+   "outfit": 1
+  },
+  "accessory": "helmet",
+  "firstMeeting": {
+   "lines": [
+    "Name's Gus. I run the lift. Forty floors down, and every one of 'em hungry for pickaxes.",
+    "Reach floor five, ten, fifteen and so on, and I can take you straight back down there. Saves the knees."
+   ]
+  },
+  "greetings": [
+   [
+    "Lift's running. Where to?"
+   ],
+   [
+    "Deeper floors, better ore \u2014 and worse company. Bring food."
+   ],
+   [
+    "Floors 1\u20135 are copper and stone. Iron from 6, silver from 11, gold from 21. Below that... ask me when you get there."
+   ]
+  ],
+  "services": [
+   "lift"
+  ]
+ },
+ {
+  "id": "stablemaster_hana",
+  "name": "Stablemaster Hana",
+  "title": "Stables",
+  "mapId": "greenhaven",
+  "x": 44,
+  "y": 23,
+  "dir": "left",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 3,
+   "hairStyle": 3,
+   "hairColor": 6,
+   "eyeColor": 3,
+   "outfit": 2
+  },
+  "accessory": "bandana",
+  "firstMeeting": {
+   "lines": [
+    "Hana. I keep the horses. You look like someone who's tired of walking.",
+    "Mayor Lina told me to expect you \u2014 here's a pony from the town herd. Press Z to ride, Z again to get off.",
+    "Mounts don't like fights or tight mine tunnels. Come back when you've got gold; I've faster beasts."
+   ]
+  },
+  "greetings": [
+   [
+    "Faster mounts cost more \u2014 and they're worth every coin."
+   ],
+   [
+    "A pony carries a farmer; a stag carries a legend."
+   ]
+  ],
+  "services": [
+   "shop"
+  ]
+ }
 ]

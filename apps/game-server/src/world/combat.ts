@@ -98,6 +98,10 @@ export interface CombatHooks {
   onWear?: (p: Player, slots: number[]) => void;
   /** Respawn: move the player somewhere. */
   respawn?: (p: Player) => void;
+  /** A duel was won (loser is left at 1 HP). */
+  onDuelEnd?: (winner: Player, loser: Player) => void;
+  /** Riding players get off when they fight. */
+  dismount?: (p: Player) => void;
 }
 
 const TILE = TILE_SIZE;
@@ -201,7 +205,7 @@ export class Combat {
         m.targetId = null;
       } else {
         const d = dist(m.x, m.y, target.x, target.y);
-        if (d <= m.def.range * TILE) {
+        if (d <= m.def.range * TILE && (m.def.range <= 2 || rt.grid.lineOfSight(m.x, m.y - 8, target.x, target.y - 12))) {
           m.dir = facing(target.x - m.x, target.y - m.y);
           if (now >= m.nextAttackAt) {
             m.nextAttackAt = now + m.def.cooldownMs;
@@ -374,23 +378,73 @@ export class Combat {
     };
   }
 
-  private inReach(p: Player, m: Monster, rangeTiles: number): boolean {
+  private inReach(p: Player, m: { x: number; y: number }, rangeTiles: number): boolean {
     // Half a tile of slack for latency (the client sees monsters slightly in the past).
     return dist(p.x, p.y - PLAYER_BODY.height / 2, m.x, m.y - 6) <= (rangeTiles + 0.6) * TILE;
+  }
+
+  /** Ranged attacks need a clear line: trees, rocks and walls block arrows and spells. */
+  private canSee(rt: MapRuntime, p: { x: number; y: number }, t: { x: number; y: number }, rangeTiles: number): boolean {
+    if (rangeTiles <= 2) return true;
+    return rt.grid.lineOfSight(p.x, p.y - 12, t.x, t.y - 8);
+  }
+
+  /** Heavy blows shove monsters back a little (never through walls; bosses don't budge). */
+  private knockback(rt: MapRuntime, from: { x: number; y: number }, m: Monster): void {
+    if (m.def.boss || !m.alive) return;
+    const d = dist(from.x, from.y, m.x, m.y) || 1;
+    const nx = m.x + ((m.x - from.x) / d) * 14;
+    const ny = m.y + ((m.y - from.y) / d) * 14;
+    if (!rt.grid.bodyBlocked(nx, ny)) {
+      m.x = nx;
+      m.y = ny;
+      m.lastMovedAt = this.now();
+    }
+  }
+
+  /** The current duel opponent, if `id` is one. */
+  private duelTarget(rt: MapRuntime, p: Player, id: unknown): Player | undefined {
+    if (typeof id !== 'string' || !p.duel || p.duel.with.id !== id) return undefined;
+    const q = p.duel.with;
+    return rt.players.has(q) && !q.dead ? q : undefined;
+  }
+
+  private strikePlayer(rt: MapRuntime, p: Player, q: Player, magic: boolean, mult: number, skill: string | undefined, now: number): void {
+    const qd = q.profile.derived;
+    const res = rollHit(this.attackerOf(p, magic, now), { level: q.rec.level, def: magic ? qd.magicDefense : qd.physicalDefense, evasion: qd.evasion * effectMult(q.effects, 'eva', now) }, mult, this.rand);
+    p.lastCombatAt = now;
+    q.lastCombatAt = now;
+    if (res.miss) return this.emit(rt, { s: p.id, t: q.id, a: 0, k: 'miss', ...(skill ? { sk: skill } : {}) });
+    const dmg = Math.min(q.rec.hp - 1, Math.round(res.damage * effectMult(q.effects, 'taken', now)));
+    q.rec.hp -= Math.max(0, dmg);
+    this.emit(rt, { s: p.id, t: q.id, a: Math.max(0, dmg), k: res.crit ? 'crit' : 'hit', ...(skill ? { sk: skill } : {}) });
+    if (q.rec.hp <= 1) this.hooks.onDuelEnd?.(p, q);
   }
 
   /** A basic weapon attack. Returns the cooldown to show, or an error message. */
   attack(rt: MapRuntime, p: Player, targetId: unknown): { cooldownMs: number } | string {
     const now = this.now();
     if (p.dead) return "You can't fight right now.";
+    const w = p.profile.weapon;
+    const foe = this.duelTarget(rt, p, targetId);
+    if (foe) {
+      if (!this.inReach(p, foe, w.range)) return 'Too far away.';
+      if (!this.canSee(rt, p, foe, w.range)) return 'No line of sight.';
+      if (now < p.nextAttackAt) return 'cooldown';
+      p.nextAttackAt = now + w.speedMs - 60;
+      this.hooks.dismount?.(p);
+      this.strikePlayer(rt, p, foe, w.magic, 1, undefined, now);
+      return { cooldownMs: w.speedMs };
+    }
     if (rt.def.safeZone) return 'No fighting here.';
     const m = typeof targetId === 'string' ? rt.monsters.get(targetId) : undefined;
     if (!m || !m.alive) return 'No target.';
-    const w = p.profile.weapon;
     if (!this.inReach(p, m, w.range)) return 'Too far away.';
+    if (!this.canSee(rt, p, m, w.range)) return 'No line of sight.';
     if (now < p.nextAttackAt) return 'cooldown';
     p.nextAttackAt = now + w.speedMs - 60;
     p.lastCombatAt = now;
+    this.hooks.dismount?.(p);
     this.strike(rt, p, m, w.magic, 1, undefined, now);
     if (++p.hitsDealt >= 10) {
       p.hitsDealt = 0;
@@ -408,6 +462,7 @@ export class Combat {
     if (res.miss) return this.emit(rt, { s: p.id, t: m.id, a: 0, k: 'miss', ...(skill ? { sk: skill } : {}) });
     const dmg = Math.round(res.damage * effectMult(m.effects, 'taken', now));
     this.damageMonster(rt, m, dmg, p, res.crit ? 'crit' : 'hit', skill);
+    if ((res.crit && p.profile.weapon.range <= 2) || (skill && KNOCKBACK_SKILLS.has(skill))) this.knockback(rt, p, m);
   }
 
   private damageMonster(rt: MapRuntime, m: Monster, dmg: number, by: Player | null, kind: CombatEvent['k'], skill?: string): void {
@@ -455,14 +510,29 @@ export class Combat {
     const intel = p.profile.stats.intelligence;
     const scale = (v: number, by?: 'int' | 'str') => (by === 'int' ? Math.round(v * intel) : by === 'str' ? Math.round(v * Math.max(4, p.profile.derived.physicalAttack * 0.25)) : v);
     const monster = typeof targetId === 'string' ? rt.monsters.get(targetId) : undefined;
+    const foe = this.duelTarget(rt, p, targetId);
     const fighting = sk.kind === 'attack' || sk.kind === 'aoe' || sk.kind === 'debuff';
-    if (fighting && rt.def.safeZone) return 'No fighting here.';
+    if (fighting && rt.def.safeZone && !foe) return 'No fighting here.';
+    if (fighting) this.hooks.dismount?.(p);
+    if (foe && (sk.kind === 'attack' || sk.kind === 'debuff')) {
+      const reach = Math.max(sk.range, p.profile.weapon.range);
+      if (!this.inReach(p, foe, reach)) return 'Too far away.';
+      if (!this.canSee(rt, p, foe, reach)) return 'No line of sight.';
+      if (sk.kind === 'attack') this.strikePlayer(rt, p, foe, sk.magic, sk.mult, sk.id, now);
+      else if (sk.effect) foe.effects = [...foe.effects.filter((e) => e.id !== sk.effect!.id), { id: sk.effect.id, name: sk.effect.name, until: now + sk.effect.durationMs, mods: { ...sk.effect.mods } }];
+      p.rec.mp -= sk.mp;
+      p.cooldowns.set(sk.id, now + sk.cooldownMs);
+      this.pushEffects(p);
+      this.pushEffects(foe);
+      return { cooldownMs: sk.cooldownMs };
+    }
 
     switch (sk.kind) {
       case 'attack':
       case 'debuff': {
         if (!monster?.alive) return 'Pick a target first.';
         if (!this.inReach(p, monster, Math.max(sk.range, p.profile.weapon.range))) return 'Too far away.';
+        if (!this.canSee(rt, p, monster, Math.max(sk.range, p.profile.weapon.range))) return 'No line of sight.';
         if (sk.kind === 'attack') this.strike(rt, p, monster, sk.magic, sk.mult, sk.id, now);
         else if (monster.state !== 'chase') {
           monster.state = 'chase';
@@ -480,6 +550,7 @@ export class Combat {
         const cx = sk.range > 0 && monster?.alive ? monster.x : p.x;
         const cy = sk.range > 0 && monster?.alive ? monster.y : p.y;
         if (sk.range > 0 && (!monster?.alive || !this.inReach(p, monster, sk.range))) return monster ? 'Too far away.' : 'Pick a target first.';
+        if (sk.range > 0 && monster && !this.canSee(rt, p, monster, sk.range)) return 'No line of sight.';
         const hits = [...rt.monsters.values()]
           .filter((m) => m.alive && dist(m.x, m.y, cx, cy) <= (sk.radius ?? 2) * TILE)
           .sort((a, b) => dist(a.x, a.y, cx, cy) - dist(b.x, b.y, cx, cy))
@@ -524,3 +595,5 @@ export class Combat {
 }
 
 export const STEP = SIM.stepMs;
+
+const KNOCKBACK_SKILLS = new Set(['power_strike', 'whirlwind', 'aimed_shot', 'smite']);

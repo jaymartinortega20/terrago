@@ -92,6 +92,7 @@ type ClientEvents = {
   add: [RemotePlayer];
   remove: [string];
   monsterAdd: [RemoteMonster];
+  look: [string];
   monsterRemove: [string];
   combat: [CombatEvent[]];
   chat: [ChatMessage];
@@ -230,6 +231,17 @@ export class GameClient {
       this.emit('combat', events);
     });
     socket.on('effects', ({ effects, cooldowns }) => this.ui.set({ effects, cooldowns }));
+    socket.on('quests', (quests) => this.ui.set({ quests }));
+    socket.on('duel', (d) => {
+      this.ui.set({ duel: d.with ? { ...d.with, until: d.until ?? 0 } : null });
+      if (!d.with && this.remotes.has(this.ui.get().targetId ?? '')) this.setTarget(null);
+    });
+    socket.on('entity:update', (id, patch) => {
+      const r = this.remotes.get(id);
+      if (!r) return;
+      r.info = { ...r.info, ...patch };
+      this.emit('look', id);
+    });
     socket.on('chat', (m) => {
       this.ui.set((s) => ({ chat: [...s.chat.slice(-79), m] }));
       this.emit('chat', m);
@@ -321,7 +333,7 @@ export class GameClient {
     // Reconcile: start from the authoritative position, replay unacknowledged inputs.
     this.pending = this.pending.filter((c) => c[0] > s.ack);
     let p = { x: s.x, y: s.y };
-    for (const [, dx, dy] of this.pending) p = stepMovement(p, { dx, dy }, this.grid, PLAYER_SPEED, SIM.stepMs);
+    for (const [, dx, dy] of this.pending) p = stepMovement(p, { dx, dy }, this.grid, PLAYER_SPEED * this.speed(), SIM.stepMs);
     const ex = this.pos.x - p.x;
     const ey = this.pos.y - p.y;
     if (ex !== 0 || ey !== 0) {
@@ -359,7 +371,7 @@ export class GameClient {
     const cmd: MoveCommand = [++this.seq, input.dx, input.dy];
     this.pending.push(cmd);
     s.emit('move', cmd);
-    const next = stepMovement(this.pos, input, this.grid, PLAYER_SPEED, SIM.stepMs);
+    const next = stepMovement(this.pos, input, this.grid, PLAYER_SPEED * this.speed(), SIM.stepMs);
     this.dir = facingFor(input, this.dir);
     this.moving = true;
     this.lastMoveAt = performance.now();
@@ -518,6 +530,16 @@ export class GameClient {
     });
   }
 
+  speed(): number {
+    return this.ui.get().self?.speed ?? 1;
+  }
+
+  toggleMount(): void {
+    this.socket?.emit('mount:toggle', (res) => {
+      if (!res.ok) pushNotice(this.ui, 'error', res.error, 2500);
+    });
+  }
+
   // --- Combat ------------------------------------------------------------------
 
   /** Pixel distance from the player to a monster (as the server measures it). */
@@ -546,7 +568,8 @@ export class GameClient {
   /** Attack key: engage the current target, or the nearest monster. */
   attackKey(): void {
     const ui = this.ui.get();
-    let id = ui.targetId && this.monsters.has(ui.targetId) ? ui.targetId : null;
+    let id = ui.targetId && (this.monsters.has(ui.targetId) || ui.duel?.id === ui.targetId) ? ui.targetId : null;
+    if (!id && ui.duel && this.remotes.has(ui.duel.id)) id = ui.duel.id;
     if (!id) id = this.nearestMonster()?.info.id ?? null;
     if (!id) return pushNotice(this.ui, 'info', 'No monster nearby.', 1500);
     this.setTarget(id, true);
@@ -557,10 +580,10 @@ export class GameClient {
   private combatStep(): void {
     const ui = this.ui.get();
     if (!ui.autoAttack || !ui.targetId || this.attackInFlight) return;
-    const m = this.monsters.get(ui.targetId);
+    const m = this.monsters.get(ui.targetId) ?? (ui.duel?.id === ui.targetId ? this.remotes.get(ui.targetId) : undefined);
     if (!m) return this.setTarget(null);
     const range = this.weaponRange();
-    if (this.reach(m) > (range + 0.4) * TILE_SIZE || performance.now() < this.nextAttackAt) return;
+    if (Math.hypot(this.pos.x - m.x, this.pos.y - 5 - (m.y - 6)) > (range + 0.4) * TILE_SIZE || performance.now() < this.nextAttackAt) return;
     this.attackInFlight = true;
     this.socket?.emit('attack', m.info.id, (res) => {
       this.attackInFlight = false;
@@ -569,6 +592,7 @@ export class GameClient {
       else {
         this.nextAttackAt = performance.now() + 500;
         if (!/far/i.test(res.error)) pushNotice(this.ui, 'error', res.error, 1500);
+        if (/line of sight/i.test(res.error)) this.nextAttackAt = performance.now() + 900;
         if (/No target|No fighting/.test(res.error)) this.setTarget(null);
       }
     });
@@ -587,7 +611,8 @@ export class GameClient {
     if (!sk) return;
     if (self.level < sk.level) return pushNotice(this.ui, 'info', `${sk.name} unlocks at level ${sk.level}.`, 2000);
     let target = this.ui.get().targetId;
-    if ((sk.kind === 'attack' || sk.kind === 'debuff' || (sk.kind === 'aoe' && sk.range > 0)) && !(target && this.monsters.has(target))) {
+    const duelFoe = this.ui.get().duel?.id;
+    if ((sk.kind === 'attack' || sk.kind === 'debuff' || (sk.kind === 'aoe' && sk.range > 0)) && !(target && (this.monsters.has(target) || target === duelFoe))) {
       target = this.nearestMonster()?.info.id ?? null;
       if (target) this.setTarget(target, true);
     }

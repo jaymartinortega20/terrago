@@ -1,0 +1,254 @@
+[
+ {
+  "id": "q_welcome",
+  "name": "Welcome to Greenhaven",
+  "description": "Every new arrival should meet the mayor.",
+  "steps": [
+   {
+    "text": "Talk to Mayor Lina by the fountain",
+    "type": "talk",
+    "count": 1,
+    "target": "mayor_lina"
+   }
+  ],
+  "rewards": {
+   "gold": 20,
+   "xp": 20
+  },
+  "next": "q_pony"
+ },
+ {
+  "id": "q_pony",
+  "name": "A Horse of Your Own",
+  "description": "Walking everywhere is slow. Hana has something for you.",
+  "steps": [
+   {
+    "text": "Talk to Stablemaster Hana on the east side of the plaza",
+    "type": "talk",
+    "count": 1,
+    "target": "stablemaster_hana"
+   },
+   {
+    "text": "Press Z to ride your pony",
+    "type": "mount",
+    "count": 1
+   }
+  ],
+  "rewards": {
+   "gold": 10,
+   "xp": 20,
+   "items": []
+  },
+  "next": "q_homestead",
+  "stepRewards": {
+   "0": [
+    {
+     "itemId": "brown_pony",
+     "quantity": 1
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_homestead",
+  "name": "A Patch of Your Own",
+  "description": "Your homestead is west along the Sunfield lane, through the south gate.",
+  "steps": [
+   {
+    "text": "Go to your Homestead (south gate, then west along the lane)",
+    "type": "visit",
+    "count": 1,
+    "target": "homestead"
+   },
+   {
+    "text": "Till, plant, water and harvest a Carrot",
+    "type": "harvest",
+    "count": 1,
+    "target": "carrot"
+   }
+  ],
+  "rewards": {
+   "gold": 15,
+   "xp": 30,
+   "items": [
+    {
+     "itemId": "carrot_seed",
+     "quantity": 6
+    }
+   ]
+  },
+  "next": "q_rowan"
+ },
+ {
+  "id": "q_rowan",
+  "name": "The Farmer's Friend",
+  "description": "Rowan sells seeds and buys crops at the Farm Supply in Greenhaven.",
+  "steps": [
+   {
+    "text": "Talk to Farmer Rowan at the Farm Supply (south-west Greenhaven)",
+    "type": "talk",
+    "count": 1,
+    "target": "farmer_rowan"
+   }
+  ],
+  "rewards": {
+   "gold": 10,
+   "xp": 15,
+   "items": [
+    {
+     "itemId": "basic_fertilizer",
+     "quantity": 2
+    }
+   ]
+  },
+  "next": "q_pickaxe"
+ },
+ {
+  "id": "q_pickaxe",
+  "name": "Tools of the Trade",
+  "description": "Miner Bram sells pickaxes near the north road.",
+  "steps": [
+   {
+    "text": "Buy a Worn Pickaxe from Miner Bram (north Greenhaven)",
+    "type": "buy",
+    "count": 1,
+    "target": "worn_pickaxe"
+   },
+   {
+    "text": "Mine 5 Copper Ore (Sunfield's north meadow or the mine)",
+    "type": "gather",
+    "count": 5,
+    "target": "copper_ore"
+   }
+  ],
+  "rewards": {
+   "gold": 30,
+   "xp": 40
+  },
+  "next": "q_smelt"
+ },
+ {
+  "id": "q_smelt",
+  "name": "Fire and Metal",
+  "description": "The furnace stands east of the Blacksmith.",
+  "steps": [
+   {
+    "text": "Smelt a Copper Bar at the furnace (east of the Blacksmith)",
+    "type": "craft",
+    "count": 1,
+    "target": "copper_bar"
+   }
+  ],
+  "rewards": {
+   "gold": 20,
+   "xp": 40,
+   "items": [
+    {
+     "itemId": "padded_head",
+     "quantity": 1
+    }
+   ]
+  },
+  "next": "q_slimes"
+ },
+ {
+  "id": "q_slimes",
+  "name": "Slime Trouble",
+  "description": "Slimes are eating Sunfield's crops. Press F to attack.",
+  "steps": [
+   {
+    "text": "Defeat 5 Green Slimes in Sunfield Plains (F to attack)",
+    "type": "kill",
+    "count": 5,
+    "target": "green_slime"
+   }
+  ],
+  "rewards": {
+   "gold": 40,
+   "xp": 60,
+   "items": [
+    {
+     "itemId": "minor_health_potion",
+     "quantity": 3
+    }
+   ]
+  },
+  "next": "q_fishing"
+ },
+ {
+  "id": "q_fishing",
+  "name": "Gone Fishing",
+  "description": "Fisher Olan stands by the pond in south-east Greenhaven.",
+  "steps": [
+   {
+    "text": "Buy a Bamboo Rod from Fisher Olan (pond, south-east Greenhaven)",
+    "type": "buy",
+    "count": 1,
+    "target": "bamboo_rod"
+   },
+   {
+    "text": "Catch any fish (face water, E to cast, E on the bite, hold Space)",
+    "type": "fish",
+    "count": 1
+   }
+  ],
+  "rewards": {
+   "gold": 30,
+   "xp": 50
+  },
+  "next": "q_mine"
+ },
+ {
+  "id": "q_mine",
+  "name": "Down Below",
+  "description": "Irondeep Mine is north of Greenhaven. Gus runs a lift every five floors.",
+  "steps": [
+   {
+    "text": "Reach floor 5 of Irondeep Mine (north road)",
+    "type": "visit",
+    "count": 1,
+    "target": "irondeep_5"
+   }
+  ],
+  "rewards": {
+   "gold": 80,
+   "xp": 120,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 1
+    }
+   ]
+  },
+  "next": "q_wolves"
+ },
+ {
+  "id": "q_wolves",
+  "name": "Whisperwood Warning",
+  "description": "Wolves are prowling Whisperwood Forest (Lv 10+). Get strong first.",
+  "steps": [
+   {
+    "text": "Enter Whisperwood Forest (west road)",
+    "type": "visit",
+    "count": 1,
+    "target": "whisperwood"
+   },
+   {
+    "text": "Defeat 5 Forest Wolves",
+    "type": "kill",
+    "count": 5,
+    "target": "forest_wolf"
+   }
+  ],
+  "rewards": {
+   "gold": 200,
+   "xp": 400,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 2
+    }
+   ]
+  }
+ }
+]

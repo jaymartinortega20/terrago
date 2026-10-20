@@ -77,6 +77,9 @@ export interface SelfState {
   derived: DerivedStats;
   appearance: Appearance;
   skills: SkillSet;
+  /** Item id of the mount being ridden, and its speed multiplier (1 = on foot). */
+  mount: string | null;
+  speed: number;
 }
 
 /** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */
@@ -135,6 +138,8 @@ export interface PublicPlayer {
   x: number;
   y: number;
   dir: Direction;
+  mount?: string | null;
+  weapon?: string | null;
 }
 
 export type ItemCategory =
@@ -147,7 +152,8 @@ export type ItemCategory =
   | 'fish'
   | 'consumable'
   | 'quest'
-  | 'cosmetic';
+  | 'cosmetic'
+  | 'mount';
 
 export interface ItemDef {
   id: string;
@@ -171,6 +177,8 @@ export interface ItemDef {
   fertilizer?: { quality: number; speed: number };
   /** Wearable: slot and stat bonuses. */
   equip?: EquipDef;
+  /** Rideable: speed multiplier and look. */
+  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' };
 }
 
 export type ToolKind = 'hoe' | 'can' | 'pickaxe' | 'axe' | 'rod' | 'sickle';
@@ -262,4 +270,35 @@ export interface FarmUpgradeView {
     farmingLevel: number;
     materials: { itemId: string; quantity: number }[];
   };
+}
+
+// ---------------------------------------------------------------------------
+// Quests
+// ---------------------------------------------------------------------------
+
+export type QuestStepType = 'talk' | 'kill' | 'gather' | 'harvest' | 'craft' | 'fish' | 'visit' | 'buy' | 'mount';
+
+export interface QuestStep {
+  text: string;
+  type: QuestStepType;
+  target?: string;
+  count: number;
+}
+
+export interface QuestDef {
+  id: string;
+  name: string;
+  description: string;
+  steps: QuestStep[];
+  rewards: { gold?: number; xp?: number; items?: { itemId: string; quantity: number }[] };
+  /** Extra items handed out when a step completes (e.g. the pony). */
+  stepRewards?: Record<string, { itemId: string; quantity: number }[]>;
+  next?: string;
+}
+
+export interface QuestState {
+  id: string;
+  step: number;
+  count: number;
+  done: boolean;
 }

@@ -94,5 +94,7 @@ export function buildSelfState(rec: CharacterRecord, now = Date.now(), profile =
     derived: profile.derived,
     appearance: rec.appearance,
     skills: rec.skills,
+    mount: null,
+    speed: 1,
   };
 }

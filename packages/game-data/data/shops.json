@@ -238,6 +238,10 @@
    {
     "itemId": "padded_boots",
     "price": 25
+   },
+   {
+    "itemId": "wooden_shield",
+    "price": 40
    }
   ],
   "buys": [
@@ -246,5 +250,28 @@
    "armor",
    "material"
   ]
+ },
+ {
+  "npcId": "stablemaster_hana",
+  "name": "Hana's Stable",
+  "sells": [
+   {
+    "itemId": "chestnut_horse",
+    "price": 2500
+   },
+   {
+    "itemId": "swift_steed",
+    "price": 9000
+   },
+   {
+    "itemId": "forest_stag",
+    "price": 24000
+   },
+   {
+    "itemId": "war_wolf",
+    "price": 60000
+   }
+  ],
+  "buys": []
  }
 ]

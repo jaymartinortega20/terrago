@@ -4078,5 +4078,308 @@
     "agi": 2
    }
   }
+ },
+ {
+  "id": "wooden_shield",
+  "name": "Wooden Shield",
+  "description": "A wooden shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:0",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 4,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 220,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 2,
+    "mdef": 1,
+    "hp": 0
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "copper_shield",
+  "name": "Copper Shield",
+  "description": "A copper shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:1",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 15,
+  "levelRequirement": 5,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 330,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 6,
+    "mdef": 4,
+    "hp": 10
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "iron_shield",
+  "name": "Iron Shield",
+  "description": "A iron shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:2",
+  "category": "armor",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 45,
+  "levelRequirement": 12,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 440,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 10,
+    "mdef": 7,
+    "hp": 20
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "silver_shield",
+  "name": "Silver Shield",
+  "description": "A silver shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:3",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 110,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 550,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 14,
+    "mdef": 10,
+    "hp": 30
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "gold_shield",
+  "name": "Gold Shield",
+  "description": "A gold shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:4",
+  "category": "armor",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 225,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 660,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 18,
+    "mdef": 13,
+    "hp": 40
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "mithril_shield",
+  "name": "Mithril Shield",
+  "description": "A mithril shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 42,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 770,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 22,
+    "mdef": 16,
+    "hp": 50
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "obsidian_shield",
+  "name": "Obsidian Shield",
+  "description": "A obsidian shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:6",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 900,
+  "levelRequirement": 56,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 880,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 26,
+    "mdef": 19,
+    "hp": 60
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "star_metal_shield",
+  "name": "Star Metal Shield",
+  "description": "A star metal shield. Warriors only; blocks blows and spells.",
+  "icon": "weapon:shield:7",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 2000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": 990,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 30,
+    "mdef": 22,
+    "hp": 70
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "brown_pony",
+  "name": "Brown Pony",
+  "description": "A sturdy little pony. Faster than walking \u2014 much faster than walking.",
+  "icon": "mount:horse:8a5d33",
+  "category": "mount",
+  "rarity": "common",
+  "stackSize": 1,
+  "vendorValue": 40,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "pickup",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.45,
+   "color": "#8a5d33",
+   "kind": "horse"
+  }
+ },
+ {
+  "id": "chestnut_horse",
+  "name": "Chestnut Horse",
+  "description": "A proper riding horse with a steady gait.",
+  "icon": "mount:horse:b5643a",
+  "category": "mount",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 400,
+  "levelRequirement": 10,
+  "tradable": true,
+  "bind": "pickup",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.65,
+   "color": "#b5643a",
+   "kind": "horse"
+  }
+ },
+ {
+  "id": "swift_steed",
+  "name": "Swift Steed",
+  "description": "Bred for the long roads between regions.",
+  "icon": "mount:horse:e8e0cc",
+  "category": "mount",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 1500,
+  "levelRequirement": 22,
+  "tradable": true,
+  "bind": "pickup",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.85,
+   "color": "#e8e0cc",
+   "kind": "horse"
+  }
+ },
+ {
+  "id": "forest_stag",
+  "name": "Forest Stag",
+  "description": "A proud stag from deep Whisperwood. Graceful and quick.",
+  "icon": "mount:stag:a8743f",
+  "category": "mount",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 32,
+  "tradable": true,
+  "bind": "pickup",
+  "maxDurability": null,
+  "mount": {
+   "speed": 2.0,
+   "color": "#a8743f",
+   "kind": "stag"
+  }
+ },
+ {
+  "id": "war_wolf",
+  "name": "War Wolf",
+  "description": "A great grey wolf that answers only to the bold.",
+  "icon": "mount:wolf:8a8a92",
+  "category": "mount",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 9000,
+  "levelRequirement": 45,
+  "tradable": true,
+  "bind": "pickup",
+  "maxDurability": null,
+  "mount": {
+   "speed": 2.15,
+   "color": "#8a8a92",
+   "kind": "wolf"
+  }
  }
 ]

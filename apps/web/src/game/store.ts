@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -75,6 +75,8 @@ export interface UiState {
   /** Active buffs/debuffs and skill cooldown end times. */
   effects: { id: string; name: string; until: number }[];
   cooldowns: Record<string, number>;
+  quests: import('@terrago/shared').QuestState[];
+  duel: { id: string; name: string; until: number } | null;
   /** Fishing in progress. */
   fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
 }
@@ -107,6 +109,8 @@ export const initialUi: UiState = {
   autoAttack: false,
   effects: [],
   cooldowns: {},
+  quests: [],
+  duel: null,
 };
 
 let noticeId = 0;

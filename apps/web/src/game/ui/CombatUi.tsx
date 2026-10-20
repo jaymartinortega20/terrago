@@ -22,6 +22,21 @@ export function TargetFrame({ client }: { client: GameClient }) {
   const id = useStore(client.ui, (s) => s.targetId);
   const level = useStore(client.ui, (s) => s.self?.level ?? 1);
   useTick(200);
+  const duel = useStore(client.ui, (s) => s.duel);
+  const foe = id && duel?.id === id ? client.remotes.get(id) : undefined;
+  if (foe) {
+    return (
+      <div className="px-panel-dark pointer-events-auto w-56 px-2 py-1" data-testid="target-frame">
+        <div className="flex items-baseline text-xs">
+          <span className="font-bold text-[#ff9a3a]">⚔ {foe.info.name}</span>
+          <span className="ml-auto text-parchment/80">Lv {foe.info.level}</span>
+        </div>
+        <div className="px-bar mt-0.5">
+          <span style={{ width: `${foe.hp}%`, background: '#d64545' }} />
+        </div>
+      </div>
+    );
+  }
   const m = id ? client.monsters.get(id) : undefined;
   if (!m) return null;
   const diff = m.info.level - level;
