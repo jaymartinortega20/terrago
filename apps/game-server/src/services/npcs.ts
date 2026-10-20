@@ -14,6 +14,8 @@ const ACTION_LABELS: Record<DialogueActionId, string> = {
   farm_upgrade: 'Expand my farm',
   repair: 'Repair my tools',
   lift: 'Take the lift',
+  quest_offer: 'Quest',
+  quest_complete: 'Complete quest',
 };
 
 function actionFor(id: DialogueActionId): DialogueAction {

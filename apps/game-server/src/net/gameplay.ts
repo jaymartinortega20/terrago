@@ -1,4 +1,4 @@
-import { BALANCE, getCrop, getItem, getMap, getNode, getRecipe, mineFloorId, mineFloorNumber, ladderRowsFor } from '@terrago/game-data';
+import { BALANCE, QUESTS, getCrop, getItem, getMap, getNode, getRecipe, mineFloorId, mineFloorNumber, ladderRowsFor } from '@terrago/game-data';
 import {
   cropStatus,
   formatDuration,
@@ -33,7 +33,8 @@ import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gather
 import { cast } from './fishing';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
-import { loadQuests, questEvent as questEventTx } from '../services/quests';
+import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
+import { getNpc as findNpc } from '../services/npcs';
 import type { Player } from '../world/player';
 import { World } from '../world/world';
 
@@ -501,6 +502,7 @@ export function questEvent(deps: GameplayDeps, p: Player, type: QuestStepType, t
     p.conn?.send('quests', p.quests);
     pushInventory(deps.world, p, out.inventory);
     applyDelta(deps.world, p, out.delta);
+    for (const m of out.progress) p.conn?.send('notice', { kind: 'info', text: m });
     for (const m of out.messages) p.conn?.send('notice', { kind: 'success', text: m });
     const rt = deps.world.runtimeOf(p);
     for (const o of out.overflow) deps.world.addDrop(rt, p.x, p.y, o.itemId, o.quantity, p.id);
@@ -535,3 +537,52 @@ export function toggleMount(deps: GameplayDeps, p: Player): { mount: string | nu
   questEvent(deps, p, 'mount', null);
   return { mount: best.id };
 }
+
+/** Quest actions to add to an NPC's dialogue (offers and hand-ins). */
+export function questDialogueActions(p: Player, npcId: string): import('@terrago/shared').DialogueAction[] {
+  const { offers, turnIns } = npcQuestActions(npcId, p.quests);
+  return [
+    ...turnIns.map((id) => ({ id: 'quest_complete' as const, label: `Complete: ${getQuestName(id)}`, questId: id })),
+    ...offers.map((id) => ({ id: 'quest_offer' as const, label: `Quest: ${getQuestName(id)}`, questId: id })),
+  ];
+}
+
+function getQuestName(id: string): string {
+  return QUESTS_BY_ID.get(id)?.name ?? id;
+}
+const QUESTS_BY_ID = new Map(QUESTS.map((q) => [q.id, q]));
+
+function questNpc(deps: GameplayDeps, p: Player, npcId: unknown) {
+  const npc = findNpc(npcId);
+  if (!npc) throw new GameError('Nobody is there.');
+  if (!deps.world.npcInRange(p, npc)) throw new GameError("You're too far away.");
+  return npc;
+}
+
+export const questServices = {
+  async accept(deps: GameplayDeps, p: Player, req: unknown) {
+    const r = (req ?? {}) as { npcId?: unknown; questId?: unknown };
+    const npc = questNpc(deps, p, r.npcId);
+    const def = QUESTS_BY_ID.get(String(r.questId));
+    if (!def || def.giver !== npc.id) throw new GameError("They don't have that quest.");
+    p.quests = await acceptQuest(deps.pool, p.id, def.id, p.quests);
+    p.conn?.send('quests', p.quests);
+    // Being somewhere already counts (e.g. a "visit" step for where you stand).
+    questEvent(deps, p, 'visit', p.mapId);
+    return null;
+  },
+  async complete(deps: GameplayDeps, p: Player, req: unknown) {
+    const r = (req ?? {}) as { npcId?: unknown; questId?: unknown };
+    const npc = questNpc(deps, p, r.npcId);
+    const def = QUESTS_BY_ID.get(String(r.questId));
+    if (!def || def.turnIn !== npc.id) throw new GameError("That's not for them.");
+    const res = await completeQuest(deps.pool, p.id, def.id);
+    p.quests = p.quests.map((q) => (q.id === def.id ? { ...q, done: true } : q));
+    p.conn?.send('quests', p.quests);
+    pushInventory(deps.world, p, res.inventory);
+    applyDelta(deps.world, p, res.delta);
+    const rt = deps.world.runtimeOf(p);
+    for (const o of res.overflow) deps.world.addDrop(rt, p.x, p.y, o.itemId, o.quantity, p.id);
+    return res.rewards;
+  },
+};

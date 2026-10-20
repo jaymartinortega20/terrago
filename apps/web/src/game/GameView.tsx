@@ -17,7 +17,7 @@ import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from '.
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 import { EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
-import { QuestTracker, QuestsPanel } from './ui/QuestUi';
+import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
 
 declare global {
   interface Window {
@@ -272,6 +272,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       </div>
 
       {touch && <MobileControls client={client} openPanel={open} />}
+      <QuestOfferWindow client={client} />
+      <QuestRewardWindow client={client} />
 
       {/* Connection state */}
       {status !== 'online' && (

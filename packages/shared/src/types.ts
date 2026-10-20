@@ -238,11 +238,12 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete';
 
 export interface DialogueAction {
   id: DialogueActionId;
   label: string;
+  questId?: string;
 }
 
 export interface ShopEntry {
@@ -283,17 +284,25 @@ export interface QuestStep {
   type: QuestStepType;
   target?: string;
   count: number;
+  /** Where to go: shown by the guide arrow. */
+  where?: { map: string; x: number; y: number };
 }
 
 export interface QuestDef {
   id: string;
   name: string;
   description: string;
+  /** Who offers the quest, and who you report back to. */
+  giver: string;
+  turnIn: string;
+  /** Quest that must be finished first. */
+  requires?: string;
+  intro: string[];
+  outro: string[];
   steps: QuestStep[];
   rewards: { gold?: number; xp?: number; items?: { itemId: string; quantity: number }[] };
   /** Extra items handed out when a step completes (e.g. the pony). */
   stepRewards?: Record<string, { itemId: string; quantity: number }[]>;
-  next?: string;
 }
 
 export interface QuestState {
@@ -301,4 +310,16 @@ export interface QuestState {
   step: number;
   count: number;
   done: boolean;
+}
+
+/** All steps finished, waiting to be turned in. */
+export function questReady(q: QuestState, def: QuestDef): boolean {
+  return !q.done && q.step >= def.steps.length;
+}
+
+/** Quests the character can pick up now (prerequisites done, not started). */
+export function questsAvailable(all: readonly QuestDef[], states: QuestState[]): QuestDef[] {
+  const done = new Set(states.filter((s) => s.done).map((s) => s.id));
+  const started = new Set(states.map((s) => s.id));
+  return all.filter((q) => !started.has(q.id) && (!q.requires || done.has(q.requires)));
 }

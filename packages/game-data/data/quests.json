@@ -1,45 +1,37 @@
 [
  {
-  "id": "q_welcome",
-  "name": "Welcome to Greenhaven",
-  "description": "Every new arrival should meet the mayor.",
-  "steps": [
-   {
-    "text": "Talk to Mayor Lina by the fountain",
-    "type": "talk",
-    "count": 1,
-    "target": "mayor_lina"
-   }
-  ],
-  "rewards": {
-   "gold": 20,
-   "xp": 20
-  },
-  "next": "q_pony"
- },
- {
   "id": "q_pony",
   "name": "A Horse of Your Own",
-  "description": "Walking everywhere is slow. Hana has something for you.",
+  "giver": "mayor_lina",
+  "turnIn": "stablemaster_hana",
+  "description": "Greenhaven is bigger than it looks. Hana keeps the town herd.",
+  "intro": [
+   "Welcome, welcome! You made it to Greenhaven in one piece.",
+   "Now \u2014 you'll wear out your boots in a week walking everywhere. Hana at the stables owes me a favour.",
+   "Go see her on the east side of the plaza. Tell her the mayor sent you."
+  ],
+  "outro": [
+   "There you go \u2014 a natural! Well, mostly. Keep your heels down.",
+   "Ride with Z, and get off with Z. Ponies don't like fights or mine tunnels, mind."
+  ],
   "steps": [
    {
-    "text": "Talk to Stablemaster Hana on the east side of the plaza",
+    "text": "Talk to Stablemaster Hana (east of the plaza)",
     "type": "talk",
     "count": 1,
-    "target": "stablemaster_hana"
+    "target": "stablemaster_hana",
+    "where": {
+     "map": "greenhaven",
+     "x": 44,
+     "y": 23
+    }
    },
    {
-    "text": "Press Z to ride your pony",
+    "text": "Press Z to ride your new pony",
     "type": "mount",
     "count": 1
    }
   ],
-  "rewards": {
-   "gold": 10,
-   "xp": 20,
-   "items": []
-  },
-  "next": "q_homestead",
   "stepRewards": {
    "0": [
     {
@@ -47,202 +39,316 @@
      "quantity": 1
     }
    ]
+  },
+  "rewards": {
+   "gold": 20,
+   "xp": 30
   }
  },
  {
   "id": "q_homestead",
   "name": "A Patch of Your Own",
-  "description": "Your homestead is west along the Sunfield lane, through the south gate.",
+  "giver": "stablemaster_hana",
+  "turnIn": "farmer_rowan",
+  "requires": "q_pony",
+  "description": "Every resident gets a homestead. Time to get your hands dirty.",
+  "intro": [
+   "Now that you can ride \u2014 have you even seen your homestead yet?",
+   "South gate, then west along the Sunfield lane. Plant something. Anything.",
+   "When it's grown, show Farmer Rowan. He'll pretend not to be impressed."
+  ],
+  "outro": [
+   "Hmph. A carrot. A real one, grown with your own hands.",
+   "Not bad for a beginner. Here \u2014 fertilizer. Mix it in before the next crop."
+  ],
   "steps": [
    {
-    "text": "Go to your Homestead (south gate, then west along the lane)",
+    "text": "Ride to your Homestead (south gate, then west along the lane)",
     "type": "visit",
     "count": 1,
-    "target": "homestead"
+    "target": "homestead",
+    "where": {
+     "map": "sunfield_plains",
+     "x": 4,
+     "y": 21
+    }
    },
    {
-    "text": "Till, plant, water and harvest a Carrot",
+    "text": "Till, plant, water and harvest a Carrot (E on the soil)",
     "type": "harvest",
     "count": 1,
-    "target": "carrot"
+    "target": "carrot",
+    "where": {
+     "map": "homestead",
+     "x": 14,
+     "y": 10
+    }
    }
   ],
   "rewards": {
-   "gold": 15,
-   "xp": 30,
+   "gold": 25,
+   "xp": 40,
    "items": [
     {
      "itemId": "carrot_seed",
      "quantity": 6
-    }
-   ]
-  },
-  "next": "q_rowan"
- },
- {
-  "id": "q_rowan",
-  "name": "The Farmer's Friend",
-  "description": "Rowan sells seeds and buys crops at the Farm Supply in Greenhaven.",
-  "steps": [
-   {
-    "text": "Talk to Farmer Rowan at the Farm Supply (south-west Greenhaven)",
-    "type": "talk",
-    "count": 1,
-    "target": "farmer_rowan"
-   }
-  ],
-  "rewards": {
-   "gold": 10,
-   "xp": 15,
-   "items": [
+    },
     {
      "itemId": "basic_fertilizer",
      "quantity": 2
     }
    ]
-  },
-  "next": "q_pickaxe"
+  }
  },
  {
   "id": "q_pickaxe",
   "name": "Tools of the Trade",
-  "description": "Miner Bram sells pickaxes near the north road.",
+  "giver": "farmer_rowan",
+  "turnIn": "miner_bram",
+  "requires": "q_homestead",
+  "description": "Farming feeds you. Mining pays for the tools.",
+  "intro": [
+   "You'll want coin for better seeds \u2014 and copper's always selling.",
+   "Bram sells pickaxes up by the north road. Grab one and dig up some copper.",
+   "There's copper rock in the north meadow of Sunfield, if you don't fancy the mine yet."
+  ],
+  "outro": [
+   "Five lumps of copper and all your fingers! Good start.",
+   "Now that ore's no use as rocks. Take it to Toren's furnace."
+  ],
   "steps": [
    {
     "text": "Buy a Worn Pickaxe from Miner Bram (north Greenhaven)",
     "type": "buy",
     "count": 1,
-    "target": "worn_pickaxe"
+    "target": "worn_pickaxe",
+    "where": {
+     "map": "greenhaven",
+     "x": 35,
+     "y": 12
+    }
    },
    {
-    "text": "Mine 5 Copper Ore (Sunfield's north meadow or the mine)",
+    "text": "Mine 5 Copper Ore (copper rocks in Sunfield's north meadow)",
     "type": "gather",
     "count": 5,
-    "target": "copper_ore"
+    "target": "copper_ore",
+    "where": {
+     "map": "sunfield_plains",
+     "x": 46,
+     "y": 9
+    }
    }
   ],
   "rewards": {
    "gold": 30,
-   "xp": 40
-  },
-  "next": "q_smelt"
+   "xp": 50
+  }
  },
  {
   "id": "q_smelt",
   "name": "Fire and Metal",
-  "description": "The furnace stands east of the Blacksmith.",
+  "giver": "miner_bram",
+  "turnIn": "blacksmith_toren",
+  "requires": "q_pickaxe",
+  "description": "Ore becomes metal in the fire.",
+  "intro": [
+   "Raw ore won't make a pickaxe. Raw ore won't make anything.",
+   "The furnace stands just east of Toren's smithy. Three ore, one bar.",
+   "Show Toren your first bar. He'll grumble. That means he likes it."
+  ],
+  "outro": [
+   "\u2026It'll do. Most people's first bar looks like a potato.",
+   "Here, a helmet. Mind your head out there \u2014 slimes have gotten bold."
+  ],
   "steps": [
    {
     "text": "Smelt a Copper Bar at the furnace (east of the Blacksmith)",
     "type": "craft",
     "count": 1,
-    "target": "copper_bar"
+    "target": "copper_bar",
+    "where": {
+     "map": "greenhaven",
+     "x": 54,
+     "y": 16
+    }
    }
   ],
   "rewards": {
-   "gold": 20,
-   "xp": 40,
+   "gold": 25,
+   "xp": 50,
    "items": [
     {
      "itemId": "padded_head",
      "quantity": 1
     }
    ]
-  },
-  "next": "q_slimes"
+  }
  },
  {
   "id": "q_slimes",
   "name": "Slime Trouble",
-  "description": "Slimes are eating Sunfield's crops. Press F to attack.",
+  "giver": "blacksmith_toren",
+  "turnIn": "mayor_lina",
+  "requires": "q_smelt",
+  "description": "The slimes of Sunfield are eating the crops.",
+  "intro": [
+   "Lina's been fretting. Slimes in Sunfield, chewing on everybody's cabbages.",
+   "You've a weapon. Use it. Press F near one \u2014 and don't let them surround you.",
+   "Five should send the message. Then tell the mayor."
+  ],
+  "outro": [
+   "Five slimes! The farmers will sleep easier tonight.",
+   "Take these potions. Drink one when things get hairy \u2014 and they will."
+  ],
   "steps": [
    {
-    "text": "Defeat 5 Green Slimes in Sunfield Plains (F to attack)",
+    "text": "Defeat 5 Green Slimes in Sunfield's north meadow (F to attack)",
     "type": "kill",
     "count": 5,
-    "target": "green_slime"
+    "target": "green_slime",
+    "where": {
+     "map": "sunfield_plains",
+     "x": 44,
+     "y": 10
+    }
    }
   ],
   "rewards": {
-   "gold": 40,
-   "xp": 60,
+   "gold": 45,
+   "xp": 70,
    "items": [
     {
      "itemId": "minor_health_potion",
      "quantity": 3
     }
    ]
-  },
-  "next": "q_fishing"
+  }
  },
  {
   "id": "q_fishing",
   "name": "Gone Fishing",
-  "description": "Fisher Olan stands by the pond in south-east Greenhaven.",
+  "giver": "mayor_lina",
+  "turnIn": "fisher_olan",
+  "requires": "q_slimes",
+  "description": "A quieter skill \u2014 but just as valuable.",
+  "intro": [
+   "You've earned some quiet. Olan fishes the pond in the south-east of town.",
+   "Buy a rod from him and catch anything at all. He'll teach you the rest."
+  ],
+  "outro": [
+   "Ha! Look at that. First catch is always the best one.",
+   "Patience, timing, and a steady hand. That's all fishing is. That's all anything is."
+  ],
   "steps": [
    {
     "text": "Buy a Bamboo Rod from Fisher Olan (pond, south-east Greenhaven)",
     "type": "buy",
     "count": 1,
-    "target": "bamboo_rod"
+    "target": "bamboo_rod",
+    "where": {
+     "map": "greenhaven",
+     "x": 45,
+     "y": 39
+    }
    },
    {
     "text": "Catch any fish (face water, E to cast, E on the bite, hold Space)",
     "type": "fish",
-    "count": 1
+    "count": 1,
+    "where": {
+     "map": "greenhaven",
+     "x": 46,
+     "y": 40
+    }
    }
   ],
   "rewards": {
-   "gold": 30,
-   "xp": 50
-  },
-  "next": "q_mine"
+   "gold": 35,
+   "xp": 60
+  }
  },
  {
   "id": "q_mine",
   "name": "Down Below",
-  "description": "Irondeep Mine is north of Greenhaven. Gus runs a lift every five floors.",
+  "giver": "fisher_olan",
+  "turnIn": "lift_gus",
+  "requires": "q_fishing",
+  "description": "Irondeep Mine goes forty floors down.",
+  "intro": [
+   "My cousin Gus runs the lift at Irondeep, up the north road.",
+   "Reach the fifth floor and he'll take you there any time. Bring food \u2014 and a weapon."
+  ],
+  "outro": [
+   "Floor five, eh? Not bad. Most turn back at three.",
+   "Here's a stone for the altar in town. Makes your gear a little meaner."
+  ],
   "steps": [
    {
-    "text": "Reach floor 5 of Irondeep Mine (north road)",
+    "text": "Reach floor 5 of Irondeep Mine (north road, then the ladders)",
     "type": "visit",
     "count": 1,
-    "target": "irondeep_5"
+    "target": "irondeep_5",
+    "where": {
+     "map": "irondeep_entrance",
+     "x": 20,
+     "y": 8
+    }
    }
   ],
   "rewards": {
-   "gold": 80,
-   "xp": 120,
+   "gold": 90,
+   "xp": 140,
    "items": [
     {
      "itemId": "enhancement_stone",
      "quantity": 1
     }
    ]
-  },
-  "next": "q_wolves"
+  }
  },
  {
   "id": "q_wolves",
   "name": "Whisperwood Warning",
-  "description": "Wolves are prowling Whisperwood Forest (Lv 10+). Get strong first.",
+  "giver": "lift_gus",
+  "turnIn": "guildmaster_kael",
+  "requires": "q_mine",
+  "description": "Wolves prowl the western forest. Level 10+ recommended.",
+  "intro": [
+   "Kael at the Guild Hall's been asking for fighters. Wolves in Whisperwood.",
+   "They hunt in packs, and they're no slimes. Get to level ten first, I'd say."
+  ],
+  "outro": [
+   "Five wolves. You've got steel in you.",
+   "The Guild will have work for someone like you. Soon."
+  ],
   "steps": [
    {
-    "text": "Enter Whisperwood Forest (west road)",
+    "text": "Ride into Whisperwood Forest (west road)",
     "type": "visit",
     "count": 1,
-    "target": "whisperwood"
+    "target": "whisperwood",
+    "where": {
+     "map": "greenhaven",
+     "x": 0,
+     "y": 22
+    }
    },
    {
-    "text": "Defeat 5 Forest Wolves",
+    "text": "Defeat 5 Forest Wolves (south-east Whisperwood)",
     "type": "kill",
     "count": 5,
-    "target": "forest_wolf"
+    "target": "forest_wolf",
+    "where": {
+     "map": "whisperwood",
+     "x": 46,
+     "y": 36
+    }
    }
   ],
   "rewards": {
-   "gold": 200,
-   "xp": 400,
+   "gold": 220,
+   "xp": 450,
    "items": [
     {
      "itemId": "enhancement_stone",

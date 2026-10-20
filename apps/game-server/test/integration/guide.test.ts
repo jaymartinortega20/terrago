@@ -27,19 +27,21 @@ async function place(id: string, mapId: string, tx: number, ty: number, dir = 'u
 }
 
 describe('guide quests, mounts, duels, line of sight', () => {
-  test('quest chain: Lina → Hana gives a pony → riding is faster', async () => {
+  test('quest chain: Lina offers → accept → Hana gives a pony → ride → hand in for rewards', async () => {
     const A = await newPlayer(base);
     await place(A.character.id, 'greenhaven', 29, 22, 'left'); // next to Mayor Lina (28,22)
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     let quests: QuestState[] = await once<QuestState[]>(a.socket, 'quests');
     a.socket.on('quests', (q) => (quests = q));
-    assert.deepEqual(quests[0], { id: 'q_welcome', step: 0, count: 0, done: false });
+    assert.deepEqual(quests, [], 'nothing started yet — Lina has an offer');
     const talk = await ack(a.socket, 'npc:interact', 'mayor_lina');
     assert.equal(talk.ok, true);
+    assert.ok(talk.data.actions.some((x: any) => x.id === 'quest_offer' && x.questId === 'q_pony'));
+    assert.equal((await ack(a.socket, 'quest:accept', { npcId: 'mayor_lina', questId: 'q_slimes' })).ok, false, 'later quests are locked');
+    const acc = await ack(a.socket, 'quest:accept', { npcId: 'mayor_lina', questId: 'q_pony' });
+    assert.equal(acc.ok, true, JSON.stringify(acc));
     await waitFor(() => quests.some((q) => q.id === 'q_pony'));
-    assert.equal(quests.find((q) => q.id === 'q_welcome')!.done, true);
-    // No mount yet.
-    assert.equal((await ack(a.socket, 'mount:toggle')).ok, false);
+    assert.equal((await ack(a.socket, 'mount:toggle')).ok, false, 'no mount yet');
     const p = server.world.players.get(A.character.id)!;
     p.x = tileCenter(45, 23).x;
     p.y = tileCenter(45, 23).y; // next to Hana (44,23)
@@ -48,11 +50,22 @@ describe('guide quests, mounts, duels, line of sight', () => {
     const pony = await db.query(`SELECT count(*)::int AS n FROM inventory_items WHERE character_id = $1 AND item_id = 'brown_pony'`, [A.character.id]);
     assert.equal(pony.rows[0].n, 1, 'Hana handed over the pony');
     await new Promise((r) => setTimeout(r, 200));
+    const early = await ack(a.socket, 'quest:complete', { npcId: 'stablemaster_hana', questId: 'q_pony' });
+    assert.equal(early.ok, false, 'not finished yet');
     const ride = await ack(a.socket, 'mount:toggle');
     assert.equal(ride.ok, true, JSON.stringify(ride));
     assert.equal(p.speed, 1.45);
-    await waitFor(() => quests.find((q) => q.id === 'q_pony')?.done);
-    assert.ok(quests.some((q) => q.id === 'q_homestead'));
+    await waitFor(() => quests.find((q) => q.id === 'q_pony')?.step === 2);
+    const gold0 = (await db.query('SELECT gold FROM characters WHERE id = $1', [A.character.id])).rows[0].gold;
+    const done = await ack(a.socket, 'quest:complete', { npcId: 'stablemaster_hana', questId: 'q_pony' });
+    assert.equal(done.ok, true, JSON.stringify(done));
+    assert.equal(done.data.gold, 20);
+    const again = await ack(a.socket, 'quest:complete', { npcId: 'stablemaster_hana', questId: 'q_pony' });
+    assert.equal(again.ok, false, 'rewards only once');
+    const gold1 = (await db.query('SELECT gold FROM characters WHERE id = $1', [A.character.id])).rows[0].gold;
+    assert.equal(gold1, gold0 + 20);
+    const hana = await ack(a.socket, 'npc:interact', 'stablemaster_hana');
+    assert.ok(hana.data.actions.some((x: any) => x.id === 'quest_offer' && x.questId === 'q_homestead'), 'next quest offered');
     // Riding covers more ground per step.
     const y0 = p.y;
     for (let s = 1; s <= 5; s++) server.world.enqueueMove(p, [p.lastQueuedSeq + 1, 0, 1]);

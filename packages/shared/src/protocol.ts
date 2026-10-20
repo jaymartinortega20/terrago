@@ -171,6 +171,8 @@ export interface ClientToServerEvents {
   'unequip': (req: { slot: number }, ack: Ack<null>) => void;
   'enhance': (req: { equipSlot: number }, ack: Ack<{ success: boolean; message: string }>) => void;
   'mount:toggle': (ack: Ack<{ mount: string | null }>) => void;
+  'quest:accept': (req: { npcId: string; questId: string }, ack: Ack<null>) => void;
+  'quest:complete': (req: { npcId: string; questId: string }, ack: Ack<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;
   'lift:go': (req: { npcId: string; floor: number }, ack: Ack<{ message: string }>) => void;
   'ping:check': (clientTime: number, ack: (serverTime: number) => void) => void;

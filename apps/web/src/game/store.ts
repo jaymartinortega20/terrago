@@ -77,6 +77,9 @@ export interface UiState {
   cooldowns: Record<string, number>;
   quests: import('@terrago/shared').QuestState[];
   duel: { id: string; name: string; until: number } | null;
+  /** Quest offer / reward windows. */
+  questOffer: { questId: string; npcId: string } | null;
+  questReward: { questId: string; gold: number; xp: number; items: { itemId: string; quantity: number }[] } | null;
   /** Fishing in progress. */
   fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
 }
@@ -111,6 +114,8 @@ export const initialUi: UiState = {
   cooldowns: {},
   quests: [],
   duel: null,
+  questOffer: null,
+  questReward: null,
 };
 
 let noticeId = 0;

@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { getCrop, getItem, getMap, getNode, skillsForClass } from '@terrago/game-data';
+import { NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, skillsForClass } from '@terrago/game-data';
 import {
   CHAT,
   CODE_DIR,
@@ -13,6 +13,7 @@ import {
   stepMovement,
   tileCenter,
   cropStatus,
+  questsAvailable,
   FISHABLE_TILES,
   PROP_TYPES,
   STATION_PROPS,
@@ -532,6 +533,49 @@ export class GameClient {
 
   speed(): number {
     return this.ui.get().self?.speed ?? 1;
+  }
+
+  async acceptQuest(npcId: string, questId: string): Promise<void> {
+    try {
+      await this.request('quest:accept', { npcId, questId });
+      this.ui.set({ questOffer: null });
+      pushNotice(this.ui, 'success', 'Quest accepted!');
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  async completeQuest(npcId: string, questId: string): Promise<void> {
+    try {
+      const r = await this.request<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>('quest:complete', { npcId, questId });
+      this.ui.set({ questReward: { questId, ...r } });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  /** Where the tracked quest wants you to go next: { map, x, y } in tiles, or null. */
+  questTarget(): { map: string; x: number; y: number; label: string } | null {
+    const quests = this.ui.get().quests.filter((q) => !q.done);
+    const q = quests[0];
+    if (!q) {
+      // Nothing active: point at whoever offers the next quest.
+      const offer = questsAvailable(QUESTS, this.ui.get().quests)[0];
+      const npc = offer ? NPCS.find((n) => n.id === offer.giver) : undefined;
+      return npc ? { map: npc.mapId, x: npc.x, y: npc.y, label: npc.name } : null;
+    }
+    const def = getQuest(q.id);
+    if (!def) return null;
+    if (q.step >= def.steps.length) {
+      const npc = NPCS.find((n) => n.id === def.turnIn);
+      return npc ? { map: npc.mapId, x: npc.x, y: npc.y, label: npc.name } : null;
+    }
+    const st = def.steps[q.step]!;
+    if (st.type === 'talk') {
+      const npc = NPCS.find((n) => n.id === st.target);
+      if (npc) return { map: npc.mapId, x: npc.x, y: npc.y, label: npc.name };
+    }
+    return st.where ? { ...st.where, label: '' } : null;
   }
 
   toggleMount(): void {

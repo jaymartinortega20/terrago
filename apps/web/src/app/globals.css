@@ -175,3 +175,22 @@ img.pixel {
     transition: none !important;
   }
 }
+
+.px-btn.gold-btn {
+  background: #e8c24a;
+  color: #2a2030;
+  box-shadow: inset 0 -3px 0 #b8902a;
+}
+
+@keyframes quest-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.quest-pop { animation: quest-pop 0.35s ease-out; }
+
+@keyframes shine {
+  0%, 100% { filter: drop-shadow(0 0 0 #ffe48a); }
+  50% { filter: drop-shadow(0 0 6px #ffe48a); }
+}
+.shine { animation: shine 1.4s ease-in-out infinite; }

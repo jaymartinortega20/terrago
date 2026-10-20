@@ -31,17 +31,20 @@ async function goto(map, x, y, dir) {
   await online();
   await page.waitForTimeout(700);
 }
-async function talkThrough() {
+/** Talk to the NPC in front and click through to a dialogue action (e.g. quest_offer). */
+async function talkUntil(action) {
   await page.keyboard.press('e');
   await page.locator('[data-testid=dialogue]').waitFor();
-  for (let i = 0; i < 10 && (await page.locator('[data-testid=dialogue]').isVisible()); i++) {
+  for (let i = 0; i < 12; i++) {
+    if (action && (await page.locator(`[data-testid=dialogue-action-${action}]`).first().isVisible())) {
+      await page.locator(`[data-testid=dialogue-action-${action}]`).first().click();
+      return;
+    }
+    if (!(await page.locator('[data-testid=dialogue]').isVisible())) return;
     await page.click('[data-testid=dialogue-next]');
     await page.waitForTimeout(200);
-    if (await page.locator('[data-testid=dialogue-action-shop]').isVisible()) {
-      await page.keyboard.press('Escape');
-      break;
-    }
   }
+  if (action) throw new Error(`no ${action} action`);
 }
 try {
   await page.goto(`${WEB}/register`);
@@ -60,23 +63,29 @@ try {
   await online();
   await page.waitForTimeout(800);
   const tracker = await page.locator('[data-testid=quest-tracker]').innerText();
-  check('Tracker shows the first step', /Mayor Lina/.test(tracker), tracker.replace(/\n/g, ' '));
+  check('Tracker invites you to find a quest', /New quest/.test(tracker), tracker.replace(/\n/g, ' '));
   await page.screenshot({ path: `${OUT}/guide-01-tracker.png` });
 
   await goto('greenhaven', 29, 22, 'left');
-  await talkThrough();
+  check('Lina shows a ! marker', await page.evaluate(() => window.__terrago.game.scene.getScene('world').npcMarkers.get('mayor_lina')?.text === '!'));
+  await talkUntil('quest_offer');
+  await page.locator('[data-testid=quest-offer]').waitFor();
+  await page.screenshot({ path: `${OUT}/guide-01b-offer.png` });
+  await page.click('[data-testid=quest-accept]');
   await page.waitForFunction(() => window.__terrago.client.ui.get().quests.some((q) => q.id === 'q_pony'));
-  check('Talking to Lina advances to the pony quest', true);
+  check('Accepted the pony quest', true);
+  await page.waitForTimeout(600);
+  check('Guide arrow points somewhere', await page.evaluate(() => !!window.__terrago.game.scene.getScene('world').guideTarget));
+  await page.screenshot({ path: `${OUT}/guide-01c-arrow.png` });
 
   await goto('greenhaven', 45, 23, 'left');
-  await talkThrough();
+  await talkUntil(null);
   await page.waitForFunction(() => window.__terrago.client.ui.get().inventory.slots.some((s) => s.itemId === 'brown_pony'));
   check('Hana gives a pony', true);
   await page.waitForTimeout(400);
   await page.keyboard.press('z');
   await page.waitForFunction(() => window.__terrago.client.ui.get().self.mount === 'brown_pony');
   check('Z mounts the pony', (await ui()).self.speed > 1.4);
-  // Ride east along the road for 1 second.
   const x0 = await page.evaluate(() => window.__terrago.client.pos.x);
   await page.keyboard.down('d');
   await page.waitForTimeout(1000);
@@ -85,10 +94,14 @@ try {
   const dx = (await page.evaluate(() => window.__terrago.client.pos.x)) - x0;
   check('Riding is faster than walking (112 px/s)', dx > 140, `${Math.round(dx)} px in 1s`);
   await page.screenshot({ path: `${OUT}/guide-02-riding.png` });
-  check('Pony quest done, next quest shown', /Homestead/.test(await page.locator('[data-testid=quest-tracker]').innerText()));
-  await page.keyboard.press('j');
-  await page.locator('[data-testid=quests-panel]').waitFor();
-  await page.screenshot({ path: `${OUT}/guide-03-quests.png` });
+  check('Tracker says return to Hana', /Return to Stablemaster Hana/.test(await page.locator('[data-testid=quest-tracker]').innerText()));
+  await page.keyboard.press('z');
+  await goto('greenhaven', 45, 23, 'left');
+  await talkUntil('quest_complete');
+  await page.locator('[data-testid=quest-reward]').waitFor();
+  await page.screenshot({ path: `${OUT}/guide-03-reward.png` });
+  await page.click('[data-testid=quest-reward-ok]');
+  check('Next quest offered by Hana (! marker)', await page.evaluate(() => window.__terrago.game.scene.getScene('world').npcMarkers.get('stablemaster_hana')?.text === '!'));
   log('ALL GUIDE CHECKS PASSED');
 } catch (e) {
   await page.screenshot({ path: `${OUT}/guide-failure.png` }).catch(() => {});

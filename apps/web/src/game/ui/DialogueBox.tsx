@@ -87,12 +87,14 @@ export function DialogueBox({ client }: { client: GameClient }) {
             dialogue.actions?.map((a) => (
               <button
                 key={a.id}
-                className="px-btn green small"
+                className={`px-btn small ${a.id === 'quest_offer' || a.id === 'quest_complete' ? 'gold-btn' : 'green'}`}
                 data-testid={`dialogue-action-${a.id}`}
                 onClick={() => {
                   const npcId = dialogue.npcId;
                   client.ui.set({ dialogue: null });
-                  if (a.id === 'shop') void client.openShop(npcId);
+                  if (a.id === 'quest_offer' && a.questId) client.ui.set({ questOffer: { questId: a.questId, npcId } });
+                  else if (a.id === 'quest_complete' && a.questId) void client.completeQuest(npcId, a.questId);
+                  else if (a.id === 'shop') void client.openShop(npcId);
                   else client.ui.set({ serviceNpc: npcId, panel: a.id === 'farm_upgrade' ? 'farm' : a.id === 'lift' ? 'lift' : 'repair' });
                 }}
               >

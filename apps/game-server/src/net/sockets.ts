@@ -23,7 +23,7 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, craftAt, gear, npcServices, questEvent, startQuests, toggleMount } from './gameplay';
+import { act, craftAt, gear, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
 import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
 
@@ -225,6 +225,8 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
           if (!world.npcInRange(p, npc)) throw new GameError("You're too far away to talk.");
           const { dialogue, inventory } = await talkToNpc(pool, p.id, npc);
           questEvent({ pool, world, log }, p, 'talk', npc.id);
+          const qa = questDialogueActions(p, npc.id);
+          if (qa.length) dialogue.actions = [...qa, ...(dialogue.actions ?? [])];
           if (inventory) {
             world.inventoryCache.set(p.id, inventory);
             p.conn?.send('inventory:update', inventory);
@@ -299,6 +301,8 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('craft', (req, ack) => serial(ack, () => craftAt(g, p, req)));
     socket.on('equip', (req, ack) => serial(ack, () => gear.equip(g, p, req)));
     socket.on('mount:toggle', (ack) => respond(ack, () => toggleMount(g, p)));
+    socket.on('quest:accept', (req, ack) => serial(ack, () => questServices.accept(g, p, req)));
+    socket.on('quest:complete', (req, ack) => serial(ack, () => questServices.complete(g, p, req)));
     socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));
     socket.on('enhance', (req, ack) => serial(ack, () => gear.enhance(g, p, req)));
     socket.on('attack', (targetId, ack) =>

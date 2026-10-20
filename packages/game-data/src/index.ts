@@ -129,8 +129,6 @@ export const RECIPES: readonly RecipeDef[] = recipesJson as RecipeDef[];
 export const MONSTERS: readonly MonsterDef[] = monstersJson as MonsterDef[];
 export const SKILLS: readonly SkillDef[] = skillsJson as SkillDef[];
 export const QUESTS: readonly QuestDef[] = questsJson as QuestDef[];
-/** The guide chain starts here for every new character. */
-export const FIRST_QUEST = 'q_welcome';
 
 export function getQuest(id: string): QuestDef | undefined {
   return QUESTS.find((q) => q.id === id);
@@ -289,7 +287,9 @@ export function validateGameData(): string[] {
   for (const t of BALANCE.farming.tiers) for (const m of t.materials ?? []) if (!itemIndex.has(m.itemId)) errors.push(`farm tier ${t.tier} material ${m.itemId} unknown`);
   for (const i of ITEMS) if (i.fertilizer && !(i.fertilizer.speed >= 1)) errors.push(`fertilizer ${i.id} speed must be >= 1`);
   for (const q of QUESTS) {
-    if (q.next && !QUESTS.some((x) => x.id === q.next)) errors.push(`quest ${q.id} next ${q.next} unknown`);
+    if (q.requires && !QUESTS.some((x) => x.id === q.requires)) errors.push(`quest ${q.id} requires unknown ${q.requires}`);
+    for (const n of [q.giver, q.turnIn]) if (!NPCS.some((x) => x.id === n)) errors.push(`quest ${q.id} uses unknown npc ${n}`);
+    for (const st of q.steps) if (st.where && !getMap(st.where.map)) errors.push(`quest ${q.id} points to unknown map ${st.where.map}`);
     for (const st of q.steps) {
       if (st.type === 'talk' && !NPCS.some((n) => n.id === st.target)) errors.push(`quest ${q.id} talks to unknown ${st.target}`);
       if (st.type === 'kill' && !monsterIndex.has(st.target ?? '')) errors.push(`quest ${q.id} kills unknown ${st.target}`);

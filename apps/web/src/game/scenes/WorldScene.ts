@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getCrop, getItem, getMonster, getNode } from '@terrago/game-data';
+import { QUESTS, getCrop, getItem, getMap, getMonster, getNode, getQuest } from '@terrago/game-data';
 import { itemIcon } from '../art/world';
 import { monsterSheet } from '../art/monsters';
 import { mountSheet } from '../art/mounts';
@@ -8,6 +8,8 @@ import {
   MAX_VIEW,
   TILE_SIZE,
   cropStatus,
+  questReady,
+  questsAvailable,
   tileCenter,
   type Appearance,
   type ChatMessage,
@@ -60,6 +62,10 @@ export class WorldScene extends Phaser.Scene {
   private remotes = new Map<string, Avatar>();
   private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number }>();
   private targetRing!: Phaser.GameObjects.Graphics;
+  private guide!: Phaser.GameObjects.Graphics;
+  private npcMarkers = new Map<string, Phaser.GameObjects.Text>();
+  private lastQuestRefresh = 0;
+  private guideTarget: { x: number; y: number } | null = null;
   private npcAvatars = new Map<string, Avatar>();
   private signs: { x: number; y: number; text: string; label: Phaser.GameObjects.Text }[] = [];
   private prompt!: Phaser.GameObjects.Text;
@@ -116,6 +122,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.cursor = this.add.graphics().setDepth(LABEL_DEPTH - 3);
     this.targetRing = this.add.graphics().setDepth(-4);
+    this.guide = this.add.graphics().setDepth(LABEL_DEPTH + 15);
     // Click / tap a nearby tile to use it.
     this.input.on('pointerdown', (ptr: Phaser.Input.Pointer) => {
       if (ptr.button !== 0 || this.client.ui.get().dialogue) return;
@@ -305,6 +312,8 @@ export class WorldScene extends Phaser.Scene {
     for (const id of [...this.objectViews.keys()]) this.destroyObjectView(id);
     for (const o of this.client.objects.values()) this.syncObject(o);
 
+    this.npcMarkers.forEach((m) => m.destroy());
+    this.npcMarkers.clear();
     for (const n of this.client.npcs) {
       const c = tileCenter(n.x, n.y);
       const av = this.makeAvatar(c.x, c.y, n.appearance, n.name, '#b9f08a', n.accessory);
@@ -429,6 +438,105 @@ export class WorldScene extends Phaser.Scene {
       this.alert.destroy();
       this.alert = null;
     }
+  }
+
+  /** "!" = quest to pick up, "?" = ready to hand in (grey while still in progress). */
+  private refreshQuestMarkers(): void {
+    const quests = this.client.ui.get().quests;
+    const offers = new Set(questsAvailable(QUESTS, quests).map((q) => q.giver));
+    const ready = new Set<string>();
+    const pending = new Set<string>();
+    for (const q of quests) {
+      const d = getQuest(q.id);
+      if (!d || q.done) continue;
+      if (questReady(q, d)) ready.add(d.turnIn);
+      else {
+        pending.add(d.turnIn);
+        const st = d.steps[q.step];
+        if (st?.type === 'talk' && st.target) ready.add(st.target);
+      }
+    }
+    for (const n of this.client.npcs) {
+      const mark = ready.has(n.id) ? ['?', '#ffe48a'] : offers.has(n.id) ? ['!', '#ffe48a'] : pending.has(n.id) ? ['?', '#b0b0b0'] : null;
+      let t = this.npcMarkers.get(n.id);
+      if (!mark) {
+        t?.destroy();
+        this.npcMarkers.delete(n.id);
+        continue;
+      }
+      if (!t) {
+        t = this.add
+          .text(0, 0, mark[0]!, { fontFamily: LABEL_FONT, fontSize: '24px', color: mark[1], stroke: '#2a2030', strokeThickness: 5 })
+          .setOrigin(0.5, 1)
+          .setResolution(2)
+          .setDepth(LABEL_DEPTH + 3);
+        this.npcMarkers.set(n.id, t);
+      }
+      t.setText(mark[0]!).setColor(mark[1]!);
+    }
+  }
+
+  /** Where the guide arrow points in this map: the quest target, or the exit toward it. */
+  private computeGuide(): { x: number; y: number } | null {
+    const target = this.client.questTarget();
+    const here = this.client.map?.id;
+    if (!target || !here) return null;
+    if (target.map === here) return { x: target.x * TILE_SIZE + TILE_SIZE / 2, y: target.y * TILE_SIZE + TILE_SIZE / 2 };
+    // Breadth-first search over portals to find the first exit on the way.
+    const prev = new Map<string, { from: string; portal: { x: number; y: number; w: number; h: number } }>();
+    const queue = [here];
+    const seen = new Set([here]);
+    while (queue.length) {
+      const id = queue.shift()!;
+      if (id === target.map) break;
+      for (const p of getMap(id)?.portals ?? []) {
+        if (seen.has(p.to)) continue;
+        seen.add(p.to);
+        prev.set(p.to, { from: id, portal: p });
+        queue.push(p.to);
+      }
+    }
+    if (!prev.has(target.map)) return null;
+    let cur = target.map;
+    let step = prev.get(cur)!;
+    while (step.from !== here) {
+      cur = step.from;
+      step = prev.get(cur)!;
+    }
+    const p = step.portal;
+    return { x: (p.x + p.w / 2) * TILE_SIZE, y: (p.y + p.h / 2) * TILE_SIZE };
+  }
+
+  private drawGuide(time: number, px: number, py: number): void {
+    const g = this.guide;
+    g.clear();
+    const t = this.guideTarget;
+    if (!t || Math.hypot(t.x - px, t.y - py) < 40) return;
+    const view = this.cameras.main.worldView;
+    const bob = Math.sin(time / 180) * 4;
+    if (view.contains(t.x, t.y - 20)) {
+      // Bouncing marker above the target.
+      const y = t.y - 40 + bob;
+      g.fillStyle(0x2a2030, 1).fillTriangle(t.x - 11, y - 3, t.x + 11, y - 3, t.x, y + 12);
+      g.fillStyle(0xffe48a, 1).fillTriangle(t.x - 8, y - 1, t.x + 8, y - 1, t.x, y + 9);
+      return;
+    }
+    // Off-screen: an arrow at the edge of the view pointing toward it.
+    const cx = view.centerX;
+    const cy = view.centerY;
+    const ang = Math.atan2(t.y - cy, t.x - cx);
+    const m = 34;
+    const hw = view.width / 2 - m;
+    const hh = view.height / 2 - m;
+    const k = Math.min(hw / Math.abs(Math.cos(ang) || 1e-6), hh / Math.abs(Math.sin(ang) || 1e-6));
+    const ax = cx + Math.cos(ang) * (k + bob * 0.5);
+    const ay = cy + Math.sin(ang) * (k + bob * 0.5);
+    const pt = (r: number, a: number) => ({ x: ax + Math.cos(ang + a) * r, y: ay + Math.sin(ang + a) * r });
+    const tip = pt(16, 0);
+    const l = pt(12, 2.4);
+    const r2 = pt(12, -2.4);
+    g.fillStyle(0x2a2030, 0.9).fillCircle(ax, ay, 15);
+    g.fillStyle(0xffe48a, 1).fillTriangle(tip.x, tip.y, l.x, l.y, r2.x, r2.y);
   }
 
   /** Tiny dust puff where an action happened. */
@@ -708,6 +816,18 @@ export class WorldScene extends Phaser.Scene {
       this.lastHint = hint;
       client.ui.set({ interactHint: hint });
     }
+
+    // Quest markers over NPCs and the guide arrow.
+    if (nowMs - this.lastQuestRefresh > 400) {
+      this.lastQuestRefresh = nowMs;
+      this.refreshQuestMarkers();
+      this.guideTarget = this.computeGuide();
+    }
+    for (const [id, mk] of this.npcMarkers) {
+      const av = this.npcAvatars.get(id);
+      if (av) mk.setPosition(av.sprite.x, av.sprite.y - 62 + Math.sin(time / 220) * 3);
+    }
+    this.drawGuide(time, lx, ly);
 
     // Crops grow on their own: refresh visuals a couple of times per second.
     if (nowMs - this.lastObjectRefresh > 400) {
