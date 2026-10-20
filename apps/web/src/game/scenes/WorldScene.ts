@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getCrop } from '@terrago/game-data';
+import { getCrop, getNode } from '@terrago/game-data';
 import {
   CHAT,
   MAX_VIEW,
@@ -14,6 +14,7 @@ import {
   type WorldObject,
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
+import { nodeArt } from '../art/nodes';
 import { buildCharacterSheet, characterSheetKey } from '../art/characters';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
@@ -106,11 +107,10 @@ export class WorldScene extends Phaser.Scene {
       const wp = this.cameras.main.getWorldPoint(ptr.x, ptr.y);
       const tx = Math.floor(wp.x / TILE_SIZE);
       const ty = Math.floor(wp.y / TILE_SIZE);
-      const o = this.client.objectAt(tx, ty);
-      if (!o) return;
       const cx = tx * TILE_SIZE + TILE_SIZE / 2;
       const cy = ty * TILE_SIZE + TILE_SIZE / 2;
-      if (Math.hypot(cx - this.client.pos.x, cy - (this.client.pos.y - 8)) <= 1.7 * TILE_SIZE) this.client.act(tx, ty);
+      if (Math.hypot(cx - this.client.pos.x, cy - (this.client.pos.y - 8)) > 1.7 * TILE_SIZE) return;
+      this.client.targetAt(tx, ty)?.run();
     });
 
     this.cameras.main.setRoundPixels(true);
@@ -275,7 +275,7 @@ export class WorldScene extends Phaser.Scene {
 
   /** Visual state of an object; when it changes, the view is rebuilt. */
   private objectKey(o: WorldObject, now: number): string {
-    if (o.kind !== 'plot') return '';
+    if (o.kind === 'node') return `${o.type}|${o.depletedUntil > now ? 'spent' : 'ok'}`;
     if (o.locked) return 'wild';
     const soil: SoilState = !o.tilled ? 'farmland' : o.wetUntil > now ? 'wet' : 'tilled';
     if (!o.crop) return soil;
@@ -294,6 +294,15 @@ export class WorldScene extends Phaser.Scene {
     const parts: Phaser.GameObjects.Image[] = [];
     const x = o.x * TILE_SIZE;
     const y = o.y * TILE_SIZE;
+    if (o.kind === 'node') {
+      const def = getNode(o.type);
+      const spent = key.endsWith('spent');
+      if (def) {
+        const nk = this.bufferTexture(`node:${o.type}:${spent ? 1 : 0}`, () => nodeArt(def, spent));
+        const img = this.add.image(x + TILE_SIZE / 2, y + TILE_SIZE + 2, nk).setOrigin(0.5, 1).setDepth(def.solid && !spent ? y + TILE_SIZE : y + 4);
+        parts.push(img);
+      }
+    }
     if (o.kind === 'plot') {
       const [soil, crop, badge] = key.split('|');
       const variant = (o.x * 3 + o.y * 5) % 3;
@@ -320,6 +329,36 @@ export class WorldScene extends Phaser.Scene {
   private destroyObjectView(id: string): void {
     this.objectViews.get(id)?.parts.forEach((p) => p.destroy());
     this.objectViews.delete(id);
+  }
+
+  private bobber: Phaser.GameObjects.Graphics | null = null;
+  private alert: Phaser.GameObjects.Text | null = null;
+
+  /** Fishing bobber on the water, and a "!" when something bites. */
+  private updateBobber(time: number): void {
+    const f = this.client.ui.get().fishing;
+    if (!f || f.phase === 'reeling') {
+      this.bobber?.destroy();
+      this.bobber = null;
+      this.alert?.destroy();
+      this.alert = null;
+      return;
+    }
+    if (!this.bobber) this.bobber = this.add.graphics().setDepth(LABEL_DEPTH - 6);
+    const bx = f.x * TILE_SIZE + TILE_SIZE / 2;
+    const by = f.y * TILE_SIZE + TILE_SIZE / 2 + (f.phase === 'bite' ? Math.sin(time / 40) * 3 : Math.sin(time / 300) * 1.5);
+    this.bobber.clear().lineStyle(1, 0xe6e2d3, 0.8).lineBetween(this.client.pos.x + 10, this.client.pos.y - 30, bx, by - 3);
+    this.bobber.fillStyle(0xe0483a, 1).fillCircle(bx, by - 2, 3).fillStyle(0xffffff, 1).fillCircle(bx, by + 1, 3);
+    if (f.phase === 'bite' && !this.alert) {
+      this.alert = this.add
+        .text(this.client.pos.x, this.client.pos.y - 70, '!', { fontFamily: LABEL_FONT, fontSize: '28px', color: '#ffe48a', stroke: '#2a2030', strokeThickness: 5 })
+        .setOrigin(0.5, 1)
+        .setDepth(LABEL_DEPTH + 20);
+    }
+    if (f.phase !== 'bite' && this.alert) {
+      this.alert.destroy();
+      this.alert = null;
+    }
   }
 
   /** Tiny dust puff where an action happened. */
@@ -457,12 +496,15 @@ export class WorldScene extends Phaser.Scene {
 
     // Target cursor + what the action key would do.
     const target = !npc && !ui.dialogue ? client.actionTarget() : null;
-    const hintText = target ? client.describeAction(target) : null;
+    const hintText = target?.hint ?? null;
     this.cursor.clear();
     if (target && hintText) {
-      this.cursor.lineStyle(2, 0xffe48a, 0.95).strokeRect(target.x * TILE_SIZE + 1, target.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-      this.cursor.lineStyle(2, 0x2a2030, 0.6).strokeRect(target.x * TILE_SIZE + 3, target.y * TILE_SIZE + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+      const w = target.w * TILE_SIZE;
+      const h = target.h * TILE_SIZE;
+      this.cursor.lineStyle(2, 0xffe48a, 0.95).strokeRect(target.x * TILE_SIZE + 1, target.y * TILE_SIZE + 1, w - 2, h - 2);
+      this.cursor.lineStyle(2, 0x2a2030, 0.6).strokeRect(target.x * TILE_SIZE + 3, target.y * TILE_SIZE + 3, w - 6, h - 6);
     }
+    this.updateBobber(time);
     if (hintText !== this.lastActionHint) {
       this.lastActionHint = hintText;
       client.ui.set({ actionHint: hintText });

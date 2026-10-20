@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import { buildCollisionGrid, tileCenter, TILE_SIZE } from '@terrago/shared';
-import { BALANCE, ITEMS, MAPS, NPCS, getItem, npcsForMap, validateGameData } from '../src/index';
+import { BALANCE, ITEMS, MAPS, NPCS, allMapIds, getItem, getMap, npcsForMap, validateGameData } from '../src/index';
 
 describe('game data', () => {
   test('cross-references are valid', () => {
@@ -16,12 +16,12 @@ describe('game data', () => {
   });
 
   test('every map spawn, NPC and portal arrival is reachable (not inside solid tiles)', () => {
-    for (const map of Object.values(MAPS)) {
+    for (const map of allMapIds().map((id) => getMap(id)!)) {
       const grid = buildCollisionGrid(map, npcsForMap(map.id).map((n) => ({ x: n.x, y: n.y })));
       const spawn = tileCenter(map.spawn.x, map.spawn.y);
       assert.equal(grid.bodyBlocked(spawn.x, spawn.y), false, `${map.id} spawn blocked`);
       for (const p of map.portals) {
-        const target = MAPS[p.to]!;
+        const target = getMap(p.to)!;
         const tgrid = buildCollisionGrid(target, npcsForMap(target.id).map((n) => ({ x: n.x, y: n.y })));
         const arrival = tileCenter(p.toX, p.toY);
         assert.equal(tgrid.bodyBlocked(arrival.x, arrival.y), false, `${p.id} arrival blocked`);

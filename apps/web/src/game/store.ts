@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -67,6 +67,10 @@ export interface UiState {
   shop: ShopView | null;
   /** Plot whose detail menu is open (fertilize / remove). */
   plotMenu: string | null;
+  /** Crafting station whose recipes are open. */
+  station: string | null;
+  /** Fishing in progress. */
+  fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
 }
 
 export const initialUi: UiState = {
@@ -91,6 +95,8 @@ export const initialUi: UiState = {
   serviceNpc: null,
   shop: null,
   plotMenu: null,
+  station: null,
+  fishing: null,
 };
 
 let noticeId = 0;

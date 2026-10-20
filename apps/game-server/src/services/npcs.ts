@@ -13,6 +13,7 @@ const ACTION_LABELS: Record<DialogueActionId, string> = {
   shop: 'Shop',
   farm_upgrade: 'Expand my farm',
   repair: 'Repair my tools',
+  lift: 'Take the lift',
 };
 
 function actionFor(id: DialogueActionId): DialogueAction {

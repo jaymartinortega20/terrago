@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { getCrop, getItem, getMap } from '@terrago/game-data';
+import { getCrop, getItem, getMap, getNode } from '@terrago/game-data';
 import {
   CHAT,
   CODE_DIR,
@@ -13,7 +13,11 @@ import {
   stepMovement,
   tileCenter,
   cropStatus,
+  FISHABLE_TILES,
+  PROP_TYPES,
+  STATION_PROPS,
   type ActRequest,
+  type FishingRound,
   type ChatMessage,
   type FarmUpgradeView,
   type ClientToServerEvents,
@@ -48,6 +52,26 @@ export interface RemotePlayer {
   dir: Direction;
   moving: boolean;
 }
+
+export interface ActionTarget {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  hint: string;
+  run: () => void;
+}
+
+const STATION_NAMES: Record<string, string> = {
+  furnace: 'Furnace',
+  anvil: 'Anvil',
+  workbench: 'Workbench',
+  cooking_pot: 'Cooking Pot',
+  alchemy_table: 'Alchemy Table',
+  mill: 'Mill',
+  loom: 'Loom',
+  enhance_altar: 'Enhancement Altar',
+};
 
 type ClientEvents = {
   enter: [EnterWorldPayload];
@@ -177,6 +201,10 @@ export class GameClient {
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
     socket.on('inventory:update', (inventory) => this.ui.set({ inventory }));
     socket.on('notice', (n) => pushNotice(this.ui, n.kind, n.text));
+    socket.on('fish:bite', ({ id }) => {
+      const f = this.ui.get().fishing;
+      if (f?.id === id && f.phase === 'waiting') this.ui.set({ fishing: { ...f, phase: 'bite' } });
+    });
     socket.on('objects:set', (list) => {
       for (const o of list) this.putObject(o);
       this.emit('objects', list, []);
@@ -287,6 +315,7 @@ export class GameClient {
       return;
     }
     if (this.pending.length > 40) return; // server isn't acknowledging; don't run ahead
+    if (this.ui.get().fishing) this.cancelFishing();
     const cmd: MoveCommand = [++this.seq, input.dx, input.dy];
     this.pending.push(cmd);
     s.emit('move', cmd);
@@ -346,17 +375,59 @@ export class GameClient {
     return { x: fx + dx, y: fy + dy };
   }
 
-  /** The object the action key would use: the one in front, else the one underfoot. */
-  actionTarget(): WorldObject | null {
+  private bestTool(kind: string): number {
+    let tier = -1;
+    for (const s of this.ui.get().inventory?.slots ?? []) {
+      const t = getItem(s.itemId)?.tool;
+      if (t?.kind === kind && (s.durability === null || s.durability > 0)) tier = Math.max(tier, t.tier);
+    }
+    return tier;
+  }
+
+  /** What the action key would do at a tile (object, crafting station or water), if anything. */
+  targetAt(tx: number, ty: number): ActionTarget | null {
+    const o = this.objectAt(tx, ty);
+    if (o) {
+      const hint = this.describeAction(o);
+      return hint ? { x: o.x, y: o.y, w: 1, h: 1, hint, run: () => this.act(o.x, o.y) } : null;
+    }
+    const map = this.map;
+    if (!map) return null;
+    for (const p of map.objects) {
+      if (p.kind !== 'prop' || !(STATION_PROPS as readonly string[]).includes(p.type)) continue;
+      const d = PROP_TYPES[p.type];
+      if (tx >= p.x && tx < p.x + d.w && ty >= p.y && ty < p.y + d.h) {
+        const name = STATION_NAMES[p.type] ?? p.type;
+        return { x: p.x, y: p.y, w: d.w, h: d.h, hint: `Use ${name}`, run: () => this.ui.set({ panel: 'craft', station: p.type }) };
+      }
+    }
+    const tile = map.tiles[ty]?.[tx];
+    if (tile && FISHABLE_TILES.has(tile) && map.fishing) {
+      if (this.bestTool('rod') < 0) return null;
+      const f = this.ui.get().fishing;
+      return { x: tx, y: ty, w: 1, h: 1, hint: f ? 'Reel in!' : 'Fish', run: () => this.fishAction(tx, ty) };
+    }
+    return null;
+  }
+
+  /** The target in front of the player, else the one underfoot. */
+  actionTarget(): ActionTarget | null {
     const t = this.targetTile();
-    const front = this.objectAt(t.x, t.y);
-    if (front) return front;
-    const under = this.objectAt(Math.floor(this.pos.x / TILE_SIZE), Math.floor((this.pos.y - 4) / TILE_SIZE));
-    return under ?? null;
+    return this.targetAt(t.x, t.y) ?? this.targetAt(Math.floor(this.pos.x / TILE_SIZE), Math.floor((this.pos.y - 4) / TILE_SIZE));
   }
 
   /** Describe what pressing the action key on an object will do. */
   describeAction(o: WorldObject): string | null {
+    if (o.kind === 'node') {
+      const def = getNode(o.type);
+      if (!def) return null;
+      if (o.depletedUntil > this.serverNow()) return `${def.name} (used up)`;
+      const verb = def.tool === 'pickaxe' ? 'Mine' : def.tool === 'axe' ? 'Chop' : 'Gather';
+      const lvl = this.ui.get().self?.skills[def.skill]?.level ?? 1;
+      if (lvl < def.level) return `${def.name} — needs ${def.skill} ${def.level}`;
+      if (def.tool && this.bestTool(def.tool) < 0) return `${def.name} — needs ${def.tool === 'axe' ? 'an axe' : 'a pickaxe'}`;
+      return `${verb} ${def.name}`;
+    }
     if (o.kind !== 'plot') return null;
     const self = this.ui.get().self;
     const owner = this.ui.get().mapOwnerId;
@@ -408,10 +479,55 @@ export class GameClient {
 
   /** The action key / button: talk to a nearby NPC, else use the tile in front. */
   primaryAction(): void {
+    const f = this.ui.get().fishing;
+    if (f) return f.phase === 'reeling' ? undefined : this.fishAction(f.x, f.y);
     if (this.ui.get().dialogue) return;
     if (this.nearestNpc()) return this.interact();
-    const o = this.actionTarget();
-    if (o) this.act(o.x, o.y);
+    this.actionTarget()?.run();
+  }
+
+  /** Cast, or hook a biting fish. */
+  fishAction(tx: number, ty: number): void {
+    const f = this.ui.get().fishing;
+    const s = this.socket;
+    if (!s?.connected) return;
+    if (!f) return this.act(tx, ty);
+    if (f.phase === 'reeling') return;
+    s.emit('fish:hook', f.id, (res) => {
+      if (!res.ok) {
+        this.ui.set({ fishing: null });
+        pushNotice(this.ui, 'error', res.error, 2500);
+        return;
+      }
+      this.ui.set({ fishing: { ...f, phase: 'reeling', round: res.data } });
+    });
+  }
+
+  /** Send a finished reeling round; the server replays it and decides. */
+  reel(round: FishingRound, toggles: number[], steps: number): void {
+    this.socket?.emit('fish:reel', { id: round.id, toggles, steps }, (res) => {
+      this.ui.set({ fishing: null });
+      if (!res.ok) pushNotice(this.ui, 'error', res.error);
+      else pushNotice(this.ui, res.data.caught ? 'success' : 'error', res.data.message, 4000);
+    });
+  }
+
+  cancelFishing(): void {
+    if (!this.ui.get().fishing) return;
+    this.socket?.emit('fish:cancel');
+    this.ui.set({ fishing: null });
+  }
+
+  craft(recipeId: string, times: number) {
+    return this.run('craft', { recipeId, times });
+  }
+
+  liftFloors(npcId: string): Promise<{ floors: number[] }> {
+    return this.request('lift:floors', npcId);
+  }
+
+  liftGo(npcId: string, floor: number) {
+    return this.run('lift:go', { npcId, floor });
   }
 
   /** Use the action key on a tile (server decides: till, plant, water, harvest...). */
@@ -425,6 +541,10 @@ export class GameClient {
         return;
       }
       this.emit('acted', { tx, ty, message: res.data.message });
+      if (res.data.fishing) {
+        this.ui.set({ fishing: { id: res.data.fishing.id, x: tx, y: ty, phase: 'waiting', round: null } });
+        return;
+      }
       const o = this.objectAt(tx, ty);
       const info = res.data.message && /% grown/.test(res.data.message);
       if (info && o) this.ui.set({ plotMenu: o.id });

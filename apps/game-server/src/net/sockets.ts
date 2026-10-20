@@ -22,7 +22,8 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, npcServices } from './gameplay';
+import { act, craftAt, npcServices } from './gameplay';
+import { cancelFishing, hook, reel } from './fishing';
 
 interface SocketData {
   userId: string;
@@ -272,6 +273,12 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('farm:upgrade', (npcId, ack) => serial(ack, () => npcServices.farmUpgrade(g, p, npcId)));
     socket.on('repair:quote', (npcId, ack) => serial(ack, () => npcServices.repairQuote(g, p, npcId)));
     socket.on('repair:all', (npcId, ack) => serial(ack, () => npcServices.repair(g, p, npcId)));
+    socket.on('fish:hook', (id, ack) => respond(ack, () => hook(p, id)));
+    socket.on('fish:reel', (req, ack) => serial(ack, () => reel(g, p, req)));
+    socket.on('fish:cancel', () => cancelFishing(p));
+    socket.on('craft', (req, ack) => serial(ack, () => craftAt(g, p, req)));
+    socket.on('lift:floors', (npcId, ack) => serial(ack, () => npcServices.liftFloors(g, p, npcId)));
+    socket.on('lift:go', (req, ack) => serial(ack, () => npcServices.liftGo(g, p, req)));
 
     socket.on('ping:check', (_t, ack) => {
       if (typeof ack === 'function') ack(Date.now());

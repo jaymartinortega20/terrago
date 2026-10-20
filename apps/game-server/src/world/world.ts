@@ -62,6 +62,8 @@ export interface WorldDeps {
   security?: Pick<SecurityEvents, 'record'>;
   /** Called when a player leaves the world for good (after grace, logout or kick). */
   onLeave?: (player: Player) => void;
+  /** Called after a player arrives in a new map. */
+  onMapEnter?: (player: Player) => void;
   /** Load runtime objects for a map instance (e.g. a homestead's farm plots). */
   loadObjects?: (def: MapDef, owner: { id: string; name: string } | null) => Promise<WorldObject[]>;
   now?: () => number;
@@ -475,6 +477,7 @@ export class World {
     p.dirty = true;
     const rt = this.addToMap(p);
     this.deps.log.info('map_change', { characterId: p.id, to: rt.key });
+    this.deps.onMapEnter?.(p);
     void this.saveNow([p]);
     if (!rt.loaded) {
       p.changingMap = true;

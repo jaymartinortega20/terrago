@@ -1,7 +1,12 @@
-import { BALANCE, getCrop, getItem, getMap } from '@terrago/game-data';
+import { BALANCE, getCrop, getItem, getMap, getNode, getRecipe, mineFloorId, mineFloorNumber, ladderRowsFor } from '@terrago/game-data';
 import {
   cropStatus,
   formatDuration,
+  gatherChance,
+  FISHABLE_TILES,
+  PROP_TYPES,
+  TILE_SIZE,
+  type NodeObject,
   maxHp,
   maxMp,
   xpToNext,
@@ -22,6 +27,8 @@ import type { toState } from '../services/inventory';
 import { getNpc, npcOffers } from '../services/npcs';
 import type { ProgressDelta } from '../services/progress';
 import { buyFromShop, repairAll, repairCost, sellToShop, shopView } from '../services/shops';
+import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gathering';
+import { cast } from './fishing';
 import type { Player } from '../world/player';
 import { World } from '../world/world';
 
@@ -175,8 +182,18 @@ export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<
   if (!world.tileInReach(p, tx, ty)) throw new GameError("That's too far away.");
 
   const rt = world.runtimeOf(p);
-  const plot = world.objectsAt(p, tx, ty).find((o): o is PlotObject => o.kind === 'plot');
-  if (!plot) throw new GameError('Nothing to do there.');
+  const here = world.objectsAt(p, tx, ty);
+  const node = here.find((o): o is NodeObject => o.kind === 'node');
+  if (node) return gatherNode(deps, p, node, req.slot);
+  const plot = here.find((o): o is PlotObject => o.kind === 'plot');
+  if (!plot) {
+    const tile = rt.def.tiles[ty]?.[tx];
+    if (tile && FISHABLE_TILES.has(tile) && rt.def.fishing) {
+      const s = await cast(deps, p, rt.def.fishing, selectedItem(world, p, req.slot)?.slot);
+      return { message: null, fishing: { id: s.id, x: tx, y: ty } };
+    }
+    throw new GameError('Nothing to do there.');
+  }
   if (rt.owner?.id !== p.id) throw new GameError("This isn't your farm.");
   if (plot.locked) throw new GameError('That land is still wild. Farmer Rowan in Greenhaven can expand your farm.');
 
@@ -221,10 +238,72 @@ export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<
 }
 
 // ---------------------------------------------------------------------------
+// Gathering, crafting
+// ---------------------------------------------------------------------------
+
+async function gatherNode(deps: GameplayDeps, p: Player, node: NodeObject, slot: unknown): Promise<ActResult> {
+  const { world, pool } = deps;
+  const def = getNode(node.type);
+  if (!def) throw new GameError('Nothing to do there.');
+  const rt = world.runtimeOf(p);
+  if (node.depletedUntil > Date.now()) throw new GameError(`This ${def.name.toLowerCase()} is used up. It will come back soon.`);
+  const skill = p.rec.skills[def.skill];
+  if (skill.level < def.level) throw new GameError(`You need ${def.skill} level ${def.level} for this ${def.name.toLowerCase()}.`);
+  const toolTier = def.tool ? hasTool(world, p, def.tool) : 0;
+  if (def.tool && toolTier < 0) throw new GameError(`You need ${def.tool === 'axe' ? 'an axe' : 'a pickaxe'}.`);
+  if (!world.nodeReserve(rt, node.id)) throw new GameError('Someone just took the last of it.');
+  const success = Math.random() < gatherChance(skill.level, def.level, toolTier, def.toolTier);
+  let res;
+  try {
+    res = await swingAtNode(pool, p.id, def, { prefer: selectedItem(world, p, slot)?.slot, success, drops: success ? rollDrops(def, Math.random) : [] });
+  } catch (err) {
+    world.nodeRelease(rt, node.id);
+    throw err;
+  }
+  if (success) world.nodeGathered(rt, node.id);
+  else world.nodeRelease(rt, node.id);
+  pushInventory(world, p, res.inventory);
+  applyDelta(world, p, res.delta);
+  return { message: res.message, effect: success ? 'gathered' : 'miss' };
+}
+
+/** Is a station of this type within reach of the player? */
+function nearStation(world: World, p: Player, station: string): boolean {
+  const def = world.runtimeOf(p).def;
+  for (const o of def.objects) {
+    if (o.kind !== 'prop' || o.type !== station) continue;
+    const d = PROP_TYPES[o.type];
+    const cx = (o.x + d.w / 2) * TILE_SIZE;
+    const cy = (o.y + d.h / 2) * TILE_SIZE;
+    if (Math.abs(cx - p.x) <= (d.w / 2 + 1.6) * TILE_SIZE && Math.abs(cy - (p.y - 8)) <= (d.h / 2 + 1.6) * TILE_SIZE) return true;
+  }
+  return false;
+}
+
+export async function craftAt(deps: GameplayDeps, p: Player, req: unknown): Promise<{ message: string }> {
+  const r = (req ?? {}) as { recipeId?: unknown; times?: unknown };
+  const recipe = typeof r.recipeId === 'string' ? getRecipe(r.recipeId) : undefined;
+  if (!recipe) throw new GameError('Unknown recipe.');
+  if (!nearStation(deps.world, p, recipe.station)) throw new GameError('You need to stand at the right crafting station.');
+  const res = await craftRecipe(deps.pool, p.id, recipe.id, r.times);
+  pushInventory(deps.world, p, res.inventory);
+  applyDelta(deps.world, p, res.delta);
+  return { message: res.message };
+}
+
+/** Remember the deepest mine checkpoints (every 5th floor) for the lift. */
+export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void> {
+  const floor = mineFloorNumber(p.mapId);
+  if (floor && floor % 5 === 0) {
+    await deps.pool.query('INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING', [p.id, `mine:${floor}`]);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // NPC services
 // ---------------------------------------------------------------------------
 
-function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair') {
+function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift') {
   const npc = getNpc(npcId);
   if (!npc || !npcOffers(npc, service)) throw new GameError("They can't help with that.");
   if (!world.npcInRange(p, npc)) throw new GameError("You're too far away.");
@@ -277,6 +356,20 @@ export const npcServices = {
       }
     }
     return { cost, items };
+  },
+  async liftFloors(deps: GameplayDeps, p: Player, npcId: unknown) {
+    npcService(deps.world, p, npcId, 'lift');
+    const { rows } = await deps.pool.query<{ flag: string }>(`SELECT flag FROM character_flags WHERE character_id = $1 AND flag LIKE 'mine:%'`, [p.id]);
+    return { floors: rows.map((r) => Number(r.flag.slice(5))).filter((n) => Number.isInteger(n)).sort((a, b) => a - b) };
+  },
+  async liftGo(deps: GameplayDeps, p: Player, req: unknown) {
+    const r = (req ?? {}) as { npcId?: unknown; floor?: unknown };
+    npcService(deps.world, p, r.npcId, 'lift');
+    const floor = Number(r.floor);
+    const { rows } = await deps.pool.query('SELECT 1 FROM character_flags WHERE character_id = $1 AND flag = $2', [p.id, `mine:${floor}`]);
+    if (!rows[0]) throw new GameError("You haven't reached that floor yet.");
+    await deps.world.moveTo(p, mineFloorId(floor), null, 4, ladderRowsFor(floor).up, 'right');
+    return { message: `The lift rattles down to floor ${floor}.` };
   },
   async repair(deps: GameplayDeps, p: Player, npcId: unknown) {
     npcService(deps.world, p, npcId, 'repair');

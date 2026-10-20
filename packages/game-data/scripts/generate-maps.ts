@@ -336,7 +336,6 @@ function whisperwood(): MapDef {
   m.prop('sign', 50, 26, 'Whisperwood Ranger Camp. Hardwood grows deep in the forest; elder trees deeper still.');
   m.reserve(43, 25, 9, 7);
   m.border(r, 2, 4, [{ side: 'e', from: 21, to: 24 }, { side: 'n', from: 25, to: 33 }, { side: 's', from: 23, to: 31 }], ['tree_pine', 'tree_oak', 'tree_ancient']);
-  m.scatterGround(r, 0.12, ',', 'f');
   m.scatterNodes(r, [{ type: 'tree_hardwood', solid: true, weight: 6 }, { type: 'tree_softwood', solid: true, weight: 2 }], 30);
   m.scatterNodes(r, [{ type: 'tree_elder', solid: true, weight: 1 }], 4, { x: 4, y: 4, w: 18, h: 40 });
   m.scatterNodes(r, [

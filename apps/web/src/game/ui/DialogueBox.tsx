@@ -93,7 +93,7 @@ export function DialogueBox({ client }: { client: GameClient }) {
                   const npcId = dialogue.npcId;
                   client.ui.set({ dialogue: null });
                   if (a.id === 'shop') void client.openShop(npcId);
-                  else client.ui.set({ serviceNpc: npcId, panel: a.id === 'farm_upgrade' ? 'farm' : 'repair' });
+                  else client.ui.set({ serviceNpc: npcId, panel: a.id === 'farm_upgrade' ? 'farm' : a.id === 'lift' ? 'lift' : 'repair' });
                 }}
               >
                 {a.label}

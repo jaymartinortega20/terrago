@@ -13,7 +13,7 @@ const GRASS_DARK = '#58953f';
 const GRASS_LIGHT = '#7dbd5b';
 const PATH = '#c9a36b';
 
-type Family = 'grass' | 'path' | 'stone' | 'sand' | 'soil' | 'water' | 'cliff' | 'bridge';
+type Family = 'grass' | 'path' | 'stone' | 'sand' | 'soil' | 'water' | 'cliff' | 'bridge' | 'cave' | 'snow' | 'lava';
 
 const FAMILY: Record<GroundTileKey, Family> = {
   '.': 'grass',
@@ -28,6 +28,17 @@ const FAMILY: Record<GroundTileKey, Family> = {
   w: 'water',
   '#': 'cliff',
   b: 'bridge',
+  c: 'cave',
+  r: 'cliff',
+  f: 'grass',
+  n: 'snow',
+  I: 'water',
+  L: 'lava',
+  a: 'path',
+  u: 'soil',
+  q: 'water',
+  k: 'stone',
+  h: 'sand',
 };
 
 function groundTile(key: GroundTileKey, r: () => number): PixelBuffer {
@@ -121,6 +132,60 @@ function groundTile(key: GroundTileKey, r: () => number): PixelBuffer {
       speck(8, '#6a6761');
       speck(5, '#94918a');
       break;
+    case 'c':
+      b.rect(0, 0, T, T, '#4a4152');
+      speck(10, '#3d3545');
+      speck(6, '#5a5063');
+      break;
+    case 'r':
+      b.rect(0, 0, T, T, '#2b2431');
+      speck(8, '#382f40');
+      for (let i = 0; i < 3; i++) b.hline(Math.floor(r() * 10), Math.floor(r() * 10) + 4, Math.floor(r() * 16), '#1d1822');
+      break;
+    case 'f':
+      b.rect(0, 0, T, T, '#4f8a3c');
+      speck(14, '#457a33');
+      speck(6, '#5f9c4a');
+      for (let i = 0; i < 2; i++) b.set(Math.floor(r() * 16), Math.floor(r() * 16), '#8a6a42');
+      break;
+    case 'n':
+      b.rect(0, 0, T, T, '#eef3f8');
+      speck(8, '#d8e2ee');
+      speck(3, '#ffffff');
+      break;
+    case 'I':
+      b.rect(0, 0, T, T, '#9fd0ea');
+      for (let i = 0; i < 2; i++) b.hline(Math.floor(r() * 10), Math.floor(r() * 10) + 5, 2 + Math.floor(r() * 12), '#d4eefa');
+      break;
+    case 'L':
+      b.rect(0, 0, T, T, '#e0541f');
+      speck(10, '#f5a623');
+      speck(4, '#ffe06a');
+      break;
+    case 'a':
+      b.rect(0, 0, T, T, '#5d5560');
+      speck(10, '#4b444e');
+      speck(3, '#a0473a');
+      break;
+    case 'u':
+      b.rect(0, 0, T, T, '#5e5236');
+      speck(10, '#4f452c');
+      speck(4, '#6f8f4a');
+      break;
+    case 'q':
+      b.rect(0, 0, T, T, '#3f5a3a');
+      speck(6, '#4f6f45');
+      b.hline(2, 6, 5, '#6f8f5a').hline(9, 13, 11, '#6f8f5a');
+      break;
+    case 'k':
+      b.rect(0, 0, T, T, '#a59a84');
+      b.hline(0, 15, 7, '#8a7f6a').vline(7, 0, 7, '#8a7f6a').vline(3, 8, 15, '#8a7f6a').vline(12, 8, 15, '#8a7f6a');
+      speck(4, '#6f8f4a');
+      break;
+    case 'h':
+      b.rect(0, 0, T, T, '#e8c88a');
+      for (let y = 3; y < T; y += 5) b.hline(0, 15, y, '#d8b474');
+      break;
     case 'b':
       b.rect(0, 0, T, T, '#b07b45');
       for (let x = 0; x < T; x += 4) b.vline(x, 0, 15, '#7a5230');
@@ -173,7 +238,9 @@ export function renderGround(map: MapDef): HTMLCanvasElement {
             }
           }
         };
-        if ((fam === 'path' || fam === 'stone' || fam === 'sand' || fam === 'soil') && nf === 'grass') {
+        if (fam === 'cave' && nk === 'r') {
+          edge(2, '#2b2431', 0.5);
+        } else if ((fam === 'path' || fam === 'stone' || fam === 'sand' || fam === 'soil') && nf === 'grass') {
           edge(1, GRASS_DARK, 0.45);
         } else if (fam === 'water' && nf !== 'water' && nf !== 'bridge') {
           edge(1, '#cfe8f5');
@@ -432,6 +499,172 @@ function drawProp(type: PropType, variant: number): PixelBuffer {
       b.rect(4, 11, 8, 9, '#5a7fc0').vline(11, 11, 19, '#46649a');
       b.rect(5, 3, 6, 7, '#e8d48a').rect(6, 6, 1, 1, '#2a2030').rect(9, 6, 1, 1, '#2a2030');
       b.hline(2, 13, 3, '#b89540').rect(5, 0, 6, 3, '#b89540');
+      return finish(b, 1);
+    }
+    case 'tree_dead': {
+      const b = new PixelBuffer(20, 32);
+      b.rect(8, 8, 4, 23, '#6b5a4a').vline(11, 8, 30, '#4f4236');
+      for (let i = 0; i < 6; i++) b.set(7 - i, 12 - i, '#6b5a4a').set(12 + i, 16 - i, '#6b5a4a').set(9 - Math.floor(i / 2), 6 - i, '#6b5a4a');
+      return finish(b);
+    }
+    case 'tree_snow': {
+      const b = tree('pine', 777 + variant * 3);
+      b.shadeIf((x, y) => y < 22 && (x + y * 3 + variant) % 5 === 0, '#f4f8fc');
+      for (let y = 2; y < 22; y += 5) b.shadeIf((x, yy) => yy === y && b.get(x, yy - 1) === null, '#ffffff');
+      return b;
+    }
+    case 'tree_swamp': {
+      const b = new PixelBuffer(24, 32);
+      b.rect(10, 14, 4, 17, '#4a3f2e').set(8, 30, '#4a3f2e').set(15, 30, '#4a3f2e');
+      b.ellipse(1, 2, 22, 16, '#4f6f3a').shadeIf((x, y) => y > 12, '#3f5a2e');
+      for (let x = 3; x < 22; x += 4) b.vline(x, 14, 20 + (x % 3), '#6f8f4a');
+      return finish(b);
+    }
+    case 'tree_ancient': {
+      const b = new PixelBuffer(28, 38);
+      b.rect(11, 22, 6, 15, '#5d3d22').vline(16, 22, 36, '#4a2f1a').set(9, 36, '#5d3d22').set(18, 36, '#5d3d22');
+      b.ellipse(0, 0, 28, 27, '#2f6f35').ellipse(3, 2, 12, 10, '#3f8a45').shadeIf((x, y) => y > 20 || x + y > 36, '#255a2b');
+      return finish(b);
+    }
+    case 'cactus': {
+      const b = new PixelBuffer(16, 26);
+      b.rect(6, 2, 4, 23, '#4f9a3f').vline(9, 2, 24, '#3f7a2f');
+      b.rect(1, 8, 3, 8, '#4f9a3f').rect(1, 14, 6, 2, '#4f9a3f').rect(12, 5, 3, 7, '#4f9a3f').rect(9, 11, 6, 2, '#4f9a3f');
+      return finish(b);
+    }
+    case 'crystal': {
+      const b = new PixelBuffer(16, 20);
+      const c = ['#b6a4ff', '#8fe0ff', '#ff9ad5'][variant % 3]!;
+      b.rect(6, 2, 4, 16, c).rect(2, 8, 3, 10, shade(c, -0.15)).rect(11, 6, 3, 12, shade(c, -0.1)).vline(7, 3, 12, shade(c, 0.5));
+      return finish(b);
+    }
+    case 'stalagmite': {
+      const b = new PixelBuffer(14, 22);
+      for (let y = 0; y < 20; y++) b.hline(7 - Math.floor(y / 3), 6 + Math.floor(y / 3), y + 1, y % 4 === 0 ? '#5a5063' : '#4a4152');
+      return finish(b);
+    }
+    case 'bones': {
+      const b = new PixelBuffer(16, 10);
+      b.hline(2, 12, 5, '#e8e0cc').set(1, 4, '#e8e0cc').set(1, 6, '#e8e0cc').set(13, 4, '#e8e0cc').set(13, 6, '#e8e0cc');
+      b.ellipse(9, 1, 5, 4, '#e8e0cc').set(10, 2, '#2a2030');
+      return b;
+    }
+    case 'ruin_pillar': {
+      const b = new PixelBuffer(14, 34);
+      b.rect(3, 4, 8, 28, '#b0a690').vline(10, 4, 31, '#8a7f6a').rect(1, 1, 12, 3, '#c4baa3').rect(1, 30, 12, 3, '#9a8f7a');
+      b.set(5, 12, '#6f8f4a').set(6, 13, '#6f8f4a').set(4, 20, '#6f8f4a');
+      return finish(b);
+    }
+    case 'mushroom_big': {
+      const b = new PixelBuffer(18, 22);
+      b.rect(7, 10, 4, 11, '#efe3c2').ellipse(0, 1, 18, 11, '#c0392b').set(4, 4, '#fff').set(10, 3, '#fff').set(13, 6, '#fff');
+      return finish(b);
+    }
+    case 'reeds': {
+      const b = new PixelBuffer(16, 20);
+      for (const x of [3, 6, 9, 12]) b.vline(x, 4 + (x % 3), 19, '#6f8f3a').rect(x, 2 + (x % 3), 1, 4, '#7a5230');
+      return b;
+    }
+    case 'ladder_down': {
+      const b = new PixelBuffer(16, 16);
+      b.rect(1, 1, 14, 14, '#14101a');
+      b.vline(4, 2, 15, '#8a5d33').vline(11, 2, 15, '#8a5d33');
+      for (let y = 4; y < 15; y += 3) b.hline(4, 11, y, '#b8844d');
+      return b;
+    }
+    case 'ladder_up': {
+      const b = new PixelBuffer(16, 24);
+      b.vline(4, 0, 23, '#8a5d33').vline(11, 0, 23, '#8a5d33');
+      for (let y = 2; y < 23; y += 4) b.hline(4, 11, y, '#b8844d');
+      b.rect(2, 0, 12, 2, '#ffe48a');
+      return finish(b, 1);
+    }
+    case 'mine_entrance': {
+      const b = new PixelBuffer(48, 36);
+      b.rect(0, 6, 48, 30, '#6b645e').shadeIf((x, y) => (x + y) % 7 === 0, '#5a544e');
+      b.rect(10, 12, 28, 24, '#14101a');
+      b.rect(8, 10, 4, 26, '#8a5d33').rect(36, 10, 4, 26, '#8a5d33').rect(6, 8, 36, 4, '#a8743f');
+      b.hline(16, 31, 30, '#6b645e').hline(16, 31, 33, '#6b645e');
+      return finish(b, 1);
+    }
+    case 'torch': {
+      const b = new PixelBuffer(8, 24);
+      b.rect(3, 8, 2, 16, '#7a5230').ellipse(1, 1, 6, 8, '#f5a623').ellipse(2, 2, 4, 5, '#ffe06a');
+      return b;
+    }
+    case 'dock_post': {
+      const b = new PixelBuffer(10, 20);
+      b.rect(3, 2, 4, 18, '#7a5230').vline(6, 2, 19, '#5d3d22').hline(2, 7, 2, '#a8743f').hline(2, 7, 6, '#d6c79f');
+      return finish(b, 1);
+    }
+    case 'tent': {
+      const b = new PixelBuffer(32, 30);
+      for (let y = 0; y < 26; y++) b.hline(16 - Math.floor(y * 0.62), 15 + Math.floor(y * 0.62), y + 2, y % 6 === 5 ? '#a8473a' : '#c95a48');
+      for (let y = 10; y < 28; y++) b.hline(15 - Math.floor((y - 10) * 0.25), 16 + Math.floor((y - 10) * 0.25), y, '#2a2030');
+      return finish(b, 1);
+    }
+    case 'campfire': {
+      const b = new PixelBuffer(16, 16);
+      b.rect(2, 11, 12, 3, '#7a5230').set(1, 12, '#5d3d22').set(14, 12, '#5d3d22');
+      b.ellipse(4, 2, 8, 10, '#f5a623').ellipse(6, 5, 4, 6, '#ffe06a');
+      return finish(b, 1);
+    }
+    case 'furnace': {
+      const b = new PixelBuffer(32, 36);
+      b.rect(2, 6, 28, 30, '#7d7a74').shadeIf((x, y) => (x * 3 + y * 5) % 11 === 0, '#6a6761');
+      b.rect(10, 18, 12, 10, '#2a2030').rect(12, 21, 8, 7, '#f5a623').rect(14, 24, 4, 4, '#ffe06a');
+      b.rect(20, 0, 6, 8, '#6a6761').hline(19, 26, 0, '#4f4c47');
+      return finish(b);
+    }
+    case 'anvil': {
+      const b = new PixelBuffer(16, 16);
+      b.rect(1, 3, 14, 4, '#4a4650').rect(0, 3, 3, 2, '#4a4650').rect(5, 7, 6, 4, '#3b3842').rect(3, 11, 10, 4, '#7a5230');
+      b.hline(2, 13, 3, '#6f6a76');
+      return finish(b, 1);
+    }
+    case 'workbench': {
+      const b = new PixelBuffer(32, 20);
+      b.rect(1, 4, 30, 4, '#b8844d').hline(1, 30, 4, '#d09a5e').rect(3, 8, 3, 11, '#8a5d33').rect(26, 8, 3, 11, '#8a5d33');
+      b.rect(6, 1, 8, 3, '#c9935a').rect(20, 2, 2, 2, '#a7a6a1').rect(22, 1, 6, 1, '#a7a6a1');
+      return finish(b, 1);
+    }
+    case 'cooking_pot': {
+      const b = new PixelBuffer(16, 18);
+      b.rect(2, 14, 12, 3, '#7a5230').ellipse(4, 12, 8, 5, '#f5a623');
+      b.ellipse(1, 3, 14, 11, '#3b3842').hline(1, 14, 4, '#5a5663').ellipse(3, 3, 10, 3, '#c9a36b');
+      b.set(6, 0, '#e8e8f0').set(9, 1, '#e8e8f0');
+      return finish(b, 1);
+    }
+    case 'alchemy_table': {
+      const b = new PixelBuffer(32, 22);
+      b.rect(1, 8, 30, 4, '#6b4a8a').hline(1, 30, 8, '#8a6aa8').rect(3, 12, 3, 9, '#4a3a5a').rect(26, 12, 3, 9, '#4a3a5a');
+      b.ellipse(4, 1, 6, 7, '#5fd4e6').rect(6, 0, 2, 2, '#cfe8f5').ellipse(13, 3, 5, 5, '#e0483a').rect(20, 2, 4, 6, '#9fd36a').rect(25, 4, 4, 4, '#f2c14e');
+      return finish(b, 1);
+    }
+    case 'mill': {
+      const b = new PixelBuffer(32, 40);
+      b.rect(6, 16, 20, 24, '#d9cdb4').rect(13, 30, 6, 10, '#8a5530').rect(4, 12, 24, 5, '#a8473a');
+      for (let i = 0; i < 12; i++) b.set(16 + i, 14 - i, '#8a5d33').set(16 - i, 14 - i, '#8a5d33').set(16 + i, 14 + Math.floor(i / 2), '#8a5d33');
+      b.rect(14, 12, 4, 4, '#5d3d22');
+      return finish(b);
+    }
+    case 'loom': {
+      const b = new PixelBuffer(32, 22);
+      b.rect(2, 2, 3, 19, '#8a5d33').rect(27, 2, 3, 19, '#8a5d33').rect(2, 2, 28, 3, '#a8743f');
+      for (let x = 6; x < 27; x += 2) b.vline(x, 5, 14, '#e8dcc0');
+      b.rect(6, 10, 21, 5, '#4a7fd6');
+      return finish(b, 1);
+    }
+    case 'enhance_altar': {
+      const b = new PixelBuffer(32, 26);
+      b.rect(2, 12, 28, 13, '#6a6070').hline(2, 29, 12, '#8a8094').rect(12, 2, 8, 10, '#4a7fd6').rect(14, 4, 4, 6, '#8fb8f0');
+      return finish(b, 1);
+    }
+    case 'dungeon_gate': {
+      const b = new PixelBuffer(48, 40);
+      b.rect(0, 8, 48, 32, '#5a5260').rect(12, 14, 24, 26, '#14101a').rect(8, 4, 32, 8, '#6a6070');
+      for (let x = 14; x < 36; x += 4) b.vline(x, 14, 39, '#3b3842');
+      b.rect(22, 6, 4, 4, '#e0483a');
       return finish(b, 1);
     }
   }

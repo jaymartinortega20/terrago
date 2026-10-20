@@ -15,6 +15,7 @@ import { ItemSlot } from './ui/ItemSlot';
 import { MobileControls } from './ui/MobileControls';
 import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
+import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 
 declare global {
   interface Window {
@@ -195,6 +196,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'shop' && <ShopPanel client={client} onClose={() => open(null)} />}
           {panel === 'farm' && <FarmPanel client={client} onClose={() => open(null)} />}
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
+          {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
           )}
@@ -223,6 +226,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       {/* Bottom: dialogue, hotbar, chat */}
       <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 sm:bottom-20">
         <PlotMenu client={client} />
+        <FishingOverlay client={client} />
         <DialogueBox client={client} />
         {!touch && (actionHint || interactHint) && (
           <div className="px-panel-dark px-2 py-0.5 text-xs font-bold text-gold" data-testid="action-hint">

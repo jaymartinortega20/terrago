@@ -285,5 +285,43 @@
         "Trust is the rarest currency in TerraGo. Spend it carefully."
       ]
     ]
+  },
+  {
+    "id": "lift_gus",
+    "name": "Gus",
+    "title": "Lift Operator",
+    "mapId": "irondeep_entrance",
+    "x": 16,
+    "y": 11,
+    "dir": "right",
+    "appearance": {
+      "bodyType": "a",
+      "skinTone": 1,
+      "hairStyle": 2,
+      "hairColor": 3,
+      "eyeColor": 2,
+      "outfit": 1
+    },
+    "accessory": "helmet",
+    "firstMeeting": {
+      "lines": [
+        "Name's Gus. I run the lift. Forty floors down, and every one of 'em hungry for pickaxes.",
+        "Reach floor five, ten, fifteen and so on, and I can take you straight back down there. Saves the knees."
+      ]
+    },
+    "greetings": [
+      [
+        "Lift's running. Where to?"
+      ],
+      [
+        "Deeper floors, better ore \u2014 and worse company. Bring food."
+      ],
+      [
+        "Floors 1\u20135 are copper and stone. Iron from 6, silver from 11, gold from 21. Below that... ask me when you get there."
+      ]
+    ],
+    "services": [
+      "lift"
+    ]
   }
 ]
