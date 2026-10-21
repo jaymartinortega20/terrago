@@ -359,5 +359,39 @@
   "services": [
    "shop"
   ]
+ },
+ {
+  "id": "warden_sela",
+  "name": "Warden Sela",
+  "title": "Dungeon Warden",
+  "mapId": "whisperwood",
+  "x": 14,
+  "y": 19,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 1,
+   "hairStyle": 5,
+   "hairColor": 2,
+   "eyeColor": 1,
+   "outfit": 4
+  },
+  "accessory": "hood",
+  "firstMeeting": {
+   "lines": [
+    "Sela. I watch the crypt so the crypt doesn't come out to watch you.",
+    "Inside, your whole party shares one dungeon. Enter together, or your friends will follow you in.",
+    "The boss winds up big attacks \u2014 when the ground glows red under you, MOVE. Its treasure is yours once a day."
+   ]
+  },
+  "greetings": [
+   [
+    "Glowing red circle? Step out of it. That's the whole lesson."
+   ],
+   [
+    "Back from the crypt in one piece? Good."
+   ]
+  ],
+  "services": []
  }
 ]

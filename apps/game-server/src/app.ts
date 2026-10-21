@@ -52,6 +52,10 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     onChat: (e) => chatLog.add(e),
     onCommand: (p, cmd, rest) => chatCommand({ pool, world, log }, p, cmd, rest),
     onLeave: (p) => socialLeave({ pool, world, log }, p),
+    dungeonOwner: (p) => {
+      const leader = p.party ? world.players.get(p.party.leaderId) : undefined;
+      return leader?.conn ? { id: leader.id, name: leader.name } : { id: p.id, name: p.name };
+    },
     security,
     loadObjects: (def, owner) => loadMapObjects(pool, def, owner),
     onMapEnter: (p) => void onMapEntered({ pool, world, log }, p).catch((err) => log.error('map_enter_hook_failed', { err })),

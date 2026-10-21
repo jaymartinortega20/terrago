@@ -4381,5 +4381,380 @@
    "color": "#8a8a92",
    "kind": "wolf"
   }
+ },
+ {
+  "id": "cryptbone_blade",
+  "name": "Cryptbone Blade",
+  "description": "Forged from the Crypt Lord's own ribs. It hums near the dead.",
+  "icon": "weapon:sword:3",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 180,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 38
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "cryptbone_bow",
+  "name": "Cryptbone Bow",
+  "description": "Strung with grave-silk. Arrows fly silent.",
+  "icon": "weapon:bow:3",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 180,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 34,
+    "agi": 3
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "cryptbone_staff",
+  "name": "Cryptbone Staff",
+  "description": "A lich's spine, set with a cold blue eye.",
+  "icon": "weapon:staff:3",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 180,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 42,
+    "int": 3,
+    "mp": 28
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "cryptbone_mace",
+  "name": "Cryptbone Mace",
+  "description": "Heavy, holy-scratched, and still faintly warm.",
+  "icon": "weapon:mace:3",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 180,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 35,
+    "atk": 10,
+    "mp": 23
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "cryptbone_dagger",
+  "name": "Cryptbone Dagger",
+  "description": "A finger-bone sharpened to a whisper.",
+  "icon": "weapon:dagger:3",
+  "category": "weapon",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 180,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 560,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 31,
+    "crit": 5
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "crypt_lords_cowl",
+  "name": "Crypt Lord's Cowl",
+  "description": "Moth-eaten velvet that refuses to rot.",
+  "icon": "armor:head:3",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 120,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 480,
+  "equip": {
+   "slot": "head",
+   "stats": {
+    "def": 10,
+    "hp": 15
+   }
+  }
+ },
+ {
+  "id": "crypt_signet",
+  "name": "Crypt Signet",
+  "description": "The seal of a forgotten house. Cold to the touch.",
+  "icon": "armor:ring:3",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 200,
+  "levelRequirement": 14,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "mdef": 9,
+    "vit": 2
+   }
+  }
+ },
+ {
+  "id": "magmaforged_sword",
+  "name": "Magmaforged Sword",
+  "description": "Quenched in the Tyrant's heart. The edge never cools.",
+  "icon": "weapon:sword:4",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 600,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 64
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "magmaforged_bow",
+  "name": "Magmaforged Bow",
+  "description": "Arrows leave a trail of sparks.",
+  "icon": "weapon:bow:4",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 600,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 59,
+    "agi": 5
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "magmaforged_staff",
+  "name": "Magmaforged Staff",
+  "description": "A rod of obsidian with a living ember inside.",
+  "icon": "weapon:staff:4",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 600,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 70,
+    "int": 5,
+    "mp": 46
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "magmaforged_mace",
+  "name": "Magmaforged Mace",
+  "description": "Each blow hisses like a forge.",
+  "icon": "weapon:mace:4",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 600,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 60,
+    "atk": 16,
+    "mp": 37
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "magmaforged_dagger",
+  "name": "Magmaforged Dagger",
+  "description": "Too hot to sheathe. Rogues carry it anyway.",
+  "icon": "weapon:dagger:4",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 600,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 680,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 54,
+    "crit": 7
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "tyrant_carapace",
+  "name": "Tyrant Carapace",
+  "description": "A plate of cooled magma shell, shaped to fit.",
+  "icon": "armor:chest:4",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 400,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 580,
+  "equip": {
+   "slot": "chest",
+   "stats": {
+    "def": 31,
+    "hp": 69,
+    "mdef": 9
+   }
+  }
+ },
+ {
+  "id": "ember_heart",
+  "name": "Ember Heart",
+  "description": "It beats. Slowly. Warmly.",
+  "icon": "armor:necklace:5",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 500,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": null,
+  "equip": {
+   "slot": "necklace",
+   "stats": {
+    "hp": 96,
+    "vit": 5
+   }
+  }
+ },
+ {
+  "id": "dungeon_key",
+  "name": "Dungeon Sigil",
+  "description": "Proof of a boss defeated. Collectors pay well for these.",
+  "icon": "gem:b06ad6",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 40,
+  "levelRequirement": 1,
+  "tradable": false,
+  "bind": "pickup",
+  "maxDurability": null
  }
 ]

@@ -82,16 +82,16 @@ export function once<T = any>(socket: TestSocket, event: string, timeoutMs = 400
   });
 }
 
-export function waitFor<T>(fn: () => T | undefined | null | false, timeoutMs = 4000, intervalMs = 20): Promise<T> {
+export function waitFor<T>(fn: () => T | undefined | null | false | Promise<T | undefined | null | false>, timeoutMs = 4000, intervalMs = 20): Promise<T> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
-    const tick = () => {
-      const v = fn();
+    const tick = async () => {
+      const v = await fn();
       if (v) return resolve(v);
       if (Date.now() - start > timeoutMs) return reject(new Error('waitFor timed out'));
-      setTimeout(tick, intervalMs);
+      setTimeout(() => void tick(), intervalMs);
     };
-    tick();
+    void tick();
   });
 }
 

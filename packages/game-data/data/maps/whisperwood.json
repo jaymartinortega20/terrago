@@ -20,6 +20,18 @@
    "toY": 23,
    "toDir": "right",
    "label": "Greenhaven"
+  },
+  {
+   "id": "gate_mossy_crypt",
+   "x": 10,
+   "y": 17,
+   "w": 3,
+   "h": 1,
+   "to": "dg_mossy_crypt",
+   "toX": 5,
+   "toY": 12,
+   "toDir": "right",
+   "label": "The Mossy Crypt"
   }
  ],
  "theme": "forest",
@@ -109,12 +121,12 @@
   "ffffffffffffffffffffffffffffffwwffffffffffffffffffffffffffffffff",
   "ffffffffffffffffffffffffffffffwwwfffffffffffffffffffffffffffffff",
   "ffffffffffffffffffffffffffffffwwwfffffffffffffffffffffffffffffff",
-  "ffffffffffffffffffffffffffffffwwwfffffffffffffffffffffffffffffff",
-  "ffffffffffffffffffffffffffffffwwffffffffffffffffffffffffffffffff",
-  "ffffffffffffffffffffffffffffffwwffffffffffffffffffffffffffffffff",
-  "ffffffffffffffffffffffffffffffwwffffffffffffffffffffffffffffffff",
-  "fffffffffffffffffffffffffffffwwwffffffffffffffffffffffffffffffff",
-  "fffffffffffffffffffffffffffffwwwffffffffffffffffffffffffffffffff",
+  "fffffffffkkkkkffffffffffffffffwwwfffffffffffffffffffffffffffffff",
+  "fffffffffkkkkkffffffffffffffffwwffffffffffffffffffffffffffffffff",
+  "fffffffffkkkkkffffffffffffffffwwffffffffffffffffffffffffffffffff",
+  "fffffffffkkkkkffffffffffffffffwwffffffffffffffffffffffffffffffff",
+  "fffffffffk===kfffffffffffffffwwwffffffffffffffffffffffffffffffff",
+  "fffffffffk===kfffffffffffffffwwwffffffffffffffffffffffffffffffff",
   "ffffffff===================bbb===========fffffffffffffffffffffff",
   "ffffffff===================bbb==================================",
   "ffffffffffffffffffffffffffffwwffffffffff========================",
@@ -3556,6 +3568,31 @@
   },
   {
    "kind": "prop",
+   "type": "dungeon_gate",
+   "x": 10,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 9,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 13,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 14,
+   "y": 17,
+   "text": "The Mossy Crypt. Recommended level 10–16. Bring friends: your party shares one dungeon."
+  },
+  {
+   "kind": "prop",
    "type": "mushroom_big",
    "x": 11,
    "y": 24
@@ -3682,12 +3719,6 @@
   },
   {
    "kind": "prop",
-   "type": "stump",
-   "x": 8,
-   "y": 18
-  },
-  {
-   "kind": "prop",
    "type": "tree_ancient",
    "x": 5,
    "y": 33
@@ -3799,12 +3830,6 @@
    "type": "bush",
    "x": 58,
    "y": 35
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 16,
-   "y": 16
   },
   {
    "kind": "prop",
@@ -3973,6 +3998,18 @@
    "type": "rock",
    "x": 7,
    "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "mushroom_big",
+   "x": 41,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 37,
+   "y": 43
   }
  ],
  "nodes": [
@@ -4084,134 +4121,134 @@
   {
    "id": "n15",
    "type": "tree_softwood",
-   "x": 12,
-   "y": 16,
-   "solid": true
-  },
-  {
-   "id": "n16",
-   "type": "tree_softwood",
    "x": 59,
    "y": 40,
    "solid": true
   },
   {
-   "id": "n17",
+   "id": "n16",
    "type": "tree_hardwood",
    "x": 26,
    "y": 4,
    "solid": true
   },
   {
-   "id": "n18",
+   "id": "n17",
    "type": "tree_hardwood",
    "x": 35,
    "y": 25,
    "solid": true
   },
   {
-   "id": "n19",
+   "id": "n18",
    "type": "tree_softwood",
    "x": 22,
    "y": 25,
    "solid": true
   },
   {
-   "id": "n20",
+   "id": "n19",
    "type": "tree_hardwood",
    "x": 48,
    "y": 33,
    "solid": true
   },
   {
-   "id": "n21",
+   "id": "n20",
    "type": "tree_hardwood",
    "x": 45,
    "y": 11,
    "solid": true
   },
   {
-   "id": "n22",
+   "id": "n21",
    "type": "tree_hardwood",
    "x": 11,
    "y": 7,
    "solid": true
   },
   {
-   "id": "n23",
+   "id": "n22",
    "type": "tree_hardwood",
    "x": 56,
    "y": 42,
    "solid": true
   },
   {
-   "id": "n24",
+   "id": "n23",
    "type": "tree_softwood",
    "x": 50,
    "y": 9,
    "solid": true
   },
   {
-   "id": "n25",
+   "id": "n24",
    "type": "tree_hardwood",
    "x": 52,
    "y": 36,
    "solid": true
   },
   {
-   "id": "n26",
+   "id": "n25",
    "type": "tree_hardwood",
    "x": 15,
    "y": 37,
    "solid": true
   },
   {
-   "id": "n27",
+   "id": "n26",
    "type": "tree_hardwood",
    "x": 50,
    "y": 39,
    "solid": true
   },
   {
-   "id": "n28",
+   "id": "n27",
    "type": "tree_softwood",
    "x": 5,
    "y": 36,
    "solid": true
   },
   {
-   "id": "n29",
+   "id": "n28",
    "type": "tree_softwood",
    "x": 20,
    "y": 6,
    "solid": true
   },
   {
+   "id": "n29",
+   "type": "tree_hardwood",
+   "x": 32,
+   "y": 3,
+   "solid": true
+  },
+  {
    "id": "n30",
-   "type": "tree_elder",
-   "x": 18,
-   "y": 42,
-   "solid": true
-  },
-  {
-   "id": "n31",
-   "type": "tree_elder",
-   "x": 13,
-   "y": 6,
-   "solid": true
-  },
-  {
-   "id": "n32",
    "type": "tree_elder",
    "x": 7,
    "y": 5,
    "solid": true
   },
   {
-   "id": "n33",
+   "id": "n31",
    "type": "tree_elder",
    "x": 14,
    "y": 23,
+   "solid": true
+  },
+  {
+   "id": "n32",
+   "type": "tree_elder",
+   "x": 17,
+   "y": 41,
+   "solid": true
+  },
+  {
+   "id": "n33",
+   "type": "tree_elder",
+   "x": 4,
+   "y": 22,
    "solid": true
   },
   {

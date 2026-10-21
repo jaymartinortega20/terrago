@@ -39,7 +39,8 @@ import recipesJson from '../data/recipes.json';
 import crystalLakeJson from '../data/maps/crystal_lake.json';
 import irondeepEntranceJson from '../data/maps/irondeep_entrance.json';
 import whisperwoodJson from '../data/maps/whisperwood.json';
-import { MINE_FLOORS, generateMineFloor, mineFloorNumber } from './mapgen';
+import dungeonsJson from '../data/dungeons.json';
+import { DUNGEON_PREFIX, MINE_FLOORS, generateDungeon, generateMineFloor, mineFloorNumber, type DungeonDef } from './mapgen';
 
 export * from './mapgen';
 import shopsJson from '../data/shops.json';
@@ -132,6 +133,12 @@ export const MONSTERS: readonly MonsterDef[] = monstersJson as MonsterDef[];
 export const SKILLS: readonly SkillDef[] = skillsJson as SkillDef[];
 export const QUESTS: readonly QuestDef[] = questsJson as QuestDef[];
 
+export const DUNGEONS: readonly DungeonDef[] = dungeonsJson as DungeonDef[];
+
+export function getDungeon(id: string): DungeonDef | undefined {
+  return DUNGEONS.find((d) => d.id === id);
+}
+
 export function getQuest(id: string): QuestDef | undefined {
   return QUESTS.find((q) => q.id === id);
 }
@@ -187,9 +194,15 @@ export function getMap(id: string): MapDef | undefined {
   if (fixed) return fixed;
   let g = generated.get(id);
   if (!g) {
-    const floor = mineFloorNumber(id);
-    if (floor === null) return undefined;
-    g = generateMineFloor(floor);
+    if (id.startsWith(DUNGEON_PREFIX)) {
+      const d = getDungeon(id.slice(DUNGEON_PREFIX.length));
+      if (!d) return undefined;
+      g = generateDungeon(d);
+    } else {
+      const floor = mineFloorNumber(id);
+      if (floor === null) return undefined;
+      g = generateMineFloor(floor);
+    }
     generated.set(id, g);
   }
   return g;
@@ -197,7 +210,7 @@ export function getMap(id: string): MapDef | undefined {
 
 /** Every map id in the world, including procedural ones. */
 export function allMapIds(): string[] {
-  return [...Object.keys(MAPS), ...Array.from({ length: MINE_FLOORS }, (_, i) => `irondeep_${i + 1}`)];
+  return [...Object.keys(MAPS), ...Array.from({ length: MINE_FLOORS }, (_, i) => `irondeep_${i + 1}`), ...DUNGEONS.map((d) => DUNGEON_PREFIX + d.id)];
 }
 
 const nodeIndex = new Map(NODES.map((n) => [n.id, n]));

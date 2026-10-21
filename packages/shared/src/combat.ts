@@ -163,6 +163,31 @@ export interface MonsterDef {
   art: { shape: string; color: string; size: number };
   respawnMs: number;
   boss?: boolean;
+  /** Boss mechanics. */
+  abilities?: BossAbility[];
+}
+
+/**
+ * Boss abilities. slam: telegraphed circle on the current target's spot;
+ * nova: circle around the boss; summon: adds at HP thresholds; enrage: damage
+ * buff at a threshold.
+ */
+export interface BossAbility {
+  id: string;
+  name: string;
+  kind: 'slam' | 'nova' | 'summon' | 'enrage';
+  everyMs?: number;
+  windupMs?: number;
+  /** Tiles. */
+  radius?: number;
+  dmgMult?: number;
+  /** HP fractions that trigger the ability once each. */
+  atHp?: number[];
+  monster?: string;
+  count?: number;
+  level?: number;
+  /** Enrage damage multiplier. */
+  dmg?: number;
 }
 
 export interface MonsterStats {

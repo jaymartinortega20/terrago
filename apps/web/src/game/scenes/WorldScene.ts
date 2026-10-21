@@ -176,6 +176,7 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('monsterAdd', (m) => this.addMonster(m)),
       this.client.on('monsterRemove', (id) => this.removeMonster(id)),
       this.client.on('combat', (ev) => this.showCombat(ev)),
+      this.client.on('telegraph', (t) => this.showTelegraph(t)),
       this.client.on('look', (id) => {
         const r = this.client.remotes.get(id);
         const av = this.remotes.get(id);
@@ -613,6 +614,29 @@ export class WorldScene extends Phaser.Scene {
     const r = this.remotes.get(id);
     if (r) return { x: r.sprite.x, y: r.sprite.y, h: 46 };
     return null;
+  }
+
+  /** A boss winds up: a red circle fills in, then flashes on impact. Step out! */
+  private showTelegraph(t: { x: number; y: number; r: number; ms: number; name: string }): void {
+    const ring = this.add.circle(t.x, t.y, t.r, 0xe0483a, 0.12).setStrokeStyle(2, 0xff6a5a, 0.9).setDepth(-3);
+    const fill = this.add.circle(t.x, t.y, t.r, 0xe0483a, 0.35).setDepth(-3).setScale(0.05);
+    const label = this.add
+      .text(t.x, t.y - t.r - 6, t.name, { fontFamily: LABEL_FONT, fontSize: '12px', color: '#ffb0a0', stroke: '#2a2030', strokeThickness: 3 })
+      .setOrigin(0.5, 1)
+      .setResolution(2)
+      .setDepth(LABEL_DEPTH + 20);
+    this.tweens.add({
+      targets: fill,
+      scale: 1,
+      duration: t.ms,
+      onComplete: () => {
+        ring.destroy();
+        label.destroy();
+        fill.setFillStyle(0xffd0a0, 0.8);
+        this.cameras.main.shake(160, 0.004);
+        this.tweens.add({ targets: fill, alpha: 0, scale: 1.15, duration: 280, onComplete: () => fill.destroy() });
+      },
+    });
   }
 
   /** Floating numbers for hits, crits, misses and heals. */

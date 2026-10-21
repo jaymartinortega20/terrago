@@ -10,8 +10,11 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateMapDef, type MapDef } from '@terrago/shared';
-import { MapBuilder, ladderRowsFor, rng } from '../src/mapgen';
+import { validateMapDef, type MapDef, type PortalDef } from '@terrago/shared';
+import dungeonsJson from '../data/dungeons.json';
+import { DUNGEON_PREFIX, MapBuilder, generateDungeon, ladderRowsFor, rng, type DungeonDef } from '../src/mapgen';
+
+const DUNGEONS = dungeonsJson as DungeonDef[];
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'maps');
 
@@ -326,6 +329,19 @@ function homestead(): MapDef {
 }
 
 /** West of Greenhaven: old forest, hardwood, herbs, a river — and (later) wolves. */
+/** A dungeon gate (3x2) with its entry portal on the row in front. */
+function dungeonGate(m: MapBuilder, id: string, ground: string): PortalDef {
+  const d = DUNGEONS.find((x) => x.id === id)!;
+  const { x, y } = d.entrance;
+  m.rect(x - 1, y - 1, 5, 6, ground, true);
+  m.prop('dungeon_gate', x, y);
+  m.prop('torch', x - 1, y + 1);
+  m.prop('torch', x + 3, y + 1);
+  m.prop('sign', x + 4, y + 2, `${d.name}. Recommended level ${d.levels[0]}–${d.levels[1]}. Bring friends: your party shares one dungeon.`);
+  const spawn = generateDungeon(d).spawn;
+  return { id: `gate_${id}`, x, y: y + 2, w: 3, h: 1, to: DUNGEON_PREFIX + id, toX: spawn.x, toY: spawn.y, toDir: 'right', label: d.name };
+}
+
 function whisperwood(): MapDef {
   const W = 64;
   const H = 48;
@@ -344,6 +360,9 @@ function whisperwood(): MapDef {
   m.prop('sign', 50, 26, 'Whisperwood Ranger Camp. Hardwood grows deep in the forest; elder trees deeper still.');
   m.reserve(43, 25, 9, 7);
   m.border(r, 2, 4, [{ side: 'e', from: 21, to: 24 }, { side: 'n', from: 25, to: 33 }, { side: 's', from: 23, to: 31 }], ['tree_pine', 'tree_oak', 'tree_ancient']);
+  const crypt = dungeonGate(m, 'mossy_crypt', 'k');
+  m.rect(10, 18, 3, 2, '=', true); // path from the trail to the crypt
+  m.reserve(13, 17, 4, 4); // Warden Sela
   m.scatterNodes(r, [{ type: 'tree_hardwood', solid: true, weight: 6 }, { type: 'tree_softwood', solid: true, weight: 2 }], 30);
   m.scatterNodes(r, [{ type: 'tree_elder', solid: true, weight: 1 }], 4, { x: 4, y: 4, w: 18, h: 40 });
   m.scatterNodes(r, [
@@ -360,7 +379,7 @@ function whisperwood(): MapDef {
     safeZone: false,
     music: 'forest',
     spawn: { x: 60, y: 23, dir: 'left' },
-    portals: [{ id: 'ww_east', x: 63, y: 21, w: 1, h: 4, to: 'greenhaven', toX: 1, toY: 23, toDir: 'right', label: 'Greenhaven' }],
+    portals: [{ id: 'ww_east', x: 63, y: 21, w: 1, h: 4, to: 'greenhaven', toX: 1, toY: 23, toDir: 'right', label: 'Greenhaven' }, crypt],
     theme: 'forest',
     fishing: 'river',
     levels: [10, 20],
@@ -449,6 +468,8 @@ function irondeepEntrance(): MapDef {
   m.prop('sign', 24, 10, 'Irondeep Mine. Forty floors deep. Floors 1–5: stone and copper. Iron below 6, silver below 11, gold below 21.');
   m.prop('crate', 15, 9);
   m.prop('barrel', 16, 9);
+  m.rect(22, 11, 9, 3, ':', true); // path east to the hollow
+  const hollow = dungeonGate(m, 'ember_hollow', 'a');
   m.scatterGround(r, 0.08, ',');
   m.scatterNodes(r, [{ type: 'rock_stone', solid: true, weight: 4 }, { type: 'rock_copper', solid: true, weight: 2 }, { type: 'rock_coal', solid: true, weight: 1 }], 12);
   m.scatterProps(r, ['rock', 'tree_pine', 'stump', 'bush'], 16);
@@ -461,6 +482,7 @@ function irondeepEntrance(): MapDef {
     portals: [
       { id: 'ie_south', x: 18, y: 29, w: 4, h: 1, to: 'greenhaven', toX: 31, toY: 1, toDir: 'down', label: 'Greenhaven' },
       { id: 'ie_mine', x: 19, y: 8, w: 3, h: 1, to: 'irondeep_1', toX: 4, toY: ladderRowsFor(1).up, toDir: 'right', label: 'Floor 1' },
+      hollow,
     ],
     theme: 'meadow',
     levels: [1, 10],

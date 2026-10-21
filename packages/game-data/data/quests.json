@@ -356,5 +356,95 @@
     }
    ]
   }
+ },
+ {
+  "id": "q_crypt",
+  "name": "The Mossy Crypt",
+  "giver": "guildmaster_kael",
+  "turnIn": "warden_sela",
+  "requires": "q_wolves",
+  "description": "Something old stirs beneath Whisperwood. Level 12+ and a party recommended.",
+  "intro": [
+   "The Guild's had word from Warden Sela in Whisperwood. The dead are walking in the old crypt.",
+   "Gather friends \u2014 a party shares the dungeon and the experience. Put Crypt Lord Varn back in his grave."
+  ],
+  "outro": [
+   "Varn's down? Then the forest sleeps easier tonight.",
+   "Keep what he dropped. He won't need it. And come back tomorrow \u2014 he never stays dead."
+  ],
+  "steps": [
+   {
+    "text": "Enter the Mossy Crypt (north-west Whisperwood)",
+    "type": "visit",
+    "count": 1,
+    "target": "dg_mossy_crypt",
+    "where": {
+     "map": "whisperwood",
+     "x": 11,
+     "y": 17
+    }
+   },
+   {
+    "text": "Defeat Crypt Lord Varn (the far chamber)",
+    "type": "kill",
+    "count": 1,
+    "target": "crypt_lord"
+   }
+  ],
+  "rewards": {
+   "gold": 600,
+   "xp": 2600,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 3
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_ember",
+  "name": "Heart of the Mountain",
+  "giver": "warden_sela",
+  "turnIn": "lift_gus",
+  "requires": "q_crypt",
+  "description": "A furnace-hot hollow has cracked open beside Irondeep. Level 26+ and a strong party recommended.",
+  "intro": [
+   "The miners broke into something hot beside Irondeep. Gus says the walls glow.",
+   "Something called the Magma Tyrant rules it. Bring your best friends and your best armor."
+  ],
+  "outro": [
+   "The Tyrant's cold? Then my lift stops shaking. Ha!",
+   "You're a proper legend now. The whole valley will hear of it."
+  ],
+  "steps": [
+   {
+    "text": "Enter Ember Hollow (east of the Irondeep mine yard)",
+    "type": "visit",
+    "count": 1,
+    "target": "dg_ember_hollow",
+    "where": {
+     "map": "irondeep_entrance",
+     "x": 30,
+     "y": 12
+    }
+   },
+   {
+    "text": "Defeat the Magma Tyrant",
+    "type": "kill",
+    "count": 1,
+    "target": "magma_tyrant"
+   }
+  ],
+  "rewards": {
+   "gold": 2000,
+   "xp": 12000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 6
+    }
+   ]
+  }
  }
 ]

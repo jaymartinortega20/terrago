@@ -352,3 +352,111 @@ export function generateMineFloor(n: number): MapDef {
   return map;
 }
 
+
+// ---------------------------------------------------------------------------
+// Dungeons — a chain of rooms ending in a boss chamber, generated from data
+// ---------------------------------------------------------------------------
+
+export interface DungeonDef {
+  id: string;
+  name: string;
+  levels: [number, number];
+  seed: number;
+  floor: string;
+  wall: string;
+  /** Where the gate stands in the overworld (top-left tile of the 3x2 gate). */
+  entrance: { map: string; x: number; y: number };
+  /** Where you come out. */
+  exit: { mapId: string; x: number; y: number };
+  rooms: number;
+  props: PropType[];
+  lava?: boolean;
+  trash: { monster: string; level: [number, number]; count: number }[];
+  boss: { monster: string; level: number };
+}
+
+export const DUNGEON_PREFIX = 'dg_';
+
+export function generateDungeon(d: DungeonDef): MapDef {
+  const r = rng(d.seed);
+  const ROOM = 11;
+  const GAP = 5;
+  const BOSS = 17;
+  const W = 4 + d.rooms * (ROOM + GAP) + BOSS + 4;
+  const H = 27;
+  const m = new MapBuilder(W, H, d.wall);
+  const mid = Math.floor(H / 2);
+  const rooms: { x: number; y: number; w: number; h: number }[] = [];
+  let x = 3;
+  for (let i = 0; i < d.rooms; i++) {
+    const w = ROOM - Math.floor(r() * 3);
+    const h = ROOM - Math.floor(r() * 3);
+    const y = mid - Math.floor(h / 2) + Math.floor(r() * 5) - 2;
+    rooms.push({ x, y, w, h });
+    x += w + GAP;
+  }
+  const boss = { x, y: mid - Math.floor(BOSS / 2), w: BOSS, h: BOSS };
+  // Carve rooms and 3-wide corridors.
+  for (const rm of [...rooms, boss]) m.rect(rm.x, rm.y, rm.w, rm.h, d.floor, false);
+  const all = [...rooms, boss];
+  for (let i = 0; i < all.length - 1; i++) {
+    const a = all[i]!;
+    const b = all[i + 1]!;
+    const ay = a.y + Math.floor(a.h / 2);
+    const by = b.y + Math.floor(b.h / 2);
+    const cx = a.x + a.w + Math.floor(GAP / 2);
+    m.rect(a.x + a.w - 1, ay - 1, cx - (a.x + a.w) + 2, 3, d.floor, false);
+    m.rect(cx - 1, Math.min(ay, by) - 1, 3, Math.abs(by - ay) + 3, d.floor, false);
+    m.rect(cx, by - 1, b.x - cx + 1, 3, d.floor, false);
+  }
+  const first = rooms[0]!;
+  const startY = first.y + Math.floor(first.h / 2);
+  // Entrance: stairs up out of the dungeon.
+  m.prop('ladder_up', first.x, startY);
+  m.reserve(first.x - 1, startY - 2, 5, 5);
+  m.prop('torch', first.x, first.y);
+  m.prop('torch', first.x + 2, first.y);
+  // Boss chamber: pillars, torches, and the way out behind the boss.
+  const bx = boss.x + Math.floor(BOSS / 2);
+  const by = boss.y + Math.floor(BOSS / 2);
+  m.prop('teleport_pad', boss.x + BOSS - 4, by);
+  m.reserve(boss.x + BOSS - 6, by - 2, 6, 5);
+  for (const [px, py] of [[boss.x + 2, boss.y + 2], [boss.x + BOSS - 3, boss.y + 2], [boss.x + 2, boss.y + BOSS - 3], [boss.x + BOSS - 3, boss.y + BOSS - 3]] as const) m.tryProp('ruin_pillar', px, py);
+  m.reserve(bx - 4, by - 4, 9, 9);
+  if (d.lava) {
+    for (let i = 0; i < 6; i++) {
+      const rm = rooms[1 + Math.floor(r() * (rooms.length - 1))] ?? boss;
+      const lx = rm.x + 1 + Math.floor(r() * (rm.w - 3));
+      const ly = rm.y + 1 + Math.floor(r() * (rm.h - 3));
+      if (m.free(lx - 1, ly - 1, 4, 4)) m.rect(lx, ly, 2, 2, 'L', true);
+    }
+  }
+  for (const rm of rooms) m.scatterProps(r, d.props, 3, { x: rm.x + 1, y: rm.y + 1, w: rm.w - 2, h: rm.h - 2 }, d.floor);
+  for (const rm of rooms) m.tryProp('torch', rm.x + rm.w - 2, rm.y);
+
+  const spawns: NonNullable<MapDef['spawns']> = [];
+  rooms.slice(1).forEach((rm, i) => {
+    const area = { x: rm.x + 1, y: rm.y + 1, w: rm.w - 2, h: rm.h - 2 };
+    const pack = d.trash.slice(0, 2 + (i % 2));
+    for (const t of pack) spawns.push({ monster: t.monster, level: t.level, count: Math.max(1, t.count - (i === 0 ? 1 : 0)), area });
+  });
+  spawns.push({ monster: d.boss.monster, level: [d.boss.level, d.boss.level], count: 1, area: { x: bx - 1, y: by - 1, w: 3, h: 3 } });
+
+  return m.toMap({
+    id: DUNGEON_PREFIX + d.id,
+    name: d.name,
+    safeZone: false,
+    music: 'dungeon',
+    spawn: { x: first.x + 2, y: startY, dir: 'right' },
+    portals: [
+      { id: 'dg_exit', x: first.x, y: startY, w: 1, h: 1, to: d.exit.mapId, toX: d.exit.x, toY: d.exit.y, toDir: 'down', label: 'Leave dungeon' },
+      { id: 'dg_done', x: boss.x + BOSS - 4, y: by, w: 2, h: 1, to: d.exit.mapId, toX: d.exit.x, toY: d.exit.y, toDir: 'down', label: 'Leave dungeon' },
+    ],
+    instanced: true,
+    dungeon: d.id,
+    theme: d.lava ? 'volcano' : 'ruins',
+    levels: d.levels,
+    respawn: d.exit,
+    spawns,
+  });
+}

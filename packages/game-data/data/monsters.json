@@ -449,5 +449,325 @@
   },
   "respawnMs": 60000,
   "magic": true
+ },
+ {
+  "id": "crypt_ghoul",
+  "name": "Crypt Ghoul",
+  "hpMult": 1.3,
+  "atkMult": 1.2,
+  "defMult": 1.0,
+  "speed": 64,
+  "aggro": 6,
+  "range": 1.3,
+  "cooldownMs": 1300,
+  "xpMult": 1.35,
+  "gold": [
+   4,
+   10
+  ],
+  "drops": [
+   {
+    "itemId": "bone",
+    "chance": 0.5,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "dark_essence",
+    "chance": 0.04,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "goblin",
+   "color": "#7d8f6a",
+   "size": 1.1
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "fire_imp",
+  "name": "Fire Imp",
+  "hpMult": 0.9,
+  "atkMult": 1.45,
+  "defMult": 0.9,
+  "speed": 80,
+  "aggro": 7,
+  "range": 4.5,
+  "cooldownMs": 1600,
+  "magic": true,
+  "xpMult": 1.5,
+  "gold": [
+   8,
+   18
+  ],
+  "drops": [
+   {
+    "itemId": "coal",
+    "chance": 0.4,
+    "min": 1,
+    "max": 3
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 0.05,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "goblin",
+   "color": "#d8502a",
+   "size": 0.9
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "crypt_lord",
+  "name": "Crypt Lord Varn",
+  "boss": true,
+  "hpMult": 9,
+  "atkMult": 1.55,
+  "defMult": 1.4,
+  "speed": 58,
+  "aggro": 7,
+  "range": 1.8,
+  "cooldownMs": 1700,
+  "xpMult": 14,
+  "gold": [
+   180,
+   320
+  ],
+  "drops": [
+   {
+    "itemId": "cryptbone_blade",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "cryptbone_bow",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "cryptbone_staff",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "cryptbone_mace",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "cryptbone_dagger",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "crypt_lords_cowl",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "crypt_signet",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1,
+    "min": 2,
+    "max": 4
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 1,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "skeleton",
+   "color": "#9b59d0",
+   "size": 2.0
+  },
+  "respawnMs": 600000,
+  "abilities": [
+   {
+    "id": "bone_slam",
+    "name": "Bone Slam",
+    "kind": "slam",
+    "everyMs": 8000,
+    "windupMs": 1500,
+    "radius": 2.2,
+    "dmgMult": 2.2
+   },
+   {
+    "id": "raise_dead",
+    "name": "Raise the Dead",
+    "kind": "summon",
+    "atHp": [
+     0.7,
+     0.4
+    ],
+    "monster": "skeleton",
+    "count": 3,
+    "level": 12
+   },
+   {
+    "id": "grave_nova",
+    "name": "Grave Nova",
+    "kind": "nova",
+    "everyMs": 15000,
+    "windupMs": 2200,
+    "radius": 3.5,
+    "dmgMult": 1.7
+   },
+   {
+    "id": "undying_rage",
+    "name": "Undying Rage",
+    "kind": "enrage",
+    "atHp": [
+     0.25
+    ],
+    "dmg": 1.4
+   }
+  ]
+ },
+ {
+  "id": "magma_tyrant",
+  "name": "Magma Tyrant",
+  "boss": true,
+  "hpMult": 12,
+  "atkMult": 1.6,
+  "defMult": 1.6,
+  "speed": 50,
+  "aggro": 7,
+  "range": 2.0,
+  "cooldownMs": 1900,
+  "xpMult": 16,
+  "gold": [
+   500,
+   900
+  ],
+  "drops": [
+   {
+    "itemId": "magmaforged_sword",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "magmaforged_bow",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "magmaforged_staff",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "magmaforged_mace",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "magmaforged_dagger",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "tyrant_carapace",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "ember_heart",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1,
+    "min": 4,
+    "max": 7
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 1,
+    "min": 2,
+    "max": 2
+   },
+   {
+    "itemId": "golem_core",
+    "chance": 0.5,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#e0602a",
+   "size": 2.2
+  },
+  "respawnMs": 600000,
+  "abilities": [
+   {
+    "id": "magma_slam",
+    "name": "Magma Slam",
+    "kind": "slam",
+    "everyMs": 7000,
+    "windupMs": 1400,
+    "radius": 2.5,
+    "dmgMult": 2.3
+   },
+   {
+    "id": "eruption",
+    "name": "Eruption",
+    "kind": "nova",
+    "everyMs": 13000,
+    "windupMs": 2000,
+    "radius": 4,
+    "dmgMult": 1.8
+   },
+   {
+    "id": "call_imps",
+    "name": "Call of the Forge",
+    "kind": "summon",
+    "atHp": [
+     0.75,
+     0.5,
+     0.25
+    ],
+    "monster": "fire_imp",
+    "count": 2,
+    "level": 28
+   },
+   {
+    "id": "molten_fury",
+    "name": "Molten Fury",
+    "kind": "enrage",
+    "atHp": [
+     0.2
+    ],
+    "dmg": 1.5
+   }
+  ]
  }
 ]

@@ -197,3 +197,20 @@ export function EnhancePanel({ client, onClose }: { client: GameClient; onClose:
     </Window>
   );
 }
+
+/** Big health bar for a boss you are fighting (or near). */
+export function BossBar({ client }: { client: GameClient }) {
+  useTick(250);
+  const boss = [...client.monsters.values()].find((m) => m.info.boss && Math.hypot(m.x - client.pos.x, m.y - client.pos.y) < 14 * 32);
+  if (!boss) return null;
+  return (
+    <div className="px-panel-dark w-[min(80vw,420px)] px-3 py-1.5 text-center" data-testid="boss-bar">
+      <div className="text-sm font-bold text-[#ff9a7a]">
+        ☠ {boss.info.name} <span className="text-xs text-parchment/70">Lv {boss.info.level}</span>
+      </div>
+      <div className="px-bar mt-1 h-3">
+        <span style={{ width: `${boss.hp}%`, background: 'linear-gradient(#e0483a, #a02a20)' }} />
+      </div>
+    </div>
+  );
+}

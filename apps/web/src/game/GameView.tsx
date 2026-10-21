@@ -16,7 +16,7 @@ import { MobileControls } from './ui/MobileControls';
 import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
-import { EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
+import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
 import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
 import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
@@ -167,7 +167,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         <EffectsBar client={client} />
         <PartyFrame client={client} />
       </div>
-      <div className="absolute top-2 left-1/2 -translate-x-1/2">
+      <div className="absolute top-2 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">
+        <BossBar client={client} />
         <TargetFrame client={client} />
       </div>
 

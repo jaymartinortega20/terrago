@@ -101,6 +101,7 @@ type ClientEvents = {
   objects: [WorldObject[], string[]];
   /** A tile action happened (for effects): tile + kind. */
   acted: [{ tx: number; ty: number; message: string | null }];
+  telegraph: [{ id: string; x: number; y: number; r: number; ms: number; name: string }];
 };
 
 export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -231,6 +232,7 @@ export class GameClient {
       for (const e of events) if (e.k === 'death' && e.t === this.ui.get().targetId) this.ui.set({ targetId: null, autoAttack: false });
       this.emit('combat', events);
     });
+    socket.on('telegraph', (t) => this.emit('telegraph', t));
     socket.on('effects', ({ effects, cooldowns }) => this.ui.set({ effects, cooldowns }));
     socket.on('quests', (quests) => this.ui.set({ quests }));
     socket.on('trade:invite', (inv) => this.ui.set({ tradeInvite: inv }));

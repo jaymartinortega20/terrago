@@ -1,0 +1,117 @@
+[
+ {
+  "id": "mossy_crypt",
+  "name": "The Mossy Crypt",
+  "levels": [
+   10,
+   16
+  ],
+  "seed": 7717,
+  "floor": "k",
+  "wall": "r",
+  "entrance": {
+   "map": "whisperwood",
+   "x": 10,
+   "y": 15
+  },
+  "exit": {
+   "mapId": "whisperwood",
+   "x": 11,
+   "y": 19
+  },
+  "rooms": 4,
+  "props": [
+   "bones",
+   "ruin_pillar",
+   "stalagmite"
+  ],
+  "trash": [
+   {
+    "monster": "skeleton",
+    "level": [
+     11,
+     13
+    ],
+    "count": 3
+   },
+   {
+    "monster": "crypt_ghoul",
+    "level": [
+     12,
+     14
+    ],
+    "count": 2
+   },
+   {
+    "monster": "giant_spider",
+    "level": [
+     12,
+     14
+    ],
+    "count": 1
+   }
+  ],
+  "boss": {
+   "monster": "crypt_lord",
+   "level": 16
+  }
+ },
+ {
+  "id": "ember_hollow",
+  "name": "Ember Hollow",
+  "levels": [
+   26,
+   32
+  ],
+  "seed": 4242,
+  "floor": "a",
+  "wall": "r",
+  "entrance": {
+   "map": "irondeep_entrance",
+   "x": 29,
+   "y": 10
+  },
+  "exit": {
+   "mapId": "irondeep_entrance",
+   "x": 30,
+   "y": 14
+  },
+  "rooms": 5,
+  "props": [
+   "stalagmite",
+   "crystal",
+   "bones"
+  ],
+  "lava": true,
+  "trash": [
+   {
+    "monster": "orc",
+    "level": [
+     26,
+     28
+    ],
+    "count": 3
+   },
+   {
+    "monster": "fire_imp",
+    "level": [
+     27,
+     29
+    ],
+    "count": 2
+   },
+   {
+    "monster": "stone_golem",
+    "level": [
+     28,
+     30
+    ],
+    "count": 1
+   }
+  ],
+  "boss": {
+   "monster": "magma_tyrant",
+   "level": 32
+  }
+ }
+]

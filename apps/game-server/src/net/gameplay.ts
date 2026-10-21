@@ -451,6 +451,16 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
         void r.player
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
+            if (r.monster.def.boss && (r.gold || r.items.length)) {
+              // Boss loot once per day per character (XP always).
+              const day = new Date().toISOString().slice(0, 10);
+              const fresh = await d.pool.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [r.player.id, `boss:${r.monster.def.id}:${day}`]);
+              if (!fresh.rowCount) {
+                r.items = [];
+                r.gold = Math.round(r.gold * 0.1);
+                r.player.conn?.send('notice', { kind: 'info', text: `You already claimed ${r.monster.def.name}'s treasure today. It returns at midnight (UTC).` });
+              }
+            }
             const res = await grantKillRewards(d.pool, r.player.id, { xp: r.xp, gold: r.gold, items: r.items, monster: r.monster.def.id });
             pushInventory(d.world, r.player, res.inventory);
             applyDelta(d.world, r.player, res.delta);

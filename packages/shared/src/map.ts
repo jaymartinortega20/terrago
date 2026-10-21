@@ -176,6 +176,8 @@ export interface MapDef {
   respawn?: { mapId: string; x: number; y: number };
   /** Monster spawn areas. */
   spawns?: SpawnDef[];
+  /** Dungeon id: an instanced map shared by your party; monsters don't respawn. */
+  dungeon?: string;
 }
 
 export interface SpawnDef {

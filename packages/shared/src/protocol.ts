@@ -132,6 +132,8 @@ export interface ServerToClientEvents {
   /** Players that came into view. */
   'entity:add': (entities: (PublicPlayer | PublicMonster)[]) => void;
   'combat': (events: CombatEvent[]) => void;
+  /** A boss is winding up an area attack: warn players (pixels, ms until impact). */
+  'telegraph': (t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
   /** A visible player's look changed (mount, weapon). */
   'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null }) => void;
   'quests': (quests: QuestState[]) => void;

@@ -68,6 +68,8 @@ export interface WorldDeps {
   security?: Pick<SecurityEvents, 'record'>;
   /** Called when a player leaves the world for good (after grace, logout or kick). */
   onLeave?: (player: Player) => void;
+  /** Who owns the dungeon instance a player enters (their party leader, or themselves). */
+  dungeonOwner?: (player: Player) => { id: string; name: string };
   /** Called after a player arrives in a new map. */
   onMapEnter?: (player: Player) => void;
   /** Async side effects of combat (rewards, death penalty, durability). */
@@ -109,8 +111,17 @@ export class World {
         onDuelEnd: (w, l) => this.duelWon(w, l),
         dismount: (p) => this.setMount(p, null, 1),
         respawn: (p) => {
-          const pt = Combat.respawnPoint(this.runtimeOf(p));
+          const rt = this.runtimeOf(p);
+          // In a dungeon you get back up at its entrance, in the same instance.
+          if (rt.def.dungeon) return void this.moveTo(p, rt.def.id, rt.owner, rt.def.spawn.x, rt.def.spawn.y, rt.def.spawn.dir);
+          const pt = Combat.respawnPoint(rt);
           void this.moveTo(p, pt.mapId, null, pt.x, pt.y, 'down');
+        },
+        announce: (rt, text) => {
+          for (const q of rt.players) q.conn?.send('notice', { kind: 'error', text });
+        },
+        telegraph: (rt, t) => {
+          for (const q of rt.players) if (!q.changingMap) q.conn?.send('telegraph', t);
         },
       },
       this.now,
@@ -236,7 +247,7 @@ export class World {
       };
       this.maps.set(key, rt);
       this.spawnNodes(rt);
-      if (!own) this.combat.spawnMonsters(rt);
+      this.combat.spawnMonsters(rt);
       if (this.deps.loadObjects) {
         const target = rt;
         target.loading = this.deps
@@ -414,8 +425,16 @@ export class World {
     } else {
       p = new Player(rec);
       p.profile = profileFor(rec);
+      // Logged out inside a dungeon: the run is over; come back outside.
+      const saved = getMap(p.mapId);
+      if (saved?.dungeon && saved.respawn) {
+        const c = tileCenter(saved.respawn.x, saved.respawn.y);
+        p.mapId = saved.respawn.mapId;
+        p.x = c.x;
+        p.y = c.y;
+      }
       if (p.rec.hp <= 0) p.rec.hp = Math.round(p.profile.maxHp * 0.5);
-      p.instanceOwner = this.ownerFor(rec, rec.mapId);
+      p.instanceOwner = this.ownerFor(rec, p.mapId);
       this.players.set(p.id, p);
       this.addToMap(p);
     }
@@ -453,7 +472,7 @@ export class World {
       tickRate: SIM.tickRate,
       snapshotRate: SIM.tickRate / SIM.snapshotEveryTicks,
       self,
-      map: { id: rt.def.id, name: rt.owner ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
+      map: { id: rt.def.id, name: rt.owner && !rt.def.dungeon ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
       position: { x: p.x, y: p.y, dir: p.dir },
       npcs: rt.npcs.map(toNpcPublic),
       inventory,
@@ -597,6 +616,12 @@ export class World {
   private async usePortal(p: Player, portal: PortalDef): Promise<void> {
     const target = getMap(portal.to);
     if (!target) return;
+    if (target.dungeon) {
+      const owner = this.deps.dungeonOwner?.(p) ?? { id: p.id, name: p.name };
+      await this.moveTo(p, target.id, owner, target.spawn.x, target.spawn.y, target.spawn.dir);
+      if (owner.id !== p.id) this.system(p, `You joined ${owner.name}'s party in ${target.name}.`);
+      return;
+    }
     const owner = target.instanced ? { id: p.id, name: p.name } : null;
     await this.moveTo(p, target.id, owner, portal.toX, portal.toY, portal.toDir);
   }

@@ -43,6 +43,15 @@ export class Monster {
   effects: ActiveEffect[] = [];
   /** Damage dealt by each player (XP share, loot owner). */
   damageBy = new Map<string, number>();
+  // --- Bosses ---------------------------------------------------------------
+  /** Summoned add: removed for good when it dies. */
+  temp = false;
+  /** Next use time per timed ability, and HP thresholds already triggered. */
+  abilityAt = new Map<string, number>();
+  triggered = new Set<string>();
+  casting: { ability: import('@terrago/shared').BossAbility; x: number; y: number; at: number } | null = null;
+  enraged = 1;
+  adds: Monster[] = [];
 
   constructor(
     readonly id: string,
@@ -104,6 +113,9 @@ export interface CombatHooks {
   partyOf?: (p: Player) => Player[];
   /** Riding players get off when they fight. */
   dismount?: (p: Player) => void;
+  /** Tell everyone in a runtime something (boss shouts, telegraphs). */
+  announce?: (rt: MapRuntime, text: string) => void;
+  telegraph?: (rt: MapRuntime, t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
 }
 
 const TILE = TILE_SIZE;
@@ -168,6 +180,10 @@ export class Combat {
 
   private think(rt: MapRuntime, m: Monster, dtMs: number, now: number): void {
     if (m.state === 'dead') {
+      if (m.temp) {
+        rt.monsters.delete(m.id);
+        return;
+      }
       if (now >= m.respawnAt) {
         const pos = randomTileIn(rt, m.spawn.area, this.rand);
         if (pos) {
@@ -179,6 +195,7 @@ export class Combat {
         m.effects = [];
         m.damageBy.clear();
         m.targetId = null;
+        this.resetBoss(rt, m);
       }
       return;
     }
@@ -206,6 +223,7 @@ export class Combat {
         m.state = 'return';
         m.targetId = null;
       } else {
+        if (m.def.abilities && this.bossTick(rt, m, target, now)) return;
         const d = dist(m.x, m.y, target.x, target.y);
         if (d <= m.def.range * TILE && (m.def.range <= 2 || rt.grid.lineOfSight(m.x, m.y - 8, target.x, target.y - 12))) {
           m.dir = facing(target.x - m.x, target.y - m.y);
@@ -222,6 +240,7 @@ export class Combat {
         m.state = 'idle';
         m.hp = m.stats.maxHp;
         m.damageBy.clear();
+        this.resetBoss(rt, m);
       } else this.moveToward(rt, m, homeX, homeY, dtMs, now, 1.5);
       return;
     }
@@ -277,7 +296,7 @@ export class Combat {
   private monsterAttack(rt: MapRuntime, m: Monster, p: Player, now: number): void {
     const def = m.def.magic ? p.profile.derived.magicDefense : p.profile.derived.physicalDefense;
     const res = rollHit(
-      { level: m.level, atk: m.stats.atk * effectMult(m.effects, 'dmg', now), accuracy: m.stats.accuracy, critChance: 5, critDamage: 150 },
+      { level: m.level, atk: m.stats.atk * m.enraged * effectMult(m.effects, 'dmg', now), accuracy: m.stats.accuracy, critChance: 5, critDamage: 150 },
       { level: p.rec.level, def, evasion: p.profile.derived.evasion * effectMult(p.effects, 'eva', now) },
       1,
       this.rand,
@@ -477,7 +496,9 @@ export class Combat {
 
   private killMonster(rt: MapRuntime, m: Monster): void {
     m.state = 'dead';
-    m.respawnAt = this.now() + m.def.respawnMs;
+    m.respawnAt = rt.def.dungeon ? Infinity : this.now() + m.def.respawnMs;
+    m.casting = null;
+    if (m.def.boss) for (const a of m.adds) if (a.alive) this.killQuietly(rt, a);
     this.emit(rt, { s: m.id, t: m.id, a: 0, k: 'death' });
     const total = [...m.damageBy.values()].reduce((a, b) => a + b, 0);
     if (total <= 0) return;
@@ -510,11 +531,97 @@ export class Combat {
         rewards.push({ player: p, xp: Math.max(1, Math.round(each * lf)), gold: 0, items: [], monster: m });
       }
     }
-    const loot = rewards.find((r) => r.player === top.p)!;
+    // Bosses give everyone their own loot roll; other monsters reward the top damage dealer.
+    const looters = m.def.boss ? rewards : [rewards.find((r) => r.player === top.p)!];
     const [g0, g1] = m.def.gold;
-    loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08));
-    for (const d of m.def.drops) if (this.rand() < d.chance) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
+    for (const loot of looters) {
+      loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08));
+      for (const d of m.def.drops) if (this.rand() < d.chance) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
+    }
     this.hooks.onKill?.(rewards);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Bosses
+  // ---------------------------------------------------------------------------
+
+  private resetBoss(rt: MapRuntime, m: Monster): void {
+    if (!m.def.abilities) return;
+    m.abilityAt.clear();
+    m.triggered.clear();
+    m.casting = null;
+    m.enraged = 1;
+    for (const a of m.adds) if (a.alive) this.killQuietly(rt, a);
+    m.adds = [];
+  }
+
+  /** Remove a monster without rewards (boss adds when the fight resets). */
+  private killQuietly(rt: MapRuntime, a: Monster): void {
+    a.state = 'dead';
+    a.respawnAt = Infinity;
+    this.emit(rt, { s: a.id, t: a.id, a: 0, k: 'death' });
+    if (a.temp) rt.monsters.delete(a.id);
+  }
+
+  /** Run boss mechanics. Returns true while the boss is busy (winding up), so it doesn't move or attack. */
+  private bossTick(rt: MapRuntime, m: Monster, target: Player, now: number): boolean {
+    if (m.casting) {
+      if (now < m.casting.at) return true;
+      const { ability: a, x, y } = m.casting;
+      m.casting = null;
+      const r = (a.radius ?? 2) * TILE;
+      for (const p of rt.players) {
+        if (p.dead || p.changingMap || dist(p.x, p.y - 10, x, y) > r) continue;
+        const def = p.profile.derived.physicalDefense;
+        const raw = m.stats.atk * m.enraged * (a.dmgMult ?? 1.5) * (100 / (100 + def * 1.5));
+        p.lastCombatAt = now;
+        this.damagePlayer(rt, p, Math.max(1, Math.round(raw * effectMult(p.effects, 'taken', now) * (0.9 + this.rand() * 0.2))), m.id, 'crit');
+      }
+      return true;
+    }
+    const frac = m.hp / m.stats.maxHp;
+    for (const a of m.def.abilities ?? []) {
+      // Threshold abilities (summons, enrage) fire once each.
+      for (const t of a.atHp ?? []) {
+        const key = `${a.id}@${t}`;
+        if (frac > t || m.triggered.has(key)) continue;
+        m.triggered.add(key);
+        if (a.kind === 'summon') this.summonAdds(rt, m, a);
+        if (a.kind === 'enrage') m.enraged = a.dmg ?? 1.5;
+        this.hooks.announce?.(rt, a.kind === 'enrage' ? `${m.def.name} flies into a rage!` : `${m.def.name}: ${a.name}!`);
+      }
+      if (!a.everyMs || (a.kind !== 'slam' && a.kind !== 'nova')) continue;
+      const next = m.abilityAt.get(a.id);
+      if (next === undefined) {
+        m.abilityAt.set(a.id, now + a.everyMs * (0.4 + this.rand() * 0.3));
+        continue;
+      }
+      if (now < next) continue;
+      m.abilityAt.set(a.id, now + a.everyMs);
+      const at = a.kind === 'slam' ? { x: target.x, y: target.y - 10 } : { x: m.x, y: m.y - 10 };
+      const ms = a.windupMs ?? 1500;
+      m.casting = { ability: a, x: at.x, y: at.y, at: now + ms };
+      this.hooks.telegraph?.(rt, { id: m.id, x: at.x, y: at.y, r: (a.radius ?? 2) * TILE, ms, name: a.name });
+      return true;
+    }
+    return false;
+  }
+
+  private summonAdds(rt: MapRuntime, boss: Monster, a: import('@terrago/shared').BossAbility): void {
+    const def = getMonster(a.monster ?? '');
+    if (!def) return;
+    const level = a.level ?? boss.level - 3;
+    for (let i = 0; i < (a.count ?? 2); i++) {
+      const area = { x: Math.floor(boss.x / TILE) - 3, y: Math.floor(boss.y / TILE) - 3, w: 7, h: 7 };
+      const pos = randomTileIn(rt, area, this.rand);
+      if (!pos) continue;
+      const add = new Monster(`m${++this.seq}`, def, level, monsterStats(def, level), pos.x, pos.y, { monster: def.id, level: [level, level], count: 1, area });
+      add.temp = true;
+      add.state = 'chase';
+      add.targetId = boss.targetId;
+      rt.monsters.set(add.id, add);
+      boss.adds.push(add);
+    }
   }
 
   /** Use a class skill. */
