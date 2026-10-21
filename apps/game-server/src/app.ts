@@ -13,6 +13,7 @@ import { Metrics } from './metrics';
 import { attachSockets, type GameIo } from './net/sockets';
 import { SecurityEvents } from './security/events';
 import { savePositions } from './services/characters';
+import { chatCommand, onLeave as socialLeave } from './net/social';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
@@ -48,7 +49,9 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   const world: World = new World({
     log,
     savePositions: (s) => savePositions(pool, s),
-    onChat: (e) => chatLog.add({ channel: 'local', ...e }),
+    onChat: (e) => chatLog.add(e),
+    onCommand: (p, cmd, rest) => chatCommand({ pool, world, log }, p, cmd, rest),
+    onLeave: (p) => socialLeave({ pool, world, log }, p),
     security,
     loadObjects: (def, owner) => loadMapObjects(pool, def, owner),
     onMapEnter: (p) => void onMapEntered({ pool, world, log }, p).catch((err) => log.error('map_enter_hook_failed', { err })),

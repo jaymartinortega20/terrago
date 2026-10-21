@@ -33,6 +33,7 @@ import { buyFromShop, repairAll, repairCost, sellToShop, shopView } from '../ser
 import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gathering';
 import { cast } from './fishing';
 import { cancelTrade } from './trade';
+import { partyOf } from './social';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
@@ -442,6 +443,7 @@ export const gear = {
 
 export function combatHooks(deps: () => GameplayDeps): CombatHooks {
   return {
+    partyOf,
     onKill: (rewards) => {
       for (const r of rewards) {
         const d = deps();

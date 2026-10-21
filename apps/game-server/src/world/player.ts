@@ -40,6 +40,19 @@ export class Player {
   /** Mount being ridden (item id) and speed multiplier. */
   mount: string | null = null;
   speed = 1;
+  // --- Social ---------------------------------------------------------------
+  party: import('../net/social').Party | null = null;
+  /** People this player muted (chat hidden) or blocked (also no whispers/trades/invites). */
+  blocked = new Map<string, 'mute' | 'block'>();
+  guild: import('../services/social').GuildMembership | null = null;
+  friendIds = new Set<string>();
+  /** Pending invites to this player, keyed "kind:fromId". */
+  invites = new Map<string, { kind: import('@terrago/shared').InviteKind; from: string; until: number; guildId?: number }>();
+  /** Last whisper partner, for /r. */
+  replyTo: string | null = null;
+  nextGlobalAt = 0;
+  /** Recent lines this player said (any channel), attached to reports. */
+  said: { ch: string; text: string; ts: number }[] = [];
   /** Starter quest chain progress (loaded at join). */
   quests: import('@terrago/shared').QuestState[] = [];
   lastVitalsAt = 0;
@@ -103,7 +116,19 @@ export class Player {
       dir: this.dir,
       mount: this.mount,
       weapon: this.rec.equipment?.find((e) => e.slot === 0)?.itemId ?? null,
+      guild: this.guild?.tag ?? null,
     };
+  }
+
+  /** Remember a line for moderation reports. */
+  remember(ch: string, text: string): void {
+    this.said.push({ ch, text, ts: Date.now() });
+    if (this.said.length > 20) this.said.shift();
+  }
+
+  /** Does this player ignore `other` (muted or blocked)? */
+  ignores(other: Player): boolean {
+    return this.blocked.has(other.id);
   }
 
   /** Queue a DB-backed action so a player's actions never interleave. */

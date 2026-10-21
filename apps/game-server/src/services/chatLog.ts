@@ -2,9 +2,10 @@ import type { Pool } from '../db';
 import type { Logger } from '../logger';
 
 interface Entry {
-  channel: 'local';
+  channel: 'local' | 'global' | 'party' | 'guild' | 'whisper';
   mapId: string;
   senderId: string;
+  recipientId?: string;
   body: string;
 }
 
@@ -36,9 +37,9 @@ export class ChatLog {
     this.buffer = [];
     try {
       await this.pool.query(
-        `INSERT INTO messages (channel, map_id, sender_character_id, body)
-         SELECT * FROM unnest($1::text[], $2::text[], $3::uuid[], $4::text[])`,
-        [batch.map((b) => b.channel), batch.map((b) => b.mapId), batch.map((b) => b.senderId), batch.map((b) => b.body)],
+        `INSERT INTO messages (channel, map_id, sender_character_id, body, recipient_character_id)
+         SELECT * FROM unnest($1::text[], $2::text[], $3::uuid[], $4::text[], $5::uuid[])`,
+        [batch.map((b) => b.channel), batch.map((b) => b.mapId), batch.map((b) => b.senderId), batch.map((b) => b.body), batch.map((b) => b.recipientId ?? null)],
       );
     } catch (err) {
       this.log.error('chat_log_flush_failed', { err, count: batch.length });

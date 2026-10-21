@@ -11,6 +11,13 @@ import type {
   MarketListing,
   MarketQuery,
   TradeView,
+  InvitePayload,
+  InviteKind,
+  PartyView,
+  FriendsView,
+  GuildView,
+  GuildRank,
+  PlayerProfile,
   SelfState,
   ShopView,
   WorldObject,
@@ -129,6 +136,10 @@ export interface ServerToClientEvents {
   'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null }) => void;
   'quests': (quests: QuestState[]) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
+  'invite': (invite: InvitePayload) => void;
+  'party': (party: PartyView | null) => void;
+  'friends': (friends: FriendsView) => void;
+  'guild': (guild: GuildView | null) => void;
   'trade:update': (view: TradeView | null) => void;
   /** Duel state: opponent id/name, or null when it ends. */
   'duel': (info: { with: { id: string; name: string } | null; until?: number }) => void;
@@ -187,6 +198,24 @@ export interface ClientToServerEvents {
   'trade:lock': (ack: Ack<null>) => void;
   'trade:confirm': (ack: Ack<{ message: string } | null>) => void;
   'trade:cancel': () => void;
+  'party:invite': (playerId: string, ack: Ack<{ message: string }>) => void;
+  'party:leave': (ack: Ack<null>) => void;
+  'party:kick': (playerId: string, ack: Ack<null>) => void;
+  'invite:respond': (req: { kind: InviteKind; fromId: string; accept: boolean }, ack: Ack<{ message: string } | null>) => void;
+  'friends:get': (ack: Ack<FriendsView>) => void;
+  'friends:add': (nameOrId: string, ack: Ack<{ message: string }>) => void;
+  'friends:remove': (id: string, ack: Ack<null>) => void;
+  'block:set': (req: { targetId: string; kind: 'mute' | 'block' | null }, ack: Ack<{ message: string }>) => void;
+  'report': (req: { targetId: string; reason: string }, ack: Ack<{ message: string }>) => void;
+  'profile:get': (idOrName: string, ack: Ack<PlayerProfile>) => void;
+  'guild:get': (ack: Ack<GuildView | null>) => void;
+  'guild:create': (req: { name: string; tag: string }, ack: Ack<{ message: string }>) => void;
+  'guild:invite': (nameOrId: string, ack: Ack<{ message: string }>) => void;
+  'guild:leave': (ack: Ack<{ message: string }>) => void;
+  'guild:kick': (id: string, ack: Ack<{ message: string }>) => void;
+  'guild:rank': (req: { id: string; rank: GuildRank }, ack: Ack<{ message: string }>) => void;
+  'guild:treasury': (req: { amount: number }, ack: Ack<{ message: string }>) => void;
+  'guild:motd': (text: string, ack: Ack<null>) => void;
   'quest:accept': (req: { npcId: string; questId: string }, ack: Ack<null>) => void;
   'quest:complete': (req: { npcId: string; questId: string }, ack: Ack<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;

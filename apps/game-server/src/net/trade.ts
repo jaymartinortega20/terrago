@@ -62,6 +62,7 @@ export function requestTrade(deps: GameplayDeps, p: Player, targetId: unknown): 
   if (!q || q === p || !q.conn) throw new GameError('That player is not here.');
   if (!near(p, q)) throw new GameError(`${q.name} is too far away to trade.`);
   if (sessions.has(p.id) || sessions.has(q.id)) throw new GameError('Someone is already trading.');
+  if (q.blocked.get(p.id) === 'block') throw new GameError(`${q.name} isn't accepting trades.`);
   invites.set(q.id, { from: p, until: Date.now() + 30_000 });
   q.conn.send('trade:invite', { id: p.id, name: p.name });
   return { message: `Trade request sent to ${q.name}.` };

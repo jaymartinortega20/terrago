@@ -17,6 +17,7 @@ import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from '.
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 import { EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
+import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
 import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
 import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
 
@@ -134,6 +135,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'z') client.toggleMount();
       else if (k === 'j') open('quests');
       else if (k === 'p') open('market');
+      else if (k === 'o') open('friends');
+      else if (k === 'g') open('guild');
       else if (k === 'q') client.useSkill(0);
       else if (k === 'r') client.useSkill(1);
       else if (k === 't') client.useSkill(2);
@@ -162,6 +165,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
         <Hud client={client} compact={touch} />
         <EffectsBar client={client} />
+        <PartyFrame client={client} />
       </div>
       <div className="absolute top-2 left-1/2 -translate-x-1/2">
         <TargetFrame client={client} />
@@ -219,6 +223,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
           {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'friends' && <FriendsPanel client={client} onClose={() => open(null)} />}
+          {panel === 'guild' && <GuildPanel client={client} onClose={() => open(null)} />}
           {panel === 'market' && <MarketPanel client={client} onClose={() => open(null)} />}
           {panel === 'enhance' && <EnhancePanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
@@ -279,6 +285,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <QuestRewardWindow client={client} />
       <SocialPopups client={client} />
       <TradeWindow client={client} />
+      <ProfileWindow client={client} />
 
       {/* Connection state */}
       {status !== 'online' && (

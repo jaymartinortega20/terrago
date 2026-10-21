@@ -62,7 +62,9 @@ export interface MapRuntime {
 export interface WorldDeps {
   log: Logger;
   savePositions: (saves: PositionSave[]) => Promise<void>;
-  onChat?: (entry: { mapId: string; senderId: string; body: string }) => void;
+  onChat?: (entry: { channel: 'local' | 'global' | 'party' | 'guild' | 'whisper'; mapId: string; senderId: string; recipientId?: string; body: string }) => void;
+  /** Slash commands handled outside the world (party, guild, whispers...). Return a reply ('' = handled silently) or undefined if unknown. */
+  onCommand?: (p: Player, cmd: string, rest: string) => string | undefined;
   security?: Pick<SecurityEvents, 'record'>;
   /** Called when a player leaves the world for good (after grace, logout or kick). */
   onLeave?: (player: Player) => void;
@@ -117,7 +119,7 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null }): void {
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
   }
 
@@ -148,6 +150,7 @@ export class World {
       if (!q || q === p) return 'Who? Type /duel followed by a player name.';
       if (q.mapId !== p.mapId || Math.hypot(q.x - p.x, q.y - p.y) > 12 * TILE_SIZE) return `${q.name} needs to be nearby.`;
       if (p.duel || q.duel) return 'Someone is already in a duel.';
+      if (q.blocked.get(p.id) === 'block') return `${q.name} isn't accepting duels.`;
       q.duelInvite = { from: p, until: now + 30_000 };
       this.system(q, `${p.name} challenges you to a duel! Type /accept to fight (nobody dies — first to 1 HP loses).`);
       return `Duel challenge sent to ${q.name}.`;
@@ -726,12 +729,17 @@ export class World {
     const rt = this.runtimeOf(p);
     const r = CHAT.localRadius;
     for (const q of rt.spatial.query(p.x - r, p.y - r, p.x + r, p.y + r)) {
-      if (q.conn && Math.hypot(q.x - p.x, q.y - p.y) <= r) q.conn.send('chat', msg);
+      if (q.conn && Math.hypot(q.x - p.x, q.y - p.y) <= r && !q.ignores(p)) q.conn.send('chat', msg);
     }
+    p.remember('local', msg.text);
     rt.recentChat.push({ msg, x: p.x, y: p.y });
     if (rt.recentChat.length > 30) rt.recentChat.splice(0, rt.recentChat.length - 30);
-    this.deps.onChat?.({ mapId: p.mapId, senderId: p.id, body: msg.text });
+    this.logChat({ channel: 'local', mapId: p.mapId, senderId: p.id, body: msg.text });
     return { ok: true, id: msg.id };
+  }
+
+  logChat(e: Parameters<NonNullable<WorldDeps['onChat']>>[0]): void {
+    this.deps.onChat?.(e);
   }
 
   /** Send a system line to one player's chat. */
@@ -741,6 +749,7 @@ export class World {
 
   private command(p: Player, text: string): { ok: true; id: string } | { ok: false; error: string } {
     const [cmd] = text.slice(1).split(' ');
+    const rest = text.slice(1 + (cmd ?? '').length).trim();
     const reply = (t: string) => {
       this.system(p, t);
       return { ok: true as const, id: 'system' };
@@ -751,15 +760,18 @@ export class World {
       case 'where':
         return reply(`${this.runtimeOf(p).def.name} (${Math.floor(p.x / TILE_SIZE)}, ${Math.floor(p.y / TILE_SIZE)})`);
       case 'help':
-        return reply('Commands: /who, /where, /duel <name>, /accept, /forfeit.');
+        return reply('Chat: /g world · /p party · /gu guild · /w name whisper · /r reply. Also /invite name, /leave, /who, /where, /duel name, /accept, /forfeit.');
       case 'duel':
       case 'accept':
       case 'forfeit': {
         const out = this.duelCommand(p, cmd!.toLowerCase(), text.slice(1 + cmd!.length).trim());
         return out ? reply(out) : { ok: true as const, id: 'system' };
       }
-      default:
-        return { ok: false, error: `Unknown command /${cmd}. Try /help.` };
+      default: {
+        const out = this.deps.onCommand?.(p, (cmd ?? '').toLowerCase(), rest);
+        if (out === undefined) return { ok: false, error: `Unknown command /${cmd}. Try /help.` };
+        return out ? reply(out) : { ok: true as const, id: 'system' };
+      }
     }
   }
 

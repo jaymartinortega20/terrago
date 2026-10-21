@@ -234,6 +234,10 @@ export class GameClient {
     socket.on('effects', ({ effects, cooldowns }) => this.ui.set({ effects, cooldowns }));
     socket.on('quests', (quests) => this.ui.set({ quests }));
     socket.on('trade:invite', (inv) => this.ui.set({ tradeInvite: inv }));
+    socket.on('invite', (inv) => this.ui.set((s) => ({ invites: [...s.invites.filter((x) => !(x.kind === inv.kind && x.fromId === inv.fromId)), inv].slice(-4) })));
+    socket.on('party', (party) => this.ui.set({ party }));
+    socket.on('friends', (friends) => this.ui.set({ friends }));
+    socket.on('guild', (guild) => this.ui.set({ guild }));
     socket.on('trade:update', (trade) => this.ui.set({ trade, ...(trade ? { tradeInvite: null, playerMenu: null } : {}) }));
     socket.on('duel', (d) => {
       this.ui.set({ duel: d.with ? { ...d.with, until: d.until ?? 0 } : null });
@@ -847,6 +851,103 @@ export class GameClient {
   tradeCancel() {
     this.socket?.emit('trade:cancel');
     this.ui.set({ trade: null });
+  }
+
+  // --- Social ---------------------------------------------------------------
+  partyInvite(playerId: string) {
+    this.ui.set({ playerMenu: null });
+    return this.run('party:invite', playerId);
+  }
+
+  partyLeave() {
+    return this.run('party:leave');
+  }
+
+  partyKick(id: string) {
+    return this.run('party:kick', id);
+  }
+
+  respondInvite(inv: import('@terrago/shared').InvitePayload, accept: boolean) {
+    this.ui.set((s) => ({ invites: s.invites.filter((x) => x !== inv) }));
+    return this.run('invite:respond', { kind: inv.kind, fromId: inv.fromId, accept });
+  }
+
+  async loadFriends(): Promise<void> {
+    try {
+      this.ui.set({ friends: await this.request('friends:get') });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  friendAdd(nameOrId: string) {
+    return this.run('friends:add', nameOrId);
+  }
+
+  friendRemove(id: string) {
+    return this.run('friends:remove', id);
+  }
+
+  async setBlock(targetId: string, kind: 'mute' | 'block' | null) {
+    const r = await this.run('block:set', { targetId, kind });
+    const p = this.ui.get().profile;
+    if (r && p?.id === targetId) this.ui.set({ profile: { ...p, blocked: kind, friend: kind === 'block' ? false : p.friend } });
+    return r;
+  }
+
+  report(targetId: string, reason: string) {
+    return this.run('report', { targetId, reason });
+  }
+
+  async openProfile(idOrName: string): Promise<void> {
+    this.ui.set({ playerMenu: null });
+    try {
+      this.ui.set({ profile: await this.request('profile:get', idOrName) });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  async loadGuild(): Promise<void> {
+    try {
+      this.ui.set({ guild: await this.request('guild:get') });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  guildCreate(name: string, tag: string) {
+    return this.run('guild:create', { name, tag });
+  }
+
+  guildInvite(nameOrId: string) {
+    return this.run('guild:invite', nameOrId);
+  }
+
+  guildLeave() {
+    return this.run('guild:leave');
+  }
+
+  guildKick(id: string) {
+    return this.run('guild:kick', id);
+  }
+
+  guildRank(id: string, rank: import('@terrago/shared').GuildRank) {
+    return this.run('guild:rank', { id, rank });
+  }
+
+  guildTreasury(amount: number) {
+    return this.run('guild:treasury', { amount });
+  }
+
+  guildMotd(text: string) {
+    return this.run('guild:motd', text);
+  }
+
+  /** Open the chat box with text ready (e.g. a whisper). */
+  draftChat(text: string): void {
+    this.ui.set({ chatDraft: text, playerMenu: null, profile: null });
+    window.dispatchEvent(new Event('terrago:focus-chat'));
   }
 
   duelRequest(name: string) {

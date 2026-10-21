@@ -7,6 +7,7 @@ import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
+import { InvitePopups } from './SocialUi';
 import { Window } from './Window';
 
 const CATEGORIES = ['', 'material', 'crop', 'seed', 'fish', 'consumable', 'weapon', 'armor', 'tool', 'mount'];
@@ -361,6 +362,7 @@ export function SocialPopups({ client }: { client: GameClient }) {
   }, [invite, client]);
   return (
     <div className="pointer-events-auto absolute top-28 left-1/2 flex -translate-x-1/2 flex-col gap-2">
+      <InvitePopups client={client} />
       {invite && (
         <div className="px-panel p-2 text-sm" data-testid="trade-invite">
           <p>
@@ -383,8 +385,14 @@ export function SocialPopups({ client }: { client: GameClient }) {
             <button className="px-btn small" onClick={() => void client.tradeRequest(menu.id)} data-testid="player-trade">
               Trade
             </button>
+            <button className="px-btn small" onClick={() => void client.partyInvite(menu.id)} data-testid="player-party">
+              Party
+            </button>
             <button className="px-btn small" onClick={() => void client.duelRequest(menu.name)} data-testid="player-duel">
               Duel
+            </button>
+            <button className="px-btn small" onClick={() => void client.openProfile(menu.id)} data-testid="player-profile">
+              Profile
             </button>
             <button className="px-btn ghost small" onClick={() => client.ui.set({ playerMenu: null })}>
               ✕

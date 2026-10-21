@@ -100,6 +100,8 @@ export interface CombatHooks {
   respawn?: (p: Player) => void;
   /** A duel was won (loser is left at 1 HP). */
   onDuelEnd?: (winner: Player, loser: Player) => void;
+  /** Party members (including the player) — they share kill XP and quest credit. */
+  partyOf?: (p: Player) => Player[];
   /** Riding players get off when they fight. */
   dismount?: (p: Player) => void;
 }
@@ -483,14 +485,31 @@ export class Combat {
       .map(([id, d]) => ({ p: [...rt.players].find((x) => x.id === id), d }))
       .filter((c): c is { p: Player; d: number } => !!c.p && !c.p.dead && dist(c.p.x, c.p.y, m.x, m.y) < 25 * TILE);
     if (!contributors.length) return;
-    const group = contributors.length > 1 ? 1.15 : 1;
     const top = contributors.reduce((a, b) => (b.d > a.d ? b : a));
-    const rewards: KillReward[] = contributors.map(({ p, d }) => {
-      // Monsters far below your level are worth little ("grey" monsters).
-      const below = p.rec.level - m.level;
-      const lf = below > 5 ? Math.max(0.1, 1 - 0.15 * (below - 5)) : 1;
-      return { player: p, xp: Math.max(1, Math.round(m.stats.xp * (d / total) * group * lf)), gold: 0, items: [], monster: m };
-    });
+    // Group contributors into units: a party (with its nearby members) or a solo player.
+    // Each unit earns XP for its share of the damage; a party splits it evenly with a bonus.
+    const units = new Map<string, { members: Set<Player>; d: number }>();
+    for (const c of contributors) {
+      const party = this.hooks.partyOf?.(c.p) ?? [c.p];
+      const key = party.length > 1 ? `party:${[...party].map((x) => x.id).sort()[0]}` : c.p.id;
+      const u = units.get(key) ?? { members: new Set<Player>(), d: 0 };
+      u.d += c.d;
+      for (const x of party) if (x === c.p || (rt.players.has(x) && !x.dead && dist(x.x, x.y, m.x, m.y) < 25 * TILE)) u.members.add(x);
+      units.set(key, u);
+    }
+    const strangers = units.size > 1 ? 1.15 : 1;
+    const rewards: KillReward[] = [];
+    for (const u of units.values()) {
+      const n = u.members.size;
+      const bonus = n > 1 ? 1 + 0.12 * (n - 1) : 1;
+      const each = (m.stats.xp * (u.d / total) * bonus * strangers) / n;
+      for (const p of u.members) {
+        // Monsters far below your level are worth little ("grey" monsters).
+        const below = p.rec.level - m.level;
+        const lf = below > 5 ? Math.max(0.1, 1 - 0.15 * (below - 5)) : 1;
+        rewards.push({ player: p, xp: Math.max(1, Math.round(each * lf)), gold: 0, items: [], monster: m });
+      }
+    }
     const loot = rewards.find((r) => r.player === top.p)!;
     const [g0, g1] = m.def.gold;
     loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08));

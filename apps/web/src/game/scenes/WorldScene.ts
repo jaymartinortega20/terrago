@@ -179,7 +179,10 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('look', (id) => {
         const r = this.client.remotes.get(id);
         const av = this.remotes.get(id);
-        if (r && av) this.setAvatarMount(av, r.info.mount);
+        if (r && av) {
+          this.setAvatarMount(av, r.info.mount);
+          av.label.setText(remoteLabel(r.info));
+        }
       }),
     );
     if (this.client.map) this.buildMap();
@@ -685,7 +688,7 @@ export class WorldScene extends Phaser.Scene {
 
   private addRemote(r: RemotePlayer): void {
     if (!this.client.map || this.remotes.has(r.info.id)) return;
-    const av = this.makeAvatar(r.x, r.y, r.info.appearance, `${r.info.name} · Lv ${r.info.level}`, '#ffffff');
+    const av = this.makeAvatar(r.x, r.y, r.info.appearance, remoteLabel(r.info), '#ffffff');
     this.remotes.set(r.info.id, av);
     this.setAvatarMount(av, r.info.mount);
   }
@@ -869,4 +872,8 @@ export class WorldScene extends Phaser.Scene {
       client.ui.set({ tile });
     }
   }
+}
+
+function remoteLabel(info: { name: string; level: number; guild?: string | null }): string {
+  return `${info.guild ? `[${info.guild}] ` : ''}${info.name} · Lv ${info.level}`;
 }

@@ -140,6 +140,8 @@ export interface PublicPlayer {
   dir: Direction;
   mount?: string | null;
   weapon?: string | null;
+  /** Guild tag shown under the name. */
+  guild?: string | null;
 }
 
 export type ItemCategory =
@@ -216,7 +218,7 @@ export interface NpcPublic {
 
 export type NpcAccessory = 'apron' | 'hat' | 'crown' | 'hood' | 'helmet' | 'bandana' | 'cape';
 
-export type ChatChannel = 'local' | 'system';
+export type ChatChannel = 'local' | 'system' | 'global' | 'party' | 'guild' | 'whisper';
 
 export interface ChatMessage {
   id: string;
@@ -225,6 +227,8 @@ export interface ChatMessage {
   fromName: string;
   text: string;
   ts: number;
+  /** Whispers: who it was sent to (shown as "To X"). */
+  toName?: string;
 }
 
 export interface DialogueResult {
@@ -373,4 +377,86 @@ export interface TradeView {
   partner: { id: string; name: string };
   mine: TradeSide;
   theirs: TradeSide;
+}
+
+// ---------------------------------------------------------------------------
+// Social: party, friends, guilds, profiles
+// ---------------------------------------------------------------------------
+
+export const PARTY_MAX = 5;
+
+export interface PartyMember {
+  id: string;
+  name: string;
+  level: number;
+  classId: ClassId;
+  hp: number;
+  maxHp: number;
+  mapId: string;
+  online: boolean;
+}
+
+export interface PartyView {
+  leaderId: string;
+  members: PartyMember[];
+}
+
+export interface FriendEntry {
+  id: string;
+  name: string;
+  level: number;
+  classId: ClassId;
+  online: boolean;
+  mapId: string | null;
+}
+
+export interface FriendsView {
+  friends: FriendEntry[];
+  /** Players you muted or blocked. */
+  blocked: { id: string; name: string; kind: 'mute' | 'block' }[];
+}
+
+export type GuildRank = 'leader' | 'officer' | 'member';
+
+export interface GuildMemberView {
+  id: string;
+  name: string;
+  level: number;
+  classId: ClassId;
+  rank: GuildRank;
+  online: boolean;
+}
+
+export interface GuildView {
+  id: number;
+  name: string;
+  tag: string;
+  motd: string;
+  treasury: number;
+  myRank: GuildRank;
+  members: GuildMemberView[];
+}
+
+export interface PlayerProfile {
+  id: string;
+  name: string;
+  level: number;
+  classId: ClassId;
+  guild: string | null;
+  online: boolean;
+  mapId: string | null;
+  createdAt: number;
+  equipment: string[];
+  friend: boolean;
+  blocked: 'mute' | 'block' | null;
+}
+
+export type InviteKind = 'party' | 'friend' | 'guild';
+
+export interface InvitePayload {
+  kind: InviteKind;
+  fromId: string;
+  fromName: string;
+  /** Guild name for guild invites. */
+  detail?: string;
 }

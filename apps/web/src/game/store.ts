@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -84,6 +84,14 @@ export interface UiState {
   trade: import('@terrago/shared').TradeView | null;
   tradeInvite: { id: string; name: string } | null;
   playerMenu: { id: string; name: string } | null;
+  /** Social state pushed by the server. */
+  party: import('@terrago/shared').PartyView | null;
+  friends: import('@terrago/shared').FriendsView | null;
+  guild: import('@terrago/shared').GuildView | null;
+  invites: import('@terrago/shared').InvitePayload[];
+  profile: import('@terrago/shared').PlayerProfile | null;
+  /** Text to put in the chat box (e.g. "/w Name "). */
+  chatDraft: string | null;
   /** Fishing in progress. */
   fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
 }
@@ -123,6 +131,12 @@ export const initialUi: UiState = {
   trade: null,
   tradeInvite: null,
   playerMenu: null,
+  party: null,
+  friends: null,
+  guild: null,
+  invites: [],
+  profile: null,
+  chatDraft: null,
 };
 
 let noticeId = 0;
