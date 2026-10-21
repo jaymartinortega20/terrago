@@ -18,6 +18,9 @@ import type {
   GuildView,
   GuildRank,
   PlayerProfile,
+  JournalView,
+  LeaderboardId,
+  LeaderboardRow,
   SelfState,
   ShopView,
   WorldObject,
@@ -139,6 +142,10 @@ export interface ServerToClientEvents {
   'quests': (quests: QuestState[]) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
   'invite': (invite: InvitePayload) => void;
+  /** You unlocked an achievement. */
+  'achievement': (a: { id: string; name: string; icon: string; gold: number }) => void;
+  /** Server-wide announcement (admins). */
+  'announce': (text: string) => void;
   'party': (party: PartyView | null) => void;
   'friends': (friends: FriendsView) => void;
   'guild': (guild: GuildView | null) => void;
@@ -218,6 +225,10 @@ export interface ClientToServerEvents {
   'guild:rank': (req: { id: string; rank: GuildRank }, ack: Ack<{ message: string }>) => void;
   'guild:treasury': (req: { amount: number }, ack: Ack<{ message: string }>) => void;
   'guild:motd': (text: string, ack: Ack<null>) => void;
+  'journal:get': (ack: Ack<JournalView>) => void;
+  'daily:login': (ack: Ack<{ message: string }>) => void;
+  'daily:task': (taskId: string, ack: Ack<{ message: string }>) => void;
+  'leaderboard:get': (id: LeaderboardId, ack: Ack<{ rows: LeaderboardRow[]; me: LeaderboardRow | null }>) => void;
   'quest:accept': (req: { npcId: string; questId: string }, ack: Ack<null>) => void;
   'quest:complete': (req: { npcId: string; questId: string }, ack: Ack<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;

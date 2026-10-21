@@ -18,6 +18,10 @@ const schema = z.object({
   SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(30),
   TRUST_PROXY: bool(false),
   METRICS_TOKEN: z.string().optional(),
+  /** Comma-separated account emails that get the admin panel. */
+  ADMIN_EMAILS: z.string().default(''),
+  /** Pin the weather (e.g. "clear" in tests). */
+  WEATHER_OVERRIDE: z.enum(['clear', 'cloudy', 'rain', 'storm', 'fog', 'snow']).optional(),
   MIGRATE_ON_START: bool(true),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   /** Disables auth rate limits; only honoured outside production (load tests). */
@@ -36,6 +40,8 @@ export interface Config {
   sessionTtlMs: number;
   trustProxy: boolean;
   metricsToken: string | undefined;
+  adminEmails: string[];
+  weatherOverride: 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow' | undefined;
   migrateOnStart: boolean;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
   rateLimitsEnabled: boolean;
@@ -64,6 +70,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     sessionTtlMs: e.SESSION_TTL_DAYS * 24 * 60 * 60 * 1000,
     trustProxy: e.TRUST_PROXY,
     metricsToken: e.METRICS_TOKEN || undefined,
+    weatherOverride: e.WEATHER_OVERRIDE,
+    adminEmails: e.ADMIN_EMAILS.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
     migrateOnStart: e.MIGRATE_ON_START,
     logLevel: e.LOG_LEVEL,
     rateLimitsEnabled: production || !e.DISABLE_RATE_LIMITS,

@@ -18,6 +18,7 @@ import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/S
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
 import { EnvBadge, WeatherLayer } from './ui/Atmosphere';
+import { JournalPanel, ProgressToasts } from './ui/JournalUi';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
 import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
 import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
@@ -138,6 +139,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'j') open('quests');
       else if (k === 'p') open('market');
       else if (k === 'o') open('friends');
+      else if (k === 'l') open('journal');
       else if (k === 'g') open('guild');
       else if (k === 'q') client.useSkill(0);
       else if (k === 'r') client.useSkill(1);
@@ -227,6 +229,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
           {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'journal' && <JournalPanel client={client} onClose={() => open(null)} />}
           {panel === 'friends' && <FriendsPanel client={client} onClose={() => open(null)} />}
           {panel === 'guild' && <GuildPanel client={client} onClose={() => open(null)} />}
           {panel === 'market' && <MarketPanel client={client} onClose={() => open(null)} />}
@@ -288,6 +291,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <QuestOfferWindow client={client} />
       <QuestRewardWindow client={client} />
       <SocialPopups client={client} />
+      <ProgressToasts client={client} openJournal={() => open('journal')} />
       <TradeWindow client={client} />
       <ProfileWindow client={client} />
 

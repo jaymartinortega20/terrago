@@ -51,6 +51,11 @@ export default function CharactersPage() {
           TERRAGO
         </Link>
         <span className="ml-auto hidden text-sm text-parchment/70 sm:block">{user?.email}</span>
+        {user?.roles?.includes('admin') && (
+          <Link href="/admin" className="px-btn small" data-testid="admin-link">
+            Admin
+          </Link>
+        )}
         <button className="px-btn ghost small" onClick={logout}>
           Log out
         </button>

@@ -36,6 +36,7 @@ import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gather
 import { cast } from './fishing';
 import { cancelTrade } from './trade';
 import { partyOf } from './social';
+import { progressEvent, track } from './journal';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
@@ -104,6 +105,9 @@ export function pushInventory(world: World, p: Player, inv: Inventory | null): v
   p.conn?.send('inventory:update', full);
 }
 
+/** Late-bound hooks (set up in app.ts) for things that need the full deps. */
+export const hooks: { level?: (p: Player) => void } = {};
+
 export function applyDelta(world: World, p: Player, delta: ProgressDelta): void {
   const patch: Partial<SelfState> = {};
   if (delta.energy) {
@@ -134,6 +138,7 @@ export function applyDelta(world: World, p: Player, delta: ProgressDelta): void 
     if (leveled) {
       p.conn?.send('notice', { kind: 'success', text: `Level up! You are now level ${p.rec.level}.` });
       world.refreshProfile(p);
+      hooks.level?.(p);
       p.rec.hp = p.profile.maxHp;
       p.rec.mp = p.profile.maxMp;
       patch.hp = p.rec.hp;
@@ -470,6 +475,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
         void r.player
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
+            if (r.monster.def.boss) progressEvent(d, r.player, 'boss', r.monster.def.id);
             if (r.monster.def.boss && (r.gold || r.items.length)) {
               // Boss loot once per day per character (XP always).
               const day = new Date().toISOString().slice(0, 10);
@@ -530,6 +536,7 @@ const questChains = new WeakMap<Player, Promise<unknown>>();
 
 /** Feed a game event to the player's quests (queued, so events never race). */
 export function questEvent(deps: GameplayDeps, p: Player, type: QuestStepType, target: string | null, n = 1): void {
+  progressEvent(deps, p, type, target, n);
   const run = async () => {
     const out = await questEventTx(deps.pool, p.id, p.quests, type, target, n);
     if (!out) return;
@@ -614,6 +621,7 @@ export const questServices = {
     const res = await completeQuest(deps.pool, p.id, def.id);
     p.quests = p.quests.map((q) => (q.id === def.id ? { ...q, done: true } : q));
     p.conn?.send('quests', p.quests);
+    track(deps, p, 'quests');
     pushInventory(deps.world, p, res.inventory);
     applyDelta(deps.world, p, res.delta);
     const rt = deps.world.runtimeOf(p);
@@ -643,6 +651,7 @@ export const market = {
       const inv = deps.world.inventoryCache.get(seller.id);
       if (inv) pushInventory(deps.world, seller, { ...inv, gold: res.sellerGold });
       seller.conn?.send('notice', { kind: 'success', text: `Sold ${res.qty}× ${res.itemName} on the market: +${res.net.toLocaleString()} Gold (after tax).` });
+      track(deps, seller, 'market_sales');
     }
     return { message: res.message };
   },

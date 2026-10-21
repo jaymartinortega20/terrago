@@ -44,8 +44,8 @@ describe('combat (v0.5)', () => {
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     assert.equal(a.enter.inventory.equipment?.find((e) => e.slot === 0)?.itemId, 'training_sword', 'starter weapon is worn');
     const monsters: PublicMonster[] = [];
-    a.socket.on('entity:add', (list) => list.forEach((e) => e.kind === 'monster' && monsters.push(e as PublicMonster)));
-    await waitFor(() => monsters.some((m) => m.monsterId === 'green_slime'), 3000);
+    await waitFor(() => a.seen.some((m) => m.monsterId === 'green_slime'), 5000);
+    monsters.push(...a.seen.filter((e) => e.kind === 'monster'));
     const slime = monsters.find((m) => m.monsterId === 'green_slime')!;
     const events: CombatEvent[] = [];
     a.socket.on('combat', (ev) => events.push(...ev));

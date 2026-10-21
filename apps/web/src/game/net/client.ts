@@ -238,6 +238,14 @@ export class GameClient {
     socket.on('trade:invite', (inv) => this.ui.set({ tradeInvite: inv }));
     socket.on('invite', (inv) => this.ui.set((s) => ({ invites: [...s.invites.filter((x) => !(x.kind === inv.kind && x.fromId === inv.fromId)), inv].slice(-4) })));
     socket.on('party', (party) => this.ui.set({ party }));
+    socket.on('achievement', (a) => {
+      this.ui.set({ achievementToast: a });
+      setTimeout(() => this.ui.get().achievementToast === a && this.ui.set({ achievementToast: null }), 5000);
+    });
+    socket.on('announce', (text) => {
+      this.ui.set({ announcement: text });
+      setTimeout(() => this.ui.get().announcement === text && this.ui.set({ announcement: null }), 12000);
+    });
     socket.on('friends', (friends) => this.ui.set({ friends }));
     socket.on('guild', (guild) => this.ui.set({ guild }));
     socket.on('trade:update', (trade) => this.ui.set({ trade, ...(trade ? { tradeInvite: null, playerMenu: null } : {}) }));
@@ -296,7 +304,36 @@ export class GameClient {
 
   // ---------------------------------------------------------------------------
 
+  private journalChecked = false;
+
+  async loadJournal(): Promise<void> {
+    try {
+      const journal = await this.request<import('@terrago/shared').JournalView>('journal:get');
+      this.ui.set({ journal, dailyReady: !journal.login.claimedToday });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  async claimLogin(): Promise<void> {
+    await this.run('daily:login');
+    await this.loadJournal();
+  }
+
+  async claimTask(id: string): Promise<void> {
+    await this.run('daily:task', id);
+    await this.loadJournal();
+  }
+
+  leaderboard(id: import('@terrago/shared').LeaderboardId) {
+    return this.request<{ rows: import('@terrago/shared').LeaderboardRow[]; me: import('@terrago/shared').LeaderboardRow | null }>('leaderboard:get', id);
+  }
+
   private onEnter(p: EnterWorldPayload): void {
+    if (!this.journalChecked) {
+      this.journalChecked = true;
+      setTimeout(() => void this.loadJournal(), 1500);
+    }
     const map = getMap(p.map.id);
     if (!map) {
       this.ui.set({ status: 'error', statusMessage: `Unknown map ${p.map.id}. Please refresh.` });

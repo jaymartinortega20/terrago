@@ -746,6 +746,8 @@ export class World {
       this.deps.security?.record('chat_rate_limited', { userId: p.userId, characterId: p.id, ip: p.ip }, 60_000);
       return { ok: false, error: "You're sending messages too fast." };
     }
+    const muted = p.mutedUntil > this.now() && !/^\/(who|where|help|accept|forfeit)\b/i.test(text);
+    if (muted) return { ok: false, error: `You're muted until ${new Date(p.mutedUntil).toUTCString().slice(17, 22)} UTC.` };
     if (text.startsWith('/')) return this.command(p, text);
 
     const msg: ChatMessage = {
@@ -770,6 +772,14 @@ export class World {
 
   logChat(e: Parameters<NonNullable<WorldDeps['onChat']>>[0]): void {
     this.deps.onChat?.(e);
+  }
+
+  /** Send a line from the server to everyone online (admin announcements). */
+  announce(text: string): void {
+    for (const q of this.players.values()) {
+      q.conn?.send('announce', text);
+      q.conn?.send('chat', { id: randomUUID(), channel: 'system', fromId: null, fromName: 'System', text: `📢 ${text}`, ts: this.now() });
+    }
   }
 
   /** Send a system line to one player's chat. */

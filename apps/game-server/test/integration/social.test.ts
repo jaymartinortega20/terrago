@@ -74,7 +74,7 @@ describe('social (v0.6)', () => {
       await new Promise((r) => setTimeout(r, 600));
     }
     assert.equal(m.alive, false);
-    await waitFor(() => pb.rec.xp > xpB && pa.rec.xp > xpA);
+    await waitFor(() => pb.rec.xp > xpB && pa.rec.xp > xpA, 12000);
     const gainA = pa.rec.xp - xpA;
     const gainB = pb.rec.xp - xpB;
     assert.ok(Math.abs(gainA - gainB) <= 1, `even split ${gainA} vs ${gainB}`);

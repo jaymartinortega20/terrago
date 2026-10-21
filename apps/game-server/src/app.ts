@@ -2,7 +2,7 @@ import { createServer, type Server as HttpServer } from 'node:http';
 import { performance } from 'node:perf_hooks';
 import { runMigrations } from '@terrago/database';
 import { BALANCE, validateGameData } from '@terrago/game-data';
-import { SIM } from '@terrago/shared';
+import { SIM, setWeatherOverride } from '@terrago/shared';
 import { TicketStore } from './auth/tickets';
 import type { Config } from './config';
 import { createPool, type Pool } from './db';
@@ -14,10 +14,11 @@ import { attachSockets, type GameIo } from './net/sockets';
 import { SecurityEvents } from './security/events';
 import { savePositions } from './services/characters';
 import { chatCommand, onLeave as socialLeave } from './net/social';
+import { track } from './net/journal';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
-import { combatHooks, loadMapObjects, onMapEntered, rainTick, type GameplayDeps } from './net/gameplay';
+import { combatHooks, hooks, loadMapObjects, onMapEntered, rainTick, type GameplayDeps } from './net/gameplay';
 
 export interface GameServer {
   config: Config;
@@ -36,6 +37,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   const dataErrors = validateGameData();
   if (dataErrors.length) throw new Error(`Game data is invalid:\n${dataErrors.join('\n')}`);
 
+  setWeatherOverride(config.weatherOverride ?? null);
   const pool = createPool(config.databaseUrl, config.dbPoolMax);
   pool.on('error', (err) => log.error('db_pool_error', { err }));
   if (config.migrateOnStart) {
@@ -61,6 +63,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     onMapEnter: (p) => void onMapEntered({ pool, world, log }, p).catch((err) => log.error('map_enter_hook_failed', { err })),
     combat: combatHooks((): GameplayDeps => ({ pool, world, log })),
   });
+  hooks.level = (p) => track({ pool, world, log }, p, 'level', p.rec.level, 'max');
   const metrics = new Metrics(world, pool);
   const tickets = new TicketStore();
   const router = buildRouter({ config, pool, log, security, world, metrics, tickets });

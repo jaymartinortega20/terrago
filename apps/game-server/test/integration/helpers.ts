@@ -23,6 +23,7 @@ export async function startTestServer(extraEnv: Record<string, string> = {}): Pr
     WEB_ORIGINS: ORIGIN,
     DISABLE_RATE_LIMITS: 'true',
     LOG_LEVEL: 'error',
+    WEATHER_OVERRIDE: 'clear',
     ...extraEnv,
   });
   return startGameServer(config, createLogger('error'));
@@ -117,13 +118,16 @@ export async function enterWorld(
   base: string,
   cookie: string,
   characterId: string,
-): Promise<{ socket: TestSocket; enter: EnterWorldPayload; firstQuests: Promise<QuestState[]> }> {
+): Promise<{ socket: TestSocket; enter: EnterWorldPayload; firstQuests: Promise<QuestState[]>; seen: any[] }> {
   const socket = connectSocket(base, cookie, characterId);
+  // Entities can arrive in the same packet as world:enter; record them from the start.
+  const seen: any[] = [];
+  (socket as any).on('entity:add', (list: any[]) => seen.push(...list));
   // The quest list can arrive right after world:enter; listen from the start so tests never miss it.
   const firstQuests = once<QuestState[]>(socket, 'quests', 8000);
   firstQuests.catch(() => {});
   const enter = await once<EnterWorldPayload>(socket, 'world:enter');
-  return { socket, enter, firstQuests };
+  return { socket, enter, firstQuests, seen };
 }
 
 /** Send N movement commands in real time (one per 50ms step), like a real client. */

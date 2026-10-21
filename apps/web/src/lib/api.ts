@@ -19,7 +19,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, {
@@ -38,6 +38,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export interface User {
   id: string;
   email: string;
+  roles?: string[];
 }
 
 export const api = {
@@ -53,4 +54,10 @@ export const api = {
   /** One-time pass (60 s) that lets the game connection prove who you are. */
   gameTicket: (characterId: string) =>
     request<{ ticket: string; expiresInMs: number }>('/api/game/ticket', { method: 'POST', body: JSON.stringify({ characterId }) }),
+};
+
+/** Admin panel calls (the server checks the admin role on every one). */
+export const adminApi = {
+  get: <T,>(path: string) => request<T>(`/api/admin/${path}`),
+  post: <T,>(path: string, body: object) => request<T>(`/api/admin/${path}`, { method: 'POST', body: JSON.stringify(body) }),
 };

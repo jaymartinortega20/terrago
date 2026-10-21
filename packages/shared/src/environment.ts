@@ -74,9 +74,16 @@ function hash(a: number, b: number): number {
   return (h >>> 0) / 4294967296;
 }
 
+let weatherOverride: Weather | null = null;
+/** Pin the weather everywhere (tests, or a server event). */
+export function setWeatherOverride(w: Weather | null): void {
+  weatherOverride = w;
+}
+
 export function weatherAt(theme: string | undefined, now: number): Weather {
   const region = weatherRegion(theme);
   if (!region) return 'clear';
+  if (weatherOverride) return weatherOverride;
   const block = Math.floor(now / WEATHER_BLOCK_MS);
   const table = TABLES[region][seasonAt(now)];
   const total = Object.values(table).reduce((n, w) => n + (w ?? 0), 0);

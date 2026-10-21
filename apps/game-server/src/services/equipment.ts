@@ -169,6 +169,7 @@ export async function grantKillRewards(
   pool: Pool,
   characterId: string,
   r: { xp: number; gold: number; items: { itemId: string; quantity: number }[]; monster: string },
+  reason: 'loot' | 'daily_reward' | 'achievement' | 'admin' = 'loot',
 ): Promise<{ delta: ProgressDelta; inventory: Inv | null; overflow: { itemId: string; quantity: number }[] }> {
   return withTransaction(pool, async (tx) => {
     await lockCharacter(tx, characterId);
@@ -189,12 +190,12 @@ export async function grantKillRewards(
         }
         slots = res.slots;
         res.changed.forEach((i) => changed.add(i));
-        if (res.added > 0) await logItemMovement(tx, { itemId: def.id, quantity: res.added, to: characterId, reason: 'loot', ref: { type: 'monster', id: r.monster } });
+        if (res.added > 0) await logItemMovement(tx, { itemId: def.id, quantity: res.added, to: characterId, reason, ref: { type: reason === 'loot' ? 'monster' : reason, id: r.monster } });
         if (res.added < it.quantity) overflow.push({ itemId: def.id, quantity: it.quantity - res.added });
       }
       await writeSlots(tx, characterId, slots, [...changed]);
       let gold = (await lockCharacter(tx, characterId)).gold;
-      if (r.gold > 0) gold = (await changeGold(tx, characterId, r.gold, 'loot', { type: 'monster', id: r.monster })).after;
+      if (r.gold > 0) gold = (await changeGold(tx, characterId, r.gold, reason, { type: reason === 'loot' ? 'monster' : reason, id: r.monster })).after;
       inventory = toState(capacity, gold, slots);
     }
     return { delta, inventory, overflow };

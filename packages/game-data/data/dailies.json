@@ -1,0 +1,79 @@
+[
+ {
+  "id": "d_kill10",
+  "text": "Defeat 10 monsters",
+  "event": "kill",
+  "count": 10,
+  "minLevel": 1
+ },
+ {
+  "id": "d_kill30",
+  "text": "Defeat 30 monsters",
+  "event": "kill",
+  "count": 30,
+  "minLevel": 12
+ },
+ {
+  "id": "d_harvest5",
+  "text": "Harvest 5 crops",
+  "event": "harvest",
+  "count": 5,
+  "minLevel": 1
+ },
+ {
+  "id": "d_harvest20",
+  "text": "Harvest 20 crops",
+  "event": "harvest",
+  "count": 20,
+  "minLevel": 8
+ },
+ {
+  "id": "d_fish3",
+  "text": "Catch 3 fish",
+  "event": "fish",
+  "count": 3,
+  "minLevel": 1
+ },
+ {
+  "id": "d_fish10",
+  "text": "Catch 10 fish",
+  "event": "fish",
+  "count": 10,
+  "minLevel": 10
+ },
+ {
+  "id": "d_gather15",
+  "text": "Gather 15 resources (ore, wood, herbs)",
+  "event": "gather",
+  "count": 15,
+  "minLevel": 1
+ },
+ {
+  "id": "d_gather40",
+  "text": "Gather 40 resources",
+  "event": "gather",
+  "count": 40,
+  "minLevel": 15
+ },
+ {
+  "id": "d_craft3",
+  "text": "Craft 3 items",
+  "event": "craft",
+  "count": 3,
+  "minLevel": 3
+ },
+ {
+  "id": "d_craft10",
+  "text": "Craft 10 items",
+  "event": "craft",
+  "count": 10,
+  "minLevel": 15
+ },
+ {
+  "id": "d_boss",
+  "text": "Defeat a boss",
+  "event": "boss",
+  "count": 1,
+  "minLevel": 14
+ }
+]

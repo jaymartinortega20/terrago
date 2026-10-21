@@ -25,6 +25,7 @@ import type { Player } from '../world/player';
 import type { World } from '../world/world';
 import { act, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
 import * as social from './social';
+import * as journal from './journal';
 import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
 import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
@@ -186,6 +187,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
           if (live) player.conn?.send('quests', player.quests);
           else await startQuests({ pool, world, log }, player);
           await social.onJoin({ pool, world, log }, player, !live);
+          if (!live) journal.track({ pool, world, log }, player, 'level', player.rec.level, 'max');
           if (player.mount) player.conn?.send('self:update', { mount: player.mount, speed: player.speed });
           if (player.duel) player.conn?.send('duel', { with: { id: player.duel.with.id, name: player.duel.with.name }, until: player.duel.until });
         }
@@ -318,6 +320,10 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('trade:lock', (ack) => respond(ack, () => lockTrade(p)));
     socket.on('trade:confirm', (ack) => serial(ack, () => confirmTrade(g, p)));
     socket.on('trade:cancel', () => cancelTrade(p));
+    socket.on('journal:get', (ack) => respond(ack, () => journal.journal(g, p)));
+    socket.on('daily:login', (ack) => serial(ack, () => journal.claimLogin(g, p)));
+    socket.on('daily:task', (id, ack) => serial(ack, () => journal.claimTask(g, p, id)));
+    socket.on('leaderboard:get', (id, ack) => respond(ack, () => journal.leaderboard(g, p, id)));
     socket.on('party:invite', (id, ack) => respond(ack, () => social.partyInvite(g, p, id)));
     socket.on('party:leave', (ack) => respond(ack, () => social.partyLeave(p)));
     socket.on('party:kick', (id, ack) => respond(ack, () => social.partyKick(g, p, id)));

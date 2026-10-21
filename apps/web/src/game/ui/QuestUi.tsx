@@ -83,7 +83,7 @@ export function QuestsPanel({ client, onClose }: { client: GameClient; onClose: 
           );
         })}
       </ul>
-      <p className="mt-2 text-[11px] text-wood-dark/80">More quests — dailies, professions, guild and boss quests — arrive in a later update.</p>
+      <p className="mt-2 text-[11px] text-wood-dark/80">Daily tasks, achievements and leaderboards are in your Journal (L).</p>
     </Window>
   );
 }

@@ -3,6 +3,8 @@ import {
   buildCollisionGrid,
   validateMapDef,
   type CropDef,
+  type AchievementDef,
+  type DailyTaskDef,
   type FishDef,
   type MonsterDef,
   type QuestDef,
@@ -42,6 +44,8 @@ import whisperwoodJson from '../data/maps/whisperwood.json';
 import frostpineJson from '../data/maps/frostpine_peaks.json';
 import mirefenJson from '../data/maps/mirefen_swamp.json';
 import dungeonsJson from '../data/dungeons.json';
+import achievementsJson from '../data/achievements.json';
+import dailiesJson from '../data/dailies.json';
 import { DUNGEON_PREFIX, MINE_FLOORS, generateDungeon, generateMineFloor, mineFloorNumber, type DungeonDef } from './mapgen';
 
 export * from './mapgen';
@@ -134,6 +138,9 @@ export const RECIPES: readonly RecipeDef[] = recipesJson as RecipeDef[];
 export const MONSTERS: readonly MonsterDef[] = monstersJson as MonsterDef[];
 export const SKILLS: readonly SkillDef[] = skillsJson as SkillDef[];
 export const QUESTS: readonly QuestDef[] = questsJson as QuestDef[];
+
+export const ACHIEVEMENTS: readonly AchievementDef[] = achievementsJson as AchievementDef[];
+export const DAILY_TASKS: readonly DailyTaskDef[] = dailiesJson as DailyTaskDef[];
 
 export const DUNGEONS: readonly DungeonDef[] = dungeonsJson as DungeonDef[];
 

@@ -460,3 +460,64 @@ export interface InvitePayload {
   /** Guild name for guild invites. */
   detail?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Progress: achievements, dailies, leaderboards
+// ---------------------------------------------------------------------------
+
+export interface AchievementDef {
+  id: string;
+  name: string;
+  description: string;
+  /** Counter it watches (kills, harvests, level...). */
+  stat: string;
+  goal: number;
+  reward: { gold: number };
+  icon: string;
+}
+
+export interface DailyTaskDef {
+  id: string;
+  text: string;
+  /** Event that advances it: kill, harvest, fish, gather, craft, boss. */
+  event: string;
+  target?: string;
+  count: number;
+  minLevel: number;
+}
+
+/** Daily login rewards for streak days 1..7 (then it loops). */
+export const LOGIN_REWARDS: { gold: number; items?: { itemId: string; quantity: number }[] }[] = [
+  { gold: 50 },
+  { gold: 80, items: [{ itemId: 'minor_health_potion', quantity: 2 }] },
+  { gold: 120 },
+  { gold: 150, items: [{ itemId: 'minor_health_potion', quantity: 3 }] },
+  { gold: 200, items: [{ itemId: 'enhancement_stone', quantity: 1 }] },
+  { gold: 250 },
+  { gold: 500, items: [{ itemId: 'enhancement_stone', quantity: 2 }] },
+];
+
+/** Daily task rewards scale with level. */
+export function dailyTaskReward(level: number): { gold: number; xp: number } {
+  return { gold: 30 + level * 8, xp: 60 + level * 25 };
+}
+
+export interface JournalView {
+  login: { streak: number; claimedToday: boolean; day: number };
+  tasks: { id: string; text: string; progress: number; count: number; claimed: boolean }[];
+  achievements: { id: string; name: string; description: string; icon: string; goal: number; progress: number; unlockedAt: number | null; gold: number }[];
+  resetsAt: number;
+}
+
+export const LEADERBOARDS = ['level', 'wealth', 'achievements', 'boss_kills', 'farming', 'fishing', 'mining', 'woodcutting'] as const;
+export type LeaderboardId = (typeof LEADERBOARDS)[number];
+
+export interface LeaderboardRow {
+  rank: number;
+  id: string;
+  name: string;
+  classId: ClassId;
+  level: number;
+  value: number;
+  guild: string | null;
+}

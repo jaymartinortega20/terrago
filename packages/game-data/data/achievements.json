@@ -1,0 +1,222 @@
+[
+ {
+  "id": "first_blood",
+  "name": "First Blood",
+  "description": "Defeat your first monster.",
+  "stat": "kills",
+  "goal": 1,
+  "reward": {
+   "gold": 20
+  },
+  "icon": "\u2694"
+ },
+ {
+  "id": "monster_hunter",
+  "name": "Monster Hunter",
+  "description": "Defeat 100 monsters.",
+  "stat": "kills",
+  "goal": 100,
+  "reward": {
+   "gold": 250
+  },
+  "icon": "\u2694"
+ },
+ {
+  "id": "slayer",
+  "name": "Slayer",
+  "description": "Defeat 1,000 monsters.",
+  "stat": "kills",
+  "goal": 1000,
+  "reward": {
+   "gold": 2000
+  },
+  "icon": "\u2694"
+ },
+ {
+  "id": "boss_slayer",
+  "name": "Boss Slayer",
+  "description": "Defeat a boss.",
+  "stat": "boss_kills",
+  "goal": 1,
+  "reward": {
+   "gold": 500
+  },
+  "icon": "\u2620"
+ },
+ {
+  "id": "boss_veteran",
+  "name": "Boss Veteran",
+  "description": "Defeat 10 bosses.",
+  "stat": "boss_kills",
+  "goal": 10,
+  "reward": {
+   "gold": 3000
+  },
+  "icon": "\u2620"
+ },
+ {
+  "id": "dungeon_delver",
+  "name": "Dungeon Delver",
+  "description": "Enter a dungeon.",
+  "stat": "dungeon_runs",
+  "goal": 1,
+  "reward": {
+   "gold": 150
+  },
+  "icon": "\ud83d\udddd"
+ },
+ {
+  "id": "green_thumb",
+  "name": "Green Thumb",
+  "description": "Harvest 10 crops.",
+  "stat": "harvests",
+  "goal": 10,
+  "reward": {
+   "gold": 60
+  },
+  "icon": "\ud83c\udf31"
+ },
+ {
+  "id": "master_farmer",
+  "name": "Master Farmer",
+  "description": "Harvest 500 crops.",
+  "stat": "harvests",
+  "goal": 500,
+  "reward": {
+   "gold": 1500
+  },
+  "icon": "\ud83c\udf3e"
+ },
+ {
+  "id": "first_catch",
+  "name": "First Catch",
+  "description": "Catch a fish.",
+  "stat": "fish",
+  "goal": 1,
+  "reward": {
+   "gold": 30
+  },
+  "icon": "\ud83d\udc1f"
+ },
+ {
+  "id": "angler",
+  "name": "Angler",
+  "description": "Catch 100 fish.",
+  "stat": "fish",
+  "goal": 100,
+  "reward": {
+   "gold": 800
+  },
+  "icon": "\ud83c\udfa3"
+ },
+ {
+  "id": "prospector",
+  "name": "Prospector",
+  "description": "Gather 100 resources.",
+  "stat": "gathered",
+  "goal": 100,
+  "reward": {
+   "gold": 300
+  },
+  "icon": "\u26cf"
+ },
+ {
+  "id": "hoarder",
+  "name": "Hoarder",
+  "description": "Gather 2,000 resources.",
+  "stat": "gathered",
+  "goal": 2000,
+  "reward": {
+   "gold": 2500
+  },
+  "icon": "\u26cf"
+ },
+ {
+  "id": "artisan",
+  "name": "Artisan",
+  "description": "Craft 50 items.",
+  "stat": "crafted",
+  "goal": 50,
+  "reward": {
+   "gold": 500
+  },
+  "icon": "\ud83d\udd28"
+ },
+ {
+  "id": "adventurer",
+  "name": "Adventurer",
+  "description": "Complete 5 quests.",
+  "stat": "quests",
+  "goal": 5,
+  "reward": {
+   "gold": 200
+  },
+  "icon": "\ud83d\udcdc"
+ },
+ {
+  "id": "storyteller",
+  "name": "Storyteller",
+  "description": "Complete 12 quests.",
+  "stat": "quests",
+  "goal": 12,
+  "reward": {
+   "gold": 1200
+  },
+  "icon": "\ud83d\udcd6"
+ },
+ {
+  "id": "level_10",
+  "name": "Seasoned",
+  "description": "Reach level 10.",
+  "stat": "level",
+  "goal": 10,
+  "reward": {
+   "gold": 200
+  },
+  "icon": "\u2605"
+ },
+ {
+  "id": "level_25",
+  "name": "Veteran",
+  "description": "Reach level 25.",
+  "stat": "level",
+  "goal": 25,
+  "reward": {
+   "gold": 1000
+  },
+  "icon": "\u2605"
+ },
+ {
+  "id": "level_50",
+  "name": "Champion",
+  "description": "Reach level 50.",
+  "stat": "level",
+  "goal": 50,
+  "reward": {
+   "gold": 5000
+  },
+  "icon": "\u2605"
+ },
+ {
+  "id": "merchant",
+  "name": "Merchant",
+  "description": "Sell 10 listings on the Marketplace.",
+  "stat": "market_sales",
+  "goal": 10,
+  "reward": {
+   "gold": 400
+  },
+  "icon": "\u25c9"
+ },
+ {
+  "id": "dailies_7",
+  "name": "Dependable",
+  "description": "Complete 7 daily tasks.",
+  "stat": "dailies",
+  "goal": 7,
+  "reward": {
+   "gold": 500
+  },
+  "icon": "\ud83d\udcc5"
+ }
+]

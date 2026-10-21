@@ -120,6 +120,9 @@ describe('farming (v0.2 success test)', () => {
     const plotRow = await db.query('SELECT tilled, crop_id FROM farm_plots WHERE character_id = $1 AND plot_index = 0', [A.character.id]);
     assert.deepEqual(plotRow.rows[0], { tilled: true, crop_id: null }, 'soil stays tilled after harvest');
     await leaveWorld(a.socket);
+    // Let the server finish saving the old position before moving the character.
+    await waitFor(() => !server.world.players.has(A.character.id), 5000);
+    await new Promise((r) => setTimeout(r, 200));
 
     // Sell the carrot to Farmer Rowan and buy more seeds.
     await place(A.character.id, 'greenhaven', 12, 35, 'up');

@@ -51,6 +51,8 @@ export class Player {
   /** Last whisper partner, for /r. */
   replyTo: string | null = null;
   nextGlobalAt = 0;
+  /** Chat mute set by a moderator (ms since epoch). */
+  mutedUntil = 0;
   /** Recent lines this player said (any channel), attached to reports. */
   said: { ch: string; text: string; ts: number }[] = [];
   /** Starter quest chain progress (loaded at join). */

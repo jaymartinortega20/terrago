@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -90,6 +90,11 @@ export interface UiState {
   guild: import('@terrago/shared').GuildView | null;
   invites: import('@terrago/shared').InvitePayload[];
   profile: import('@terrago/shared').PlayerProfile | null;
+  journal: import('@terrago/shared').JournalView | null;
+  /** Today's login reward is waiting. */
+  dailyReady: boolean;
+  achievementToast: { id: string; name: string; icon: string; gold: number } | null;
+  announcement: string | null;
   /** Text to put in the chat box (e.g. "/w Name "). */
   chatDraft: string | null;
   /** Fishing in progress. */
@@ -137,6 +142,10 @@ export const initialUi: UiState = {
   invites: [],
   profile: null,
   chatDraft: null,
+  journal: null,
+  dailyReady: false,
+  achievementToast: null,
+  announcement: null,
 };
 
 let noticeId = 0;
