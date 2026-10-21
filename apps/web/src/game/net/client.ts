@@ -233,6 +233,8 @@ export class GameClient {
     });
     socket.on('effects', ({ effects, cooldowns }) => this.ui.set({ effects, cooldowns }));
     socket.on('quests', (quests) => this.ui.set({ quests }));
+    socket.on('trade:invite', (inv) => this.ui.set({ tradeInvite: inv }));
+    socket.on('trade:update', (trade) => this.ui.set({ trade, ...(trade ? { tradeInvite: null, playerMenu: null } : {}) }));
     socket.on('duel', (d) => {
       this.ui.set({ duel: d.with ? { ...d.with, until: d.until ?? 0 } : null });
       if (!d.with && this.remotes.has(this.ui.get().targetId ?? '')) this.setTarget(null);
@@ -795,6 +797,61 @@ export class GameClient {
 
   repairAll(npcId: string) {
     return this.run('repair:all', npcId);
+  }
+
+  // --- Marketplace ---------------------------------------------------------
+  marketSearch(q: import('@terrago/shared').MarketQuery) {
+    return this.request<{ listings: import('@terrago/shared').MarketListing[]; total: number }>('market:search', q);
+  }
+
+  marketMine() {
+    return this.request<{ listings: import('@terrago/shared').MarketListing[] }>('market:mine');
+  }
+
+  marketList(slot: number, quantity: number, unitPrice: number) {
+    return this.run('market:list', { slot, quantity, unitPrice });
+  }
+
+  marketBuy(listingId: number) {
+    return this.run('market:buy', listingId);
+  }
+
+  marketCancel(listingId: number) {
+    return this.run('market:cancel', listingId);
+  }
+
+  // --- Direct trade --------------------------------------------------------
+  tradeRequest(playerId: string) {
+    this.ui.set({ playerMenu: null });
+    return this.run('trade:request', playerId);
+  }
+
+  tradeRespond(accept: boolean) {
+    const inv = this.ui.get().tradeInvite;
+    this.ui.set({ tradeInvite: null });
+    if (inv) void this.run('trade:respond', { fromId: inv.id, accept });
+  }
+
+  tradeOffer(items: { slot: number; quantity: number }[], gold: number) {
+    return this.run('trade:offer', { items, gold });
+  }
+
+  tradeLock() {
+    return this.run('trade:lock');
+  }
+
+  tradeConfirm() {
+    return this.run('trade:confirm');
+  }
+
+  tradeCancel() {
+    this.socket?.emit('trade:cancel');
+    this.ui.set({ trade: null });
+  }
+
+  duelRequest(name: string) {
+    this.ui.set({ playerMenu: null });
+    return this.sendChat(`/duel ${name}`);
   }
 
   sendChat(text: string): Promise<boolean> {

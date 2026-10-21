@@ -89,6 +89,8 @@ export interface Balance {
   };
   persistence: { positionSaveIntervalMs: number };
   skillCurve: XpCurve;
+  /** Marketplace economics: fees and tax are gold sinks. */
+  market: { listingFeeRate: number; listingFeeMin: number; taxRate: number; durationHours: number; maxListings: number; maxPrice: number };
   farming: {
     homesteadMap: string;
     waterMs: number;

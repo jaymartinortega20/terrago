@@ -8,6 +8,9 @@ import type {
   PublicMonster,
   PublicPlayer,
   QuestState,
+  MarketListing,
+  MarketQuery,
+  TradeView,
   SelfState,
   ShopView,
   WorldObject,
@@ -125,6 +128,8 @@ export interface ServerToClientEvents {
   /** A visible player's look changed (mount, weapon). */
   'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null }) => void;
   'quests': (quests: QuestState[]) => void;
+  'trade:invite': (from: { id: string; name: string }) => void;
+  'trade:update': (view: TradeView | null) => void;
   /** Duel state: opponent id/name, or null when it ends. */
   'duel': (info: { with: { id: string; name: string } | null; until?: number }) => void;
   /** Your active buffs/debuffs and skill cooldowns (ends: ms since epoch). */
@@ -171,6 +176,17 @@ export interface ClientToServerEvents {
   'unequip': (req: { slot: number }, ack: Ack<null>) => void;
   'enhance': (req: { equipSlot: number }, ack: Ack<{ success: boolean; message: string }>) => void;
   'mount:toggle': (ack: Ack<{ mount: string | null }>) => void;
+  'market:search': (q: MarketQuery, ack: Ack<{ listings: MarketListing[]; total: number }>) => void;
+  'market:mine': (ack: Ack<{ listings: MarketListing[] }>) => void;
+  'market:list': (req: { slot: number; quantity: number; unitPrice: number }, ack: Ack<{ message: string }>) => void;
+  'market:buy': (listingId: number, ack: Ack<{ message: string }>) => void;
+  'market:cancel': (listingId: number, ack: Ack<{ message: string }>) => void;
+  'trade:request': (playerId: string, ack: Ack<{ message: string }>) => void;
+  'trade:respond': (req: { fromId: string; accept: boolean }, ack: Ack<null>) => void;
+  'trade:offer': (req: { items: { slot: number; quantity: number }[]; gold: number }, ack: Ack<null>) => void;
+  'trade:lock': (ack: Ack<null>) => void;
+  'trade:confirm': (ack: Ack<{ message: string } | null>) => void;
+  'trade:cancel': () => void;
   'quest:accept': (req: { npcId: string; questId: string }, ack: Ack<null>) => void;
   'quest:complete': (req: { npcId: string; questId: string }, ack: Ack<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;

@@ -31,7 +31,7 @@ describe('guide quests, mounts, duels, line of sight', () => {
     const A = await newPlayer(base);
     await place(A.character.id, 'greenhaven', 29, 22, 'left'); // next to Mayor Lina (28,22)
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
-    let quests: QuestState[] = await once<QuestState[]>(a.socket, 'quests');
+    let quests: QuestState[] = await a.firstQuests;
     a.socket.on('quests', (q) => (quests = q));
     assert.deepEqual(quests, [], 'nothing started yet — Lina has an offer');
     const talk = await ack(a.socket, 'npc:interact', 'mayor_lina');

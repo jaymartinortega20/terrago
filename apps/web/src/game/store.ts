@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -80,6 +80,10 @@ export interface UiState {
   /** Quest offer / reward windows. */
   questOffer: { questId: string; npcId: string } | null;
   questReward: { questId: string; gold: number; xp: number; items: { itemId: string; quantity: number }[] } | null;
+  /** Direct trade window, a pending invite, and the clicked-player menu. */
+  trade: import('@terrago/shared').TradeView | null;
+  tradeInvite: { id: string; name: string } | null;
+  playerMenu: { id: string; name: string } | null;
   /** Fishing in progress. */
   fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
 }
@@ -116,6 +120,9 @@ export const initialUi: UiState = {
   duel: null,
   questOffer: null,
   questReward: null,
+  trade: null,
+  tradeInvite: null,
+  playerMenu: null,
 };
 
 let noticeId = 0;

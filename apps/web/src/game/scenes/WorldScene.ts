@@ -135,6 +135,14 @@ export class WorldScene extends Phaser.Scene {
           return;
         }
       }
+      // Clicking another player opens the Trade / Duel menu.
+      for (const [id, av] of this.remotes) {
+        if (av.sprite.getBounds().contains(wp.x, wp.y)) {
+          const r = this.client.remotes.get(id);
+          if (r) this.client.ui.set({ playerMenu: { id, name: r.info.name } });
+          return;
+        }
+      }
       // Clicking a monster targets and attacks it.
       for (const [id, v] of this.monsterViews) {
         const b = v.sprite.getBounds();

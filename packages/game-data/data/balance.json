@@ -138,5 +138,13 @@
         ]
       }
     ]
+  },
+  "market": {
+    "listingFeeRate": 0.01,
+    "listingFeeMin": 2,
+    "taxRate": 0.05,
+    "durationHours": 72,
+    "maxListings": 20,
+    "maxPrice": 100000000
   }
 }

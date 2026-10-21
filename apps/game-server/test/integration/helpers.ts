@@ -1,6 +1,6 @@
 import pg from 'pg';
 import { io as ioClient, type Socket } from 'socket.io-client';
-import { PROTOCOL_VERSION, type ClientToServerEvents, type EnterWorldPayload, type ServerToClientEvents } from '@terrago/shared';
+import { PROTOCOL_VERSION, type ClientToServerEvents, type EnterWorldPayload, type QuestState, type ServerToClientEvents } from '@terrago/shared';
 import { startGameServer, type GameServer } from '../../src/app';
 import { loadConfig } from '../../src/config';
 import { createLogger } from '../../src/logger';
@@ -113,10 +113,17 @@ export async function newPlayer(base: string, opts: { name?: string; classId?: s
 }
 
 /** Connect and wait for the world:enter payload. */
-export async function enterWorld(base: string, cookie: string, characterId: string): Promise<{ socket: TestSocket; enter: EnterWorldPayload }> {
+export async function enterWorld(
+  base: string,
+  cookie: string,
+  characterId: string,
+): Promise<{ socket: TestSocket; enter: EnterWorldPayload; firstQuests: Promise<QuestState[]> }> {
   const socket = connectSocket(base, cookie, characterId);
+  // The quest list can arrive right after world:enter; listen from the start so tests never miss it.
+  const firstQuests = once<QuestState[]>(socket, 'quests', 8000);
+  firstQuests.catch(() => {});
   const enter = await once<EnterWorldPayload>(socket, 'world:enter');
-  return { socket, enter };
+  return { socket, enter, firstQuests };
 }
 
 /** Send N movement commands in real time (one per 50ms step), like a real client. */

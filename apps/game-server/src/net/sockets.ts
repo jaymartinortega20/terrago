@@ -23,7 +23,8 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, craftAt, gear, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
+import { act, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
+import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
 import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
 
@@ -162,7 +163,10 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('disconnect', (reason) => {
       closed = true;
       metrics.sockets--;
-      if (player) world.detach(player.id, conn);
+      if (player) {
+        cancelTrade(player, 'Trade cancelled — your partner left.');
+        world.detach(player.id, conn);
+      }
       log.debug('socket_disconnect', { characterId: character.id, reason });
     });
 
@@ -301,6 +305,17 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('craft', (req, ack) => serial(ack, () => craftAt(g, p, req)));
     socket.on('equip', (req, ack) => serial(ack, () => gear.equip(g, p, req)));
     socket.on('mount:toggle', (ack) => respond(ack, () => toggleMount(g, p)));
+    socket.on('market:search', (q, ack) => respond(ack, () => market.search(g, p, q)));
+    socket.on('market:mine', (ack) => respond(ack, () => market.mine(g, p)));
+    socket.on('market:list', (req, ack) => serial(ack, () => market.list(g, p, req)));
+    socket.on('market:buy', (id, ack) => serial(ack, () => market.buy(g, p, id)));
+    socket.on('market:cancel', (id, ack) => serial(ack, () => market.cancel(g, p, id)));
+    socket.on('trade:request', (id, ack) => respond(ack, () => requestTrade(g, p, id)));
+    socket.on('trade:respond', (req, ack) => respond(ack, () => respondTrade(g, p, req)));
+    socket.on('trade:offer', (req, ack) => respond(ack, () => setOffer(g, p, req)));
+    socket.on('trade:lock', (ack) => respond(ack, () => lockTrade(p)));
+    socket.on('trade:confirm', (ack) => serial(ack, () => confirmTrade(g, p)));
+    socket.on('trade:cancel', () => cancelTrade(p));
     socket.on('quest:accept', (req, ack) => serial(ack, () => questServices.accept(g, p, req)));
     socket.on('quest:complete', (req, ack) => serial(ack, () => questServices.complete(g, p, req)));
     socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));

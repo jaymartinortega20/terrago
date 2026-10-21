@@ -8,6 +8,7 @@ import {
   TILE_SIZE,
   type NodeObject,
   type QuestStepType,
+  type MarketQuery,
   type DropObject,
   maxHp,
   maxMp,
@@ -31,10 +32,12 @@ import type { ProgressDelta } from '../services/progress';
 import { buyFromShop, repairAll, repairCost, sellToShop, shopView } from '../services/shops';
 import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gathering';
 import { cast } from './fishing';
+import { cancelTrade } from './trade';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
 import { getNpc as findNpc } from '../services/npcs';
+import { buyListing, cancelListing, createListing, myListings, searchMarket } from '../services/market';
 import type { Player } from '../world/player';
 import { World } from '../world/world';
 
@@ -325,6 +328,7 @@ export async function craftAt(deps: GameplayDeps, p: Player, req: unknown): Prom
 
 /** Remember the deepest mine checkpoints (every 5th floor) for the lift. */
 export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void> {
+  cancelTrade(p, 'Trade cancelled — you left the area.');
   questEvent(deps, p, 'visit', p.mapId);
   const floor = mineFloorNumber(p.mapId);
   if (floor && floor % 5 === 0) {
@@ -584,5 +588,36 @@ export const questServices = {
     const rt = deps.world.runtimeOf(p);
     for (const o of res.overflow) deps.world.addDrop(rt, p.x, p.y, o.itemId, o.quantity, p.id);
     return res.rewards;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Marketplace
+// ---------------------------------------------------------------------------
+
+export const market = {
+  search: (deps: GameplayDeps, p: Player, q: unknown) => searchMarket(deps.pool, (q ?? {}) as MarketQuery, p.id),
+  mine: async (deps: GameplayDeps, p: Player) => ({ listings: await myListings(deps.pool, p.id) }),
+  async list(deps: GameplayDeps, p: Player, req: unknown) {
+    const r = (req ?? {}) as { slot?: unknown; quantity?: unknown; unitPrice?: unknown };
+    const res = await createListing(deps.pool, p.id, r.slot, r.quantity, r.unitPrice);
+    pushInventory(deps.world, p, res.inventory);
+    return { message: res.message };
+  },
+  async buy(deps: GameplayDeps, p: Player, id: unknown) {
+    const res = await buyListing(deps.pool, p.id, id);
+    pushInventory(deps.world, p, res.inventory);
+    const seller = deps.world.players.get(res.sellerId);
+    if (seller) {
+      const inv = deps.world.inventoryCache.get(seller.id);
+      if (inv) pushInventory(deps.world, seller, { ...inv, gold: res.sellerGold });
+      seller.conn?.send('notice', { kind: 'success', text: `Sold ${res.qty}× ${res.itemName} on the market: +${res.net.toLocaleString()} Gold (after tax).` });
+    }
+    return { message: res.message };
+  },
+  async cancel(deps: GameplayDeps, p: Player, id: unknown) {
+    const res = await cancelListing(deps.pool, p.id, id);
+    pushInventory(deps.world, p, res.inventory);
+    return { message: res.message };
   },
 };

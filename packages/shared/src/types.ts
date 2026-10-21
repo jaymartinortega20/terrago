@@ -323,3 +323,54 @@ export function questsAvailable(all: readonly QuestDef[], states: QuestState[]):
   const started = new Set(states.map((s) => s.id));
   return all.filter((q) => !started.has(q.id) && (!q.requires || done.has(q.requires)));
 }
+
+// ---------------------------------------------------------------------------
+// Marketplace and trading
+// ---------------------------------------------------------------------------
+
+export interface MarketListing {
+  id: number;
+  sellerName: string;
+  itemId: string;
+  quantity: number;
+  quality: number;
+  enhance: number;
+  durability: number | null;
+  unitPrice: number;
+  category: string;
+  rarity: string;
+  createdAt: number;
+  expiresAt: number;
+  /** For "my listings": active, sold, cancelled, returned. */
+  status?: string;
+  mine?: boolean;
+}
+
+export interface MarketQuery {
+  search?: string;
+  category?: string;
+  rarity?: string;
+  sort?: 'price_asc' | 'price_desc' | 'newest';
+  page?: number;
+}
+
+export interface TradeOfferItem {
+  slot: number;
+  itemId: string;
+  quantity: number;
+  quality: number;
+  enhance: number;
+}
+
+export interface TradeSide {
+  items: TradeOfferItem[];
+  gold: number;
+  locked: boolean;
+  confirmed: boolean;
+}
+
+export interface TradeView {
+  partner: { id: string; name: string };
+  mine: TradeSide;
+  theirs: TradeSide;
+}

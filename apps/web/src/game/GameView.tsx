@@ -17,6 +17,7 @@ import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from '.
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 import { EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
+import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
 import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
 
 declare global {
@@ -132,6 +133,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'f') client.attackKey();
       else if (k === 'z') client.toggleMount();
       else if (k === 'j') open('quests');
+      else if (k === 'p') open('market');
       else if (k === 'q') client.useSkill(0);
       else if (k === 'r') client.useSkill(1);
       else if (k === 't') client.useSkill(2);
@@ -217,6 +219,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
           {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'market' && <MarketPanel client={client} onClose={() => open(null)} />}
           {panel === 'enhance' && <EnhancePanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
@@ -274,6 +277,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       {touch && <MobileControls client={client} openPanel={open} />}
       <QuestOfferWindow client={client} />
       <QuestRewardWindow client={client} />
+      <SocialPopups client={client} />
+      <TradeWindow client={client} />
 
       {/* Connection state */}
       {status !== 'online' && (
