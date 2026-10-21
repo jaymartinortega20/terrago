@@ -393,5 +393,73 @@
    ]
   ],
   "services": []
+ },
+ {
+  "id": "scout_bjorna",
+  "name": "Scout Bjorna",
+  "title": "Mountain Scout",
+  "mapId": "frostpine_peaks",
+  "x": 9,
+  "y": 21,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 0,
+   "hairStyle": 2,
+   "hairColor": 7,
+   "eyeColor": 2,
+   "outfit": 3
+  },
+  "accessory": "hat",
+  "firstMeeting": {
+   "lines": [
+    "Bjorna. I scout the peaks for the Guild.",
+    "Wolves on the slopes, yetis by the frozen lake \u2014 and up north, the Frost Giant himself.",
+    "He wakes every half hour or so. Bring a crowd if you mean to fight him."
+   ]
+  },
+  "greetings": [
+   [
+    "Snow's deep today. Watch your step."
+   ],
+   [
+    "Seen the giant? You'd know if you had."
+   ]
+  ],
+  "services": []
+ },
+ {
+  "id": "hunter_moss",
+  "name": "Hunter Moss",
+  "title": "Witch Hunter",
+  "mapId": "mirefen_swamp",
+  "x": 7,
+  "y": 18,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 4,
+   "hairStyle": 1,
+   "hairColor": 1,
+   "eyeColor": 4,
+   "outfit": 5
+  },
+  "accessory": "hood",
+  "firstMeeting": {
+   "lines": [
+    "Moss. I hunt what hides in the mire.",
+    "Trolls by the water, lurkers in the mud, and witches in the old ruins east.",
+    "Fog's thick here more days than not. Stay on the boardwalks when you can."
+   ]
+  },
+  "greetings": [
+   [
+    "Smell that? That's the swamp saying hello."
+   ],
+   [
+    "The witches brew at night. That's when they're weakest \u2014 or so I tell myself."
+   ]
+  ],
+  "services": []
  }
 ]

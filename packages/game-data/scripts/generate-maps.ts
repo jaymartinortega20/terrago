@@ -169,7 +169,8 @@ function sunfield(): MapDef {
   const m = new MapBuilder(W, H);
 
   m.rect(28, 0, 4, 22, '='); // road from Greenhaven
-  m.rect(5, 20, 49, 3, '='); // east-west farm lane; its west end leads to the homesteads
+  m.rect(5, 20, 55, 3, '='); // east-west farm lane: west to the homesteads, east to Mirefen Swamp
+  m.reserve(54, 18, 6, 7);
 
   // Old commons fields (decorative), south of the lane
   const fields = [
@@ -217,6 +218,7 @@ function sunfield(): MapDef {
   m.forestBorder(r, 2, 3, [
     { side: 'n', from: 28, to: 31 },
     { side: 'w', from: 19, to: 23 },
+    { side: 'e', from: 19, to: 23 },
   ]);
   m.scatterGround(r, 0.09, ',');
   m.scatterGround(r, 0.05, '*');
@@ -235,6 +237,7 @@ function sunfield(): MapDef {
     portals: [
       { id: 'sf_north_road', x: 28, y: 0, w: 4, h: 1, to: 'greenhaven', toX: 31, toY: 45, toDir: 'up', label: 'Greenhaven' },
       { id: 'sf_homesteads', x: 4, y: 20, w: 1, h: 3, to: 'homestead', toX: 19, toY: 27, toDir: 'up', label: 'Your Homestead', instance: 'self' },
+      { id: 'sf_east', x: 59, y: 20, w: 1, h: 3, to: 'mirefen_swamp', toX: 2, toY: 21, toDir: 'right', label: 'Mirefen Swamp' },
     ],
     theme: 'meadow',
     fishing: 'pond',
@@ -469,6 +472,7 @@ function irondeepEntrance(): MapDef {
   m.prop('crate', 15, 9);
   m.prop('barrel', 16, 9);
   m.rect(22, 11, 9, 3, ':', true); // path east to the hollow
+  m.rect(21, 18, 19, 3, '=', true); // mountain path east, up to the Frostpine Peaks
   const hollow = dungeonGate(m, 'ember_hollow', 'a');
   m.scatterGround(r, 0.08, ',');
   m.scatterNodes(r, [{ type: 'rock_stone', solid: true, weight: 4 }, { type: 'rock_copper', solid: true, weight: 2 }, { type: 'rock_coal', solid: true, weight: 1 }], 12);
@@ -483,6 +487,7 @@ function irondeepEntrance(): MapDef {
       { id: 'ie_south', x: 18, y: 29, w: 4, h: 1, to: 'greenhaven', toX: 31, toY: 1, toDir: 'down', label: 'Greenhaven' },
       { id: 'ie_mine', x: 19, y: 8, w: 3, h: 1, to: 'irondeep_1', toX: 4, toY: ladderRowsFor(1).up, toDir: 'right', label: 'Floor 1' },
       hollow,
+      { id: 'ie_east', x: 39, y: 18, w: 1, h: 3, to: 'frostpine_peaks', toX: 2, toY: 25, toDir: 'right', label: 'Frostpine Peaks' },
     ],
     theme: 'meadow',
     levels: [1, 10],
@@ -490,7 +495,117 @@ function irondeepEntrance(): MapDef {
   });
 }
 
-for (const map of [greenhaven(), sunfield(), homestead(), whisperwood(), crystalLake(), irondeepEntrance()]) {
+/** East of Irondeep: snowfields, a frozen lake, and the Frost Giant's high plateau. */
+function frostpine(): MapDef {
+  const W = 64;
+  const H = 48;
+  const r = rng(60606);
+  const m = new MapBuilder(W, H, 'n');
+  // Ragged cliffs all round.
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) {
+      const edge = Math.min(x, W - 1 - x, y, H - 1 - y);
+      if (edge < 2 + Math.floor((Math.sin(x * 0.5) + Math.sin(y * 0.7 + 2)) * 1.1 + 1)) m.grid[y]![x] = '#';
+    }
+  // Trail from the west entrance, winding north-east to the plateau.
+  m.rect(0, 24, 14, 3, '=', true);
+  m.rect(12, 14, 3, 13, '=', true);
+  m.rect(12, 12, 30, 3, '=', true);
+  m.rect(40, 5, 3, 10, '=', true);
+  // Scout camp
+  m.rect(4, 18, 9, 5, ':', true);
+  m.prop('tent', 5, 18);
+  m.prop('campfire', 8, 20);
+  m.prop('sign', 11, 23, 'Frostpine Peaks. Wolves on the slopes, yetis by the lake. The Frost Giant walks the northern plateau.');
+  // Frozen lake
+  const cx = 34;
+  const cy = 22;
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) {
+      const d = ((x - cx) / 9) ** 2 + ((y - cy) / 5.5) ** 2;
+      if (d < 1 && m.grid[y]![x] !== '#') m.grid[y]![x] = 'I';
+    }
+  m.reserve(25, 15, 19, 15);
+  // The giant's plateau (north-east)
+  m.rect(44, 3, 16, 9, ':', true);
+  m.prop('ruin_pillar', 45, 3);
+  m.prop('ruin_pillar', 58, 3);
+  m.prop('sign', 43, 11, "The Giant's Plateau. Turn back unless you brought friends.");
+  m.scatterNodes(r, [{ type: 'rock_silver', solid: true, weight: 4 }, { type: 'rock_gold', solid: true, weight: 3 }, { type: 'rock_mithril', solid: true, weight: 1 }, { type: 'rock_crystal', solid: true, weight: 1 }], 18, undefined, 'n');
+  m.scatterNodes(r, [{ type: 'tree_spirit', solid: true, weight: 1 }, { type: 'tree_hardwood', solid: true, weight: 3 }, { type: 'plant_silverleaf', solid: false, weight: 3 }], 14, undefined, 'n');
+  m.scatterProps(r, ['tree_snow', 'tree_snow', 'tree_snow', 'rock', 'tree_pine'], 120, undefined, 'n');
+  return m.toMap({
+    id: 'frostpine_peaks',
+    name: 'Frostpine Peaks',
+    safeZone: false,
+    music: 'snow',
+    spawn: { x: 2, y: 25, dir: 'right' },
+    portals: [{ id: 'fp_west', x: 0, y: 24, w: 1, h: 3, to: 'irondeep_entrance', toX: 37, toY: 19, toDir: 'left', label: 'Irondeep Mine' }],
+    theme: 'snow',
+    fishing: 'lake',
+    levels: [20, 30],
+    respawn: { mapId: 'frostpine_peaks', x: 8, y: 22 },
+    spawns: [
+      { monster: 'snow_wolf', level: [20, 23], count: 7, area: { x: 16, y: 28, w: 24, h: 14 } },
+      { monster: 'ice_wisp', level: [22, 25], count: 5, area: { x: 4, y: 30, w: 14, h: 12 } },
+      { monster: 'frost_yeti', level: [25, 28], count: 4, area: { x: 44, y: 16, w: 14, h: 22 } },
+      { monster: 'frost_giant', level: [30, 30], count: 1, area: { x: 49, y: 5, w: 6, h: 4 } },
+    ],
+  });
+}
+
+/** East of Sunfield: mud, black water, boardwalks and witch-haunted ruins. */
+function mirefen(): MapDef {
+  const W = 64;
+  const H = 48;
+  const r = rng(13013);
+  const m = new MapBuilder(W, H, 'u');
+  m.scatterGround(r, 0.18, 'f', 'u');
+  // Pools of swamp water
+  for (let i = 0; i < 14; i++) {
+    const px = 8 + Math.floor(r() * 50);
+    const py = 4 + Math.floor(r() * 38);
+    const w = 3 + Math.floor(r() * 6);
+    const h = 2 + Math.floor(r() * 4);
+    for (let y = py; y < py + h; y++) for (let x = px; x < px + w; x++) if (m.inside(x, y) && ((x - px - w / 2) / (w / 2)) ** 2 + ((y - py - h / 2) / (h / 2)) ** 2 < 1) m.grid[y]![x] = 'q';
+  }
+  // Boardwalk from the west, and a trail to the ruins
+  m.rect(0, 20, 30, 3, 'b', true);
+  m.rect(28, 13, 3, 10, 'b', true);
+  m.rect(28, 12, 20, 3, 'b', true);
+  // Hunter's camp
+  m.rect(3, 15, 8, 5, '=', true);
+  m.prop('tent', 3, 15);
+  m.prop('campfire', 6, 17);
+  m.prop('sign', 10, 19, 'Mirefen Swamp. Stay on the boardwalks. Witches nest in the old ruins to the east.');
+  // Witch ruins (east)
+  m.rect(46, 6, 14, 14, 'k', true);
+  for (const [x, y] of [[46, 6], [58, 6], [46, 18], [58, 18], [52, 6]] as const) m.prop('ruin_pillar', x, y);
+  m.prop('cooking_pot', 52, 12);
+  m.forestBorder(r, 2, 4, [{ side: 'w', from: 19, to: 23 }]);
+  m.scatterNodes(r, [{ type: 'rock_obsidian', solid: true, weight: 2 }, { type: 'rock_gold', solid: true, weight: 2 }, { type: 'rock_coal', solid: true, weight: 2 }], 10, undefined, 'uf');
+  m.scatterNodes(r, [{ type: 'plant_glowcap', solid: false, weight: 3 }, { type: 'plant_mushroom', solid: false, weight: 3 }, { type: 'tree_spirit', solid: true, weight: 1 }, { type: 'plant_herb', solid: false, weight: 2 }], 22, undefined, 'uf');
+  m.scatterProps(r, ['tree_swamp', 'tree_swamp', 'reeds', 'reeds', 'mushroom_big', 'tree_dead', 'stump'], 90, undefined, 'uf');
+  return m.toMap({
+    id: 'mirefen_swamp',
+    name: 'Mirefen Swamp',
+    safeZone: false,
+    music: 'swamp',
+    spawn: { x: 2, y: 21, dir: 'right' },
+    portals: [{ id: 'mf_west', x: 0, y: 20, w: 1, h: 3, to: 'sunfield_plains', toX: 57, toY: 21, toDir: 'left', label: 'Sunfield Plains' }],
+    theme: 'swamp',
+    fishing: 'river',
+    levels: [28, 38],
+    respawn: { mapId: 'mirefen_swamp', x: 7, y: 20 },
+    spawns: [
+      { monster: 'bog_lurker', level: [28, 31], count: 6, area: { x: 12, y: 26, w: 20, h: 16 } },
+      { monster: 'swamp_troll', level: [31, 34], count: 6, area: { x: 20, y: 24, w: 26, h: 18 } },
+      { monster: 'marsh_witch', level: [33, 36], count: 5, area: { x: 47, y: 7, w: 12, h: 12 } },
+    ],
+  });
+}
+
+for (const map of [greenhaven(), sunfield(), homestead(), whisperwood(), crystalLake(), irondeepEntrance(), frostpine(), mirefen()]) {
   const errors = validateMapDef(map);
   if (errors.length) {
     console.error(errors.join('\n'));

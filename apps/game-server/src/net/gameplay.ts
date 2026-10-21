@@ -21,11 +21,13 @@ import {
   type PlotState,
   type SelfState,
   type WorldObject,
+  isWet,
+  weatherAt,
 } from '@terrago/shared';
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
 import type { Logger } from '../logger';
-import { clearPlot, farmUpgradeView, fertilize, harvest, loadFarm, plant, plotsForTier, till, upgradeFarm, water, type FarmResult } from '../services/farming';
+import { clearPlot, farmUpgradeView, fertilize, harvest, loadFarm, plant, plotsForTier, rainWater, till, upgradeFarm, water, type FarmResult } from '../services/farming';
 import type { toState } from '../services/inventory';
 import { getNpc, npcOffers } from '../services/npcs';
 import type { ProgressDelta } from '../services/progress';
@@ -328,6 +330,23 @@ export async function craftAt(deps: GameplayDeps, p: Player, req: unknown): Prom
 }
 
 /** Remember the deepest mine checkpoints (every 5th floor) for the lift. */
+/** Every minute: rain waters the farms of homesteads someone is standing in. */
+export async function rainTick(deps: GameplayDeps): Promise<void> {
+  const now = Date.now();
+  for (const rt of [...deps.world.runtimes()]) {
+    if (!rt.def.farmPlots || !rt.owner || !rt.players.size || !rt.loaded || !isWet(weatherAt(rt.def.theme, now))) continue;
+    const res = await rainWater(deps.pool, rt.owner.id);
+    if (!res.plots.length) continue;
+    const updated: PlotObject[] = [];
+    for (const st of res.plots) {
+      const cur = rt.objects.get(`plot:${st.index}`);
+      if (cur?.kind === 'plot') updated.push({ ...cur, tilled: st.tilled, wetUntil: st.wetUntil, crop: st.crop });
+    }
+    deps.world.setObjects(rt.key, updated);
+    for (const p of rt.players) p.conn?.send('notice', { kind: 'info', text: '🌧 The rain watered your fields.' });
+  }
+}
+
 export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void> {
   cancelTrade(p, 'Trade cancelled — you left the area.');
   questEvent(deps, p, 'visit', p.mapId);

@@ -6,6 +6,8 @@ import {
   removeFromSlot,
   removeItemById,
   rollQuality,
+  seasonAt,
+  seasonSpeed,
   waterCrop,
   type CropState,
   type FarmUpgradeView,
@@ -225,9 +227,12 @@ export function plant(pool: Pool, characterId: string, index: number, prefer?: n
     ctx.changedSlots.add(slot);
     await logItemMovement(ctx.tx, { itemId: crop.seedItem, quantity: 1, from: characterId, reason: 'plant' });
     ctx.delta.energy = await spendEnergyTx(ctx.tx, characterId, F().energy.plant, ctx.now);
-    p.crop = { cropId: crop.id, growthDone: 0, progressAt: ctx.now, waterUntil: p.wetUntil, speed: 1, fertilizer: null, harvests: 0 };
+    // In-season crops grow faster.
+    const season = seasonSpeed(crop.seasons, ctx.now);
+    p.crop = { cropId: crop.id, growthDone: 0, progressAt: ctx.now, waterUntil: p.wetUntil, speed: season, fertilizer: null, harvests: 0 };
     const wet = p.wetUntil > ctx.now;
-    return { message: wet ? `Planted ${crop.name}.` : `Planted ${crop.name}. Water it so it can grow!`, plots: [p] };
+    const tip = season > 1 ? ` It's ${seasonAt(ctx.now)} — ${crop.name} grows faster in season!` : '';
+    return { message: (wet ? `Planted ${crop.name}.` : `Planted ${crop.name}. Water it so it can grow!`) + tip, plots: [p] };
   });
 }
 
@@ -298,6 +303,24 @@ export function harvest(pool: Pool, characterId: string, index: number, rand: ()
   });
 }
 
+/** Rain waters every tilled plot that is drying out (no energy, no tools). */
+export function rainWater(pool: Pool, characterId: string): Promise<FarmResult> {
+  return farmTx(pool, characterId, async (ctx) => {
+    const plots: StoredPlot[] = [];
+    for (let i = 0; i < plotsForTier(ctx.tier); i++) {
+      const p = await lockPlot(ctx.tx, characterId, i);
+      if (!p.tilled || p.wetUntil - ctx.now > F().waterMs * 0.5) continue;
+      if (p.crop) {
+        const def = getCrop(p.crop.cropId);
+        if (def) p.crop = waterCrop(p.crop, def, ctx.now, F().waterMs);
+        p.wetUntil = p.crop.waterUntil;
+      } else p.wetUntil = ctx.now + F().waterMs;
+      plots.push(p);
+    }
+    return { message: plots.length ? 'The rain watered your fields.' : null, plots };
+  });
+}
+
 export function fertilize(pool: Pool, characterId: string, index: number, prefer?: number): Promise<FarmResult> {
   return farmTx(pool, characterId, async (ctx) => {
     checkUnlocked(ctx, index);
@@ -317,7 +340,7 @@ export function fertilize(pool: Pool, characterId: string, index: number, prefer
     await logItemMovement(ctx.tx, { itemId: item.id, quantity: 1, from: characterId, reason: 'fertilize' });
     // Settle growth up to now so the new speed only applies from here on.
     const settled = waterCrop(p.crop, def, ctx.now, 0);
-    p.crop = { ...settled, waterUntil: p.crop.waterUntil, speed: item.fertilizer!.speed, fertilizer: item.id };
+    p.crop = { ...settled, waterUntil: p.crop.waterUntil, speed: item.fertilizer!.speed * seasonSpeed(def.seasons, ctx.now), fertilizer: item.id };
     return { message: `Mixed ${item.name} into the soil.`, plots: [p] };
   });
 }

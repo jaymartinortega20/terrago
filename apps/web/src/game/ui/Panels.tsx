@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CLASSES, getItem, MAPS } from '@terrago/game-data';
+import { CLASSES, getItem, getMap } from '@terrago/game-data';
 import { QUALITIES, TILE_SIZE } from '@terrago/shared';
 import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
@@ -165,7 +165,7 @@ export function CharacterPanel({ client, onClose }: { client: GameClient; onClos
 export function MapPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const mapId = useStore(client.ui, (s) => s.mapId);
   const tile = useStore(client.ui, (s) => s.tile);
-  const map = mapId ? MAPS[mapId] : undefined;
+  const map = mapId ? getMap(mapId) : undefined;
   const url = useMemo(() => {
     if (!map) return null;
     const ground = renderGround(map);

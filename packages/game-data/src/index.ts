@@ -39,6 +39,8 @@ import recipesJson from '../data/recipes.json';
 import crystalLakeJson from '../data/maps/crystal_lake.json';
 import irondeepEntranceJson from '../data/maps/irondeep_entrance.json';
 import whisperwoodJson from '../data/maps/whisperwood.json';
+import frostpineJson from '../data/maps/frostpine_peaks.json';
+import mirefenJson from '../data/maps/mirefen_swamp.json';
 import dungeonsJson from '../data/dungeons.json';
 import { DUNGEON_PREFIX, MINE_FLOORS, generateDungeon, generateMineFloor, mineFloorNumber, type DungeonDef } from './mapgen';
 
@@ -150,6 +152,8 @@ export const MAPS: Readonly<Record<string, MapDef>> = {
   whisperwood: whisperwoodJson as MapDef,
   crystal_lake: crystalLakeJson as MapDef,
   irondeep_entrance: irondeepEntranceJson as MapDef,
+  frostpine_peaks: frostpineJson as MapDef,
+  mirefen_swamp: mirefenJson as MapDef,
 };
 
 const itemIndex = new Map(ITEMS.map((i) => [i.id, i]));

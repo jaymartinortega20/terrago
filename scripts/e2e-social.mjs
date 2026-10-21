@@ -82,7 +82,7 @@ try {
   // Found a guild and invite B from their profile.
   await A.page.keyboard.press('g');
   await A.page.fill('[data-testid=guild-name]', `Moss ${stamp.slice(-4)}`);
-  await A.page.fill('[data-testid=guild-tag]', 'MOS');
+  await A.page.fill('[data-testid=guild-tag]', stamp.slice(-3).toUpperCase());
   await A.page.click('[data-testid=guild-create]');
   await A.page.locator('[data-testid=guild-members]').waitFor();
   check('Guild founded for 500 Gold', (await A.ui()).inventory.gold === 500);
@@ -94,7 +94,7 @@ try {
   await B.page.locator('[data-testid=invite-guild]').waitFor();
   await B.page.click('[data-testid=invite-accept-guild]');
   await A.page.waitForFunction(() => window.__terrago.client.ui.get().guild?.members.length === 2);
-  await A.page.waitForFunction((id) => window.__terrago.client.remotes.get(id)?.info.guild === 'MOS', B.id);
+  await A.page.waitForFunction(([id, tag]) => window.__terrago.client.remotes.get(id)?.info.guild === tag, [B.id, stamp.slice(-3).toUpperCase()]);
   check('Guild tag shows over B', true);
 
   // Friends: request from the profile, accept, see them online.

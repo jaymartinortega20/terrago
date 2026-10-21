@@ -17,6 +17,7 @@ import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from '.
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
+import { EnvBadge, WeatherLayer } from './ui/Atmosphere';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
 import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
 import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
@@ -90,6 +91,7 @@ export default function GameView({
   return (
     <div className="fixed inset-0 overflow-hidden bg-night no-select">
       <div ref={host} className="absolute inset-0" data-testid="game-canvas" />
+      {client && <WeatherLayer client={client} />}
       {client && <Overlay client={client} touch={touch} onExit={onExit} badge={badge} />}
     </div>
   );
@@ -179,6 +181,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           <span className="ml-2 text-parchment/70">
             ({tile.x}, {tile.y})
           </span>
+          <EnvBadge client={client} />
           <span className="ml-2 text-parchment/70">👥 {nearby}</span>
           <span className="ml-2 text-parchment/70">{ping === null ? '' : `${ping}ms`}</span>
         </div>

@@ -18,6 +18,8 @@ import {
   type NpcAccessory,
   type CombatEvent,
   type WorldObject,
+  darknessAt,
+  weatherRegion,
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
 import { nodeArt } from '../art/nodes';
@@ -276,6 +278,35 @@ export class WorldScene extends Phaser.Scene {
 
     const W = map.width * TILE_SIZE;
     const H = map.height * TILE_SIZE;
+    // Night: a dark-blue veil over the world (under names), with warm glows around lights.
+    this.night = this.add.rectangle(0, 0, W, H, 0x0a0f2c, 0).setOrigin(0, 0).setDepth(LABEL_DEPTH - 10);
+    this.mapLayer.push(this.night);
+    this.glows = [];
+    const indoor = !weatherRegion(map.theme);
+    this.indoorDim = indoor ? (map.dungeon ? 0.32 : 0.22) : 0;
+    for (const o of map.objects) {
+      if (o.kind !== 'prop' || !['lamp', 'torch', 'campfire'].includes(o.type)) continue;
+      const key = this.canvasTexture('glow', () => {
+        const c = document.createElement('canvas');
+        c.width = c.height = 128;
+        const ctx = c.getContext('2d')!;
+        const grad = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
+        grad.addColorStop(0, 'rgba(255,200,120,1)');
+        grad.addColorStop(0.45, 'rgba(255,170,90,0.45)');
+        grad.addColorStop(1, 'rgba(255,150,60,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 128, 128);
+        return c;
+      });
+      const g = this.add
+        .image((o.x + 0.5) * TILE_SIZE, (o.y + 0.5) * TILE_SIZE, key)
+        .setScale(o.type === 'campfire' ? 1.6 : 1.1)
+        .setAlpha(0)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(LABEL_DEPTH - 9);
+      this.glows.push(g);
+      this.mapLayer.push(g);
+    }
     const ground = this.add.image(0, 0, this.canvasTexture(`ground:${map.id}`, () => renderGround(map))).setOrigin(0, 0).setDepth(-10);
     this.mapLayer.push(ground);
 
@@ -777,8 +808,23 @@ export class WorldScene extends Phaser.Scene {
     av.bubble?.setPosition(rx, ry - 62 - lift);
   }
 
+  private night: Phaser.GameObjects.Rectangle | null = null;
+  private glows: Phaser.GameObjects.Image[] = [];
+  private indoorDim = 0;
+
+  /** Darkness from the time of day (outdoors) or a fixed dimness (caves, dungeons). */
+  private updateLighting(time: number): void {
+    if (!this.night) return;
+    const dark = this.indoorDim || darknessAt(this.client.serverNow());
+    this.night.setFillStyle(0x0a0f2c, dark);
+    const flicker = 0.85 + Math.sin(time / 130) * 0.05 + Math.sin(time / 47) * 0.04;
+    const glow = Math.min(0.5, (dark + (this.indoorDim ? 0.15 : 0)) * 0.75) * flicker;
+    for (const g of this.glows) g.setAlpha(glow * 1.6);
+  }
+
   override update(time: number): void {
     const client = this.client;
+    this.updateLighting(time);
     // Phaser's delta is smoothed toward 60 FPS; movement must follow real time
     // or slow devices would walk slower than the server allows.
     const nowMs = performance.now();

@@ -769,5 +769,331 @@
     "dmg": 1.5
    }
   ]
+ },
+ {
+  "id": "snow_wolf",
+  "name": "Snow Wolf",
+  "hpMult": 1.1,
+  "atkMult": 1.3,
+  "defMult": 1.0,
+  "speed": 92,
+  "aggro": 7,
+  "range": 1.3,
+  "cooldownMs": 1100,
+  "xpMult": 1.3,
+  "gold": [
+   6,
+   14
+  ],
+  "drops": [
+   {
+    "itemId": "wolf_pelt",
+    "chance": 0.5,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "frost_shard",
+    "chance": 0.08,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#e8eef4",
+   "size": 1.15
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "ice_wisp",
+  "name": "Ice Wisp",
+  "hpMult": 0.85,
+  "atkMult": 1.4,
+  "defMult": 0.8,
+  "speed": 85,
+  "aggro": 7,
+  "range": 4.5,
+  "cooldownMs": 1700,
+  "xpMult": 1.35,
+  "gold": [
+   6,
+   14
+  ],
+  "drops": [
+   {
+    "itemId": "frost_shard",
+    "chance": 0.25,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "bat",
+   "color": "#9fd8ff",
+   "size": 1.0
+  },
+  "respawnMs": 50000,
+  "magic": true
+ },
+ {
+  "id": "frost_yeti",
+  "name": "Frost Yeti",
+  "hpMult": 2.0,
+  "atkMult": 1.45,
+  "defMult": 1.6,
+  "speed": 52,
+  "aggro": 5,
+  "range": 1.5,
+  "cooldownMs": 1800,
+  "xpMult": 1.8,
+  "gold": [
+   12,
+   26
+  ],
+  "drops": [
+   {
+    "itemId": "yeti_fur",
+    "chance": 0.6,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "frost_shard",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 0.04,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#dfe8f0",
+   "size": 1.5
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "bog_lurker",
+  "name": "Bog Lurker",
+  "hpMult": 1.6,
+  "atkMult": 1.35,
+  "defMult": 1.3,
+  "speed": 50,
+  "aggro": 4,
+  "range": 1.4,
+  "cooldownMs": 1500,
+  "xpMult": 1.5,
+  "gold": [
+   10,
+   20
+  ],
+  "drops": [
+   {
+    "itemId": "bog_moss",
+    "chance": 0.6,
+    "min": 1,
+    "max": 3
+   },
+   {
+    "itemId": "slime_gel",
+    "chance": 0.5,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "slime",
+   "color": "#4a6a3a",
+   "size": 1.45
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "swamp_troll",
+  "name": "Swamp Troll",
+  "hpMult": 1.9,
+  "atkMult": 1.5,
+  "defMult": 1.5,
+  "speed": 58,
+  "aggro": 6,
+  "range": 1.5,
+  "cooldownMs": 1600,
+  "xpMult": 1.75,
+  "gold": [
+   14,
+   30
+  ],
+  "drops": [
+   {
+    "itemId": "bog_moss",
+    "chance": 0.4,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "swamp_pearl",
+    "chance": 0.06,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "orc_tusk",
+    "chance": 0.3,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "orc",
+   "color": "#3f7a6a",
+   "size": 1.4
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "marsh_witch",
+  "name": "Marsh Witch",
+  "hpMult": 1.1,
+  "atkMult": 1.6,
+  "defMult": 1.1,
+  "speed": 55,
+  "aggro": 8,
+  "range": 5,
+  "cooldownMs": 1800,
+  "xpMult": 1.8,
+  "gold": [
+   16,
+   32
+  ],
+  "drops": [
+   {
+    "itemId": "dark_essence",
+    "chance": 0.12,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "swamp_pearl",
+    "chance": 0.08,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "mirewitch_charm",
+    "chance": 0.02,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "mage",
+   "color": "#3a6a3a",
+   "size": 1.0
+  },
+  "respawnMs": 50000,
+  "magic": true
+ },
+ {
+  "id": "frost_giant",
+  "name": "Hrimnir the Frost Giant",
+  "hpMult": 14,
+  "atkMult": 1.6,
+  "defMult": 1.7,
+  "speed": 48,
+  "aggro": 7,
+  "range": 2.0,
+  "cooldownMs": 2000,
+  "xpMult": 18,
+  "gold": [
+   400,
+   700
+  ],
+  "drops": [
+   {
+    "itemId": "frostbound_ring",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "giants_mantle",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "frost_shard",
+    "chance": 1,
+    "min": 3,
+    "max": 6
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1,
+    "min": 3,
+    "max": 5
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 1,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "orc",
+   "color": "#a8c8e8",
+   "size": 2.4
+  },
+  "respawnMs": 1800000,
+  "boss": true,
+  "abilities": [
+   {
+    "id": "glacier_stomp",
+    "name": "Glacier Stomp",
+    "kind": "nova",
+    "everyMs": 11000,
+    "windupMs": 1800,
+    "radius": 3.5,
+    "dmgMult": 1.8
+   },
+   {
+    "id": "ice_boulder",
+    "name": "Ice Boulder",
+    "kind": "slam",
+    "everyMs": 7000,
+    "windupMs": 1500,
+    "radius": 2.2,
+    "dmgMult": 2.1
+   },
+   {
+    "id": "winter_call",
+    "name": "Call of Winter",
+    "kind": "summon",
+    "atHp": [
+     0.6,
+     0.3
+    ],
+    "monster": "snow_wolf",
+    "count": 3,
+    "level": 24
+   },
+   {
+    "id": "frenzy",
+    "name": "Frenzy",
+    "kind": "enrage",
+    "atHp": [
+     0.2
+    ],
+    "dmg": 1.4
+   }
+  ]
  }
 ]

@@ -265,6 +265,11 @@ export class World {
     return rt;
   }
 
+  /** Every loaded map runtime. */
+  runtimes(): IterableIterator<MapRuntime> {
+    return this.maps.values();
+  }
+
   /** The runtime a player is currently in. */
   runtimeOf(p: Player): MapRuntime {
     return this.runtime(p.mapId, p.instanceOwner);

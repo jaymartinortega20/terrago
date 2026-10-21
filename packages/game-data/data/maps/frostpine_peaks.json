@@ -1,0 +1,1133 @@
+{
+ "id": "frostpine_peaks",
+ "name": "Frostpine Peaks",
+ "safeZone": false,
+ "music": "snow",
+ "spawn": {
+  "x": 2,
+  "y": 25,
+  "dir": "right"
+ },
+ "portals": [
+  {
+   "id": "fp_west",
+   "x": 0,
+   "y": 24,
+   "w": 1,
+   "h": 3,
+   "to": "irondeep_entrance",
+   "toX": 37,
+   "toY": 19,
+   "toDir": "left",
+   "label": "Irondeep Mine"
+  }
+ ],
+ "theme": "snow",
+ "fishing": "lake",
+ "levels": [
+  20,
+  30
+ ],
+ "respawn": {
+  "mapId": "frostpine_peaks",
+  "x": 8,
+  "y": 22
+ },
+ "spawns": [
+  {
+   "monster": "snow_wolf",
+   "level": [
+    20,
+    23
+   ],
+   "count": 7,
+   "area": {
+    "x": 16,
+    "y": 28,
+    "w": 24,
+    "h": 14
+   }
+  },
+  {
+   "monster": "ice_wisp",
+   "level": [
+    22,
+    25
+   ],
+   "count": 5,
+   "area": {
+    "x": 4,
+    "y": 30,
+    "w": 14,
+    "h": 12
+   }
+  },
+  {
+   "monster": "frost_yeti",
+   "level": [
+    25,
+    28
+   ],
+   "count": 4,
+   "area": {
+    "x": 44,
+    "y": 16,
+    "w": 14,
+    "h": 22
+   }
+  },
+  {
+   "monster": "frost_giant",
+   "level": [
+    30,
+    30
+   ],
+   "count": 1,
+   "area": {
+    "x": 49,
+    "y": 5,
+    "w": 6,
+    "h": 4
+   }
+  }
+ ],
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "################################################################",
+  "################################################################",
+  "######nnnnnnnn#####nnnnnnn#####nnnnnnnn#####nnnnnnn######nnnnn##",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn::::::::::::::::nnn#",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn::::::::::::::::nnn#",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::nnn#",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::nn##",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::nn##",
+  "#####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::n###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::n###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::nn##",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn===n::::::::::::::::nn##",
+  "###nnnnnnnnn===============================nnnnnnnnnnnnnnnnnnnn#",
+  "##nnnnnnnnnn===============================nnnnnnnnnnnnnnnnnnnn#",
+  "###nnnnnnnnn===============================nnnnnnnnnnnnnnnnnnnn#",
+  "####nnnnnnnn===nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "####nnnnnnnn===nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "#####nnnnnnn===nnnnnnnnnnnnnnnnIIIIIIInnnnnnnnnnnnnnnnnnnnnnn###",
+  "####:::::::::==nnnnnnnnnnnnnIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn###",
+  "####:::::::::==nnnnnnnnnnnnIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn##",
+  "###n:::::::::==nnnnnnnnnnnIIIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnn##",
+  "###n:::::::::==nnnnnnnnnnnIIIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn#",
+  "##nn:::::::::==nnnnnnnnnnnIIIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn#",
+  "###nnnnnnnnn===nnnnnnnnnnnIIIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn#",
+  "===============nnnnnnnnnnnIIIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnn##",
+  "===============nnnnnnnnnnnnIIIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn##",
+  "===============nnnnnnnnnnnnnIIIIIIIIIIIIInnnnnnnnnnnnnnnnnnnn###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnIIIIIIInnnnnnnnnnnnnnnnnnnnnnn###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "#####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "#######nnnnnn######nnnnnn#######nnnnnn#######nnnnnn######nnnn###",
+  "#########nn##########nnn##########nn###########nn##########nn###",
+  "################################################################",
+  "################################################################"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 5,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 8,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 11,
+   "y": 23,
+   "text": "Frostpine Peaks. Wolves on the slopes, yetis by the lake. The Frost Giant walks the northern plateau."
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 45,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 58,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 43,
+   "y": 11,
+   "text": "The Giant's Plateau. Turn back unless you brought friends."
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 17,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 49,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 6,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 32,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 51,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 54,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 57,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 52,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 29,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 35,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 28,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 5,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 45,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 47,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 48,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 9,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 53,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 51,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 25,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 47,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 29,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 45,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 13,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 23,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 23,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 27,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 28,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 17,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 50,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 15,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 7,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 49,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 59,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 45,
+   "y": 21
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 23,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 25,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 8,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 51,
+   "y": 21
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 48,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 19,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 37,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 10,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 10,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 27,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 18,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 10,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 39,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 46,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 33,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 61,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 15,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 17,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 26,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 55,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 57,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 20,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 48,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 27,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 34,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 33,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 17,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 22,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 36,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 32,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 52,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 35,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 39,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 19,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 57,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 5,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 57,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 24,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 12,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 41,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 17,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 5,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 32,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 53,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 8,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 44,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 33,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 58,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 31,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 30,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 20,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 17,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 53,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 7,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 27,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 43,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 49,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 45,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 31,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 13,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 39,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 5,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 59,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 24,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 54,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 54,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 56,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 11,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 54,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 60,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 13,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 10,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 47,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 17,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 29,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 15,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 22,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 60,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 22,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 50,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 59,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 55,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 47,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 19,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "tree_pine",
+   "x": 45,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 20,
+   "y": 37
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "rock_silver",
+   "x": 21,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "rock_silver",
+   "x": 49,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "rock_gold",
+   "x": 12,
+   "y": 3,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "rock_silver",
+   "x": 25,
+   "y": 8,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "rock_silver",
+   "x": 48,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "rock_silver",
+   "x": 30,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "rock_silver",
+   "x": 6,
+   "y": 14,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "rock_crystal",
+   "x": 23,
+   "y": 35,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "rock_gold",
+   "x": 37,
+   "y": 5,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "rock_gold",
+   "x": 56,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "rock_silver",
+   "x": 10,
+   "y": 35,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "rock_crystal",
+   "x": 23,
+   "y": 27,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "rock_silver",
+   "x": 34,
+   "y": 40,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "rock_crystal",
+   "x": 59,
+   "y": 32,
+   "solid": true
+  },
+  {
+   "id": "n14",
+   "type": "rock_gold",
+   "x": 45,
+   "y": 13,
+   "solid": true
+  },
+  {
+   "id": "n15",
+   "type": "rock_mithril",
+   "x": 39,
+   "y": 31,
+   "solid": true
+  },
+  {
+   "id": "n16",
+   "type": "rock_silver",
+   "x": 22,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n17",
+   "type": "rock_silver",
+   "x": 50,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n18",
+   "type": "plant_silverleaf",
+   "x": 10,
+   "y": 11,
+   "solid": false
+  },
+  {
+   "id": "n19",
+   "type": "plant_silverleaf",
+   "x": 16,
+   "y": 34,
+   "solid": false
+  },
+  {
+   "id": "n20",
+   "type": "tree_hardwood",
+   "x": 22,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n21",
+   "type": "plant_silverleaf",
+   "x": 17,
+   "y": 7,
+   "solid": false
+  },
+  {
+   "id": "n22",
+   "type": "tree_hardwood",
+   "x": 33,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n23",
+   "type": "tree_hardwood",
+   "x": 20,
+   "y": 31,
+   "solid": true
+  },
+  {
+   "id": "n24",
+   "type": "plant_silverleaf",
+   "x": 49,
+   "y": 40,
+   "solid": false
+  },
+  {
+   "id": "n25",
+   "type": "tree_hardwood",
+   "x": 21,
+   "y": 27,
+   "solid": true
+  },
+  {
+   "id": "n26",
+   "type": "plant_silverleaf",
+   "x": 15,
+   "y": 30,
+   "solid": false
+  },
+  {
+   "id": "n27",
+   "type": "plant_silverleaf",
+   "x": 38,
+   "y": 7,
+   "solid": false
+  },
+  {
+   "id": "n28",
+   "type": "plant_silverleaf",
+   "x": 48,
+   "y": 19,
+   "solid": false
+  },
+  {
+   "id": "n29",
+   "type": "tree_hardwood",
+   "x": 52,
+   "y": 40,
+   "solid": true
+  },
+  {
+   "id": "n30",
+   "type": "plant_silverleaf",
+   "x": 50,
+   "y": 19,
+   "solid": false
+  },
+  {
+   "id": "n31",
+   "type": "tree_hardwood",
+   "x": 37,
+   "y": 33,
+   "solid": true
+  }
+ ]
+}

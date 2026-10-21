@@ -405,13 +405,13 @@
  {
   "id": "q_ember",
   "name": "Heart of the Mountain",
-  "giver": "warden_sela",
+  "giver": "scout_bjorna",
   "turnIn": "lift_gus",
-  "requires": "q_crypt",
+  "requires": "q_peaks",
   "description": "A furnace-hot hollow has cracked open beside Irondeep. Level 26+ and a strong party recommended.",
   "intro": [
-   "The miners broke into something hot beside Irondeep. Gus says the walls glow.",
-   "Something called the Magma Tyrant rules it. Bring your best friends and your best armor."
+   "From up here you can see it \u2014 smoke from a crack beside Irondeep.",
+   "The miners call it Ember Hollow. Something called the Magma Tyrant rules it. Bring your best friends and your best armor."
   ],
   "outro": [
    "The Tyrant's cold? Then my lift stops shaking. Ha!",
@@ -443,6 +443,132 @@
     {
      "itemId": "enhancement_stone",
      "quantity": 6
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_peaks",
+  "name": "Into the Frostpine",
+  "giver": "lift_gus",
+  "turnIn": "scout_bjorna",
+  "requires": "q_crypt",
+  "description": "The mountain path east of the mine yard climbs into snow. Level 20+ recommended.",
+  "intro": [
+   "You've got the look of someone who's outgrown the forest.",
+   "Take the east path from my yard up into the Frostpine Peaks. Bjorna the scout will want to meet you."
+  ],
+  "outro": [
+   "Six wolves and two yetis? The slopes are safer already.",
+   "When you're ready for real heat, there's a hollow by Irondeep I need to tell you about."
+  ],
+  "steps": [
+   {
+    "text": "Climb into the Frostpine Peaks (east path from the Irondeep yard)",
+    "type": "visit",
+    "count": 1,
+    "target": "frostpine_peaks",
+    "where": {
+     "map": "irondeep_entrance",
+     "x": 39,
+     "y": 19
+    }
+   },
+   {
+    "text": "Defeat 6 Snow Wolves",
+    "type": "kill",
+    "count": 6,
+    "target": "snow_wolf",
+    "where": {
+     "map": "frostpine_peaks",
+     "x": 22,
+     "y": 30
+    }
+   },
+   {
+    "text": "Defeat 2 Frost Yetis (by the frozen lake)",
+    "type": "kill",
+    "count": 2,
+    "target": "frost_yeti",
+    "where": {
+     "map": "frostpine_peaks",
+     "x": 40,
+     "y": 16
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 900,
+   "xp": 5200,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 3
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_mire",
+  "name": "Witches of the Mire",
+  "giver": "lift_gus",
+  "turnIn": "hunter_moss",
+  "requires": "q_ember",
+  "description": "East of Sunfield, the land sinks into Mirefen Swamp. Level 28+ recommended.",
+  "intro": [
+   "One last job, legend. The farmers say the swamp east of Sunfield is creeping closer.",
+   "Hunter Moss is out there. Help her thin out the trolls and the witches."
+  ],
+  "outro": [
+   "Five trolls, three witches. The mire's quieter than it's been in years.",
+   "Keep that charm close if you find one. They whisper, but they protect."
+  ],
+  "steps": [
+   {
+    "text": "Enter Mirefen Swamp (east lane of Sunfield)",
+    "type": "visit",
+    "count": 1,
+    "target": "mirefen_swamp",
+    "where": {
+     "map": "sunfield_plains",
+     "x": 59,
+     "y": 21
+    }
+   },
+   {
+    "text": "Defeat 5 Swamp Trolls",
+    "type": "kill",
+    "count": 5,
+    "target": "swamp_troll",
+    "where": {
+     "map": "mirefen_swamp",
+     "x": 26,
+     "y": 30
+    }
+   },
+   {
+    "text": "Defeat 3 Marsh Witches (eastern ruins)",
+    "type": "kill",
+    "count": 3,
+    "target": "marsh_witch",
+    "where": {
+     "map": "mirefen_swamp",
+     "x": 50,
+     "y": 14
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 2500,
+   "xp": 16000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 6
+    },
+    {
+     "itemId": "swamp_pearl",
+     "quantity": 2
     }
    ]
   }

@@ -4756,5 +4756,125 @@
   "tradable": false,
   "bind": "pickup",
   "maxDurability": null
+ },
+ {
+  "id": "frost_shard",
+  "name": "Frost Shard",
+  "description": "A sliver of ice that never melts. Enchanters prize it.",
+  "icon": "essence:9fd8ff",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 30,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "yeti_fur",
+  "name": "Yeti Fur",
+  "description": "Thick white fur, warm as a hearth.",
+  "icon": "hide:eef2f6",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 22,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "bog_moss",
+  "name": "Bog Moss",
+  "description": "Spongy, smelly, and surprisingly useful in potions.",
+  "icon": "fiber",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 14,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "swamp_pearl",
+  "name": "Swamp Pearl",
+  "description": "A murky green pearl from the deep mire.",
+  "icon": "gem:6ad0a0",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 60,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "frostbound_ring",
+  "name": "Frostbound Ring",
+  "description": "Cut from the Frost Giant's crown. It frosts your breath.",
+  "icon": "armor:ring:5",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 500,
+  "levelRequirement": 26,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "atk": 11,
+    "matk": 11
+   }
+  }
+ },
+ {
+  "id": "giants_mantle",
+  "name": "Giant's Mantle",
+  "description": "A cloak that fell from enormous shoulders. Still fits, somehow.",
+  "icon": "armor:cape:5",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 450,
+  "levelRequirement": 26,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 300,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "def": 8,
+    "mdef": 11,
+    "agi": 3
+   }
+  }
+ },
+ {
+  "id": "mirewitch_charm",
+  "name": "Mirewitch Charm",
+  "description": "A knot of bog-iron and green glass. Whispers at night.",
+  "icon": "armor:necklace:5",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 300,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": null,
+  "equip": {
+   "slot": "necklace",
+   "stats": {
+    "hp": 88,
+    "vit": 4
+   }
+  }
  }
 ]

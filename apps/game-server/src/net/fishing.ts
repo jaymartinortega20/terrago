@@ -1,6 +1,6 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import { fishFor, getItem } from '@terrago/game-data';
-import { FISHING_STEP_MS, fishingZone, rollQuality, simulateFishing, timeOfDay, type FishDef, type FishingParams, type FishingRound } from '@terrago/shared';
+import { FISHING_STEP_MS, isWet, weatherAt, fishingZone, rollQuality, simulateFishing, timeOfDay, type FishDef, type FishingParams, type FishingRound } from '@terrago/shared';
 import { GameError } from '../db';
 import { castLine, landFish } from '../services/gathering';
 import type { Player } from '../world/player';
@@ -55,7 +55,8 @@ export async function cast(deps: GameplayDeps, p: Player, table: string, prefer?
     id: randomUUID(),
     fish,
     params: { seed: randomInt(1, 2_000_000_000), difficulty: fish.difficulty, zone: fishingZone(paid.rodTier, paid.fishing), maxSteps: 600 },
-    biteAt: now + 1800 + randomInt(0, 4500),
+    // Fish bite faster in the rain.
+    biteAt: now + Math.round((1800 + randomInt(0, 4500)) * (isWet(weatherAt(deps.world.runtimeOf(p).def.theme, now)) ? 0.6 : 1)),
     hookedAt: null,
     state: 'waiting',
     timer: null,

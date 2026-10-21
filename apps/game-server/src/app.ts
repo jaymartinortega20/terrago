@@ -17,7 +17,7 @@ import { chatCommand, onLeave as socialLeave } from './net/social';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
-import { combatHooks, loadMapObjects, onMapEntered, type GameplayDeps } from './net/gameplay';
+import { combatHooks, loadMapObjects, onMapEntered, rainTick, type GameplayDeps } from './net/gameplay';
 
 export interface GameServer {
   config: Config;
@@ -100,6 +100,8 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
 
   const saveTimer = setInterval(() => void world.saveDirty(), BALANCE.persistence.positionSaveIntervalMs);
   const energyTimer = setInterval(() => world.pushEnergy(), 5_000);
+  const rainTimer = setInterval(() => void rainTick({ pool, world, log }).catch((err) => log.error('rain_tick_failed', { err })), 60_000);
+  rainTimer.unref();
 
   await new Promise<void>((resolve) => http.listen(config.port, config.host, resolve));
   const addr = http.address();
@@ -121,6 +123,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
         if (loopTimer) clearTimeout(loopTimer);
         clearInterval(saveTimer);
         clearInterval(energyTimer);
+        clearInterval(rainTimer);
         await world.shutdown();
         io.close();
         await chatLog.close();

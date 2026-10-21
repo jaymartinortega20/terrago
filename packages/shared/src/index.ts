@@ -14,3 +14,4 @@ export * from './skills';
 export * from './farming';
 export * from './gathering';
 export * from './combat';
+export * from './environment';
