@@ -229,7 +229,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       <label className="mt-2 flex items-center gap-2 text-sm">
         <input type="checkbox" checked={s.muted} onChange={(e) => setS({ ...s, muted: e.target.checked })} /> Mute all
       </label>
-      <p className="mt-1 text-xs text-wood-dark/70">Music and sound effects arrive in a later version; your levels are saved now.</p>
+      <p className="mt-1 text-xs text-wood-dark/70">Music and sounds start after your first click or key press. Levels are saved in this browser.</p>
       <h3 className="mt-4 font-bold">Connection</h3>
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>

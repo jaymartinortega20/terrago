@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { QUESTS, getCrop, getItem, getMap, getMonster, getNode, getQuest } from '@terrago/game-data';
 import { itemIcon } from '../art/world';
+import { audio, trackFor } from '../audio';
 import { monsterSheet } from '../art/monsters';
 import { mountSheet } from '../art/mounts';
 import {
@@ -20,6 +21,7 @@ import {
   type WorldObject,
   darknessAt,
   weatherRegion,
+  weatherAt,
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
 import { nodeArt } from '../art/nodes';
@@ -276,6 +278,9 @@ export class WorldScene extends Phaser.Scene {
     for (const id of [...this.monsterViews.keys()]) this.removeMonster(id);
     if (this.local) this.destroyAvatar(this.local);
 
+    audio.sfx('portal');
+    this.areaTrack = trackFor(map.music, map.theme);
+    this.nextSoundCheck = 0;
     const W = map.width * TILE_SIZE;
     const H = map.height * TILE_SIZE;
     // Night: a dark-blue veil over the world (under names), with warm glows around lights.
@@ -649,6 +654,8 @@ export class WorldScene extends Phaser.Scene {
 
   /** A boss winds up: a red circle fills in, then flashes on impact. Step out! */
   private showTelegraph(t: { x: number; y: number; r: number; ms: number; name: string }): void {
+    audio.sfx('telegraph');
+    this.time.delayedCall(t.ms, () => audio.sfx('boom'));
     const ring = this.add.circle(t.x, t.y, t.r, 0xe0483a, 0.12).setStrokeStyle(2, 0xff6a5a, 0.9).setDepth(-3);
     const fill = this.add.circle(t.x, t.y, t.r, 0xe0483a, 0.35).setDepth(-3).setScale(0.05);
     const label = this.add
@@ -674,6 +681,14 @@ export class WorldScene extends Phaser.Scene {
   private showCombat(events: CombatEvent[]): void {
     const me = this.client.ui.get().self?.characterId;
     for (const e of events) {
+      if (e.s === me && e.t !== me) {
+        if (e.k === 'crit') audio.sfx('crit');
+        else if (e.k === 'hit') audio.sfx(e.sk && ['fireball', 'smite', 'frost_nova', 'arcane'].some((k) => e.sk!.includes(k)) ? 'magic' : 'hit');
+        else if (e.k === 'miss') audio.sfx('miss');
+      } else if (e.t === me) {
+        if (e.k === 'hit' || e.k === 'crit') audio.sfx('hurt');
+        else if (e.k === 'heal') audio.sfx('heal');
+      } else if (e.k === 'death' && e.t === this.client.ui.get().targetId) audio.sfx('death');
       const pos = this.entityPos(e.t);
       if (!pos) continue;
       if (e.k === 'death') continue;
@@ -808,6 +823,29 @@ export class WorldScene extends Phaser.Scene {
     av.bubble?.setPosition(rx, ry - 62 - lift);
   }
 
+  private areaTrack: string | null = null;
+  private nextSoundCheck = 0;
+
+  /** Pick music (boss fights get their own) and weather/night ambience, once a second. */
+  private updateSound(time: number): void {
+    if (time < this.nextSoundCheck || !this.client.map) return;
+    this.nextSoundCheck = time + 1000;
+    const c = this.client;
+    const boss = [...c.monsters.values()].some((m) => m.info.boss && Math.hypot(m.x - c.pos.x, m.y - c.pos.y) < 12 * TILE_SIZE);
+    audio.playMusic(boss ? 'boss' : this.areaTrack);
+    const now = c.serverNow();
+    const theme = c.map?.theme;
+    let amb: string | null = null;
+    if (weatherRegion(theme)) {
+      const w = weatherAt(theme, now);
+      if (w === 'rain' || w === 'storm') amb = w;
+      else if (w === 'snow' || (w === 'fog' && theme === 'snow')) amb = 'wind';
+      else if (darknessAt(now) > 0.4) amb = 'night';
+      if (w === 'storm' && Math.random() < 0.06) audio.thunder();
+    }
+    audio.setAmbient(amb);
+  }
+
   private night: Phaser.GameObjects.Rectangle | null = null;
   private glows: Phaser.GameObjects.Image[] = [];
   private indoorDim = 0;
@@ -825,6 +863,7 @@ export class WorldScene extends Phaser.Scene {
   override update(time: number): void {
     const client = this.client;
     this.updateLighting(time);
+    this.updateSound(time);
     // Phaser's delta is smoothed toward 60 FPS; movement must follow real time
     // or slow devices would walk slower than the server allows.
     const nowMs = performance.now();

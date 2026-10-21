@@ -38,6 +38,7 @@ import {
 } from '@terrago/shared';
 import { api, GAME_SERVER_URL } from '@/lib/api';
 import { initialUi, pushNotice, Store, type UiState } from '../store';
+import { audio } from '../audio';
 
 interface Sample {
   t: number;
@@ -239,10 +240,12 @@ export class GameClient {
     socket.on('invite', (inv) => this.ui.set((s) => ({ invites: [...s.invites.filter((x) => !(x.kind === inv.kind && x.fromId === inv.fromId)), inv].slice(-4) })));
     socket.on('party', (party) => this.ui.set({ party }));
     socket.on('achievement', (a) => {
+      audio.sfx('achievement');
       this.ui.set({ achievementToast: a });
       setTimeout(() => this.ui.get().achievementToast === a && this.ui.set({ achievementToast: null }), 5000);
     });
     socket.on('announce', (text) => {
+      audio.sfx('quest');
       this.ui.set({ announcement: text });
       setTimeout(() => this.ui.get().announcement === text && this.ui.set({ announcement: null }), 12000);
     });
@@ -260,15 +263,25 @@ export class GameClient {
       this.emit('look', id);
     });
     socket.on('chat', (m) => {
+      if (m.channel === 'whisper' && m.fromId !== this.ui.get().self?.characterId) audio.sfx('chat');
       this.ui.set((s) => ({ chat: [...s.chat.slice(-79), m] }));
       this.emit('chat', m);
     });
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
     socket.on('inventory:update', (inventory) => this.ui.set((s) => ({ inventory: { ...inventory, equipment: inventory.equipment ?? s.inventory?.equipment ?? [] } })));
-    socket.on('notice', (n) => pushNotice(this.ui, n.kind, n.text));
+    socket.on('notice', (n) => {
+      pushNotice(this.ui, n.kind, n.text);
+      if (n.kind === 'error') audio.sfx(/defeated/i.test(n.text) ? 'death' : 'error');
+      else if (/Level up|level \d+!/.test(n.text)) audio.sfx('levelup');
+      else if (/Trade complete/.test(n.text)) audio.sfx('trade');
+      else if (/Gold/.test(n.text)) audio.sfx('coin');
+    });
     socket.on('fish:bite', ({ id }) => {
       const f = this.ui.get().fishing;
-      if (f?.id === id && f.phase === 'waiting') this.ui.set({ fishing: { ...f, phase: 'bite' } });
+      if (f?.id === id && f.phase === 'waiting') {
+        this.ui.set({ fishing: { ...f, phase: 'bite' } });
+        audio.sfx('bite');
+      }
     });
     socket.on('objects:set', (list) => {
       for (const o of list) this.putObject(o);
@@ -585,6 +598,7 @@ export class GameClient {
       await this.request('quest:accept', { npcId, questId });
       this.ui.set({ questOffer: null });
       pushNotice(this.ui, 'success', 'Quest accepted!');
+      audio.sfx('open');
     } catch (e) {
       pushNotice(this.ui, 'error', (e as Error).message);
     }
@@ -594,6 +608,7 @@ export class GameClient {
     try {
       const r = await this.request<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>('quest:complete', { npcId, questId });
       this.ui.set({ questReward: { questId, ...r } });
+      audio.sfx('quest');
     } catch (e) {
       pushNotice(this.ui, 'error', (e as Error).message);
     }
@@ -741,7 +756,10 @@ export class GameClient {
     this.socket?.emit('fish:reel', { id: round.id, toggles, steps }, (res) => {
       this.ui.set({ fishing: null });
       if (!res.ok) pushNotice(this.ui, 'error', res.error);
-      else pushNotice(this.ui, res.data.caught ? 'success' : 'error', res.data.message, 4000);
+      else {
+        pushNotice(this.ui, res.data.caught ? 'success' : 'error', res.data.message, 4000);
+        audio.sfx(res.data.caught ? 'catch' : 'splash');
+      }
     });
   }
 
@@ -751,8 +769,10 @@ export class GameClient {
     this.ui.set({ fishing: null });
   }
 
-  craft(recipeId: string, times: number) {
-    return this.run('craft', { recipeId, times });
+  async craft(recipeId: string, times: number) {
+    const r = await this.run('craft', { recipeId, times });
+    if (r) audio.sfx('craft');
+    return r;
   }
 
   liftFloors(npcId: string): Promise<{ floors: number[] }> {
@@ -774,6 +794,15 @@ export class GameClient {
         return;
       }
       this.emit('acted', { tx, ty, message: res.data.message });
+      const at = this.objectAt(tx, ty);
+      const msg = res.data.message ?? '';
+      if (res.data.fishing) audio.sfx('splash');
+      else if (at?.kind === 'node') audio.sfx(at.type.startsWith('rock') ? 'mine' : at.type.startsWith('tree') ? 'chop' : 'pick');
+      else if (at?.kind === 'drop') audio.sfx('pick');
+      else if (/^Harvested/.test(msg)) audio.sfx('harvest');
+      else if (/^Watered/.test(msg)) audio.sfx('water');
+      else if (/^Planted|^Mixed/.test(msg)) audio.sfx('plant');
+      else if (at?.kind === 'plot') audio.sfx('dig');
       if (res.data.fishing) {
         this.ui.set({ fishing: { id: res.data.fishing.id, x: tx, y: ty, phase: 'waiting', round: null } });
         return;

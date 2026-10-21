@@ -26,7 +26,7 @@ import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from '
 declare global {
   interface Window {
     /** Read-only debug handle used by automated tests. */
-    __terrago?: { client: GameClient; game?: Phaser.Game };
+    __terrago?: { client: GameClient; game?: Phaser.Game; audio?: typeof audio };
   }
 }
 
@@ -54,7 +54,7 @@ export default function GameView({
     audio.init();
     const c = createClient(characterId);
     c.connect();
-    window.__terrago = { client: c };
+    window.__terrago = { client: c, audio };
     let game: Phaser.Game | null = null;
     let cancelled = false;
     const start = async () => {
@@ -81,6 +81,8 @@ export default function GameView({
     setClient(c);
     return () => {
       cancelled = true;
+      audio.playMusic(null);
+      audio.setAmbient(null);
       game?.destroy(true);
       game = null;
       c.disconnect();
@@ -113,7 +115,10 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
   const actionHint = useStore(ui, (s) => s.actionHint);
   const interactHint = useStore(ui, (s) => s.interactHint);
 
-  const open = (p: Panel) => ui.set((s) => ({ panel: s.panel === p ? null : p }));
+  const open = (p: Panel) => {
+    audio.sfx('open');
+    ui.set((s) => ({ panel: s.panel === p ? null : p }));
+  };
   /** Hotbar: first press selects the slot, pressing a selected food eats it. */
   const pressSlot = (slot: number) => {
     const item = ui.get().inventory?.slots.find((s) => s.slot === slot);
