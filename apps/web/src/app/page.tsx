@@ -9,7 +9,7 @@ const FEATURES = [
     title: 'Farming',
     icon: 'carrot',
     status: 'Next: v0.2',
-    body: 'Claim a homestead in Sunfield Plains. Till, plant, water and harvest — crops keep growing while you are offline. Quality matters: a Gold-quality harvest is worth far more than a common one.',
+    body: 'Claim a homestead off the Whispering Fields lane. Till, plant, water and harvest — crops keep growing while you are offline. Quality matters: a Gold-quality harvest is worth far more than a common one.',
   },
   {
     id: 'combat',
@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'What can I do right now?',
-    a: 'TerraGo is in early development (v0.1). You can create a character, explore Greenhaven and Sunfield Plains with other players, chat, meet the townsfolk and manage your bag. Farming arrives next.',
+    a: 'TerraGo is in early development (v0.1). You can create a character, explore six maps from Oakhaven to the Infernal Caldera with other players, chat, meet the townsfolk and manage your bag. Farming arrives next.',
   },
   {
     q: 'Is my progress saved?',
@@ -117,17 +117,17 @@ export default function LandingPage() {
         <h2 className="text-outline text-3xl font-bold text-gold">The World</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {[
-            ['Greenhaven', 'The starter town and social heart of TerraGo. Shops, a tavern, the guild hall and a fountain everyone meets at.', 'Open'],
-            ['Sunfield Plains', 'Rolling farmland south of town where homesteads are being surveyed.', 'Open'],
-            ['Whisperwood Forest', 'Wolves, boars, herbs and hardwood. Levels 10–20.', 'Coming'],
-            ['Crystal Lake', 'The best fishing in the land — once the bridge is fixed.', 'Coming'],
-            ['Irondeep Mine', 'Floor after floor of ore, and things that bite in the dark.', 'Coming'],
-            ['Dragonspire', 'Where legends end. Or begin.', 'Endgame'],
+            ['Oakhaven Sanctuary', 'The safe town hub: quest givers, the blacksmith, crafting stations, the market and a pond full of rare catches.', 'Town'],
+            ['Whispering Fields', 'Slimes, goblins and wolves, levels 1–40. Gnarlfang guards the Job Trainer at the far end.', 'Lv 1–40'],
+            ['Desolate Crags', 'Cracked stone and living rock. Ore veins and the first upgrade gems.', 'Lv 41–70'],
+            ['Glacial Depths', 'Frozen caverns with rare ore and high-tier gems, guarded by frost giants.', 'Lv 71–99'],
+            ["Dragon's Peak", 'Level 100 drakes, dragon knights and champions.', 'Lv 100'],
+            ['The Infernal Caldera', 'Raid lair of Pyraxis, the Infernal Titan.', 'Raid'],
           ].map(([name, text, status]) => (
             <div key={name} className="px-panel-dark p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-gold">{name}</h3>
-                <span className={`text-xs ${status === 'Open' ? 'text-leaf' : 'text-parchment/60'}`}>{status}</span>
+                <span className={`text-xs ${status === 'Town' ? 'text-leaf' : 'text-parchment/60'}`}>{status}</span>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-parchment/85">{text}</p>
             </div>
@@ -140,7 +140,7 @@ export default function LandingPage() {
         <div className="px-panel-dark p-6 sm:p-8">
           <h2 className="text-3xl font-bold text-gold">Community</h2>
           <p className="mt-3 leading-relaxed text-parchment/90">
-            Every player you see in Greenhaven is a real person. Say hello at the fountain, form a party, start a guild. Chat has filters, rate limits, and mute, block and
+            Every player you see in Oakhaven is a real person. Say hello at the fountain, form a party, start a guild. Chat has filters, rate limits, and mute, block and
             report tools are on the roadmap — be kind, trade fair, and help newcomers find their feet.
           </p>
         </div>

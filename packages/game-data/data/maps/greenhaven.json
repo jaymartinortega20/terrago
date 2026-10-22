@@ -1,6 +1,6 @@
 {
  "id": "greenhaven",
- "name": "Greenhaven",
+ "name": "Oakhaven Sanctuary",
  "safeZone": true,
  "music": "town_greenhaven",
  "spawn": {
@@ -19,7 +19,7 @@
    "toX": 30,
    "toY": 2,
    "toDir": "down",
-   "label": "Sunfield Plains"
+   "label": "Whispering Fields"
   },
   {
    "id": "gh_north",
@@ -27,39 +27,15 @@
    "y": 0,
    "w": 4,
    "h": 1,
-   "to": "irondeep_entrance",
-   "toX": 20,
-   "toY": 27,
+   "to": "desolate_crags",
+   "toX": 31,
+   "toY": 45,
    "toDir": "up",
-   "label": "Irondeep Mine"
-  },
-  {
-   "id": "gh_west",
-   "x": 0,
-   "y": 21,
-   "w": 1,
-   "h": 4,
-   "to": "whisperwood",
-   "toX": 62,
-   "toY": 23,
-   "toDir": "left",
-   "label": "Whisperwood Forest"
-  },
-  {
-   "id": "gh_east",
-   "x": 63,
-   "y": 21,
-   "w": 1,
-   "h": 4,
-   "to": "crystal_lake",
-   "toX": 1,
-   "toY": 22,
-   "toDir": "right",
-   "label": "Crystal Lake"
+   "label": "Desolate Crags"
   }
  ],
  "theme": "meadow",
- "fishing": "pond",
+ "fishing": "lake",
  "levels": [
   1,
   5
@@ -443,21 +419,21 @@
    "type": "sign",
    "x": 29,
    "y": 3,
-   "text": "North: Irondeep Mine. Bring a pickaxe."
+   "text": "North: the Desolate Crags (Lv 41–70). Ore and gems. Bring a pickaxe."
   },
   {
    "kind": "prop",
    "type": "sign",
    "x": 4,
    "y": 20,
-   "text": "West: Whisperwood Forest (Lv 10–20). Hardwood, herbs — and wolves."
+   "text": "The western woods are closed. The road south leads to Whispering Fields."
   },
   {
    "kind": "prop",
    "type": "sign",
    "x": 59,
    "y": 20,
-   "text": "East: Crystal Lake. Best fishing in TerraGo."
+   "text": "The eastern road is closed. Fish the pond: Olan says it is full of rare catches."
   },
   {
    "kind": "prop",
@@ -524,7 +500,7 @@
    "type": "sign",
    "x": 35,
    "y": 44,
-   "text": "South gate: Sunfield Plains"
+   "text": "South gate: Whispering Fields (Lv 1–40). Master Aldric waits at the far end."
   },
   {
    "kind": "prop",

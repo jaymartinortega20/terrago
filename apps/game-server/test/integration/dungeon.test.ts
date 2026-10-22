@@ -42,16 +42,16 @@ describe('dungeons (v0.7)', () => {
     const A = await newPlayer(base, { classId: 'warrior' });
     const B = await newPlayer(base, { classId: 'acolyte' });
     for (const x of [A, B]) {
-      await db.query(`UPDATE characters SET level = 16, map_id = 'whisperwood', pos_x = $2, pos_y = $3 WHERE id = $1`, [x.character.id, tileCenter(11, 19).x, tileCenter(11, 19).y]);
+      await db.query(`UPDATE characters SET level = 16, map_id = 'sunfield_plains', pos_x = $2, pos_y = $3 WHERE id = $1`, [x.character.id, tileCenter(9, 56).x, tileCenter(9, 56).y]);
     }
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     const b = await enterWorld(base, B.browser.cookie, B.character.id);
     await ack(a.socket, 'party:invite', B.character.id);
     await ack(b.socket, 'invite:respond', { kind: 'party', fromId: A.character.id, accept: true });
 
-    const gate = getMap('whisperwood')!.portals.find((p) => p.id === 'gate_mossy_crypt')!;
-    const pa = await stepOnto(a.socket, A.character.id, 'whisperwood', gate.x + 1, gate.y);
-    const pb = await stepOnto(b.socket, B.character.id, 'whisperwood', gate.x + 1, gate.y);
+    const gate = getMap('sunfield_plains')!.portals.find((p) => p.id === 'gate_mossy_crypt')!;
+    const pa = await stepOnto(a.socket, A.character.id, 'sunfield_plains', gate.x + 1, gate.y);
+    const pb = await stepOnto(b.socket, B.character.id, 'sunfield_plains', gate.x + 1, gate.y);
     assert.equal(pa.mapId, 'dg_mossy_crypt');
     assert.equal(pb.mapId, 'dg_mossy_crypt');
     const rt = server.world.runtimeOf(pa);
@@ -114,7 +114,7 @@ describe('dungeons (v0.7)', () => {
     await leaveWorld(a.socket);
     await leaveWorld(b.socket);
     const again = await enterWorld(base, A.browser.cookie, A.character.id);
-    assert.equal(again.enter.map.id, 'whisperwood');
+    assert.equal(again.enter.map.id, 'sunfield_plains');
     await leaveWorld(again.socket);
   });
 });

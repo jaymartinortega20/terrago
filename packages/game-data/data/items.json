@@ -55,7 +55,7 @@
  {
   "id": "honey_bun",
   "name": "Lina's Honey Bun",
-  "description": "Baked by the Mayor herself, glazed with Sunfield honey. Restores 25 Energy.",
+  "description": "Baked by the Mayor herself, glazed with Whispering Fields honey. Restores 25 Energy.",
   "icon": "honey_bun",
   "category": "consumable",
   "rarity": "uncommon",
@@ -71,8 +71,8 @@
  },
  {
   "id": "greenhaven_charter",
-  "name": "Greenhaven Charter",
-  "description": "Proof of residence in Greenhaven, signed by Mayor Lina. Keep it safe.",
+  "name": "Oakhaven Charter",
+  "description": "Proof of residence in Oakhaven, signed by Mayor Lina. Keep it safe.",
   "icon": "scroll",
   "category": "quest",
   "rarity": "uncommon",
@@ -86,7 +86,7 @@
  {
   "id": "copper_ore",
   "name": "Copper Ore",
-  "description": "Greenish ore from the upper floors of Irondeep Mine.",
+  "description": "Greenish ore from the Desolate Crags.",
   "icon": "ore:copper",
   "category": "material",
   "rarity": "common",
@@ -674,7 +674,7 @@
  {
   "id": "hardwood_log",
   "name": "Hardwood Log",
-  "description": "Dense wood from Whisperwood's old trees.",
+  "description": "Dense wood from the old trees of Whispering Fields.",
   "icon": "log:hard",
   "category": "material",
   "rarity": "uncommon",
@@ -702,7 +702,7 @@
  {
   "id": "iron_ore",
   "name": "Iron Ore",
-  "description": "Rust-red ore from Irondeep's middle floors.",
+  "description": "Rust-red ore from the Desolate Crags.",
   "icon": "ore:iron",
   "category": "material",
   "rarity": "common",
@@ -772,7 +772,7 @@
  {
   "id": "obsidian_ore",
   "name": "Obsidian Ore",
-  "description": "Volcanic glass from Ember Ridge.",
+  "description": "Volcanic glass from the Glacial Depths' black ice.",
   "icon": "ore:obsidian",
   "category": "material",
   "rarity": "rare",
@@ -800,7 +800,7 @@
  {
   "id": "dragonstone",
   "name": "Dragonstone",
-  "description": "A blood-red stone found only near Dragonspire.",
+  "description": "A blood-red stone found only on Dragon's Peak.",
   "icon": "gem:e0483a",
   "category": "material",
   "rarity": "legendary",
@@ -1122,7 +1122,7 @@
  {
   "id": "silverleaf",
   "name": "Silverleaf",
-  "description": "A shimmering leaf from Whisperwood's shade. Potent in potions.",
+  "description": "A shimmering leaf from the southern Whispering Fields. Potent in potions.",
   "icon": "herb:c8d8e0",
   "category": "material",
   "rarity": "uncommon",
@@ -4347,7 +4347,7 @@
  {
   "id": "forest_stag",
   "name": "Forest Stag",
-  "description": "A proud stag from deep Whisperwood. Graceful and quick.",
+  "description": "A proud stag from the southern Whispering Fields. Graceful and quick.",
   "icon": "mount:stag:a8743f",
   "category": "mount",
   "rarity": "epic",

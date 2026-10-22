@@ -71,10 +71,10 @@ describe('gathering, fishing and crafting (v0.3)', () => {
 
   test('a higher-tier node needs the skill level and a strong enough tool', async () => {
     const A = await newPlayer(base);
-    const map = getMap('crystal_lake')!;
+    const map = getMap('desolate_crags')!;
     const iron = map.nodes!.find((n) => n.type === 'rock_iron')!;
-    const [sx, sy] = standUnder('crystal_lake', iron.x, iron.y);
-    await place(A.character.id, 'crystal_lake', sx, sy);
+    const [sx, sy] = standUnder('desolate_crags', iron.x, iron.y);
+    await place(A.character.id, 'desolate_crags', sx, sy);
     await give(A.character.id, 10, 'worn_pickaxe', 1, 150);
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     const low = await ack(a.socket, 'act', { tx: iron.x, ty: iron.y });

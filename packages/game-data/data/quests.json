@@ -4,9 +4,9 @@
   "name": "A Horse of Your Own",
   "giver": "mayor_lina",
   "turnIn": "stablemaster_hana",
-  "description": "Greenhaven is bigger than it looks. Hana keeps the town herd.",
+  "description": "Oakhaven is bigger than it looks. Hana keeps the town herd.",
   "intro": [
-   "Welcome, welcome! You made it to Greenhaven in one piece.",
+   "Welcome, welcome! You made it to Oakhaven in one piece.",
    "Now \u2014 you'll wear out your boots in a week walking everywhere. Hana at the stables owes me a favour.",
    "Go see her on the east side of the plaza. Tell her the mayor sent you."
   ],
@@ -54,7 +54,7 @@
   "description": "Every resident gets a homestead. Time to get your hands dirty.",
   "intro": [
    "Now that you can ride \u2014 have you even seen your homestead yet?",
-   "South gate, then west along the Sunfield lane. Plant something. Anything.",
+   "South gate, then west along the Whispering Fields lane. Plant something. Anything.",
    "When it's grown, show Farmer Rowan. He'll pretend not to be impressed."
   ],
   "outro": [
@@ -110,7 +110,7 @@
   "intro": [
    "You'll want coin for better seeds \u2014 and copper's always selling.",
    "Bram sells pickaxes up by the north road. Grab one and dig up some copper.",
-   "There's copper rock in the north meadow of Sunfield, if you don't fancy the mine yet."
+   "There's copper rock in the north meadow of Whispering Fields, if you don't fancy the mine yet."
   ],
   "outro": [
    "Five lumps of copper and all your fingers! Good start.",
@@ -118,7 +118,7 @@
   ],
   "steps": [
    {
-    "text": "Buy a Worn Pickaxe from Miner Bram (north Greenhaven)",
+    "text": "Buy a Worn Pickaxe from Miner Bram (north Oakhaven)",
     "type": "buy",
     "count": 1,
     "target": "worn_pickaxe",
@@ -129,7 +129,7 @@
     }
    },
    {
-    "text": "Mine 5 Copper Ore (copper rocks in Sunfield's north meadow)",
+    "text": "Mine 5 Copper Ore (copper rocks in Whispering Fields's north meadow)",
     "type": "gather",
     "count": 5,
     "target": "copper_ore",
@@ -191,9 +191,9 @@
   "giver": "blacksmith_toren",
   "turnIn": "mayor_lina",
   "requires": "q_smelt",
-  "description": "The slimes of Sunfield are eating the crops.",
+  "description": "The slimes of Whispering Fields are eating the crops.",
   "intro": [
-   "Lina's been fretting. Slimes in Sunfield, chewing on everybody's cabbages.",
+   "Lina's been fretting. Slimes in Whispering Fields, chewing on everybody's cabbages.",
    "You've a weapon. Use it. Press F near one \u2014 and don't let them surround you.",
    "Five should send the message. Then tell the mayor."
   ],
@@ -203,7 +203,7 @@
   ],
   "steps": [
    {
-    "text": "Defeat 5 Green Slimes in Sunfield's north meadow (F to attack)",
+    "text": "Defeat 5 Green Slimes in Whispering Fields's north meadow (F to attack)",
     "type": "kill",
     "count": 5,
     "target": "green_slime",
@@ -242,7 +242,7 @@
   ],
   "steps": [
    {
-    "text": "Buy a Bamboo Rod from Fisher Olan (pond, south-east Greenhaven)",
+    "text": "Buy a Bamboo Rod from Fisher Olan (pond, south-east Oakhaven)",
     "type": "buy",
     "count": 1,
     "target": "bamboo_rod",
@@ -269,80 +269,30 @@
   }
  },
  {
-  "id": "q_mine",
-  "name": "Down Below",
+  "id": "q_goblins",
+  "name": "Goblins in the Fields",
   "giver": "fisher_olan",
-  "turnIn": "lift_gus",
+  "turnIn": "mayor_lina",
   "requires": "q_fishing",
-  "description": "Irondeep Mine goes forty floors down.",
+  "description": "Goblins have made camp in the middle of Whispering Fields. Level 10+ recommended.",
   "intro": [
-   "My cousin Gus runs the lift at Irondeep, up the north road.",
-   "Reach the fifth floor and he'll take you there any time. Bring food \u2014 and a weapon."
+   "Bad news from the south road. Goblins set up a camp past the old farm fields.",
+   "Get to level ten or so, then thin them out. The mayor will want to hear it's done."
   ],
   "outro": [
-   "Floor five, eh? Not bad. Most turn back at three.",
-   "Here's a stone for the altar in town. Makes your gear a little meaner."
+   "Eight goblins! Oakhaven owes you one.",
+   "The fields go much further south than most dare. Wolves, then worse. Talk to Kael at the castle."
   ],
   "steps": [
    {
-    "text": "Reach floor 5 of Irondeep Mine (north road, then the ladders)",
-    "type": "visit",
-    "count": 1,
-    "target": "irondeep_5",
-    "where": {
-     "map": "irondeep_entrance",
-     "x": 20,
-     "y": 8
-    }
-   }
-  ],
-  "rewards": {
-   "gold": 90,
-   "xp": 140,
-   "items": [
-    {
-     "itemId": "enhancement_stone",
-     "quantity": 1
-    }
-   ]
-  }
- },
- {
-  "id": "q_wolves",
-  "name": "Whisperwood Warning",
-  "giver": "lift_gus",
-  "turnIn": "guildmaster_kael",
-  "requires": "q_mine",
-  "description": "Wolves prowl the western forest. Level 10+ recommended.",
-  "intro": [
-   "Kael at the Guild Hall's been asking for fighters. Wolves in Whisperwood.",
-   "They hunt in packs, and they're no slimes. Get to level ten first, I'd say."
-  ],
-  "outro": [
-   "Five wolves. You've got steel in you.",
-   "The Guild will have work for someone like you. Soon."
-  ],
-  "steps": [
-   {
-    "text": "Ride into Whisperwood Forest (west road)",
-    "type": "visit",
-    "count": 1,
-    "target": "whisperwood",
-    "where": {
-     "map": "greenhaven",
-     "x": 0,
-     "y": 22
-    }
-   },
-   {
-    "text": "Defeat 5 Forest Wolves (south-east Whisperwood)",
+    "text": "Defeat 8 Goblin Scouts (goblin camp, middle of Whispering Fields)",
     "type": "kill",
-    "count": 5,
-    "target": "forest_wolf",
+    "count": 8,
+    "target": "goblin_scout",
     "where": {
-     "map": "whisperwood",
-     "x": 46,
-     "y": 36
+     "map": "sunfield_plains",
+     "x": 40,
+     "y": 50
     }
    }
   ],
@@ -358,30 +308,69 @@
   }
  },
  {
-  "id": "q_crypt",
-  "name": "The Mossy Crypt",
-  "giver": "guildmaster_kael",
-  "turnIn": "warden_sela",
-  "requires": "q_wolves",
-  "description": "Something old stirs beneath Whisperwood. Level 12+ and a party recommended.",
+  "id": "q_wolves",
+  "name": "Howls in the South",
+  "giver": "mayor_lina",
+  "turnIn": "guildmaster_kael",
+  "requires": "q_goblins",
+  "description": "Wolf packs roam the southern Whispering Fields. Level 20+ recommended.",
   "intro": [
-   "The Guild's had word from Warden Sela in Whisperwood. The dead are walking in the old crypt.",
-   "Gather friends \u2014 a party shares the dungeon and the experience. Put Crypt Lord Varn back in his grave."
+   "Kael at the castle wants fighters for the southern fields. Wolves, in packs.",
+   "They're no slimes. Level twenty, at least."
   ],
   "outro": [
-   "Varn's down? Then the forest sleeps easier tonight.",
-   "Keep what he dropped. He won't need it. And come back tomorrow \u2014 he never stays dead."
+   "Ten wolves. You've got steel in you.",
+   "There's something old under the fields too. If you've friends, Kael has a job for you."
   ],
   "steps": [
    {
-    "text": "Enter the Mossy Crypt (north-west Whisperwood)",
+    "text": "Defeat 10 Forest Wolves (south Whispering Fields)",
+    "type": "kill",
+    "count": 10,
+    "target": "forest_wolf",
+    "where": {
+     "map": "sunfield_plains",
+     "x": 30,
+     "y": 68
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 400,
+   "xp": 1200,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 2
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_crypt",
+  "name": "The Mossy Crypt",
+  "giver": "guildmaster_kael",
+  "turnIn": "guildmaster_kael",
+  "requires": "q_wolves",
+  "description": "Something old stirs beneath the fields. Level 12+ and a party recommended.",
+  "intro": [
+   "The dead are walking in the old crypt under Whispering Fields.",
+   "Gather friends: a party shares the dungeon and the experience. Put Crypt Lord Varn back in his grave."
+  ],
+  "outro": [
+   "Varn's down? Then the fields sleep easier tonight.",
+   "Keep what he dropped. And come back tomorrow: he never stays dead."
+  ],
+  "steps": [
+   {
+    "text": "Enter the Mossy Crypt (west side of Whispering Fields)",
     "type": "visit",
     "count": 1,
     "target": "dg_mossy_crypt",
     "where": {
-     "map": "whisperwood",
-     "x": 11,
-     "y": 17
+     "map": "sunfield_plains",
+     "x": 9,
+     "y": 55
     }
    },
    {
@@ -403,428 +392,196 @@
   }
  },
  {
-  "id": "q_ember",
-  "name": "Heart of the Mountain",
-  "giver": "scout_bjorna",
-  "turnIn": "lift_gus",
-  "requires": "q_peaks",
-  "description": "A furnace-hot hollow has cracked open beside Irondeep. Level 26+ and a strong party recommended.",
-  "intro": [
-   "From up here you can see it \u2014 smoke from a crack beside Irondeep.",
-   "The miners call it Ember Hollow. Something called the Magma Tyrant rules it. Bring your best friends and your best armor."
-  ],
-  "outro": [
-   "The Tyrant's cold? Then my lift stops shaking. Ha!",
-   "You're a proper legend now. The whole valley will hear of it."
-  ],
-  "steps": [
-   {
-    "text": "Enter Ember Hollow (east of the Irondeep mine yard)",
-    "type": "visit",
-    "count": 1,
-    "target": "dg_ember_hollow",
-    "where": {
-     "map": "irondeep_entrance",
-     "x": 30,
-     "y": 12
-    }
-   },
-   {
-    "text": "Defeat the Magma Tyrant",
-    "type": "kill",
-    "count": 1,
-    "target": "magma_tyrant"
-   }
-  ],
-  "rewards": {
-   "gold": 2000,
-   "xp": 12000,
-   "items": [
-    {
-     "itemId": "enhancement_stone",
-     "quantity": 6
-    }
-   ]
-  }
- },
- {
-  "id": "q_peaks",
-  "name": "Into the Frostpine",
-  "giver": "lift_gus",
-  "turnIn": "scout_bjorna",
+  "id": "q_warden",
+  "name": "The Warden of the Fields",
+  "giver": "guildmaster_kael",
+  "turnIn": "job_master_aldric",
   "requires": "q_crypt",
-  "description": "The mountain path east of the mine yard climbs into snow. Level 20+ recommended.",
+  "description": "Gnarlfang guards the way to Master Aldric. Level 40, and bring friends.",
   "intro": [
-   "You've got the look of someone who's outgrown the forest.",
-   "Take the east path from my yard up into the Frostpine Peaks. Bjorna the scout will want to meet you."
+   "At the far south end of Whispering Fields an old wolf guards the way to Master Aldric's grove.",
+   "Aldric teaches the second jobs, but only to those who get past Gnarlfang. Level forty. Bring friends."
   ],
   "outro": [
-   "Six wolves and two yetis? The slopes are safer already.",
-   "When you're ready for real heat, there's a hollow by Irondeep I need to tell you about."
+   "You beat Gnarlfang? Then you have earned the right to choose.",
+   "Two paths for every class. Choose well: there is no going back."
   ],
   "steps": [
    {
-    "text": "Climb into the Frostpine Peaks (east path from the Irondeep yard)",
-    "type": "visit",
-    "count": 1,
-    "target": "frostpine_peaks",
-    "where": {
-     "map": "irondeep_entrance",
-     "x": 39,
-     "y": 19
-    }
-   },
-   {
-    "text": "Defeat 6 Snow Wolves",
+    "text": "Defeat Gnarlfang, Warden of the Fields (the arena, far south)",
     "type": "kill",
-    "count": 6,
-    "target": "snow_wolf",
-    "where": {
-     "map": "frostpine_peaks",
-     "x": 22,
-     "y": 30
-    }
-   },
-   {
-    "text": "Defeat 2 Frost Yetis (by the frozen lake)",
-    "type": "kill",
-    "count": 2,
-    "target": "frost_yeti",
-    "where": {
-     "map": "frostpine_peaks",
-     "x": 40,
-     "y": 16
-    }
-   }
-  ],
-  "rewards": {
-   "gold": 900,
-   "xp": 5200,
-   "items": [
-    {
-     "itemId": "enhancement_stone",
-     "quantity": 3
-    }
-   ]
-  }
- },
- {
-  "id": "q_mire",
-  "name": "Witches of the Mire",
-  "giver": "lift_gus",
-  "turnIn": "hunter_moss",
-  "requires": "q_ember",
-  "description": "East of Sunfield, the land sinks into Mirefen Swamp. Level 28+ recommended.",
-  "intro": [
-   "One last job, legend. The farmers say the swamp east of Sunfield is creeping closer.",
-   "Hunter Moss is out there. Help her thin out the trolls and the witches."
-  ],
-  "outro": [
-   "Five trolls, three witches. The mire's quieter than it's been in years.",
-   "Keep that charm close if you find one. They whisper, but they protect."
-  ],
-  "steps": [
-   {
-    "text": "Enter Mirefen Swamp (east lane of Sunfield)",
-    "type": "visit",
     "count": 1,
-    "target": "mirefen_swamp",
+    "target": "fields_warden",
     "where": {
      "map": "sunfield_plains",
-     "x": 59,
-     "y": 21
-    }
-   },
-   {
-    "text": "Defeat 5 Swamp Trolls",
-    "type": "kill",
-    "count": 5,
-    "target": "swamp_troll",
-    "where": {
-     "map": "mirefen_swamp",
-     "x": 26,
-     "y": 30
-    }
-   },
-   {
-    "text": "Defeat 3 Marsh Witches (eastern ruins)",
-    "type": "kill",
-    "count": 3,
-    "target": "marsh_witch",
-    "where": {
-     "map": "mirefen_swamp",
-     "x": 50,
-     "y": 14
+     "x": 30,
+     "y": 84
     }
    }
   ],
   "rewards": {
    "gold": 2500,
-   "xp": 16000,
+   "xp": 9000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 4
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_crags",
+  "name": "The Desolate Crags",
+  "giver": "job_master_aldric",
+  "turnIn": "forgewarden_hal",
+  "requires": "q_warden",
+  "description": "North of Oakhaven lie the Crags: ore, gems and living rock. Level 41+.",
+  "intro": [
+   "Your new path needs better steel. North of Oakhaven lie the Desolate Crags.",
+   "Forgewarden Hal camps there. Earth elementals guard the ore."
+  ],
+  "outro": [
+   "Ten of them? The rock will remember you.",
+   "Mine what you can. The best ore lies deeper still, in the ice."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Earth Elementals (Desolate Crags, north of Oakhaven)",
+    "type": "kill",
+    "count": 10,
+    "target": "earth_elemental",
+    "where": {
+     "map": "desolate_crags",
+     "x": 30,
+     "y": 30
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 3000,
+   "xp": 15000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 4
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_depths",
+  "name": "Into the Glacial Depths",
+  "giver": "forgewarden_hal",
+  "turnIn": "scout_bjorna",
+  "requires": "q_crags",
+  "description": "Rare ore and gems wait in the frozen caverns. Level 71+.",
+  "intro": [
+   "Past the crags the mountain turns to ice. Scout Bjorna knows the way through the Glacial Depths.",
+   "Ice specters drift there. They don't like visitors."
+  ],
+  "outro": [
+   "Eight specters! I'd have run.",
+   "Beyond the ice is Dragon's Peak. Only the strongest go there."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 8 Ice Specters (Glacial Depths)",
+    "type": "kill",
+    "count": 8,
+    "target": "ice_specter",
+    "where": {
+     "map": "glacial_depths",
+     "x": 30,
+     "y": 24
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5000,
+   "xp": 30000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 5
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_peak",
+  "name": "Dragon's Peak",
+  "giver": "scout_bjorna",
+  "turnIn": "hunter_kade",
+  "requires": "q_depths",
+  "description": "Level 100 drakes and champions rule the summit.",
+  "intro": [
+   "You're ready for the Peak. Kade the dragon hunter waits at the camp below the summit.",
+   "Everything up there is level one hundred. Everything."
+  ],
+  "outro": [
+   "You lived. That's the first test.",
+   "There's one more. Beyond the peak burns the Infernal Caldera."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Young Drakes on Dragon's Peak",
+    "type": "kill",
+    "count": 10,
+    "target": "young_drake",
+    "where": {
+     "map": "dragonspire",
+     "x": 22,
+     "y": 32
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 8000,
+   "xp": 60000,
    "items": [
     {
      "itemId": "enhancement_stone",
      "quantity": 6
-    },
-    {
-     "itemId": "swamp_pearl",
-     "quantity": 2
     }
    ]
   }
  },
  {
-  "id": "q_desert",
-  "name": "Sand and Stings",
-  "giver": "hunter_moss",
-  "turnIn": "caravan_zara",
-  "requires": "q_mire",
-  "description": "East of Crystal Lake the land turns to sand. Level 38+ recommended.",
+  "id": "q_caldera",
+  "name": "The Infernal Titan",
+  "giver": "hunter_kade",
+  "turnIn": "hunter_kade",
+  "requires": "q_peak",
+  "description": "Pyraxis waits in the Caldera. A raid of the realm's best is needed.",
   "intro": [
-   "You've cleaned up the mire. Ever seen a desert?",
-   "Past Crystal Lake, east. Caravan Master Zara could use a blade like yours."
+   "Pyraxis, the Infernal Titan. He sleeps in the Caldera past the summit.",
+   "Gather a raid. Everyone who fights him gets their own share of the loot."
   ],
   "outro": [
-   "Six scorpions and four bandits. The caravans will roll again!",
-   "When you want real heat, head east to Ember Ridge."
+   "The Titan fell! They'll sing about this in Oakhaven.",
+   "He'll rise again. They always do."
   ],
   "steps": [
    {
-    "text": "Cross Crystal Lake to Dusthaven Desert (east shore)",
-    "type": "visit",
-    "target": "dusthaven_desert",
+    "text": "Defeat Pyraxis in the Infernal Caldera",
+    "type": "kill",
     "count": 1,
+    "target": "infernal_titan",
     "where": {
-     "map": "crystal_lake",
-     "x": 58,
-     "y": 22
-    }
-   },
-   {
-    "text": "Defeat 6 Sand Scorpions",
-    "type": "kill",
-    "target": "sand_scorpion",
-    "count": 6,
-    "where": {
-     "map": "dusthaven_desert",
-     "x": 30,
-     "y": 32
-    }
-   },
-   {
-    "text": "Defeat 4 Dust Bandits",
-    "type": "kill",
-    "target": "dust_bandit",
-    "count": 4,
-    "where": {
-     "map": "dusthaven_desert",
-     "x": 42,
-     "y": 14
+     "map": "infernal_caldera",
+     "x": 24,
+     "y": 18
     }
    }
   ],
   "rewards": {
-   "gold": 4000,
-   "xp": 40000,
-   "items": [
-    {
-     "itemId": "enhancement_stone",
-     "quantity": 8
-    }
-   ]
-  }
- },
- {
-  "id": "q_ridge",
-  "name": "The Burning Ridge",
-  "giver": "caravan_zara",
-  "turnIn": "forgewarden_hal",
-  "requires": "q_desert",
-  "description": "Beyond the desert, the mountains smoke. Level 50+ recommended.",
-  "intro": [
-   "Smoke on the eastern horizon \u2014 that's Ember Ridge.",
-   "Forgewarden Hal keeps the old forges there. Tell him Zara sent you."
-  ],
-  "outro": [
-   "Hounds and golems both. You're tougher than the obsidian.",
-   "North of here lie the Ancient Ruins. Elowen will want to meet you."
-  ],
-  "steps": [
-   {
-    "text": "Travel east to Ember Ridge",
-    "type": "visit",
-    "target": "ember_ridge",
-    "count": 1,
-    "where": {
-     "map": "dusthaven_desert",
-     "x": 62,
-     "y": 23
-    }
-   },
-   {
-    "text": "Defeat 8 Magma Hounds",
-    "type": "kill",
-    "target": "magma_hound",
-    "count": 8,
-    "where": {
-     "map": "ember_ridge",
-     "x": 30,
-     "y": 30
-    }
-   },
-   {
-    "text": "Defeat 3 Obsidian Golems",
-    "type": "kill",
-    "target": "obsidian_golem",
-    "count": 3,
-    "where": {
-     "map": "ember_ridge",
-     "x": 46,
-     "y": 14
-    }
-   }
-  ],
-  "rewards": {
-   "gold": 7000,
-   "xp": 90000,
+   "gold": 20000,
+   "xp": 150000,
    "items": [
     {
      "itemId": "enhancement_stone",
      "quantity": 10
-    },
-    {
-     "itemId": "ember_core",
-     "quantity": 2
-    }
-   ]
-  }
- },
- {
-  "id": "q_ruins",
-  "name": "Echoes of an Empire",
-  "giver": "forgewarden_hal",
-  "turnIn": "archivist_elowen",
-  "requires": "q_ridge",
-  "description": "North of Ember Ridge: the ruins of an ancient empire. Level 65+ recommended.",
-  "intro": [
-   "Take the north pass. The ruins are older than the mountain, some say.",
-   "Archivist Elowen studies them. She'll need someone to keep the sentinels busy."
-  ],
-  "outro": [
-   "You fought back the knights and sentinels. The archive is safe \u2014 for now.",
-   "If you gather an army, the Stoneheart Golem waits in the central court."
-  ],
-  "steps": [
-   {
-    "text": "Climb the north pass to the Ancient Ruins",
-    "type": "visit",
-    "target": "ancient_ruins",
-    "count": 1,
-    "where": {
-     "map": "ember_ridge",
-     "x": 31,
-     "y": 1
-    }
-   },
-   {
-    "text": "Defeat 8 Cursed Knights",
-    "type": "kill",
-    "target": "cursed_knight",
-    "count": 8,
-    "where": {
-     "map": "ancient_ruins",
-     "x": 16,
-     "y": 16
-    }
-   },
-   {
-    "text": "Defeat 4 Ruin Sentinels",
-    "type": "kill",
-    "target": "ruin_sentinel",
-    "count": 4,
-    "where": {
-     "map": "ancient_ruins",
-     "x": 46,
-     "y": 14
-    }
-   }
-  ],
-  "rewards": {
-   "gold": 12000,
-   "xp": 180000,
-   "items": [
-    {
-     "itemId": "enhancement_stone",
-     "quantity": 12
-    },
-    {
-     "itemId": "ancient_relic",
-     "quantity": 2
-    }
-   ]
-  }
- },
- {
-  "id": "q_dragonspire",
-  "name": "The Dragon Road",
-  "giver": "archivist_elowen",
-  "turnIn": "hunter_kade",
-  "requires": "q_ruins",
-  "description": "East of the ruins, the Dragonspire. The end of the map \u2014 and of easy days. Level 80+ recommended.",
-  "intro": [
-   "The empire fell to dragons, the records say. They're still there \u2014 east, on the Dragonspire.",
-   "Find Kade, the dragon hunter. He's mad, and he's right."
-  ],
-  "outro": [
-   "Elder drakes don't fall to just anyone. You're a legend.",
-   "The Ancient Wyvern is all that's left. Gather twenty friends. I'll be watching."
-  ],
-  "steps": [
-   {
-    "text": "Cross into the Dragonspire",
-    "type": "visit",
-    "target": "dragonspire",
-    "count": 1,
-    "where": {
-     "map": "ancient_ruins",
-     "x": 62,
-     "y": 21
-    }
-   },
-   {
-    "text": "Defeat 10 Young Drakes",
-    "type": "kill",
-    "target": "young_drake",
-    "count": 10,
-    "where": {
-     "map": "dragonspire",
-     "x": 26,
-     "y": 30
-    }
-   },
-   {
-    "text": "Defeat 3 Elder Drakes",
-    "type": "kill",
-    "target": "elder_drake",
-    "count": 3,
-    "where": {
-     "map": "dragonspire",
-     "x": 46,
-     "y": 12
-    }
-   }
-  ],
-  "rewards": {
-   "gold": 25000,
-   "xp": 400000,
-   "items": [
-    {
-     "itemId": "enhancement_stone",
-     "quantity": 20
-    },
-    {
-     "itemId": "drake_scale",
-     "quantity": 4
     }
    ]
   }

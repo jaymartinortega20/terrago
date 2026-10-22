@@ -99,6 +99,9 @@ describe('classes, resources, stat points and second jobs', () => {
     assert.equal(early.ok, false);
     assert.match(early.error, /level 40/);
     p.rec.level = 40;
+    const gate = await ack(s.socket, 'job:advance', { npcId: npc.id, job: 'beastmaster' });
+    assert.match(gate.error, /Gnarlfang/, 'the mini-boss guards the trainer');
+    await db.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, 'slain:fields_warden')`, [P.character.id]);
     assert.equal((await ack(s.socket, 'job:advance', { npcId: npc.id, job: 'paladin' })).ok, false, 'not an archer job');
     const ok = await ack(s.socket, 'job:advance', { npcId: npc.id, job: 'beastmaster' });
     assert.equal(ok.ok, true, JSON.stringify(ok));

@@ -1,0 +1,611 @@
+{
+ "id": "desolate_crags",
+ "name": "Desolate Crags",
+ "safeZone": false,
+ "music": "ruins",
+ "spawn": {
+  "x": 31,
+  "y": 45,
+  "dir": "up"
+ },
+ "portals": [
+  {
+   "id": "dc_south",
+   "x": 30,
+   "y": 47,
+   "w": 4,
+   "h": 1,
+   "to": "greenhaven",
+   "toX": 31,
+   "toY": 2,
+   "toDir": "down",
+   "label": "Oakhaven Sanctuary"
+  },
+  {
+   "id": "dc_north",
+   "x": 30,
+   "y": 0,
+   "w": 4,
+   "h": 1,
+   "to": "glacial_depths",
+   "toX": 31,
+   "toY": 45,
+   "toDir": "up",
+   "label": "Glacial Depths"
+  }
+ ],
+ "theme": "ruins",
+ "levels": [
+  41,
+  70
+ ],
+ "respawn": {
+  "mapId": "desolate_crags",
+  "x": 31,
+  "y": 40
+ },
+ "spawns": [
+  {
+   "monster": "earth_elemental",
+   "level": [
+    41,
+    55
+   ],
+   "count": 11,
+   "area": {
+    "x": 5,
+    "y": 4,
+    "w": 22,
+    "h": 30
+   }
+  },
+  {
+   "monster": "rock_golem",
+   "level": [
+    55,
+    70
+   ],
+   "count": 9,
+   "area": {
+    "x": 36,
+    "y": 4,
+    "w": 22,
+    "h": 34
+   }
+  }
+ ],
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "##############################====##############################",
+  "###kkkkkkk#######kkkkkkk######====kkkk#######kkkkkkk#######kkkkk",
+  "##kkkkkkkkkk###kkkkkkkkkkk###k====kkkkkk###kkkkkkkkkkk##kkkkkkk#",
+  "##kkkkkkkkkkaaaaaaakkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "###kkkkkkkkkaaaaaaakkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "###kkkkkkkkkaaaaaaakkkkkkkkkkk====kkkkkkkaaaaaaakkkkkkkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkaaaaaaaaaaaaa##kkkkk###",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkaaaaaaaaaaaaa##kkkkk###",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkaaaaaaakkkkkkk##",
+  "###kkkkkkkkkkkkkaaaaaaakkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkaaaaaaakkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkaaaaaaakkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkaaaaaaakkkkkkkkkkkkkkkk#",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkaaaaaaakkkkkkkkkkkkkkkk#",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkaaaaaaakkkkkkkkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkk##kkkkkkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkk##kkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkaaaaaaakkkkkkkkkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkaaaaaaakkkkkkkkkkkkkkkk##",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkaaaaaaakkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkaaaaaaakkkkkkkkkk#",
+  "###kkkkkkkkkkkkkkkkkk####kkkkk====kkkkkkkkkkkkaaaaaaakkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkk####kkkkk====kkkkkkkkkkkkaaaaaaakkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkk####kkkkkkkkkkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkaaaaaaakkkk====kkk####kkkkkkkkkkkkkkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkaaaaaaakkaa====akkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkaaaaaaakkaa====akkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkaa====aaaaaaaakkk####kkkkkkkkkkkkkk#",
+  "##kkkkkkkkkkkkkkkkkk###kkkkkkk====kaaaaaaakkk####kkkkkkkkkkkkkkk",
+  "##kkkkkkkkkkkkkkkkkk###kkkkkkk====kaaaaaaakkkkkkkkkkkkkkkkkkkkk#",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "###kkk=========kk=====kkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "###kkk=========kk=====kkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "###kkk=========kk=====kkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "##kkkk=========kk=====kkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkk=========kk=====kkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkk=========kkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkk#",
+  "##kkkkkkkkk#####kkkkkkkkk#####====kkkkk#####kkkkkkkkk#####kkkkk#",
+  "##############################====##############################",
+  "##############################====##############################"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 7,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 11,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 13,
+   "y": 43,
+   "text": "Desolate Crags. Earth elementals in the west, rock golems in the east. Ore everywhere."
+  },
+  {
+   "kind": "prop",
+   "type": "teleport_pad",
+   "x": 18,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 12,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 45,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 59,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 5,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 58,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 59,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 54,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 58,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 48,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 15,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 28,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 6,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 51,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 57,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 22,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 5,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 52,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 7,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 21,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 52,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 50,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 53,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 4,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 60,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 5,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 25,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 41,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 47,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 23,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 36,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 58,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 50,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 53,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 9,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 59,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 18,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 57,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 17,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 55,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 49,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 10,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 58,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 44,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 50,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 22,
+   "y": 7
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "rock_iron",
+   "x": 43,
+   "y": 16,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "rock_gold",
+   "x": 19,
+   "y": 18,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "rock_copper",
+   "x": 42,
+   "y": 12,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "rock_iron",
+   "x": 21,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "rock_gold",
+   "x": 52,
+   "y": 15,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "rock_silver",
+   "x": 44,
+   "y": 19,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "rock_iron",
+   "x": 9,
+   "y": 23,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "rock_gold",
+   "x": 46,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "rock_copper",
+   "x": 56,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "rock_coal",
+   "x": 5,
+   "y": 24,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "rock_coal",
+   "x": 43,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "rock_copper",
+   "x": 41,
+   "y": 26,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "rock_gold",
+   "x": 12,
+   "y": 22,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "rock_iron",
+   "x": 26,
+   "y": 40,
+   "solid": true
+  },
+  {
+   "id": "n14",
+   "type": "rock_gold",
+   "x": 14,
+   "y": 18,
+   "solid": true
+  },
+  {
+   "id": "n15",
+   "type": "rock_iron",
+   "x": 27,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n16",
+   "type": "rock_coal",
+   "x": 51,
+   "y": 20,
+   "solid": true
+  },
+  {
+   "id": "n17",
+   "type": "rock_iron",
+   "x": 28,
+   "y": 23,
+   "solid": true
+  },
+  {
+   "id": "n18",
+   "type": "rock_copper",
+   "x": 42,
+   "y": 39,
+   "solid": true
+  },
+  {
+   "id": "n19",
+   "type": "rock_iron",
+   "x": 37,
+   "y": 35,
+   "solid": true
+  },
+  {
+   "id": "n20",
+   "type": "rock_copper",
+   "x": 52,
+   "y": 27,
+   "solid": true
+  },
+  {
+   "id": "n21",
+   "type": "rock_silver",
+   "x": 14,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n22",
+   "type": "rock_iron",
+   "x": 11,
+   "y": 30,
+   "solid": true
+  },
+  {
+   "id": "n23",
+   "type": "rock_gold",
+   "x": 5,
+   "y": 26,
+   "solid": true
+  },
+  {
+   "id": "n24",
+   "type": "rock_copper",
+   "x": 36,
+   "y": 24,
+   "solid": true
+  },
+  {
+   "id": "n25",
+   "type": "rock_coal",
+   "x": 59,
+   "y": 39,
+   "solid": true
+  }
+ ]
+}

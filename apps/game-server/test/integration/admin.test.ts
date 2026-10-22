@@ -155,8 +155,8 @@ describe('admin tools (economy, flags, player detail, settings, events)', () => 
     assert.equal(pl.rec.hp, pl.profile.maxHp);
     const w = await Admin.browser.post('/api/admin/waystones', { characterId: P.character.id });
     assert.ok(w.data.unlocked >= 5);
-    assert.equal((await Admin.browser.post('/api/admin/teleport', { characterId: P.character.id, mapId: 'crystal_lake' })).status, 200);
-    await waitFor(() => server.world.players.get(P.character.id)?.mapId === 'crystal_lake');
+    assert.equal((await Admin.browser.post('/api/admin/teleport', { characterId: P.character.id, mapId: 'desolate_crags' })).status, 200);
+    await waitFor(() => server.world.players.get(P.character.id)?.mapId === 'desolate_crags');
     assert.equal((await Admin.browser.post('/api/admin/teleport', { characterId: P.character.id, mapId: 'atlantis' })).status, 400);
     // Offline level-up: full HP when they come back (capped to the real maximum).
     const Q = await newPlayer(base);

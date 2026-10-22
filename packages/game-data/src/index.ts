@@ -42,20 +42,15 @@ import skillsJson from '../data/skills.json';
 import questsJson from '../data/quests.json';
 import nodesJson from '../data/nodes.json';
 import recipesJson from '../data/recipes.json';
-import crystalLakeJson from '../data/maps/crystal_lake.json';
-import irondeepEntranceJson from '../data/maps/irondeep_entrance.json';
-import whisperwoodJson from '../data/maps/whisperwood.json';
-import frostpineJson from '../data/maps/frostpine_peaks.json';
-import mirefenJson from '../data/maps/mirefen_swamp.json';
-import dusthavenJson from '../data/maps/dusthaven_desert.json';
-import emberRidgeJson from '../data/maps/ember_ridge.json';
-import ruinsJson from '../data/maps/ancient_ruins.json';
 import dragonspireJson from '../data/maps/dragonspire.json';
+import cragsJson from '../data/maps/desolate_crags.json';
+import depthsJson from '../data/maps/glacial_depths.json';
+import calderaJson from '../data/maps/infernal_caldera.json';
 import dungeonsJson from '../data/dungeons.json';
 import achievementsJson from '../data/achievements.json';
 import animalsJson from '../data/animals.json';
 import dailiesJson from '../data/dailies.json';
-import { DUNGEON_PREFIX, MINE_FLOORS, generateDungeon, generateMineFloor, mineFloorNumber, type DungeonDef } from './mapgen';
+import { DUNGEON_PREFIX, generateDungeon, type DungeonDef } from './mapgen';
 
 export * from './mapgen';
 import shopsJson from '../data/shops.json';
@@ -190,15 +185,10 @@ export const MAPS: Readonly<Record<string, MapDef>> = {
   greenhaven: greenhavenJson as MapDef,
   sunfield_plains: sunfieldJson as MapDef,
   homestead: homesteadJson as MapDef,
-  whisperwood: whisperwoodJson as MapDef,
-  crystal_lake: crystalLakeJson as MapDef,
-  irondeep_entrance: irondeepEntranceJson as MapDef,
-  frostpine_peaks: frostpineJson as MapDef,
-  mirefen_swamp: mirefenJson as MapDef,
-  dusthaven_desert: dusthavenJson as MapDef,
-  ember_ridge: emberRidgeJson as MapDef,
-  ancient_ruins: ruinsJson as MapDef,
+  desolate_crags: cragsJson as MapDef,
+  glacial_depths: depthsJson as MapDef,
   dragonspire: dragonspireJson as MapDef,
+  infernal_caldera: calderaJson as MapDef,
 };
 
 const itemIndex = new Map(ITEMS.map((i) => [i.id, i]));
@@ -247,11 +237,7 @@ export function getMap(id: string): MapDef | undefined {
       const d = getDungeon(id.slice(DUNGEON_PREFIX.length));
       if (!d) return undefined;
       g = generateDungeon(d);
-    } else {
-      const floor = mineFloorNumber(id);
-      if (floor === null) return undefined;
-      g = generateMineFloor(floor);
-    }
+    } else return undefined;
     generated.set(id, g);
   }
   return g;
@@ -259,7 +245,7 @@ export function getMap(id: string): MapDef | undefined {
 
 /** Every map id in the world, including procedural ones. */
 export function allMapIds(): string[] {
-  return [...Object.keys(MAPS), ...Array.from({ length: MINE_FLOORS }, (_, i) => `irondeep_${i + 1}`), ...DUNGEONS.map((d) => DUNGEON_PREFIX + d.id)];
+  return [...Object.keys(MAPS), ...DUNGEONS.map((d) => DUNGEON_PREFIX + d.id)];
 }
 
 const nodeIndex = new Map(NODES.map((n) => [n.id, n]));

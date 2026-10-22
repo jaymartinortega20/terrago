@@ -33,7 +33,7 @@ export function BankPanel({ client, onClose }: { client: GameClient; onClose: ()
     if (b) setBank(b);
   };
   return (
-    <Window title="Greenhaven Bank" onClose={onClose} testId="bank-panel" wide>
+    <Window title="Oakhaven Bank" onClose={onClose} testId="bank-panel" wide>
       <p className="text-xs text-wood-dark/80">Click an item to move it between your bag and your vault.</p>
       <h3 className="mt-2 text-sm font-bold">Vault {bank ? `(${bank.slots.length}/${bank.capacity})` : ''}</h3>
       {bank ? <Grid slots={bank.slots} capacity={bank.capacity} onPick={(i) => void move('withdraw', i)} size={30} testId="bank-vault" /> : <p>Loading…</p>}

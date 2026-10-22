@@ -1,0 +1,634 @@
+{
+ "id": "glacial_depths",
+ "name": "Glacial Depths",
+ "safeZone": false,
+ "music": "snow",
+ "spawn": {
+  "x": 31,
+  "y": 45,
+  "dir": "up"
+ },
+ "portals": [
+  {
+   "id": "gd_south",
+   "x": 30,
+   "y": 47,
+   "w": 4,
+   "h": 1,
+   "to": "desolate_crags",
+   "toX": 31,
+   "toY": 2,
+   "toDir": "down",
+   "label": "Desolate Crags"
+  },
+  {
+   "id": "gd_east",
+   "x": 63,
+   "y": 22,
+   "w": 1,
+   "h": 3,
+   "to": "dragonspire",
+   "toX": 2,
+   "toY": 23,
+   "toDir": "right",
+   "label": "Dragon's Peak"
+  },
+  {
+   "id": "gate_sunken_sanctum",
+   "x": 50,
+   "y": 32,
+   "w": 3,
+   "h": 1,
+   "to": "dg_sunken_sanctum",
+   "toX": 5,
+   "toY": 12,
+   "toDir": "right",
+   "label": "The Sunken Sanctum"
+  }
+ ],
+ "theme": "snow",
+ "levels": [
+  71,
+  99
+ ],
+ "respawn": {
+  "mapId": "glacial_depths",
+  "x": 31,
+  "y": 40
+ },
+ "spawns": [
+  {
+   "monster": "ice_specter",
+   "level": [
+    71,
+    85
+   ],
+   "count": 10,
+   "area": {
+    "x": 5,
+    "y": 4,
+    "w": 22,
+    "h": 30
+   }
+  },
+  {
+   "monster": "frost_giant_brute",
+   "level": [
+    85,
+    99
+   ],
+   "count": 9,
+   "area": {
+    "x": 36,
+    "y": 4,
+    "w": 24,
+    "h": 16
+   }
+  }
+ ],
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "################################################################",
+  "################################################################",
+  "##nnn########nnnnnn########nnnnnn########nnnnnn########nnnnnn###",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnccccccccccccnnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnccccccccccccccnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnccccccccccccccnnnnnnnnnnnn##",
+  "##nnnnnnnnnnnnnnnnnnnnnncccccccnnnnnccccccccccccccnnnnnnnnnnn###",
+  "##nnnnnnnnnnnnnnnnnnnnncccccccccnnnnnccccccccccccnnnnnnnnnnnn###",
+  "###nnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnnnnnnnnnnnnnnnnnnnncccccccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "#nnnnnncccccccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnncIIIcccnnnnnnnnnnn##",
+  "#nnnnncccccIIIcnnnnnnnnnnnnnnnnnnnnnnnnnnnnccIIIccccnnnnnnnnnn##",
+  "#nnnnncccccIIIcnnnnnnnnnnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnnn##",
+  "#nnnnncccccccccnnnnnnnnnnnnnnnnnnnnnnnnnnnnccccccccccnnnnnnnnn##",
+  "#nnnnnncccccccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnn##",
+  "#nnnnnnnnnIIInnnnnnnnnnnnnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnn##",
+  "##nnnnnnnnIIInnnnnnnnnnnnnnnnnnncccccccnnnnnncccccccnnnnnnnnn###",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnnnnnnnnnnnnnn###",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnncccccccccnnnnnnnnnnncccccccnnn###",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnn==================================",
+  "##nnnnnnnnnnnnnnnnnnnnnnnnnnnn==================================",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn==================================",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn====ccccccnnnnnnnnnnncccccccnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn====ccccccnnnncccccccnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnIIInnnnnnnnn====ccccccnnncccccccccnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnIIInnnnnnnnn====cccccnnnncccccccccnnnnnnnnnn##",
+  "##nnnnnnnnnncccccccnnnnnnnnnnn====nnnnnnnnnccccccnnnnnnnnnnnn###",
+  "##nnnnnnnnncccccccccnnnnnnnnnn====nnnnnnnnnncccccnnnnnnnnnnnn###",
+  "###nnnnnnnncccccccccnnnnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnnnnnnncccccccccnnnnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnnnnnnnncccccccnnnnnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn====ncccccccnnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn====cccccccccnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnnnnnnnnnnnnnnnnnnnnnnnnnn====cccccccccnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnn=========nn=====nnnnnnnn====cccccccccnnnnnnnnnnnnnnnnnnn##",
+  "#nnnnn=========nn=====nnnnnnnn====ncccccccnnnnnnnnnnnnnnnnnnn###",
+  "##nnnn=========nn=====nnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnn=========nn=====nnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnn=========nn=====nnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnn=========nnnnnnnnnnnnnnn====nnnnnnnnnnnnnnnnnnnnnnnnnnn###",
+  "##nnnnn####nnnnnnnnnn####nnnnn====n####nnnnnnnnnn####nnnnnnnn###",
+  "#nnnnnn#####nnnnnnnnn#####nnnn====#####nnnnnnnnn#####nnnnnnnnn##",
+  "#nnnn########nnnnnn########nnn====#######nnnnnn########nnnnnn###",
+  "#nn############nn############n====#########nn############nn#####"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 7,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 11,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 13,
+   "y": 43,
+   "text": "Glacial Depths. Ice specters drift in the west caves; frost giants roam the east."
+  },
+  {
+   "kind": "prop",
+   "type": "teleport_pad",
+   "x": 18,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "dungeon_gate",
+   "x": 50,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 49,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 53,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 54,
+   "y": 32,
+   "text": "The Sunken Sanctum. Recommended level 70–80. Click the gate to pick Normal, Hard, Nightmare or Mythic. Your party shares one run."
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 36,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 7,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 50,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 36,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 3,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 46,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 41,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 46,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 59,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 30,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 13,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 50,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 30,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 26,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 48,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 24,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 51,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 45,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 23,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 52,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 46,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 26,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 18,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 9,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 8,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 8,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 58,
+   "y": 45
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 3,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 56,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 23,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 24,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 7,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 38,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 21,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 5,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 25,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 27,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 57,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 47,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 32,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 39,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 25,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 3,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 29,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 34,
+   "y": 18
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "rock_mithril",
+   "x": 52,
+   "y": 15,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "rock_mithril",
+   "x": 47,
+   "y": 33,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "rock_mithril",
+   "x": 42,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "rock_starmetal",
+   "x": 14,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "rock_starmetal",
+   "x": 25,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "rock_mithril",
+   "x": 55,
+   "y": 26,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "rock_crystal",
+   "x": 5,
+   "y": 24,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "rock_crystal",
+   "x": 17,
+   "y": 6,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "rock_crystal",
+   "x": 24,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "rock_mithril",
+   "x": 11,
+   "y": 4,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "rock_mithril",
+   "x": 50,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "rock_mithril",
+   "x": 9,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "rock_mithril",
+   "x": 38,
+   "y": 4,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "rock_obsidian",
+   "x": 59,
+   "y": 19,
+   "solid": true
+  },
+  {
+   "id": "n14",
+   "type": "rock_crystal",
+   "x": 38,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n15",
+   "type": "rock_crystal",
+   "x": 48,
+   "y": 27,
+   "solid": true
+  },
+  {
+   "id": "n16",
+   "type": "rock_crystal",
+   "x": 50,
+   "y": 27,
+   "solid": true
+  },
+  {
+   "id": "n17",
+   "type": "rock_starmetal",
+   "x": 35,
+   "y": 31,
+   "solid": true
+  },
+  {
+   "id": "n18",
+   "type": "rock_starmetal",
+   "x": 37,
+   "y": 39,
+   "solid": true
+  },
+  {
+   "id": "n19",
+   "type": "rock_crystal",
+   "x": 60,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n20",
+   "type": "rock_starmetal",
+   "x": 22,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n21",
+   "type": "rock_obsidian",
+   "x": 15,
+   "y": 16,
+   "solid": true
+  },
+  {
+   "id": "n22",
+   "type": "rock_crystal",
+   "x": 57,
+   "y": 3,
+   "solid": true
+  },
+  {
+   "id": "n23",
+   "type": "rock_starmetal",
+   "x": 52,
+   "y": 20,
+   "solid": true
+  }
+ ]
+}

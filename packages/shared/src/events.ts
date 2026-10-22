@@ -26,7 +26,7 @@ export const WORLD_EVENTS: WorldEventDef[] = [
   {
     id: 'slime_rain',
     name: 'Slime Rain',
-    description: 'Slimes are pouring onto Sunfield Plains — and the King Slime came with them!',
+    description: 'Slimes are pouring onto Whispering Fields — and the King Slime came with them!',
     kind: 'invasion',
     map: 'sunfield_plains',
     monsters: [
@@ -39,12 +39,12 @@ export const WORLD_EVENTS: WorldEventDef[] = [
   {
     id: 'goblin_raid',
     name: 'Goblin Raid',
-    description: 'A goblin war band marches through Whisperwood, led by their Warchief!',
+    description: 'A goblin war band marches through Whispering Fields, led by their Warchief!',
     kind: 'invasion',
-    map: 'whisperwood',
+    map: 'sunfield_plains',
     monsters: [{ monster: 'goblin_scout', level: [14, 17], count: 12 }],
     boss: { monster: 'goblin_warchief', level: 19 },
-    area: { x: 34, y: 18, w: 22, h: 12 },
+    area: { x: 34, y: 42, w: 22, h: 12 },
   },
 ];
 

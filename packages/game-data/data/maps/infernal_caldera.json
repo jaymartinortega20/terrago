@@ -1,0 +1,227 @@
+{
+ "id": "infernal_caldera",
+ "name": "The Infernal Caldera",
+ "safeZone": false,
+ "music": "boss",
+ "spawn": {
+  "x": 24,
+  "y": 37,
+  "dir": "up"
+ },
+ "portals": [
+  {
+   "id": "ic_south",
+   "x": 22,
+   "y": 39,
+   "w": 5,
+   "h": 1,
+   "to": "dragonspire",
+   "toX": 29,
+   "toY": 2,
+   "toDir": "down",
+   "label": "Dragon's Peak"
+  }
+ ],
+ "theme": "volcano",
+ "levels": [
+  100,
+  100
+ ],
+ "respawn": {
+  "mapId": "dragonspire",
+  "x": 11,
+  "y": 20
+ },
+ "spawns": [
+  {
+   "monster": "infernal_titan",
+   "level": [
+    100,
+    100
+   ],
+   "count": 1,
+   "area": {
+    "x": 22,
+    "y": 13,
+    "w": 4,
+    "h": 4
+   }
+  },
+  {
+   "monster": "ember_elemental",
+   "level": [
+    96,
+    100
+   ],
+   "count": 6,
+   "area": {
+    "x": 15,
+    "y": 10,
+    "w": 18,
+    "h": 12
+   }
+  }
+ ],
+ "width": 48,
+ "height": 40,
+ "tileSize": 32,
+ "tiles": [
+  "################################################",
+  "###aaaa##########aaaa##########aaaa##########aa#",
+  "##aaaaaa########aaaaaa########aaaaaa########aa##",
+  "###aaaaaa######aaaaaaaa######aaaaaaaa######aaa##",
+  "###aaaaaaaa##aaaaaaaaaaaa##aaaaaaaaaaa###aaaa###",
+  "###aaaaaaaaaaaaaaaaLLLLLLLLLLLaaaaaaaaaaaaaaa###",
+  "##aaaaaaaaaaaaaaLLLLLLLLLLLLLLLLLaaaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaLLLLLaaaaaaaaaaaLLLLLaaaaaaaaaaaa#",
+  "##aaaaaaaaaaLLLLLaaaaaaaaaaaaaaaLLLLLaaaaaaaaaa#",
+  "#aaaaaaaaaaLLL::::::::::::::::::::LLLLaaaaaaaaaa",
+  "#aaaaaaaaaLLLa::::::::::::::::::::aaLLLaaaaaaaaa",
+  "##aaaaaaaLLLaa::::::::::::::::::::aaaLLLaaaaaaa#",
+  "##aaaaaaLLLaaa::::::::::::::::::::aaaaLLLaaaaaa#",
+  "###aaaaaLLLaaa::::::::::::::::::::aaaaLLLaaaaa##",
+  "###aaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaa###",
+  "###aaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaa###",
+  "###aaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaaa##",
+  "##aaaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaaaa#",
+  "##aaaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaaaa#",
+  "#aaaaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaaaaa",
+  "#aaaaaaLLLaaaa::::::::::::::::::::aaaaaLLLaaaaaa",
+  "##aaaaaaLLLaaa::::::::::::::::::::aaaaLLLaaaaaa#",
+  "##aaaaaaLLLaaa::::::::::::::::::::aaaaLLLaaaaaa#",
+  "##aaaaaaaLLLaa::::::::::::::::::::aaaLLLaaaaaa##",
+  "###aaaaaaaLLLaaaaaaaaa=====aaaaaaaaaLLLaaaaaa###",
+  "###aaaaaaaaLLLLaaaaaaa=====aaaaaaaLLLLaaaaaaa###",
+  "###aaaaaaaaaLLLLLaaaaa=====aaaaaLLLLLaaaaaaaaa##",
+  "##aaaaaaaaaaaaLLLLLaaa=====aaaLLLLLaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaLLLLLL=====LLLLLLaaaaaaaaaaaaaa#",
+  "##aaaaaaaaaaaaaaaaaLLL=====LLLaaaaaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaaaaa=====aaaaaaaaaaaaaaaaaaaaa",
+  "#aaaaaaaaaaaaaaaaaaaaa=====aaaaaaaaaaaaaaaaaaaaa",
+  "##aaaaaaaaaaaaaaaaaaaa=====aaaaaaaaaaaaaaaaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaa=====aaaaaaaaaaaaaaaaaaa##",
+  "###aaaaaaaaaaaaaaaaaaa=====aaaaaaaaaaaaaaaaaaa##",
+  "###aaaaaaaa##aaaaaaaaa=====aaaaaaaaaaaa##aaaa###",
+  "###aaaaa#######aaaaaaa=====##aaaaaaa#######aa###",
+  "###aaaa##########aaaa#=====####aaaa##########a##",
+  "####aa############aa##=====#####aa############a#",
+  "######################=====#####################"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 27,
+   "y": 34,
+   "text": "The Infernal Caldera. Pyraxis, the Infernal Titan. A raid of level 100 heroes. Everyone who fights gets their own loot."
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 21,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 27,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 43,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 36,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 8,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 43,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 34,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 42,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 44,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 34,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 5,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 10,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 7,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 3,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 31,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 43,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 12,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 35,
+   "y": 22
+  }
+ ]
+}

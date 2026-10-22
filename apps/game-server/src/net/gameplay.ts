@@ -506,6 +506,8 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
             if (perk === 'gold') r.gold = Math.round(r.gold * 1.1);
             if (perk === 'dragon') r.gold = Math.round(r.gold * 1.05);
             if (r.monster.def.boss) progressEvent(d, r.player, 'boss', r.monster.def.id);
+            // Remember every boss a character helped defeat (e.g. Gnarlfang unlocks the Job Trainer).
+            if (r.monster.def.boss) await d.pool.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [r.player.id, `slain:${r.monster.def.id}`]);
             if (r.monster.def.boss && (r.gold || r.items.length)) {
               // Boss loot once per day per character (XP always).
               const day = new Date().toISOString().slice(0, 10);

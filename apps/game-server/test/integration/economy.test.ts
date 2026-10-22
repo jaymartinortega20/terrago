@@ -59,7 +59,7 @@ describe('bank, waystones, stalls', () => {
     const A = await newPlayer(base);
     const gh = waystones().find((w) => w.mapId === 'greenhaven')!;
     const sf = waystones().find((w) => w.mapId === 'sunfield_plains')!;
-    const fp = waystones().find((w) => w.mapId === 'frostpine_peaks')!;
+    const fp = waystones().find((w) => w.mapId === 'glacial_depths')!;
     await place(A.character.id, 'greenhaven', 31, 26);
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     assert.equal((await ack(a.socket, 'travel:go', 'sunfield_plains')).ok, false, 'not on a pad');
@@ -68,8 +68,8 @@ describe('bank, waystones, stalls', () => {
     p.y = tileCenter(gh.x, gh.y).y;
     const list = await ack(a.socket, 'travel:list');
     assert.equal(list.data.atWaystone, true);
-    assert.equal(list.data.options.find((o: any) => o.mapId === 'frostpine_peaks').known, false);
-    assert.equal((await ack(a.socket, 'travel:go', 'frostpine_peaks')).ok, false, 'not attuned');
+    assert.equal(list.data.options.find((o: any) => o.mapId === 'glacial_depths').known, false);
+    assert.equal((await ack(a.socket, 'travel:go', 'glacial_depths')).ok, false, 'not attuned');
     const g0 = await gold(A.character.id);
     const go = await ack(a.socket, 'travel:go', 'sunfield_plains');
     assert.equal(go.ok, true, JSON.stringify(go));

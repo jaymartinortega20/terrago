@@ -39,32 +39,36 @@ describe('endgame: difficulty modes, world bosses', () => {
     await leaveWorld(a.socket);
   });
 
-  test('new regions are connected and their world bosses spawn', async () => {
-    for (const [id, boss] of [['ancient_ruins', 'stoneheart_golem'], ['dragonspire', 'ancient_wyvern']] as const) {
-      const def = getMap(id)!;
-      assert.ok(def.spawns?.some((s) => s.monster === boss));
-    }
-    assert.ok(getMap('crystal_lake')!.portals.some((p) => p.to === 'dusthaven_desert'));
-    assert.ok(getMap('ancient_ruins')!.portals.some((p) => p.to === 'dg_sunken_sanctum'));
+  test('the six maps are connected in order and their bosses spawn', async () => {
+    const chain = ['greenhaven', 'desolate_crags', 'glacial_depths', 'dragonspire', 'infernal_caldera'];
+    for (let i = 0; i < chain.length - 1; i++) assert.ok(getMap(chain[i]!)!.portals.some((p) => p.to === chain[i + 1]), `${chain[i]} -> ${chain[i + 1]}`);
+    assert.ok(getMap('greenhaven')!.portals.some((p) => p.to === 'sunfield_plains'));
+    assert.equal(getMap('greenhaven')!.name, 'Oakhaven Sanctuary');
+    assert.equal(getMap('sunfield_plains')!.name, 'Whispering Fields');
+    assert.ok(getMap('sunfield_plains')!.spawns?.some((s) => s.monster === 'fields_warden' && s.level[0] === 40));
+    assert.ok(getMap('infernal_caldera')!.spawns?.some((s) => s.monster === 'infernal_titan'));
+    assert.ok(getMap('dragonspire')!.spawns!.every((s) => s.level[0] === 100), "everything on Dragon's Peak is level 100");
+    assert.ok(getMap('glacial_depths')!.portals.some((p) => p.to === 'dg_sunken_sanctum'));
+    for (const old of ['whisperwood', 'crystal_lake', 'irondeep_entrance', 'frostpine_peaks', 'mirefen_swamp', 'dusthaven_desert', 'ember_ridge', 'ancient_ruins']) assert.equal(getMap(old), undefined, `${old} is gone`);
   });
 
   test('harden: below its HP threshold a boss shrugs off damage for a while', async () => {
     const A = await newPlayer(base);
-    const c = tileCenter(30, 15);
-    await db.query(`UPDATE characters SET level = 80, map_id = 'ancient_ruins', pos_x = $2, pos_y = $3 WHERE id = $1`, [A.character.id, c.x, c.y]);
+    const c = tileCenter(24, 22);
+    await db.query(`UPDATE characters SET level = 100, map_id = 'infernal_caldera', pos_x = $2, pos_y = $3 WHERE id = $1`, [A.character.id, c.x, c.y]);
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     const p = server.world.players.get(A.character.id)!;
     const rt = server.world.runtimeOf(p);
-    const golem = [...rt.monsters.values()].find((m) => m.def.id === 'stoneheart_golem')!;
+    const golem = [...rt.monsters.values()].find((m) => m.def.id === 'infernal_titan')!;
     const heal = setInterval(() => (p.rec.hp = p.profile.maxHp), 100);
     golem.hp = Math.round(golem.stats.maxHp * 0.5);
     p.x = golem.x;
     p.y = golem.y + 40;
     rt.spatial.update(p);
     await ack(a.socket, 'attack', golem.id);
-    await waitFor(() => golem.effects.some((e) => e.id === 'stone_skin'), 8000);
+    await waitFor(() => golem.effects.some((e) => e.id === 'obsidian_shell'), 8000);
     clearInterval(heal);
-    assert.equal(golem.effects.find((e) => e.id === 'stone_skin')!.mods.taken, 0.25);
+    assert.equal(golem.effects.find((e) => e.id === 'obsidian_shell')!.mods.taken, 0.15);
     await leaveWorld(a.socket);
   });
 });

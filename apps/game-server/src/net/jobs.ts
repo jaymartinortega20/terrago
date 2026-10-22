@@ -6,6 +6,9 @@ import type { Player } from '../world/player';
 import type { GameplayDeps } from './gameplay';
 import { npcService } from './gameplay';
 
+/** The mini-boss that guards the Job Trainer. */
+export const JOB_GATE_BOSS = 'fields_warden';
+
 const STAT_COLUMNS: Record<keyof BaseStats, string> = {
   strength: 'strength',
   agility: 'agility',
@@ -38,6 +41,8 @@ export async function advanceJob(deps: GameplayDeps, p: Player, req: unknown): P
   npcService(deps.world, p, r.npcId, 'job');
   if (p.rec.job) throw new GameError(`You are already a ${getJob(p.rec.job)?.name}.`);
   if (p.rec.level < JOB_LEVEL) throw new GameError(`Come back at level ${JOB_LEVEL}.`);
+  const slain = await deps.pool.query(`SELECT 1 FROM character_flags WHERE character_id = $1 AND flag = $2`, [p.id, `slain:${JOB_GATE_BOSS}`]);
+  if (!slain.rowCount) throw new GameError('First prove yourself: defeat Gnarlfang, Warden of the Fields, in the arena.');
   const cls = getClass(p.rec.classId);
   const job = cls.jobs.find((j) => j.id === r.job);
   if (!job) throw new GameError(`A ${cls.name} can become a ${cls.jobs.map((j) => j.name).join(' or ')}.`);

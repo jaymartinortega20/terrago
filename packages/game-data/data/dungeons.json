@@ -10,14 +10,14 @@
   "floor": "k",
   "wall": "r",
   "entrance": {
-   "map": "whisperwood",
-   "x": 10,
-   "y": 15
+   "map": "sunfield_plains",
+   "x": 8,
+   "y": 52
   },
   "exit": {
-   "mapId": "whisperwood",
-   "x": 11,
-   "y": 19
+   "mapId": "sunfield_plains",
+   "x": 9,
+   "y": 56
   },
   "rooms": 4,
   "props": [
@@ -67,14 +67,14 @@
   "floor": "a",
   "wall": "r",
   "entrance": {
-   "map": "irondeep_entrance",
-   "x": 29,
-   "y": 10
+   "map": "sunfield_plains",
+   "x": 48,
+   "y": 70
   },
   "exit": {
-   "mapId": "irondeep_entrance",
-   "x": 30,
-   "y": 14
+   "mapId": "sunfield_plains",
+   "x": 49,
+   "y": 74
   },
   "rooms": 5,
   "props": [
@@ -125,13 +125,13 @@
   "floor": "k",
   "wall": "r",
   "entrance": {
-   "map": "ancient_ruins",
-   "x": 44,
+   "map": "glacial_depths",
+   "x": 50,
    "y": 30
   },
   "exit": {
-   "mapId": "ancient_ruins",
-   "x": 45,
+   "mapId": "glacial_depths",
+   "x": 51,
    "y": 34
   },
   "rooms": 5,

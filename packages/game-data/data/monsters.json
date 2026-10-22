@@ -2042,5 +2042,392 @@
     "dmg": 1.5
    }
   ]
+ },
+ {
+  "id": "fields_warden",
+  "name": "Gnarlfang, Warden of the Fields",
+  "hpMult": 16,
+  "atkMult": 1.55,
+  "defMult": 1.2,
+  "speed": 70,
+  "aggro": 6,
+  "range": 1.3,
+  "cooldownMs": 1500,
+  "xpMult": 14,
+  "gold": [
+   400,
+   700
+  ],
+  "drops": [
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1.0,
+    "min": 2,
+    "max": 3
+   },
+   {
+    "itemId": "wolf_pelt",
+    "chance": 1.0,
+    "min": 3,
+    "max": 5
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#5a4a3a",
+   "size": 1.9
+  },
+  "respawnMs": 300000,
+  "boss": true,
+  "abilities": [
+   {
+    "id": "maul",
+    "name": "Maul",
+    "kind": "slam",
+    "everyMs": 7000,
+    "windupMs": 1400,
+    "radius": 2.2,
+    "dmgMult": 2.0
+   },
+   {
+    "id": "howl",
+    "name": "Call the Pack",
+    "kind": "summon",
+    "atHp": [
+     0.7,
+     0.4
+    ],
+    "monster": "forest_wolf",
+    "count": 3,
+    "level": 34
+   },
+   {
+    "id": "fury",
+    "name": "Feral Fury",
+    "kind": "enrage",
+    "atHp": [
+     0.25
+    ],
+    "dmg": 1.4
+   }
+  ]
+ },
+ {
+  "id": "earth_elemental",
+  "name": "Earth Elemental",
+  "hpMult": 1.7,
+  "atkMult": 1.5,
+  "defMult": 1.5,
+  "speed": 45,
+  "aggro": 5,
+  "range": 1.4,
+  "cooldownMs": 1600,
+  "xpMult": 2.0,
+  "gold": [
+   8,
+   18
+  ],
+  "drops": [
+   {
+    "itemId": "stone",
+    "chance": 0.6,
+    "min": 1,
+    "max": 3
+   },
+   {
+    "itemId": "copper_ore",
+    "chance": 0.25,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#8a6a3a",
+   "size": 1.0
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "rock_golem",
+  "name": "Rock Golem",
+  "hpMult": 2.6,
+  "atkMult": 1.6,
+  "defMult": 2.0,
+  "speed": 40,
+  "aggro": 5,
+  "range": 1.5,
+  "cooldownMs": 1900,
+  "xpMult": 2.4,
+  "gold": [
+   12,
+   26
+  ],
+  "drops": [
+   {
+    "itemId": "stone",
+    "chance": 0.7,
+    "min": 2,
+    "max": 4
+   },
+   {
+    "itemId": "iron_ore",
+    "chance": 0.3,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "gold_ore",
+    "chance": 0.06,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#7a7068",
+   "size": 1.35
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "ice_specter",
+  "name": "Ice Specter",
+  "hpMult": 1.4,
+  "atkMult": 1.8,
+  "defMult": 1.2,
+  "speed": 60,
+  "aggro": 5,
+  "range": 5,
+  "cooldownMs": 1800,
+  "xpMult": 2.8,
+  "gold": [
+   16,
+   30
+  ],
+  "drops": [
+   {
+    "itemId": "mithril_ore",
+    "chance": 0.18,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "crystal_ore",
+    "chance": 0.12,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "mage",
+   "color": "#bfe8ff",
+   "size": 1.0
+  },
+  "respawnMs": 60000,
+  "magic": true
+ },
+ {
+  "id": "frost_giant_brute",
+  "name": "Frost Giant",
+  "hpMult": 3.2,
+  "atkMult": 1.9,
+  "defMult": 2.2,
+  "speed": 42,
+  "aggro": 5,
+  "range": 1.6,
+  "cooldownMs": 2000,
+  "xpMult": 3.4,
+  "gold": [
+   24,
+   44
+  ],
+  "drops": [
+   {
+    "itemId": "mithril_ore",
+    "chance": 0.25,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "obsidian_ore",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "orc",
+   "color": "#a8c8e8",
+   "size": 1.55
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "drake_champion",
+  "name": "Drake Champion",
+  "hpMult": 6.0,
+  "atkMult": 2.2,
+  "defMult": 2.4,
+  "speed": 62,
+  "aggro": 6,
+  "range": 1.3,
+  "cooldownMs": 1600,
+  "xpMult": 9.0,
+  "gold": [
+   80,
+   140
+  ],
+  "drops": [
+   {
+    "itemId": "dragonstone",
+    "chance": 0.3,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 0.4,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#c02a1a",
+   "size": 1.5
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "dragon_knight_champion",
+  "name": "Dragon Knight Champion",
+  "hpMult": 6.5,
+  "atkMult": 2.3,
+  "defMult": 2.6,
+  "speed": 55,
+  "aggro": 6,
+  "range": 1.3,
+  "cooldownMs": 1700,
+  "xpMult": 10.0,
+  "gold": [
+   90,
+   160
+  ],
+  "drops": [
+   {
+    "itemId": "dragonstone",
+    "chance": 0.35,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "star_metal_ore",
+    "chance": 0.3,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "orc",
+   "color": "#2a1a3a",
+   "size": 1.5
+  },
+  "respawnMs": 60000
+ },
+ {
+  "id": "infernal_titan",
+  "name": "Pyraxis, the Infernal Titan",
+  "hpMult": 220,
+  "atkMult": 2.3,
+  "defMult": 2.6,
+  "speed": 40,
+  "aggro": 8,
+  "range": 2.2,
+  "cooldownMs": 2200,
+  "xpMult": 120,
+  "gold": [
+   5000,
+   9000
+  ],
+  "drops": [
+   {
+    "itemId": "dragonstone",
+    "chance": 1.0,
+    "min": 3,
+    "max": 6
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1.0,
+    "min": 4,
+    "max": 8
+   },
+   {
+    "itemId": "star_metal_ore",
+    "chance": 1.0,
+    "min": 4,
+    "max": 8
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#d0301a",
+   "size": 2.6
+  },
+  "respawnMs": 3600000,
+  "boss": true,
+  "abilities": [
+   {
+    "id": "magma_fist",
+    "name": "Magma Fist",
+    "kind": "slam",
+    "everyMs": 5500,
+    "windupMs": 1400,
+    "radius": 3.2,
+    "dmgMult": 2.7
+   },
+   {
+    "id": "caldera_burst",
+    "name": "Caldera Burst",
+    "kind": "nova",
+    "everyMs": 10000,
+    "windupMs": 2000,
+    "radius": 6,
+    "dmgMult": 2.1
+   },
+   {
+    "id": "obsidian_shell",
+    "name": "Obsidian Shell",
+    "kind": "harden",
+    "everyMs": 26000,
+    "durationMs": 7000,
+    "taken": 0.15,
+    "belowHp": 0.75
+   },
+   {
+    "id": "spawn_of_fire",
+    "name": "Spawn of Fire",
+    "kind": "summon",
+    "atHp": [
+     0.8,
+     0.6,
+     0.4,
+     0.2
+    ],
+    "monster": "ember_elemental",
+    "count": 4,
+    "level": 98
+   },
+   {
+    "id": "cataclysm",
+    "name": "Cataclysm",
+    "kind": "enrage",
+    "atHp": [
+     0.15
+    ],
+    "dmg": 1.8
+   }
+  ]
  }
 ]
