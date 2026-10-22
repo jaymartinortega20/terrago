@@ -16,3 +16,4 @@ export * from './gathering';
 export * from './combat';
 export * from './environment';
 export * from './specializations';
+export * from './events';

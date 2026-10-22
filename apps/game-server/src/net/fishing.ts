@@ -1,6 +1,6 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import { fishFor, getItem } from '@terrago/game-data';
-import { FISHING_STEP_MS, isWet, weatherAt, fishingZone, rollQuality, simulateFishing, timeOfDay, type FishDef, type FishingParams, type FishingRound } from '@terrago/shared';
+import { FISHING_STEP_MS, eventMult, isWet, weatherAt, fishingZone, rollQuality, simulateFishing, timeOfDay, type FishDef, type FishingParams, type FishingRound } from '@terrago/shared';
 import { GameError } from '../db';
 import { castLine, landFish } from '../services/gathering';
 import type { Player } from '../world/player';
@@ -49,7 +49,8 @@ export async function cast(deps: GameplayDeps, p: Player, table: string, prefer?
   pushInventory(deps.world, p, paid.inventory);
   applyDelta(deps.world, p, paid.delta);
   const spec = p.rec.specs?.fishing;
-  const fish = pickFish(table, paid.fishing, spec === 'rare_fish_hunter');
+  const frenzy = eventMult('fishing', Date.now());
+  const fish = pickFish(table, paid.fishing, spec === 'rare_fish_hunter' || frenzy > 1);
   if (!fish) throw new GameError('Nothing seems to live in this water.');
   const now = Date.now();
   const s: Session = {
@@ -57,7 +58,7 @@ export async function cast(deps: GameplayDeps, p: Player, table: string, prefer?
     fish,
     params: { seed: randomInt(1, 2_000_000_000), difficulty: fish.difficulty, zone: fishingZone(paid.rodTier, paid.fishing) * (spec === 'deep_sea_fisher' ? 1.25 : 1), maxSteps: 600 },
     // Fish bite faster in the rain.
-    biteAt: now + Math.round((1800 + randomInt(0, 4500)) * (isWet(weatherAt(deps.world.runtimeOf(p).def.theme, now)) ? 0.6 : 1)),
+    biteAt: now + Math.round((1800 + randomInt(0, 4500)) * (isWet(weatherAt(deps.world.runtimeOf(p).def.theme, now)) ? 0.6 : 1) / frenzy),
     hookedAt: null,
     state: 'waiting',
     timer: null,

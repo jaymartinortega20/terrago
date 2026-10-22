@@ -46,6 +46,8 @@ export class Monster {
   // --- Bosses ---------------------------------------------------------------
   /** Summoned add: removed for good when it dies. */
   temp = false;
+  /** World event that spawned it (invasions). */
+  eventTag: string | null = null;
   /** Next use time per timed ability, and HP thresholds already triggered. */
   abilityAt = new Map<string, number>();
   triggered = new Set<string>();
@@ -605,6 +607,29 @@ export class Combat {
       return true;
     }
     return false;
+  }
+
+  /** Spawn event monsters (invasions). They never respawn. */
+  spawnEvent(rt: MapRuntime, tag: string, monsterId: string, level: [number, number], count: number, area: SpawnDef['area']): number {
+    const def = getMonster(monsterId);
+    if (!def) return 0;
+    let n = 0;
+    for (let i = 0; i < count; i++) {
+      const pos = randomTileIn(rt, area, this.rand);
+      if (!pos) continue;
+      const lv = level[0] + Math.floor(this.rand() * (level[1] - level[0] + 1));
+      const m = new Monster(`m${++this.seq}`, def, lv, monsterStats(def, lv), pos.x, pos.y, { monster: def.id, level, count: 1, area });
+      m.temp = true;
+      m.eventTag = tag;
+      rt.monsters.set(m.id, m);
+      n++;
+    }
+    return n;
+  }
+
+  /** Remove what's left of an event's monsters. */
+  despawnEvent(rt: MapRuntime, tag: string): void {
+    for (const m of [...rt.monsters.values()]) if (m.eventTag === tag && m.alive) this.killQuietly(rt, m);
   }
 
   private summonAdds(rt: MapRuntime, boss: Monster, a: import('@terrago/shared').BossAbility): void {

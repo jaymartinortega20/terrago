@@ -17,7 +17,7 @@ import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from '.
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel, RecipeBook } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
-import { EnvBadge, WeatherLayer } from './ui/Atmosphere';
+import { EnvBadge, EventBadge, WeatherLayer } from './ui/Atmosphere';
 import { JournalPanel, ProgressToasts } from './ui/JournalUi';
 import { AnimalsPanel, BankPanel, StallBrowseWindow, StallSetupPanel, TravelPanel } from './ui/EconomyUi';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
@@ -196,6 +196,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           <span className="ml-2 text-parchment/70">👥 {nearby}</span>
           <span className="ml-2 text-parchment/70">{ping === null ? '' : `${ping}ms`}</span>
         </div>
+        {!touch && <EventBadge client={client} />}
         {touch && (
           <button className="px-btn ghost small pointer-events-auto" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} data-testid="menu-toggle">
             ☰ Menu

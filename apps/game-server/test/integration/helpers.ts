@@ -27,6 +27,7 @@ export async function startTestServer(extraEnv: Record<string, string> = {}): Pr
     DISABLE_RATE_LIMITS: 'true',
     LOG_LEVEL: 'error',
     WEATHER_OVERRIDE: 'clear',
+    EVENTS: 'off',
     ...extraEnv,
   });
   return startGameServer(config, createLogger('error'));

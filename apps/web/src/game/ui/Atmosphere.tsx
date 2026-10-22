@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WEATHER_ICON, WEATHER_LABEL, clockText, seasonAt, seasonEndsAt, weatherAt, weatherRegion, type Weather } from '@terrago/shared';
+import { currentEvent, formatDuration, nextEvent, WEATHER_ICON, WEATHER_LABEL, clockText, seasonAt, seasonEndsAt, weatherAt, weatherRegion, type Weather } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 
@@ -67,3 +67,22 @@ const CSS = `
 .tg-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:tg-flash 9s infinite}
 @keyframes tg-flash{0%,91%,95%,100%{opacity:0}92%{opacity:.55}93%{opacity:.1}94%{opacity:.4}}
 `;
+
+/** The world event running now (or the next one), under the location box. */
+export function EventBadge({ client }: { client: GameClient }) {
+  const now = useNow(client, 5000);
+  const ev = currentEvent(now);
+  if (!ev) {
+    const n = nextEvent(now);
+    return (
+      <div className="px-panel-dark pointer-events-auto px-2 py-0.5 text-[11px] text-parchment/70" title={n.def.description} data-testid="event-next">
+        Next event: {n.def.name} in {formatDuration(n.start - now)}
+      </div>
+    );
+  }
+  return (
+    <div className="px-panel-dark pointer-events-auto px-2 py-0.5 text-xs font-bold text-gold" title={ev.def.description} data-testid="event-now">
+      🎉 {ev.def.name} · {formatDuration(ev.end - now)} left
+    </div>
+  );
+}

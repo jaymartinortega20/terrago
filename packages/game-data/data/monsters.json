@@ -1095,5 +1095,145 @@
     "dmg": 1.4
    }
   ]
+ },
+ {
+  "id": "king_slime",
+  "name": "King Slime",
+  "boss": true,
+  "hpMult": 6,
+  "atkMult": 1.3,
+  "defMult": 1.0,
+  "speed": 38,
+  "aggro": 6,
+  "range": 1.8,
+  "cooldownMs": 1800,
+  "xpMult": 8,
+  "gold": [
+   60,
+   120
+  ],
+  "drops": [
+   {
+    "itemId": "slime_gel",
+    "chance": 1,
+    "min": 4,
+    "max": 8
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 0.6,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "minor_health_potion",
+    "chance": 1,
+    "min": 2,
+    "max": 4
+   }
+  ],
+  "art": {
+   "shape": "slime",
+   "color": "#7cc35a",
+   "size": 2.4
+  },
+  "respawnMs": 600000,
+  "abilities": [
+   {
+    "id": "belly_flop",
+    "name": "Belly Flop",
+    "kind": "slam",
+    "everyMs": 7000,
+    "windupMs": 1500,
+    "radius": 2.2,
+    "dmgMult": 1.8
+   },
+   {
+    "id": "split",
+    "name": "Split!",
+    "kind": "summon",
+    "atHp": [
+     0.6,
+     0.3
+    ],
+    "monster": "green_slime",
+    "count": 3,
+    "level": 4
+   }
+  ]
+ },
+ {
+  "id": "goblin_warchief",
+  "name": "Goblin Warchief",
+  "boss": true,
+  "hpMult": 8,
+  "atkMult": 1.5,
+  "defMult": 1.3,
+  "speed": 62,
+  "aggro": 7,
+  "range": 1.6,
+  "cooldownMs": 1500,
+  "xpMult": 10,
+  "gold": [
+   150,
+   300
+  ],
+  "drops": [
+   {
+    "itemId": "goblin_trinket",
+    "chance": 1,
+    "min": 2,
+    "max": 4
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 0.8,
+    "min": 1,
+    "max": 3
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 0.5,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "goblin",
+   "color": "#4f7a2c",
+   "size": 1.9
+  },
+  "respawnMs": 600000,
+  "abilities": [
+   {
+    "id": "war_stomp",
+    "name": "War Stomp",
+    "kind": "nova",
+    "everyMs": 10000,
+    "windupMs": 1700,
+    "radius": 3,
+    "dmgMult": 1.7
+   },
+   {
+    "id": "rally",
+    "name": "Rally the Band",
+    "kind": "summon",
+    "atHp": [
+     0.5
+    ],
+    "monster": "goblin_scout",
+    "count": 4,
+    "level": 15
+   },
+   {
+    "id": "bloodlust",
+    "name": "Bloodlust",
+    "kind": "enrage",
+    "atHp": [
+     0.25
+    ],
+    "dmg": 1.4
+   }
+  ]
  }
 ]

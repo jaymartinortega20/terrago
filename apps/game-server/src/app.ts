@@ -2,7 +2,7 @@ import { createServer, type Server as HttpServer } from 'node:http';
 import { performance } from 'node:perf_hooks';
 import { runMigrations } from '@terrago/database';
 import { BALANCE, validateGameData } from '@terrago/game-data';
-import { SIM, setWeatherOverride } from '@terrago/shared';
+import { SIM, setEventOverride, setWeatherOverride } from '@terrago/shared';
 import { TicketStore } from './auth/tickets';
 import type { Config } from './config';
 import { createPool, type Pool } from './db';
@@ -15,6 +15,7 @@ import { SecurityEvents } from './security/events';
 import { savePositions } from './services/characters';
 import { chatCommand, onLeave as socialLeave } from './net/social';
 import { track } from './net/journal';
+import { startEventDirector } from './net/events';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
@@ -38,6 +39,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   if (dataErrors.length) throw new Error(`Game data is invalid:\n${dataErrors.join('\n')}`);
 
   setWeatherOverride(config.weatherOverride ?? null);
+  setEventOverride(config.events);
   const pool = createPool(config.databaseUrl, config.dbPoolMax);
   pool.on('error', (err) => log.error('db_pool_error', { err }));
   if (config.migrateOnStart) {
@@ -105,6 +107,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   const energyTimer = setInterval(() => world.pushEnergy(), 5_000);
   const rainTimer = setInterval(() => void rainTick({ pool, world, log }).catch((err) => log.error('rain_tick_failed', { err })), 60_000);
   rainTimer.unref();
+  const stopEvents = startEventDirector({ pool, world, log });
 
   await new Promise<void>((resolve) => http.listen(config.port, config.host, resolve));
   const addr = http.address();
@@ -127,6 +130,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
         clearInterval(saveTimer);
         clearInterval(energyTimer);
         clearInterval(rainTimer);
+        stopEvents();
         await world.shutdown();
         io.close();
         await chatLog.close();

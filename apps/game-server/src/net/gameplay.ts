@@ -23,6 +23,7 @@ import {
   type WorldObject,
   isWet,
   weatherAt,
+  eventMult,
 } from '@terrago/shared';
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
@@ -493,6 +494,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
         void r.player
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
+            r.xp = Math.round(r.xp * eventMult('xp', Date.now()));
             if (r.monster.def.boss) progressEvent(d, r.player, 'boss', r.monster.def.id);
             if (r.monster.def.boss && (r.gold || r.items.length)) {
               // Boss loot once per day per character (XP always).

@@ -6,6 +6,7 @@ import {
   removeFromSlot,
   removeItemById,
   rollQuality,
+  eventMult,
   seasonAt,
   seasonSpeed,
   waterCrop,
@@ -293,6 +294,8 @@ export function harvest(pool: Pool, characterId: string, index: number, rand: ()
     const [min, max] = def.yield;
     let qty = min + Math.floor(rand() * (max - min + 1));
     if (cropMaster && rand() < 0.3) qty += 1;
+    const festival = eventMult('farming', ctx.now);
+    if (festival > 1) qty += 1;
     if (rand() < Math.min(0.3, Math.max(0, farming.level - def.levelRequired) * 0.01)) qty += 1; // skilled bonus
 
     const produce = getItem(def.produceItem)!;
@@ -302,7 +305,7 @@ export function harvest(pool: Pool, characterId: string, index: number, rand: ()
     added.changed.forEach((i) => ctx.changedSlots.add(i));
     await logItemMovement(ctx.tx, { itemId: produce.id, quantity: qty, quality, to: characterId, reason: 'harvest' });
 
-    const skill = await grantSkillXpTx(ctx.tx, characterId, 'farming', def.xp);
+    const skill = await grantSkillXpTx(ctx.tx, characterId, 'farming', def.xp * festival);
     ctx.delta.skill = { id: 'farming', progress: skill, levelsGained: skill.levelsGained };
     ctx.delta.character = await grantCharacterXpTx(ctx.tx, characterId, Math.round(def.xp * F().characterXpShare));
     ctx.delta.energy = await spendEnergyTx(ctx.tx, characterId, F().energy.harvest, ctx.now);

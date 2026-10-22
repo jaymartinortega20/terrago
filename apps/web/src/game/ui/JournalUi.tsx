@@ -6,6 +6,7 @@ import { LEADERBOARDS, LOGIN_REWARDS, dailyTaskReward, formatDuration, type Lead
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { Window } from './Window';
+import { EventBadge } from './Atmosphere';
 
 const BOARD_LABEL: Record<LeaderboardId, string> = {
   level: 'Level',
@@ -55,6 +56,9 @@ export function JournalPanel({ client, onClose }: { client: GameClient; onClose:
             <button className="px-btn green small mt-2" disabled={j.login.claimedToday} onClick={() => void client.claimLogin()} data-testid="claim-login">
               {j.login.claimedToday ? 'Claimed — come back tomorrow' : `Claim day ${j.login.day} reward`}
             </button>
+          </div>
+          <div className="mt-2">
+            <EventBadge client={client} />
           </div>
           <p className="mt-3 font-bold">Today&apos;s tasks</p>
           <p className="text-xs text-wood-dark/70">

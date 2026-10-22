@@ -21,6 +21,8 @@ const schema = z.object({
   /** Comma-separated account emails that get the admin panel. */
   ADMIN_EMAILS: z.string().default(''),
   /** Pin the weather (e.g. "clear" in tests). */
+  /** "off" disables world events, or an event id forces one (testing). */
+  EVENTS: z.string().optional(),
   WEATHER_OVERRIDE: z.enum(['clear', 'cloudy', 'rain', 'storm', 'fog', 'snow']).optional(),
   MIGRATE_ON_START: bool(true),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
@@ -41,6 +43,7 @@ export interface Config {
   trustProxy: boolean;
   metricsToken: string | undefined;
   adminEmails: string[];
+  events: string | undefined;
   weatherOverride: 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow' | undefined;
   migrateOnStart: boolean;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
@@ -71,6 +74,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     trustProxy: e.TRUST_PROXY,
     metricsToken: e.METRICS_TOKEN || undefined,
     weatherOverride: e.WEATHER_OVERRIDE,
+    events: e.EVENTS,
     adminEmails: e.ADMIN_EMAILS.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
     migrateOnStart: e.MIGRATE_ON_START,
     logLevel: e.LOG_LEVEL,
