@@ -2,7 +2,8 @@
  {
   "id": "warrior",
   "name": "Warrior",
-  "summary": "Front-line fighter with high HP and heavy melee blows.",
+  "summary": "Front-line fighter. Builds Rage by hitting and being hit, then spends it on crushing blows.",
+  "resource": "rage",
   "weapons": [
    "sword",
    "axe",
@@ -18,49 +19,44 @@
   },
   "hpBase": 70,
   "hpPerLevel": 14,
-  "mpBase": 12,
-  "mpPerLevel": 2,
+  "mpBase": 100,
+  "mpPerLevel": 0,
   "growth": {
-   "strength": 2,
-   "agility": 0.8,
-   "intelligence": 0.3,
-   "vitality": 1.8,
-   "luck": 0.4
+   "strength": 0,
+   "agility": 0,
+   "intelligence": 0,
+   "vitality": 0,
+   "luck": 0
   },
-  "starterWeapon": "training_sword"
- },
- {
-  "id": "ranger",
-  "name": "Ranger",
-  "summary": "Patient hunter who strikes from range with bows and crossbows.",
-  "weapons": [
-   "bow",
-   "crossbow"
-  ],
-  "baseStats": {
-   "strength": 5,
-   "agility": 10,
-   "intelligence": 3,
-   "vitality": 6,
-   "luck": 4
-  },
-  "hpBase": 55,
-  "hpPerLevel": 10,
-  "mpBase": 18,
-  "mpPerLevel": 3,
-  "growth": {
-   "strength": 1,
-   "agility": 2,
-   "intelligence": 0.5,
-   "vitality": 1,
-   "luck": 0.7
-  },
-  "starterWeapon": "training_bow"
+  "starterWeapon": "training_sword",
+  "jobs": [
+   {
+    "id": "paladin",
+    "name": "Paladin",
+    "summary": "Holy knight: tougher, protects allies and smites with light.",
+    "passive": {
+     "hpPct": 15,
+     "defPct": 15,
+     "matkPct": 10
+    }
+   },
+   {
+    "id": "berserker",
+    "name": "Berserker",
+    "summary": "Reckless fury: much more damage, a little less defense.",
+    "passive": {
+     "atkPct": 20,
+     "critAdd": 5,
+     "defPct": -10
+    }
+   }
+  ]
  },
  {
   "id": "mage",
   "name": "Mage",
-  "summary": "Scholar of the elements. Fragile, but devastating from afar.",
+  "summary": "Master of the elements. Huge magic damage from a deep Mana pool.",
+  "resource": "mana",
   "weapons": [
    "staff",
    "wand"
@@ -77,21 +73,94 @@
   "mpBase": 40,
   "mpPerLevel": 7,
   "growth": {
-   "strength": 0.3,
-   "agility": 0.8,
-   "intelligence": 2.4,
-   "vitality": 0.9,
-   "luck": 0.6
+   "strength": 0,
+   "agility": 0,
+   "intelligence": 0,
+   "vitality": 0,
+   "luck": 0
   },
-  "starterWeapon": "training_staff"
+  "starterWeapon": "training_staff",
+  "jobs": [
+   {
+    "id": "sorcerer",
+    "name": "Sorcerer",
+    "summary": "Raw destruction: meteors and chain lightning.",
+    "passive": {
+     "matkPct": 20,
+     "mpPct": 15
+    }
+   },
+   {
+    "id": "necromancer",
+    "name": "Necromancer",
+    "summary": "Dark arts: drain life and curse foes.",
+    "passive": {
+     "matkPct": 10,
+     "hpPct": 10,
+     "regenPct": 30
+    }
+   }
+  ]
  },
  {
-  "id": "priest",
-  "name": "Priest",
-  "summary": "Keeps the party standing with healing and protective blessings.",
+  "id": "archer",
+  "name": "Archer",
+  "summary": "Swift marksman. Fast-refilling Energy for a steady stream of shots.",
+  "resource": "energy",
   "weapons": [
-   "staff",
-   "mace"
+   "bow",
+   "crossbow",
+   "dagger"
+  ],
+  "baseStats": {
+   "strength": 5,
+   "agility": 10,
+   "intelligence": 3,
+   "vitality": 6,
+   "luck": 4
+  },
+  "hpBase": 55,
+  "hpPerLevel": 10,
+  "mpBase": 100,
+  "mpPerLevel": 0,
+  "growth": {
+   "strength": 0,
+   "agility": 0,
+   "intelligence": 0,
+   "vitality": 0,
+   "luck": 0
+  },
+  "starterWeapon": "training_bow",
+  "jobs": [
+   {
+    "id": "ranger",
+    "name": "Ranger",
+    "summary": "Deadly precision: piercing shots and arrow storms.",
+    "passive": {
+     "atkPct": 15,
+     "critAdd": 8
+    }
+   },
+   {
+    "id": "beastmaster",
+    "name": "Beastmaster",
+    "summary": "Fights beside a loyal hawk that dives, blinds and marks foes.",
+    "passive": {
+     "atkPct": 8,
+     "hpPct": 10
+    },
+    "companion": "hawk"
+   }
+  ]
+ },
+ {
+  "id": "acolyte",
+  "name": "Acolyte",
+  "summary": "Servant of the light. Heals allies and punishes the wicked with Mana.",
+  "resource": "mana",
+  "weapons": [
+   "mace",
+   "staff"
   ],
   "baseStats": {
    "strength": 4,
@@ -105,39 +174,33 @@
   "mpBase": 34,
   "mpPerLevel": 6,
   "growth": {
-   "strength": 0.6,
-   "agility": 0.7,
-   "intelligence": 2.0,
-   "vitality": 1.3,
-   "luck": 0.6
+   "strength": 0,
+   "agility": 0,
+   "intelligence": 0,
+   "vitality": 0,
+   "luck": 0
   },
-  "starterWeapon": "training_mace"
- },
- {
-  "id": "rogue",
-  "name": "Rogue",
-  "summary": "Quick, precise and hard to pin down. Lives by the dagger and luck.",
-  "weapons": [
-   "dagger"
-  ],
-  "baseStats": {
-   "strength": 6,
-   "agility": 10,
-   "intelligence": 3,
-   "vitality": 5,
-   "luck": 6
-  },
-  "hpBase": 50,
-  "hpPerLevel": 9,
-  "mpBase": 20,
-  "mpPerLevel": 3,
-  "growth": {
-   "strength": 1.3,
-   "agility": 2,
-   "intelligence": 0.4,
-   "vitality": 0.9,
-   "luck": 1
-  },
-  "starterWeapon": "training_dagger"
+  "starterWeapon": "training_mace",
+  "jobs": [
+   {
+    "id": "high_priest",
+    "name": "High Priest",
+    "summary": "Supreme healer: mass healing and holy light.",
+    "passive": {
+     "mpPct": 20,
+     "healPct": 30
+    }
+   },
+   {
+    "id": "inquisitor",
+    "name": "Inquisitor",
+    "summary": "Battle cleric: judgment and purging flames.",
+    "passive": {
+     "matkPct": 15,
+     "atkPct": 10,
+     "hpPct": 5
+    }
+   }
+  ]
  }
 ]

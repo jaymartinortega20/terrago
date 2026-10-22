@@ -16,6 +16,7 @@ function toSummary(r: Record<string, any>): CharacterSummary {
     id: r.id,
     name: r.name,
     classId: r.class_id,
+    job: r.job ?? null,
     level: r.level,
     mapId: r.map_id,
     appearance: r.appearance,
@@ -26,7 +27,7 @@ function toSummary(r: Record<string, any>): CharacterSummary {
 
 export async function listCharacters(pool: Pool, userId: string): Promise<CharacterSummary[]> {
   const { rows } = await pool.query(
-    `SELECT id, name, class_id, level, map_id, appearance, created_at, last_played_at
+    `SELECT id, name, class_id, job, level, map_id, appearance, created_at, last_played_at
        FROM characters WHERE user_id = $1 AND deleted_at IS NULL
       ORDER BY last_played_at DESC NULLS LAST, created_at ASC`,
     [userId],
@@ -67,7 +68,7 @@ export async function createCharacter(pool: Pool, userId: string, input: CreateC
       await tx.query(
         `INSERT INTO character_stats (character_id, strength, agility, intelligence, vitality, luck, hp, mp, energy)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [created.id, s.strength, s.agility, s.intelligence, s.vitality, s.luck, maxHp(1, s, cls), maxMp(1, s, cls), BALANCE.energy.startingEnergy],
+        [created.id, s.strength, s.agility, s.intelligence, s.vitality, s.luck, maxHp(1, s, cls), cls.resource === 'rage' ? 0 : cls.resource === 'energy' ? 100 : maxMp(1, s, cls), BALANCE.energy.startingEnergy],
       );
       await tx.query(`INSERT INTO inventories (character_id, container, capacity) VALUES ($1, 'bag', $2), ($1, 'equip', 9)`, [
         created.id,
@@ -101,6 +102,7 @@ export async function loadCharacter(pool: Pool, userId: string, characterId: str
     userId: r.user_id,
     name: r.name,
     classId: r.class_id,
+    job: r.job ?? null,
     level: r.level,
     xp: Number(r.xp),
     gold: Number(r.gold),

@@ -28,6 +28,9 @@ import {
   type NpcAccessory,
   type NpcPublic,
   type XpCurve,
+  type JobId,
+  type JobPassive,
+  type ResourceKind,
 } from '@terrago/shared';
 import balanceJson from '../data/balance.json';
 import classesJson from '../data/classes.json';
@@ -71,9 +74,31 @@ export interface ClassDef extends ClassProfile {
   name: string;
   summary: string;
   weapons: string[];
-  /** Stats gained per level. */
+  /** Stats gained per level (zero now: players spend stat points instead). */
   growth: BaseStats;
   starterWeapon: string;
+  resource: ResourceKind;
+  /** Second jobs available at level 40. */
+  jobs: JobDef[];
+}
+
+export interface JobDef {
+  id: JobId;
+  name: string;
+  summary: string;
+  passive: JobPassive;
+  /** A companion that comes with the job (Beastmaster's hawk). */
+  companion?: string;
+}
+
+/** The job definition (and its class) for a job id. */
+export function getJob(id: string | null | undefined): (JobDef & { classId: ClassId }) | undefined {
+  if (!id) return undefined;
+  for (const c of CLASSES) {
+    const j = c.jobs.find((x) => x.id === id);
+    if (j) return { ...j, classId: c.id };
+  }
+  return undefined;
 }
 
 export interface NpcDef {
@@ -250,8 +275,21 @@ export function getSkillDef(id: string): SkillDef | undefined {
 }
 
 export function skillsForClass(classId: ClassId): SkillDef[] {
-  return SKILLS.filter((k) => k.classId === classId).sort((a, b) => a.level - b.level);
+  return SKILLS.filter((k) => k.classId === classId && !k.job).sort((a, b) => a.level - b.level);
 }
+
+/** Skills on a character's bar: the class skills, then their second job's skills. */
+export function skillsFor(classId: ClassId, job?: string | null): SkillDef[] {
+  return [...skillsForClass(classId), ...SKILLS.filter((k) => k.classId === classId && k.job && k.job === job).sort((a, b) => a.level - b.level)];
+}
+
+/** Every job skill for a job (for the job trainer's preview). */
+export function skillsForJob(job: string): SkillDef[] {
+  return SKILLS.filter((k) => k.job === job).sort((a, b) => a.level - b.level);
+}
+
+/** Keyboard keys for skill slots. */
+export const SKILL_KEYS = ['Q', 'R', 'T', 'X', 'V', 'H'];
 
 export function equipDef(itemId: string) {
   return itemIndex.get(itemId)?.equip;

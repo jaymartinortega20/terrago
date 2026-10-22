@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { QUESTS, getCrop, getItem, getMap, getMonster, getNode, getQuest } from '@terrago/game-data';
+import { QUESTS, getCrop, getItem, getJob, getMap, getMonster, getNode, getQuest } from '@terrago/game-data';
 import { itemIcon } from '../art/world';
 import { audio, trackFor } from '../audio';
 import { CombatFx, FIRE_PAL, HOLY_PAL, ICE_PAL, MAGIC_PAL, MONSTER_PAL, POISON_PAL, paletteFor, type WeaponType } from '../fx/CombatFx';
@@ -1380,7 +1380,8 @@ export class WorldScene extends Phaser.Scene {
   }
 }
 
-function remoteLabel(info: { name: string; level: number; guild?: string | null; shop?: string | null }): string {
-  const base = `${info.guild ? `[${info.guild}] ` : ''}${info.name} · Lv ${info.level}`;
+function remoteLabel(info: { name: string; level: number; guild?: string | null; shop?: string | null; job?: string | null }): string {
+  const job = getJob(info.job)?.name;
+  const base = `${info.guild ? `[${info.guild}] ` : ''}${info.name} · Lv ${info.level}${job ? ` ${job}` : ''}`;
   return info.shop ? `[Shop] ${info.shop}\n${base}` : base;
 }

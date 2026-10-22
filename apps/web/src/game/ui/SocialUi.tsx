@@ -7,7 +7,7 @@ import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { Window } from './Window';
 
-const CLASS_NAME: Record<string, string> = { warrior: 'Warrior', ranger: 'Ranger', mage: 'Mage', priest: 'Priest', rogue: 'Rogue' };
+const CLASS_NAME: Record<string, string> = { warrior: 'Warrior', mage: 'Mage', archer: 'Archer', acolyte: 'Acolyte' };
 const mapName = (id: string | null) => (id ? (getMap(id.split(':')[0]!)?.name ?? id) : '');
 const Dot = ({ on }: { on: boolean }) => <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${on ? 'bg-leaf' : 'bg-wood-dark/30'}`} aria-label={on ? 'online' : 'offline'} />;
 

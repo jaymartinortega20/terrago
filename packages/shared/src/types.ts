@@ -6,8 +6,30 @@ import type { EquipDef } from './combat';
 
 export type Direction = (typeof DIRECTIONS)[number];
 
-export const CLASS_IDS = ['warrior', 'ranger', 'mage', 'priest', 'rogue'] as const;
+export const CLASS_IDS = ['warrior', 'mage', 'archer', 'acolyte'] as const;
 export type ClassId = (typeof CLASS_IDS)[number];
+
+/** What a class spends on skills: Mana regenerates, Rage builds in combat, Energy refills fast. */
+export type ResourceKind = 'mana' | 'rage' | 'energy';
+
+/** Second jobs, chosen at level 40. */
+export const JOB_IDS = ['paladin', 'berserker', 'sorcerer', 'necromancer', 'ranger', 'beastmaster', 'high_priest', 'inquisitor'] as const;
+export type JobId = (typeof JOB_IDS)[number];
+export const JOB_LEVEL = 40;
+/** Stat points earned per level (spent by the player: RO-style). */
+export const STAT_POINTS_PER_LEVEL = 5;
+
+/** Passive bonuses a job grants (percent, or flat crit chance). */
+export interface JobPassive {
+  hpPct?: number;
+  mpPct?: number;
+  atkPct?: number;
+  matkPct?: number;
+  defPct?: number;
+  critAdd?: number;
+  regenPct?: number;
+  healPct?: number;
+}
 
 export const RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'] as const;
 export type Rarity = (typeof RARITIES)[number];
@@ -51,6 +73,7 @@ export interface CharacterSummary {
   id: string;
   name: string;
   classId: ClassId;
+  job?: JobId | null;
   level: number;
   mapId: string;
   appearance: Appearance;
@@ -84,6 +107,10 @@ export interface SelfState {
   specs?: Record<string, string>;
   /** Active pet item id. */
   pet?: string | null;
+  /** Second job (from level 40). */
+  job?: JobId | null;
+  /** Unspent stat points. */
+  statPoints?: number;
 }
 
 /** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */
@@ -152,6 +179,8 @@ export interface PublicPlayer {
   pet?: string | null;
   /** Sitting down (from the sit emote). */
   pose?: 'sit' | null;
+  /** Second job, shown under the name. */
+  job?: JobId | null;
 }
 
 /** Emotes players can do (chat /wave, or the emote menu). */
@@ -259,7 +288,7 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job';
 
 export interface DialogueAction {
   id: DialogueActionId;

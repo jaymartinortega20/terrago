@@ -98,7 +98,10 @@ export function combatProfile(
   hp: { base: number; perLevel: number; mpBase: number; mpPerLevel: number },
   equipment: InventorySlot[],
   equipDef: (itemId: string) => EquipDef | undefined,
+  opts: { passive?: import('./types').JobPassive; resource?: import('./types').ResourceKind } = {},
 ): CombatProfile {
+  const jp = opts.passive ?? {};
+  const pct = (v?: number) => 1 + (v ?? 0) / 100;
   const s = statsAtLevel(base, growth, level);
   const bonus: Required<EquipStats> = { atk: 0, matk: 0, def: 0, mdef: 0, hp: 0, mp: 0, str: 0, agi: 0, int: 0, vit: 0, luk: 0, crit: 0 };
   let weapon = FISTS;
@@ -118,13 +121,13 @@ export function combatProfile(
   };
   const round1 = (v: number) => Math.round(v * 10) / 10;
   const derived: DerivedStats = {
-    physicalAttack: st.strength * 2 + level + bonus.atk,
-    magicAttack: st.intelligence * 2 + level + bonus.matk,
-    physicalDefense: st.vitality + Math.floor(st.strength / 2) + bonus.def,
+    physicalAttack: Math.round((st.strength * 2 + level + bonus.atk) * pct(jp.atkPct)),
+    magicAttack: Math.round((st.intelligence * 2 + level + bonus.matk) * pct(jp.matkPct)),
+    physicalDefense: Math.round((st.vitality + Math.floor(st.strength / 2) + bonus.def) * pct(jp.defPct)),
     magicDefense: Math.floor((st.intelligence + st.vitality) / 2) + bonus.mdef,
     accuracy: 80 + st.agility + Math.floor(st.luck / 2),
     evasion: st.agility + Math.floor(st.luck / 3),
-    criticalChance: round1(1 + st.luck * 0.3 + st.agility * 0.05 + bonus.crit),
+    criticalChance: round1(1 + st.luck * 0.3 + st.agility * 0.05 + bonus.crit + (jp.critAdd ?? 0)),
     criticalDamage: 150 + Math.floor(st.luck / 2),
     movementSpeed: 100,
     attackSpeed: 100 + Math.floor(st.agility / 2),
@@ -133,8 +136,9 @@ export function combatProfile(
   return {
     stats: st,
     derived,
-    maxHp: hp.base + hp.perLevel * (level - 1) + st.vitality * 5 + bonus.hp,
-    maxMp: hp.mpBase + hp.mpPerLevel * (level - 1) + st.intelligence * 3 + bonus.mp,
+    maxHp: Math.round((hp.base + hp.perLevel * (level - 1) + st.vitality * 5 + bonus.hp) * pct(jp.hpPct)),
+    // Rage and Energy are always out of 100; Mana grows with level and INT.
+    maxMp: opts.resource && opts.resource !== 'mana' ? 100 : Math.round((hp.mpBase + hp.mpPerLevel * (level - 1) + st.intelligence * 3 + bonus.mp) * pct(jp.mpPct)),
     weapon: { ...weapon, speedMs: Math.max(350, Math.round(weapon.speedMs * (100 / derived.attackSpeed))) },
   };
 }
@@ -288,6 +292,10 @@ export interface EffectMods {
   shield?: number;
   /** HP regen per second. */
   regen?: number;
+  /** Multiplier on the victim's accuracy (Blind Blitz). */
+  acc?: number;
+  /** Extra critical chance (percent points) for attacks against this target (Hunter's Eye). */
+  critTaken?: number;
 }
 
 export interface SkillDef {
@@ -308,6 +316,8 @@ export interface SkillDef {
   maxTargets?: number;
   effect?: { id: string; name: string; durationMs: number; mods: EffectMods; scale?: 'int' | 'str' };
   icon: string;
+  /** Only for this second job. */
+  job?: import('./types').JobId;
 }
 
 export interface ActiveEffect {
@@ -320,7 +330,14 @@ export interface ActiveEffect {
   nextTick?: number;
 }
 
-export function effectMult(effects: ActiveEffect[], key: 'dmg' | 'taken' | 'eva' | 'slow', now: number): number {
+/** Sum of an additive effect (e.g. critTaken) over active effects. */
+export function effectSum(effects: ActiveEffect[], key: 'critTaken', now: number): number {
+  let s = 0;
+  for (const e of effects) if (e.until > now && e.mods[key] !== undefined) s += e.mods[key]!;
+  return s;
+}
+
+export function effectMult(effects: ActiveEffect[], key: 'dmg' | 'taken' | 'eva' | 'slow' | 'acc', now: number): number {
   let m = 1;
   for (const e of effects) if (e.until > now && e.mods[key] !== undefined) m *= e.mods[key]!;
   return m;

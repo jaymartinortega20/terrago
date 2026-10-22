@@ -1,5 +1,9 @@
 'use client';
 
+import { getJob } from '@terrago/game-data';
+import { RESOURCE_COLOR } from './CombatUi';
+
+const RES_SHORT = { mana: 'MP', rage: 'RG', energy: 'EN' } as const;
 import { CLASSES } from '@terrago/game-data';
 import { CharacterPreview } from '@/components/CharacterPreview';
 import type { GameClient } from '../net/client';
@@ -39,15 +43,15 @@ export function Hud({ client, compact }: { client: GameClient; compact?: boolean
             {self.name}
           </span>
           <span className="text-[11px] text-parchment/80">
-            Lv {self.level} {cls?.name}
+            Lv {self.level} {getJob(self.job)?.name ?? cls?.name}
           </span>
           <span className="ml-auto text-[11px] text-gold" title="Gold">
             ◉ {gold.toLocaleString()}
           </span>
         </div>
         <Bar compact={compact} label="HP" value={self.hp} max={self.maxHp} color="#d64545" />
-        <Bar compact={compact} label="MP" value={self.mp} max={self.maxMp} color="#4a7fd6" />
-        <Bar compact={compact} label="EN" value={self.energy} max={self.maxEnergy} color="#e0a52e" />
+        <Bar compact={compact} label={RES_SHORT[cls?.resource ?? 'mana']} value={self.mp} max={self.maxMp} color={RESOURCE_COLOR[cls?.resource ?? 'mana']} />
+        <Bar compact={compact} label="ST" value={self.energy} max={self.maxEnergy} color="#8a9a5a" />
       </div>
     </div>
   );

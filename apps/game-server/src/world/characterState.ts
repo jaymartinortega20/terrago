@@ -1,5 +1,6 @@
-import { BALANCE, equipDef, getClass, getMap } from '@terrago/game-data';
+import { BALANCE, equipDef, getClass, getJob, getMap } from '@terrago/game-data';
 import {
+  STAT_POINTS_PER_LEVEL,
   combatProfile,
   settleEnergy,
   tileCenter,
@@ -7,6 +8,7 @@ import {
   type Appearance,
   type BaseStats,
   type ClassId,
+  type JobId,
   type Direction,
   type CombatProfile,
   type InventorySlot,
@@ -21,6 +23,8 @@ export interface CharacterRecord {
   userId: string;
   name: string;
   classId: ClassId;
+  /** Second job (level 40+). */
+  job?: JobId | null;
   level: number;
   xp: number;
   gold: number;
@@ -53,7 +57,18 @@ export interface PositionSave {
 
 export function profileFor(rec: CharacterRecord): CombatProfile {
   const cls = getClass(rec.classId);
-  return combatProfile(rec.level, rec.stats, cls.growth, { base: cls.hpBase, perLevel: cls.hpPerLevel, mpBase: cls.mpBase, mpPerLevel: cls.mpPerLevel }, rec.equipment ?? [], equipDef);
+  const job = getJob(rec.job);
+  return combatProfile(rec.level, rec.stats, cls.growth, { base: cls.hpBase, perLevel: cls.hpPerLevel, mpBase: cls.mpBase, mpPerLevel: cls.mpPerLevel }, rec.equipment ?? [], equipDef, {
+    passive: job?.passive,
+    resource: cls.resource,
+  });
+}
+
+/** Stat points earned so far minus those already spent (stats above the class base). */
+export function unspentStatPoints(rec: CharacterRecord): number {
+  const base = getClass(rec.classId).baseStats;
+  const spent = (Object.keys(base) as (keyof typeof base)[]).reduce((a, k) => a + (rec.stats[k] - base[k]), 0);
+  return Math.max(0, STAT_POINTS_PER_LEVEL * (rec.level - 1) - spent);
 }
 
 /**
@@ -82,6 +97,8 @@ export function buildSelfState(rec: CharacterRecord, now = Date.now(), profile =
     characterId: rec.id,
     name: rec.name,
     classId: rec.classId,
+    job: rec.job ?? null,
+    statPoints: unspentStatPoints(rec),
     level: rec.level,
     xp: rec.xp,
     xpToNext: xpToNext(rec.level, BALANCE.xpCurve),

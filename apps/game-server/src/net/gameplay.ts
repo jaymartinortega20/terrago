@@ -1,4 +1,5 @@
 import { BALANCE, QUESTS, getCrop, getItem, getMap, getNode, getRecipe, mineFloorId, mineFloorNumber, ladderRowsFor } from '@terrago/game-data';
+import { unspentStatPoints } from '../world/characterState';
 import { settings } from '../services/serverConfig';
 import {
   cropStatus,
@@ -147,6 +148,7 @@ export function applyDelta(world: World, p: Player, delta: ProgressDelta): void 
     p.rec.xp = delta.character.xp;
     const cls = getClass(p.rec.classId);
     Object.assign(patch, {
+      statPoints: unspentStatPoints(p.rec),
       level: p.rec.level,
       xp: p.rec.xp,
       xpToNext: xpToNext(p.rec.level, BALANCE.xpCurve),
@@ -386,7 +388,7 @@ export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void>
 // NPC services
 // ---------------------------------------------------------------------------
 
-export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank') {
+export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job') {
   const npc = getNpc(npcId);
   if (!npc || !npcOffers(npc, service)) throw new GameError("They can't help with that.");
   if (!world.npcInRange(p, npc)) throw new GameError("You're too far away.");

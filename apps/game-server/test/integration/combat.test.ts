@@ -109,7 +109,7 @@ describe('combat (v0.5)', () => {
   });
 
   test('dying sends you back to town with weakness and worn-down gear', async () => {
-    const A = await newPlayer(base, { classId: 'rogue' });
+    const A = await newPlayer(base, { classId: 'archer' });
     await place(A.character.id, 'sunfield_plains', 45, 30);
     const a = await enterWorld(base, A.browser.cookie, A.character.id);
     const p = server.world.players.get(A.character.id)!;

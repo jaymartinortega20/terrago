@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getItem, skillsForClass } from '@terrago/game-data';
+import { SKILL_KEYS, getClass, getItem, skillsFor } from '@terrago/game-data';
+
+export const RESOURCE_LABEL = { mana: 'Mana', rage: 'Rage', energy: 'Energy' } as const;
+export const RESOURCE_COLOR = { mana: '#4a7fd6', rage: '#c0392b', energy: '#e6c229' } as const;
 import { EQUIP_SLOTS, ENHANCE_SAFE_LEVEL, MAX_ENHANCE, enhanceChance, enhanceCost } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
@@ -82,8 +85,9 @@ export function SkillBar({ client, compact }: { client: GameClient; compact?: bo
   const cooldowns = useStore(client.ui, (s) => s.cooldowns);
   useTick(200);
   if (!self) return null;
-  const skills = skillsForClass(self.classId).slice(0, 3);
-  const keys = ['Q', 'R', 'T'];
+  const skills = skillsFor(self.classId, self.job);
+  const keys = SKILL_KEYS;
+  const res = RESOURCE_LABEL[getClass(self.classId).resource];
   const now = client.serverNow();
   return (
     <div className={`pointer-events-auto flex ${compact ? 'flex-col' : 'px-panel-dark p-1'} gap-1`} data-testid="skill-bar">
@@ -94,7 +98,7 @@ export function SkillBar({ client, compact }: { client: GameClient; compact?: bo
         return (
           <button
             key={sk.id}
-            title={`${sk.name} (${keys[i]}) — ${sk.description} ${sk.mp} MP`}
+            title={`${sk.name} (${keys[i]}) — ${sk.description} ${sk.mp} ${res}`}
             onClick={() => client.useSkill(i)}
             className={`relative flex items-center justify-center border-3 border-ink bg-night ${compact ? 'rounded-full' : ''} ${locked ? 'opacity-40' : ''}`}
             style={{ width: size, height: size, borderWidth: 3 }}

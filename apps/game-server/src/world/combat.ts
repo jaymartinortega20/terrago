@@ -1,4 +1,6 @@
-import { getClass, getMonster, getSkillDef } from '@terrago/game-data';
+import { getClass, getJob, getMonster, getSkillDef } from '@terrago/game-data';
+
+const RESOURCE_NAME = { mana: 'Mana', rage: 'Rage', energy: 'Energy' } as const;
 import {
   OUT_OF_COMBAT_MS,
   PLAYER_BODY,
@@ -19,6 +21,7 @@ import {
   type MonsterStats,
   type PublicMonster,
   type SpawnDef,
+  effectSum,
 } from '@terrago/shared';
 import type { Player } from './player';
 import type { MapRuntime } from './world';
@@ -304,18 +307,21 @@ export class Combat {
   private monsterAttack(rt: MapRuntime, m: Monster, p: Player, now: number): void {
     const def = m.def.magic ? p.profile.derived.magicDefense : p.profile.derived.physicalDefense;
     const res = rollHit(
-      { level: m.level, atk: m.stats.atk * m.enraged * effectMult(m.effects, 'dmg', now), accuracy: m.stats.accuracy, critChance: 5, critDamage: 150 },
+      { level: m.level, atk: m.stats.atk * m.enraged * effectMult(m.effects, 'dmg', now), accuracy: m.stats.accuracy * effectMult(m.effects, 'acc', now), critChance: 5, critDamage: 150 },
       { level: p.rec.level, def, evasion: p.profile.derived.evasion * effectMult(p.effects, 'eva', now) },
       1,
       this.rand,
     );
     p.lastCombatAt = now;
-    if (res.miss) return this.emit(rt, { s: m.id, t: p.id, a: 0, k: 'miss' });
+    // LUK: perfect dodge (0.1% per point, up to 20%) ignores the hit entirely.
+    const perfectDodge = Math.min(0.2, p.profile.stats.luck * 0.001);
+    if (res.miss || this.rand() < perfectDodge) return this.emit(rt, { s: m.id, t: p.id, a: 0, k: 'miss' });
     this.damagePlayer(rt, p, Math.round(res.damage * effectMult(p.effects, 'taken', now)), m.id, res.crit ? 'crit' : 'hit');
   }
 
   damagePlayer(rt: MapRuntime, p: Player, amount: number, source: string, kind: CombatEvent['k']): void {
     const now = this.now();
+    if (kind === 'hit' || kind === 'crit') this.gainRage(p, 4);
     let dmg = amount;
     for (const e of p.effects) {
       if (dmg <= 0) break;
@@ -366,9 +372,11 @@ export class Combat {
     // Regeneration: fast out of combat, slow in it; Blessing adds more.
     const ooc = now - p.lastCombatAt > OUT_OF_COMBAT_MS;
     const sec = dtMs / 1000;
-    let hpRegen = p.profile.maxHp * (ooc ? 0.03 * (p.pet === 'pet_slime' ? 1.2 : 1) : 0.004) * sec;
+    let hpRegen = p.profile.maxHp * (ooc ? 0.03 * (p.pet === 'pet_slime' ? 1.2 : 1) : 0.004) * sec * (1 + (getJob(p.rec.job)?.passive.regenPct ?? 0) / 100);
     for (const e of p.effects) if (e.mods.regen) hpRegen += e.mods.regen * sec;
-    const mpRegen = p.profile.maxMp * (ooc ? 0.03 : 0.008) * sec;
+    // Mana regenerates; Energy refills quickly; Rage drains away once the fight is over.
+    const resource = getClass(p.rec.classId).resource;
+    const mpRegen = resource === 'energy' ? 12 * sec : resource === 'rage' ? (ooc ? -6 * sec : 0) : p.profile.maxMp * (ooc ? 0.03 : 0.008) * sec;
     p.regenCarry += hpRegen;
     const whole = Math.floor(p.regenCarry);
     p.regenCarry -= whole;
@@ -376,7 +384,7 @@ export class Combat {
     p.mpCarry = (p.mpCarry ?? 0) + mpRegen;
     const mpWhole = Math.floor(p.mpCarry);
     p.mpCarry -= mpWhole;
-    p.rec.mp = Math.min(p.profile.maxMp, p.rec.mp + mpWhole);
+    p.rec.mp = Math.max(0, Math.min(p.profile.maxMp, p.rec.mp + mpWhole));
     if ((p.rec.hp !== p.sentHp || p.rec.mp !== p.sentMp) && now - (p.lastVitalsAt ?? 0) > 200) {
       p.sentHp = p.rec.hp;
       p.sentMp = p.rec.mp;
@@ -482,8 +490,17 @@ export class Combat {
     return { cooldownMs: w.speedMs };
   }
 
+  /** Warriors build Rage by fighting (out of 100). */
+  private gainRage(p: Player, n: number): void {
+    if (getClass(p.rec.classId).resource !== 'rage') return;
+    p.rec.mp = Math.min(p.profile.maxMp, p.rec.mp + n);
+  }
+
   private strike(rt: MapRuntime, p: Player, m: Monster, magic: boolean, mult: number, skill: string | undefined, now: number): void {
-    const res = rollHit(this.attackerOf(p, magic, now), { level: m.level, def: magic ? m.stats.def * 0.8 : m.stats.def, evasion: m.stats.evasion }, mult, this.rand);
+    const atk = this.attackerOf(p, magic, now);
+    atk.critChance += effectSum(m.effects, 'critTaken', now);
+    const res = rollHit(atk, { level: m.level, def: magic ? m.stats.def * 0.8 : m.stats.def, evasion: m.stats.evasion }, mult, this.rand);
+    if (!res.miss && !skill) this.gainRage(p, res.crit ? 10 : 6);
     if (m.state === 'idle' || m.state === 'return') {
       m.state = 'chase';
       m.targetId = p.id;
@@ -546,8 +563,10 @@ export class Combat {
     const rolls = rt.def.dungeon ? difficultyOf(rt.owner?.id).lootRolls : 1;
     for (const loot of looters) {
       loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08) * rolls);
+      // LUK slightly raises drop chances (+0.2% of the base chance per point, at most +40%).
+      const luck = 1 + Math.min(0.4, (loot.player.profile.stats.luck ?? 0) * 0.002);
       for (let k = 0; k < rolls; k++)
-        for (const d of m.def.drops) if (this.rand() < d.chance) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
+        for (const d of m.def.drops) if (this.rand() < d.chance * luck) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
     }
     if (rt.def.dungeon) for (const r of rewards) r.difficulty = difficultyOf(rt.owner?.id).id;
     this.hooks.onKill?.(rewards);
@@ -674,9 +693,10 @@ export class Combat {
     const sk = typeof skillId === 'string' ? getSkillDef(skillId) : undefined;
     if (!sk || sk.classId !== p.rec.classId) return "You don't know that skill.";
     if (p.rec.level < sk.level) return `${sk.name} unlocks at level ${sk.level}.`;
+    if (sk.job && p.rec.job !== sk.job) return `${sk.name} is a ${getJob(sk.job)?.name ?? sk.job} skill.`;
     if (p.dead) return "You can't do that right now.";
     if ((p.cooldowns.get(sk.id) ?? 0) > now) return 'cooldown';
-    if (p.rec.mp < sk.mp) return 'Not enough MP.';
+    if (p.rec.mp < sk.mp) return `Not enough ${RESOURCE_NAME[getClass(p.rec.classId).resource]}.`;
     const intel = p.profile.stats.intelligence;
     const scale = (v: number, by?: 'int' | 'str') => (by === 'int' ? Math.round(v * intel) : by === 'str' ? Math.round(v * Math.max(4, p.profile.derived.physicalAttack * 0.25)) : v);
     const monster = typeof targetId === 'string' ? rt.monsters.get(targetId) : undefined;
@@ -747,7 +767,7 @@ export class Combat {
       case 'heal': {
         const ally = typeof targetId === 'string' ? findPlayer(targetId) : undefined;
         const who = ally && ally !== p && !ally.dead && ally.mapId === p.mapId && dist(ally.x, ally.y, p.x, p.y) <= sk.range * TILE ? ally : p;
-        const amount = 40 + intel * 3;
+        const amount = Math.round((40 + intel * 3) * (1 + (getJob(p.rec.job)?.passive.healPct ?? 0) / 100));
         who.rec.hp = Math.min(who.profile.maxHp, who.rec.hp + amount);
         this.emit(rt, { s: p.id, t: who.id, a: amount, k: 'heal', sk: sk.id });
         break;

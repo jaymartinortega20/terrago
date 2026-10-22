@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { DUNGEONS, NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, skillsForClass } from '@terrago/game-data';
+import { DUNGEONS, NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, skillsFor } from '@terrago/game-data';
 import {
   CHAT,
   CODE_DIR,
@@ -709,6 +709,29 @@ export class GameClient {
     this.ui.set({ targetId: id, autoAttack: engage && !!id });
   }
 
+  /** Spend stat points (STR/AGI/INT/VIT/LUK). */
+  async addStat(stat: keyof import('@terrago/shared').BaseStats, amount = 1): Promise<void> {
+    try {
+      const r = await this.request<{ stats: import('@terrago/shared').BaseStats; statPoints: number }>('stats:add', { stat, amount });
+      void r;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message, 2500);
+    }
+  }
+
+  /** Become a second job at the Job Trainer. */
+  async advanceJob(npcId: string, job: string): Promise<boolean> {
+    try {
+      const r = await this.request<{ job: string; message: string }>('job:advance', { npcId, job });
+      pushNotice(this.ui, 'success', r.message, 6000);
+      audio.sfx('levelup');
+      return true;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message, 3500);
+      return false;
+    }
+  }
+
   /** Your outfit and the skins you own. */
   wardrobe(): Promise<{ outfit: number; owned: number[] }> {
     return this.request('wardrobe:get');
@@ -775,7 +798,7 @@ export class GameClient {
   useSkill(n: number): void {
     const self = this.ui.get().self;
     if (!self) return;
-    const sk = skillsForClass(self.classId)[n];
+    const sk = skillsFor(self.classId, self.job)[n];
     if (!sk) return;
     if (self.level < sk.level) return pushNotice(this.ui, 'info', `${sk.name} unlocks at level ${sk.level}.`, 2000);
     let target = this.ui.get().targetId;

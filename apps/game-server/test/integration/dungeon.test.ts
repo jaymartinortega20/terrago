@@ -40,7 +40,7 @@ async function stepOnto(socket: any, id: string, mapId: string, tx: number, ty: 
 describe('dungeons (v0.7)', () => {
   test('a party shares one instance; the boss telegraphs, summons, drops loot for everyone once a day', async () => {
     const A = await newPlayer(base, { classId: 'warrior' });
-    const B = await newPlayer(base, { classId: 'priest' });
+    const B = await newPlayer(base, { classId: 'acolyte' });
     for (const x of [A, B]) {
       await db.query(`UPDATE characters SET level = 16, map_id = 'whisperwood', pos_x = $2, pos_y = $3 WHERE id = $1`, [x.character.id, tileCenter(11, 19).x, tileCenter(11, 19).y]);
     }

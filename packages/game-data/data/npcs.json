@@ -630,5 +630,40 @@
    ]
   ],
   "services": []
+ },
+ {
+  "id": "job_master_aldric",
+  "name": "Master Aldric",
+  "title": "Job Trainer",
+  "mapId": "greenhaven",
+  "x": 38,
+  "y": 13,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 2,
+   "hairStyle": 5,
+   "hairColor": 4,
+   "eyeColor": 1,
+   "outfit": 5
+  },
+  "accessory": "cape",
+  "firstMeeting": {
+   "lines": [
+    "So you seek a greater path.",
+    "Reach level 40 and I will teach you your second job: two roads for every class, and you may walk only one."
+   ]
+  },
+  "greetings": [
+   [
+    "Strength is chosen, not given. Choose well."
+   ],
+   [
+    "At level 40 every hero must pick a path."
+   ]
+  ],
+  "services": [
+   "job"
+  ]
  }
 ]

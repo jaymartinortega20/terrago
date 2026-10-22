@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CLASSES, getItem, getMap } from '@terrago/game-data';
-import { BASE_OUTFIT_COUNT, OUTFITS, QUALITIES, TILE_SIZE } from '@terrago/shared';
+import { CLASSES, getItem, getJob, getMap, skillsForJob } from '@terrago/game-data';
+import { BASE_OUTFIT_COUNT, JOB_LEVEL, OUTFITS, QUALITIES, TILE_SIZE } from '@terrago/shared';
 import { characterPreview } from '../art/characters';
 import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
@@ -158,6 +158,66 @@ function Wardrobe({ client }: { client: GameClient }) {
   );
 }
 
+const STAT_KEY = { STR: 'strength', AGI: 'agility', INT: 'intelligence', VIT: 'vitality', LUK: 'luck' } as const;
+const STAT_HELP: Record<string, string> = {
+  STR: 'Strength: melee/physical attack, a little defense.',
+  AGI: 'Agility: attack speed (ASPD), accuracy and evasion (flee).',
+  INT: 'Intelligence: magic attack, max Mana and healing power.',
+  VIT: 'Vitality: max HP, HP recovery and physical defense.',
+  LUK: 'Luck: critical chance, perfect dodge and slightly better drops.',
+};
+
+/** Job Trainer: pick one of your class's two second jobs at level 40. */
+export function JobPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
+  const self = useStore(client.ui, (s) => s.self);
+  const npcId = useStore(client.ui, (s) => s.serviceNpc);
+  if (!self) return null;
+  const cls = CLASSES.find((c) => c.id === self.classId);
+  return (
+    <Window title="Second job" onClose={onClose} testId="job-panel">
+      {self.job ? (
+        <p>
+          You are a <b>{getJob(self.job)?.name}</b>. The choice is final.
+        </p>
+      ) : (
+        <p className="text-sm">
+          At level {JOB_LEVEL} a {cls?.name} chooses one path. {self.level < JOB_LEVEL ? <b>You are level {self.level}: come back at {JOB_LEVEL}.</b> : 'Choose carefully: this is permanent.'}
+        </p>
+      )}
+      <div className="mt-2 grid gap-2">
+        {cls?.jobs.map((j) => (
+          <div key={j.id} className={`border-2 p-2 ${self.job === j.id ? 'border-gold bg-gold/20' : 'border-ink bg-parchment-2'}`} data-testid={`job-${j.id}`}>
+            <div className="flex items-center">
+              <b className="text-base">{j.name}</b>
+              {!self.job && (
+                <button
+                  className="px-btn green small ml-auto"
+                  disabled={self.level < JOB_LEVEL || !npcId}
+                  onClick={async () => {
+                    if (!confirm(`Become a ${j.name}? You can't change it later.`)) return;
+                    if (await client.advanceJob(npcId!, j.id)) onClose();
+                  }}
+                  data-testid={`job-pick-${j.id}`}
+                >
+                  Become {j.name}
+                </button>
+              )}
+            </div>
+            <p className="text-xs">{j.summary}</p>
+            <ul className="mt-1 text-[11px]">
+              {skillsForJob(j.id).map((s) => (
+                <li key={s.id}>
+                  • <b>{s.name}</b> (Lv {s.level}) — {s.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </Window>
+  );
+}
+
 export function CharacterPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const self = useStore(client.ui, (s) => s.self);
   if (!self) return null;
@@ -182,6 +242,7 @@ export function CharacterPanel({ client, onClose }: { client: GameClient; onClos
       <p className="text-xl font-bold">{self.name}</p>
       <p className="text-sm">
         Level {self.level} {cls?.name}
+        {self.job ? ` · ${getJob(self.job)?.name}` : self.level >= JOB_LEVEL ? ' · second job ready (see Master Aldric)' : ` · second job at Lv ${JOB_LEVEL}`}
       </p>
       <div className="mt-1 text-xs">
         XP {self.xp.toLocaleString()} / {self.xpToNext.toLocaleString()}
@@ -199,12 +260,25 @@ export function CharacterPanel({ client, onClose }: { client: GameClient; onClos
             ['LUK', self.stats.luck],
           ] as const
         ).map(([k, v]) => (
-          <div key={k} className="border-2 border-ink bg-parchment-2 py-1">
+          <div key={k} className="relative border-2 border-ink bg-parchment-2 py-1" title={STAT_HELP[k]}>
             <div className="font-bold">{v}</div>
             <div className="text-[10px]">{k}</div>
+            {(self.statPoints ?? 0) > 0 && (
+              <button
+                className="absolute -top-2 -right-2 h-5 w-5 rounded-full border-2 border-ink bg-gold text-[11px] leading-none font-bold"
+                onClick={(e) => client.addStat(STAT_KEY[k], e.shiftKey ? Math.min(10, self.statPoints ?? 1) : 1)}
+                aria-label={`Add a point to ${k}`}
+                data-testid={`stat-add-${k}`}
+              >
+                +
+              </button>
+            )}
           </div>
         ))}
       </div>
+      <p className="mt-1 text-[11px] text-wood-dark/80" data-testid="stat-points">
+        {(self.statPoints ?? 0) > 0 ? <b className="text-gold-dark">{self.statPoints} stat points to spend</b> : 'No stat points left'} · 5 per level · Shift-click adds 10. Hover a stat to see what it does.
+      </p>
       <h3 className="mt-3 text-sm font-bold text-wood-dark">Equipment</h3>
       <EquipmentGrid client={client} />
       <Wardrobe client={client} />

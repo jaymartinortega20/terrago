@@ -133,6 +133,7 @@ export class Player {
       shop: this.stall?.name ?? null,
       pet: this.pet,
       pose: this.pose,
+      job: this.rec.job ?? null,
     };
   }
 

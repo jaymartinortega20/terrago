@@ -148,7 +148,7 @@ export class LocalServer {
         id: `00000000-0000-4000-8000-00000000b0${i}0`,
         userId: `bot-${i}`,
         name: names[i]!,
-        classId: (['ranger', 'mage', 'priest'] as const)[i]!,
+        classId: (['archer', 'mage', 'acolyte'] as const)[i]!,
         level: 2 + i * 3,
         xp: 0,
         gold: 0,

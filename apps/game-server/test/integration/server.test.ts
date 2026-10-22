@@ -121,8 +121,8 @@ describe('characters', () => {
     const hack = await browser.post('/api/characters', { name: 'Hacker', classId: 'mage', appearance: { ...look, hairStyle: 999 } });
     assert.equal(hack.status, 400);
     assert.equal((await browser.post('/api/characters', { name: 'SecondChar', classId: 'mage', appearance: look })).status, 200);
-    assert.equal((await browser.post('/api/characters', { name: 'ThirdChar', classId: 'rogue', appearance: look })).status, 200);
-    const fourth = await browser.post('/api/characters', { name: 'FourthChar', classId: 'rogue', appearance: look });
+    assert.equal((await browser.post('/api/characters', { name: 'ThirdChar', classId: 'archer', appearance: look })).status, 200);
+    const fourth = await browser.post('/api/characters', { name: 'FourthChar', classId: 'archer', appearance: look });
     assert.equal(fourth.status, 400);
     assert.match(fourth.data.error, /at most 3/);
     const list = await browser.get('/api/characters');

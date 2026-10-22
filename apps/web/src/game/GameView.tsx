@@ -14,7 +14,7 @@ import { DialogueBox } from './ui/DialogueBox';
 import { Hud } from './ui/Hud';
 import { ItemSlot } from './ui/ItemSlot';
 import { MobileControls } from './ui/MobileControls';
-import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
+import { CharacterPanel, InventoryPanel, JobPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel, RecipeBook } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
@@ -153,6 +153,9 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'q') client.useSkill(0);
       else if (k === 'r') client.useSkill(1);
       else if (k === 't') client.useSkill(2);
+      else if (k === 'x') client.useSkill(3);
+      else if (k === 'v') client.useSkill(4);
+      else if (k === 'h') client.useSkill(5);
       else if (k === 'tab') {
         e.preventDefault();
         const ids = [...client.monsters.values()].sort((a, b) => Math.hypot(a.x - client.pos.x, a.y - client.pos.y) - Math.hypot(b.x - client.pos.x, b.y - client.pos.y)).map((m) => m.info.id);
@@ -244,6 +247,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'dungeon' && <DungeonPanel client={client} onClose={() => open(null)} />}
           {panel === 'animals' && <AnimalsPanel client={client} onClose={() => open(null)} />}
           {panel === 'bank' && <BankPanel client={client} onClose={() => open(null)} />}
+          {panel === 'job' && <JobPanel client={client} onClose={() => open(null)} />}
           {panel === 'travel' && <TravelPanel client={client} onClose={() => open(null)} />}
           {panel === 'stall' && <StallSetupPanel client={client} onClose={() => open(null)} />}
           {panel === 'crafting' && <RecipeBook client={client} onClose={() => open(null)} />}

@@ -17,6 +17,7 @@ import type { SecurityEvents } from '../security/events';
 import { TokenBucket } from '../security/rateLimit';
 import { loadCharacter, useItem } from '../services/characters';
 import { getInventory, moveInventoryItem } from '../services/inventory';
+import { addStatPoints, advanceJob } from './jobs';
 import { ownedSkins, wearOutfit } from './wardrobe';
 import { getItem } from '@terrago/game-data';
 import { getNpc, talkToNpc } from '../services/npcs';
@@ -363,6 +364,8 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('animals:collect', (ack) => serial(ack, () => eco.animals.collect(g, p)));
     socket.on('dungeon:enter', (req, ack) => serial(ack, () => eco.enterDungeon(g, p, req)));
     socket.on('spec:choose', (req, ack) => serial(ack, () => chooseSpecialization(g, p, req)));
+    socket.on('stats:add', (req, ack) => serial(ack, () => addStatPoints(g, p, req)));
+    socket.on('job:advance', (req, ack) => serial(ack, () => advanceJob(g, p, req)));
     socket.on('journal:get', (ack) => respond(ack, () => journal.journal(g, p)));
     socket.on('daily:login', (ack) => serial(ack, () => journal.claimLogin(g, p)));
     socket.on('daily:task', (id, ack) => serial(ack, () => journal.claimTask(g, p, id)));
