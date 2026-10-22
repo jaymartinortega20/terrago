@@ -8,6 +8,7 @@ import { isTyping } from './input';
 import { GameClient } from './net/client';
 import { WorldScene } from './scenes/WorldScene';
 import { useStore, type Panel } from './store';
+import { EmoteMenu } from './ui/EmoteMenu';
 import { ChatBox } from './ui/ChatBox';
 import { DialogueBox } from './ui/DialogueBox';
 import { Hud } from './ui/Hud';
@@ -142,6 +143,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'k') open('skills');
       else if (k === 'f') client.attackKey();
       else if (k === 'z') client.toggleMount();
+      else if (k === 'y') ui.set((s) => ({ emoteMenu: !s.emoteMenu }));
       else if (k === 'j') open('quests');
       else if (k === 'p') open('market');
       else if (k === 'o') open('friends');
@@ -301,6 +303,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       )}
       <div className={`absolute left-2 ${touch ? 'top-[82px]' : 'bottom-2'}`}>
         <ChatBox client={client} compact={touch} />
+        <EmoteMenu client={client} />
       </div>
 
       {touch && <MobileControls client={client} openPanel={open} />}

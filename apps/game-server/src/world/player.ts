@@ -59,6 +59,9 @@ export class Player {
   dungeonDifficulty: import('@terrago/shared').DifficultyId = 'normal';
   /** Chat mute set by a moderator (ms since epoch). */
   mutedUntil = 0;
+  /** Sitting down (cleared when they move). */
+  pose: 'sit' | null = null;
+  lastEmoteAt = 0;
   /** Message of the day already shown this session. */
   motdShown = false;
   /** Recent lines this player said (any channel), attached to reports. */
@@ -129,6 +132,7 @@ export class Player {
       guild: this.guild?.tag ?? null,
       shop: this.stall?.name ?? null,
       pet: this.pet,
+      pose: this.pose,
     };
   }
 

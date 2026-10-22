@@ -140,6 +140,17 @@ export function ChatBox({ client, compact }: { client: GameClient; compact?: boo
           aria-label="Chat message"
           data-testid="chat-input"
         />
+        <button
+          type="button"
+          className="bg-night-3 px-1.5 text-[15px] text-parchment hover:bg-night-2"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => client.ui.set((s) => ({ emoteMenu: !s.emoteMenu }))}
+          aria-label="Emotes (Y)"
+          title="Emotes (Y)"
+          data-testid="emote-button"
+        >
+          ☺
+        </button>
       </form>
     </div>
   );

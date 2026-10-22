@@ -27,7 +27,8 @@ import {
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
 import { nodeArt } from '../art/nodes';
-import { buildCharacterSheet, characterSheetKey } from '../art/characters';
+import { CHAR_FRAMES_PER_DIR, FRAME_ACTION, FRAME_SIT, buildCharacterSheet, characterSheetKey } from '../art/characters';
+import { emoteIcon } from '../art/emotes';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
 import type { GameClient, RemoteMonster, RemotePlayer } from '../net/client';
@@ -57,6 +58,15 @@ interface Avatar {
   bubbleTimer: Phaser.Time.TimerEvent | null;
   hand?: Phaser.GameObjects.Image | null;
   handKey?: string | null;
+  /** Animation timers (scene time, ms). */
+  actionUntil?: number;
+  lunge?: { x: number; y: number; until: number } | null;
+  hurtUntil?: number;
+  deadUntil?: number;
+  danceUntil?: number;
+  bowUntil?: number;
+  emote?: Phaser.GameObjects.Image | null;
+  tinted?: boolean;
 }
 
 /**
@@ -183,7 +193,27 @@ export class WorldScene extends Phaser.Scene {
         for (const id of removed) this.destroyObjectView(id);
         for (const o of changed) this.syncObject(o);
       }),
-      this.client.on('acted', ({ tx, ty }) => this.puff(tx, ty)),
+      this.client.on('acted', ({ tx, ty }) => {
+        this.puff(tx, ty);
+        const c = { x: tx * TILE_SIZE + TILE_SIZE / 2, y: ty * TILE_SIZE + TILE_SIZE / 2 };
+        this.pose(this.local, 300, c);
+        const me = this.entityPos(this.client.ui.get().self?.characterId ?? '');
+        const slot = this.client.ui.get().inventory?.slots.find((x) => x.slot === this.client.ui.get().selectedSlot)?.itemId ?? null;
+        if (me && fxSettings().level !== 'off') this.fx.workSwing(me, c.x, c.y, this.toolIcon(slot && getItem(slot)?.category === 'tool' ? slot : null, tx, ty));
+        const selfId = this.client.ui.get().self?.characterId;
+        if (selfId) this.swinging.set(selfId, this.time.now + 400);
+      }),
+      this.client.on('work', (w) => {
+        const av = this.remotes.get(w.id);
+        const from = this.entityPos(w.id);
+        if (!av || !from) return;
+        const c = { x: w.tx * TILE_SIZE + TILE_SIZE / 2, y: w.ty * TILE_SIZE + TILE_SIZE / 2 };
+        this.pose(av, 300, c);
+        if (fxSettings().level !== 'off') this.fx.workSwing(from, c.x, c.y, this.toolIcon(w.tool, w.tx, w.ty));
+        this.swinging.set(w.id, this.time.now + 400);
+        this.puff(w.tx, w.ty);
+      }),
+      this.client.on('emote', (e) => this.showEmote(e.id, e.emote)),
       this.client.on('monsterAdd', (m) => this.addMonster(m)),
       this.client.on('monsterRemove', (id) => this.removeMonster(id)),
       this.client.on('combat', (ev) => this.showCombat(ev)),
@@ -224,7 +254,7 @@ export class WorldScene extends Phaser.Scene {
     const key = characterSheetKey(a, accessory);
     if (!this.textures.exists(key)) {
       const tex = this.textures.addCanvas(key, buildCharacterSheet(a, accessory))!;
-      for (let row = 0; row < 4; row++) for (let col = 0; col < 3; col++) tex.add(row * 3 + col, 0, col * 32, row * 48, 32, 48);
+      for (let row = 0; row < 4; row++) for (let col = 0; col < CHAR_FRAMES_PER_DIR; col++) tex.add(row * CHAR_FRAMES_PER_DIR + col, 0, col * 32, row * 48, 32, 48);
     }
     return key;
   }
@@ -266,6 +296,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private destroyAvatar(av: Avatar): void {
+    av.emote?.destroy();
     av.mount?.destroy();
     av.hand?.destroy();
     av.bubbleTimer?.remove();
@@ -377,7 +408,7 @@ export class WorldScene extends Phaser.Scene {
     for (const n of this.client.npcs) {
       const c = tileCenter(n.x, n.y);
       const av = this.makeAvatar(c.x, c.y, n.appearance, n.name, '#b9f08a', n.accessory);
-      av.sprite.setFrame(DIR_ROW[n.dir] * 3);
+      av.sprite.setFrame(DIR_ROW[n.dir] * CHAR_FRAMES_PER_DIR);
       av.label.setDepth(LABEL_DEPTH - 1);
       this.npcAvatars.set(n.id, av);
     }
@@ -724,6 +755,13 @@ export class WorldScene extends Phaser.Scene {
       } else if (e.k === 'death' && e.t === this.client.ui.get().targetId) audio.sfx('death');
       const pos = this.entityPos(e.t);
       if (!pos) continue;
+      // Body language: attackers strike or cast, targets flinch, the defeated fall.
+      const now = this.time.now;
+      const srcAv = this.avatarOf(e.s);
+      const tgtAv = this.avatarOf(e.t);
+      if (srcAv && e.k !== 'death' && e.k !== 'dot') this.pose(srcAv, 280, e.s !== e.t ? pos : undefined);
+      if (tgtAv && (e.k === 'hit' || e.k === 'crit')) tgtAv.hurtUntil = now + (e.k === 'crit' ? 260 : 170);
+      if (tgtAv && e.k === 'death') tgtAv.deadUntil = now + 1800;
       if (e.k === 'death') continue;
       try {
         this.attackFx(e, opts);
@@ -970,15 +1008,91 @@ export class WorldScene extends Phaser.Scene {
     return { dx: dx as MoveInput['dx'], dy: dy as MoveInput['dy'] };
   }
 
-  private placeAvatar(av: Avatar, x: number, y: number, dir: Direction, moving: boolean, time: number): void {
-    const rx = Math.round(x);
-    const ry = Math.round(y);
+  private placeAvatar(av: Avatar, x: number, y: number, dir: Direction, moving: boolean, time: number, opts: { sit?: boolean; speed?: number } = {}): void {
+    const now = this.time.now;
+    let rx = Math.round(x);
+    let ry = Math.round(y);
     const lift = av.mount ? 14 : 0;
-    const col = av.mount ? 0 : moving ? WALK_CYCLE[Math.floor(time / 130) % 4]! : 0;
-    av.sprite.setPosition(rx, ry + 2 - lift).setFrame(DIR_ROW[dir] * 3 + col).setDepth(y + 0.5);
+    // Faster characters (speed boosts) run: the walk cycle speeds up with them.
+    const stepMs = 130 / Math.max(0.6, Math.min(2.2, opts.speed ?? 1));
+    let col = av.mount ? 0 : moving ? WALK_CYCLE[Math.floor(time / stepMs) % 4]! : 0;
+    if (!moving && opts.sit && !av.mount) col = FRAME_SIT;
+    if ((av.actionUntil ?? 0) > now && !av.mount) col = FRAME_ACTION;
+    if (av.lunge && av.lunge.until > now) {
+      const k = (av.lunge.until - now) / 220;
+      rx += Math.round(av.lunge.x * Math.sin(k * Math.PI));
+      ry += Math.round(av.lunge.y * Math.sin(k * Math.PI));
+    }
+    let shownDir = dir;
+    if ((av.danceUntil ?? 0) > now) {
+      ry -= Math.round(Math.abs(Math.sin(now / 110)) * 6);
+      shownDir = (['down', 'left', 'up', 'right'] as Direction[])[Math.floor(now / 220) % 4]!;
+      col = Math.floor(now / 220) % 2 ? FRAME_ACTION : 0;
+    }
+    const hurt = (av.hurtUntil ?? 0) > now;
+    const dead = (av.deadUntil ?? 0) > now;
+    if (hurt) rx += Math.round(Math.sin(now / 12) * 2);
+    av.sprite.setPosition(rx, ry + 2 - lift).setFrame(DIR_ROW[shownDir] * CHAR_FRAMES_PER_DIR + col).setDepth(y + 0.5);
+    // Taking damage flashes red; a fallen character lies down, greyed.
+    if (hurt || dead) {
+      av.sprite.setTint(dead ? 0x9a9aa8 : 0xff7a6a);
+      av.tinted = true;
+    } else if (av.tinted) {
+      av.sprite.clearTint();
+      av.tinted = false;
+    }
+    av.sprite.setRotation(dead ? (dir === 'left' ? -Math.PI / 2 : Math.PI / 2) : 0);
+    av.sprite.setScale(1, (av.bowUntil ?? 0) > now ? 0.86 : 1);
     if (av.mount) av.mount.setPosition(rx, ry + 4).setFlipX(dir === 'left').setFrame(moving ? Math.floor(time / 110) % 2 : 0).setDepth(dir === 'up' ? y + 1 : y);
-    av.label.setPosition(rx, ry - 46 - lift);
-    av.bubble?.setPosition(rx, ry - 62 - lift);
+    const sitDrop = col === FRAME_SIT ? 6 : 0;
+    av.label.setPosition(rx, ry - 46 - lift + sitDrop);
+    av.bubble?.setPosition(rx, ry - 62 - lift + sitDrop);
+    av.emote?.setPosition(rx, ry - 64 - lift + sitDrop + Math.round(Math.sin(now / 160) * 2));
+    if (av.hand) av.hand.setVisible(col !== FRAME_SIT && !dead && (av.danceUntil ?? 0) <= now);
+  }
+
+  /** Strike/cast/work pose for a moment, with a small lunge toward a point. */
+  private pose(av: Avatar | null, ms: number, toward?: { x: number; y: number }): void {
+    if (!av) return;
+    const now = this.time.now;
+    av.actionUntil = now + ms;
+    if (toward) {
+      const a = Math.atan2(toward.y - av.sprite.y, toward.x - av.sprite.x);
+      av.lunge = { x: Math.cos(a) * 4, y: Math.sin(a) * 3, until: now + 220 };
+    }
+  }
+
+  /** An emote bubble above someone's head (and dance/bow moves). */
+  private showEmote(id: string, emote: string): void {
+    const av = this.avatarOf(id);
+    if (!av) return;
+    const now = this.time.now;
+    if (emote === 'dance') av.danceUntil = now + 2200;
+    if (emote === 'bow') av.bowUntil = now + 900;
+    if (emote === 'wave' || emote === 'cheer') av.actionUntil = now + 700;
+    const icon = emoteIcon(emote);
+    if (!icon) return;
+    av.emote?.destroy();
+    const img = this.add.image(av.sprite.x, av.sprite.y - 64, this.canvasTexture(`emote:${emote}`, () => icon)).setOrigin(0.5, 1).setDepth(LABEL_DEPTH + 4).setScale(0.3);
+    av.emote = img;
+    this.tweens.add({ targets: img, scale: 1, duration: 160, ease: 'Back.easeOut' });
+    this.time.delayedCall(2600, () => {
+      if (av.emote !== img) return;
+      this.tweens.add({ targets: img, alpha: 0, duration: 250, onComplete: () => img.destroy() });
+      av.emote = null;
+    });
+  }
+
+  /** Tool for a work swing: the held tool, else whatever fits the tile. */
+  private toolIcon(itemId: string | null, tx: number, ty: number): string | null {
+    let icon = itemId ? getItem(itemId)?.icon : undefined;
+    if (!icon) {
+      const at = this.client.objectAt(tx, ty);
+      if (at?.kind === 'node') icon = at.type.startsWith('rock') ? 'tool:pickaxe:0' : at.type.startsWith('tree') ? 'tool:axe:0' : 'tool:sickle:0';
+      else if (at?.kind === 'plot') icon = 'tool:hoe:0';
+    }
+    if (!icon) return null;
+    return this.canvasTexture(`icon:${icon}`, () => itemIcon(icon!, 2));
   }
 
   private animalSprites: Phaser.GameObjects.Image[] = [];
@@ -1162,7 +1276,7 @@ export class WorldScene extends Phaser.Scene {
     const lx = client.prevPos.x + (client.pos.x - client.prevPos.x) * alpha + client.correction.x;
     const ly = client.prevPos.y + (client.pos.y - client.prevPos.y) * alpha + client.correction.y;
     this.setAvatarMount(this.local, client.ui.get().self?.mount);
-    this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time);
+    this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time, { sit: client.pose === 'sit', speed: client.speed() });
     const fxo = fxSettings();
     const selfId = client.ui.get().self?.characterId;
     if (selfId) this.placeHand(this.local, selfId, client.dir, client.moving, time, fxo.handWeapon);
@@ -1171,7 +1285,7 @@ export class WorldScene extends Phaser.Scene {
     for (const [id, r] of client.remotes) {
       const av = this.remotes.get(id);
       if (av) {
-        this.placeAvatar(av, r.x, r.y, r.dir, r.moving, time);
+        this.placeAvatar(av, r.x, r.y, r.dir, r.moving, time, { sit: r.info.pose === 'sit' });
         this.placeHand(av, id, r.dir, r.moving, time, fxo.handWeapon);
       }
     }

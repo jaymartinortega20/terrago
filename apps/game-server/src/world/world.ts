@@ -1,5 +1,6 @@
 import { BALANCE, getMap, getNode, npcsForMap, toNpcPublic, type NpcDef } from '@terrago/game-data';
 import { settings } from '../services/serverConfig';
+import { GameError } from '../db';
 import {
   AOI,
   CHAT,
@@ -30,6 +31,8 @@ import {
   type SnapshotEntity,
   type WorldObject,
   manualEvent,
+  EMOTES,
+  type EmoteId,
 } from '@terrago/shared';
 import { randomUUID } from 'node:crypto';
 import type { Logger } from '../logger';
@@ -132,9 +135,31 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null }): void {
     if ('pet' in patch) p.conn?.send('self:update', { pet: patch.pet ?? null });
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
+  }
+
+  /** Show an emote to everyone who can see this player (and to them). Sitting is a pose that lasts until they move. */
+  emote(p: Player, raw: unknown): { emote: EmoteId } {
+    const emote = String(raw ?? '') as EmoteId;
+    if (!EMOTES.includes(emote)) throw new GameError('Unknown emote.');
+    const now = this.now();
+    if (now - p.lastEmoteAt < 1000) throw new GameError('Slow down.');
+    p.lastEmoteAt = now;
+    if (emote === 'sit') {
+      if (p.mount) throw new GameError('Get off your mount first.');
+      p.pose = p.pose === 'sit' ? null : 'sit';
+      this.broadcastLook(p, { pose: p.pose });
+      p.conn?.send('entity:update', p.id, { pose: p.pose });
+    }
+    for (const q of this.runtimeOf(p).players) if (q === p || q.known.has(p.id)) q.conn?.send('emote', { id: p.id, emote });
+    return { emote };
+  }
+
+  /** Let nearby players see this player working a tile (tool swing). */
+  showWork(p: Player, tx: number, ty: number, tool: string | null): void {
+    for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:act', { id: p.id, tx, ty, tool });
   }
 
   /** Get on (item id + speed) or off (null) a mount. */
@@ -605,6 +630,10 @@ export class World {
       const next = stepMovement({ x: p.x, y: p.y }, { dx, dy }, rt.grid, PLAYER_SPEED * p.speed, SIM.stepMs);
       p.dir = facingFor({ dx, dy }, p.dir);
       if (next.x !== p.x || next.y !== p.y) {
+        if (p.pose) {
+          p.pose = null;
+          this.broadcastLook(p, { pose: null });
+        }
         p.x = next.x;
         p.y = next.y;
         p.dirty = true;
@@ -817,7 +846,7 @@ export class World {
       case 'where':
         return reply(`${this.runtimeOf(p).def.name} (${Math.floor(p.x / TILE_SIZE)}, ${Math.floor(p.y / TILE_SIZE)})`);
       case 'help':
-        return reply('Chat: /g world · /p party · /gu guild · /w name whisper · /r reply. Also /invite name, /leave, /who, /where, /duel name, /accept, /forfeit.');
+        return reply('Chat: /g world · /p party · /gu guild · /w name whisper · /r reply. Also /invite name, /leave, /who, /where, /duel name, /accept, /forfeit. Emotes: /wave /laugh /heart /cheer /angry /cry /dance /bow /zzz /sit (or press Y).');
       case 'duel':
       case 'accept':
       case 'forfeit': {

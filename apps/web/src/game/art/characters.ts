@@ -3,14 +3,18 @@ import { OUTLINE, PixelBuffer, SHADOW, makeCanvas, shade } from './pixel';
 
 /**
  * Procedural character sprites: 16x24 logical pixels per frame (32x48 on screen).
- * Sheet layout: rows = down, left, right, up; columns = stand, stepA, stepB.
+ * Sheet layout: rows = down, left, right, up; columns = stand, stepA, stepB,
+ * action (arms up / reaching forward: attacking, casting, working), sit.
  */
 export const CHAR_W = 16;
 export const CHAR_H = 24;
-export const CHAR_FRAMES_PER_DIR = 3;
+export const CHAR_FRAMES_PER_DIR = 5;
+/** Column of the action and sitting poses. */
+export const FRAME_ACTION = 3;
+export const FRAME_SIT = 4;
 export const CHAR_DIR_ROWS: Direction[] = ['down', 'left', 'right', 'up'];
 
-type Frame = 0 | 1 | 2;
+type Frame = 0 | 1 | 2 | 3 | 4;
 
 interface Palette {
   skin: string;
@@ -49,7 +53,8 @@ function palette(a: Appearance): Palette {
 
 export function drawCharacterFrame(a: Appearance, dir: Direction, frame: Frame, accessory?: NpcAccessory): PixelBuffer {
   const side = dir === 'left' || dir === 'right';
-  const base = side ? drawSide(a, frame, accessory) : drawFrontBack(a, dir === 'up', frame, accessory);
+  let base = side ? drawSide(a, frame === 4 ? 0 : frame, accessory) : drawFrontBack(a, dir === 'up', frame === 4 ? 0 : frame, accessory);
+  if (frame === 4) base = seated(base, a, side, dir === 'up');
   const buf = dir === 'right' ? base.mirrored() : base;
   buf.outline(OUTLINE);
   // Soft ground shadow under the feet.
@@ -62,6 +67,23 @@ export function drawCharacterFrame(a: Appearance, dir: Direction, frame: Frame, 
   return buf;
 }
 
+/** Sitting: the upper body drops 3px and the legs fold forward. */
+function seated(stand: PixelBuffer, a: Appearance, side: boolean, back: boolean): PixelBuffer {
+  const p = palette(a);
+  const b = new PixelBuffer(CHAR_W, CHAR_H);
+  for (let y = 0; y <= 17; y++) for (let x = 0; x < CHAR_W; x++) b.set(x, y + 3, stand.get(x, y));
+  const leg = p.robe ? p.shirt : p.pants;
+  const legShade = p.robe ? p.shirtShade : p.pantsShade;
+  if (side) {
+    b.rect(2, 20, 8, 2, leg).hline(2, 9, 21, legShade);
+    b.rect(2, 22, 2, 1, legShade).rect(1, 23, 3, 1, p.shoes);
+  } else {
+    b.rect(5, 20, 6, 2, leg).vline(10, 20, 21, legShade).vline(7, 21, 21, legShade);
+    if (!back) b.rect(5, 22, 2, 1, p.shoes).rect(9, 22, 2, 1, p.shoes);
+  }
+  return b;
+}
+
 function drawFrontBack(a: Appearance, back: boolean, frame: Frame, acc?: NpcAccessory): PixelBuffer {
   const p = palette(a);
   const b = new PixelBuffer(CHAR_W, CHAR_H);
@@ -69,6 +91,7 @@ function drawFrontBack(a: Appearance, back: boolean, frame: Frame, acc?: NpcAcce
   const tl = narrow ? 5 : 4; // torso left
   const tr = narrow ? 10 : 11; // torso right
   const lift = (leg: 0 | 1) => (frame === 1 && leg === 0) || (frame === 2 && leg === 1);
+  const action = frame === 3;
 
   if (acc === 'cape' && back) b.rect(3, 11, 10, 10, '#8e2b3a').vline(12, 11, 20, '#6e1f2c');
   if (acc === 'cape' && !back) {
@@ -106,6 +129,13 @@ function drawFrontBack(a: Appearance, back: boolean, frame: Frame, acc?: NpcAcce
   const armSwing = (left: boolean) => (frame === 0 ? 0 : (frame === 1) === left ? -1 : 1);
   for (const left of [true, false]) {
     const x = left ? tl - 1 : tr + 1;
+    if (action) {
+      // Both arms raised: swinging a weapon, casting, lifting a tool.
+      const ox = left ? x - 1 : x + 1;
+      b.rect(x, 9, 1, 4, left ? p.shirt : p.shirtShade).rect(ox, 7, 1, 3, left ? p.shirt : p.shirtShade);
+      b.set(ox, 6, p.skin);
+      continue;
+    }
     const dy = armSwing(left);
     b.rect(x, 12 + dy, 1, 5, left ? p.shirt : p.shirtShade);
     b.set(x, 17 + dy, p.skin);
@@ -209,11 +239,11 @@ function drawSide(a: Appearance, frame: Frame, acc?: NpcAccessory): PixelBuffer 
   // Legs
   if (p.robe) {
     b.rect(5, 11, 6, 10, p.shirt).hline(4, 11, 20, p.shirtShade).vline(10, 12, 19, p.shirtShade);
-    const fx = frame === 1 ? 3 : frame === 2 ? 6 : 4;
+    const fx = frame === 1 ? 3 : frame === 2 ? 6 : frame === 3 ? 3 : 4;
     b.rect(fx, 21, 3, 1, p.shoes).rect(8, 21, 2, 1, shade(p.shoes, -0.2));
     b.hline(5, 10, 15, p.accent);
   } else {
-    const legs: Record<Frame, [number, number]> = { 0: [6, 8], 1: [4, 9], 2: [8, 5] };
+    const legs: Record<Frame, [number, number]> = { 0: [6, 8], 1: [4, 9], 2: [8, 5], 3: [4, 9], 4: [6, 8] };
     const [front, far] = legs[frame];
     b.rect(far, 18, 2, 4, p.pantsShade).rect(far, 22, 2, 1, shade(p.shoes, -0.25));
     b.rect(front, 18, 2, 4, p.pants).rect(front - 1, 22, 3, 1, p.shoes);
@@ -224,9 +254,14 @@ function drawSide(a: Appearance, frame: Frame, acc?: NpcAccessory): PixelBuffer 
   if (acc === 'apron') b.rect(4, 13, 3, 7, '#e9e1cc');
 
   // Near arm swings forward/back
-  const ax = frame === 1 ? 5 : frame === 2 ? 9 : 7;
-  b.rect(ax, 12, 2, 4, p.shirtShade);
-  b.rect(ax, 16, 2, 1, p.skin);
+  if (frame === 3) {
+    // Reaching forward (lunge / strike / cast).
+    b.rect(2, 12, 6, 2, p.shirtShade).rect(1, 12, 1, 2, p.skin);
+  } else {
+    const ax = frame === 1 ? 5 : frame === 2 ? 9 : 7;
+    b.rect(ax, 12, 2, 4, p.shirtShade);
+    b.rect(ax, 16, 2, 1, p.skin);
+  }
 
   // Head (facing left)
   b.rect(4, 4, 7, 6, p.skin).hline(5, 9, 3, p.skin).hline(5, 9, 10, p.skinShade);

@@ -150,7 +150,13 @@ export interface PublicPlayer {
   shop?: string | null;
   /** Active pet (item id). */
   pet?: string | null;
+  /** Sitting down (from the sit emote). */
+  pose?: 'sit' | null;
 }
+
+/** Emotes players can do (chat /wave, or the emote menu). */
+export const EMOTES = ['wave', 'laugh', 'heart', 'cheer', 'angry', 'cry', 'dance', 'bow', 'zzz', 'sit'] as const;
+export type EmoteId = (typeof EMOTES)[number];
 
 export type ItemCategory =
   | 'tool'

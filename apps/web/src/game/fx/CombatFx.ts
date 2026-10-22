@@ -230,6 +230,24 @@ export class CombatFx {
     }
   }
 
+  /** Working a tile: the tool lifts and comes down on it (hoe, pickaxe, axe...). */
+  workSwing(from: Spot, tx: number, ty: number, iconKey: string | null): void {
+    if (!iconKey) return;
+    const h = { x: from.x, y: from.y - from.h * 0.45 };
+    const a = Math.atan2(ty - h.y, tx - h.x);
+    const img = this.add.image(h.x + Math.cos(a) * 4, h.y, iconKey).setOrigin(0.12, 0.88).setScale(0.9).setDepth(this.depth + 1).setRotation(a - 1.6 + ICON_TILT);
+    this.tweens.add({
+      targets: img,
+      rotation: a + 0.2 + ICON_TILT,
+      duration: 170,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        this.sparks(tx, ty, 0xe8dcc0, 4, 10);
+        this.fade(img, 160);
+      },
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Ranged
   // ---------------------------------------------------------------------------

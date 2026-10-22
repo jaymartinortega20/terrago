@@ -12,6 +12,7 @@ import {
   type InviteKind,
   type PartyView,
   type PlayerProfile,
+  EMOTES,
 } from '@terrago/shared';
 import { GameError } from '../db';
 import * as db from '../services/social';
@@ -482,7 +483,13 @@ export function chatCommand(deps: GameplayDeps, p: Player, cmd: string, rest: st
       case 'leave':
         partyLeave(p);
         return 'You left the party.';
+      case 'emotes':
+        return `Emotes: ${EMOTES.map((e) => `/${e}`).join(' ')}`;
       default:
+        if ((EMOTES as readonly string[]).includes(cmd)) {
+          world.emote(p, cmd);
+          return '';
+        }
         return undefined;
     }
   } catch (err) {

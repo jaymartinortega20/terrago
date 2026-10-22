@@ -312,8 +312,15 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
 
     socket.on('act', (req, ack) => {
       antibot?.action(p);
-      serial(ack, () => act(g, p, req));
+      serial(ack, async () => {
+        const res = await act(g, p, req);
+        // Nearby players see the tool swing.
+        const slotItem = world.inventoryCache.get(p.id)?.slots.find((s) => s.slot === req?.slot)?.itemId ?? null;
+        world.showWork(p, req.tx, req.ty, slotItem && getItem(slotItem)?.category === 'tool' ? slotItem : null);
+        return res;
+      });
     });
+    socket.on('emote', (emote, ack) => respond(ack, () => world.emote(p, emote)));
     socket.on('shop:get', (npcId, ack) => serial(ack, () => npcServices.shopGet(g, p, npcId)));
     socket.on('shop:buy', (req, ack) => serial(ack, () => npcServices.shopBuy(g, p, req)));
     socket.on('shop:sell', (req, ack) => serial(ack, () => npcServices.shopSell(g, p, req)));

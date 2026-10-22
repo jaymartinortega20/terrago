@@ -103,6 +103,8 @@ type ClientEvents = {
   objects: [WorldObject[], string[]];
   /** A tile action happened (for effects): tile + kind. */
   acted: [{ tx: number; ty: number; message: string | null }];
+  emote: [{ id: string; emote: string }];
+  work: [{ id: string; tx: number; ty: number; tool: string | null }];
   telegraph: [{ id: string; x: number; y: number; r: number; ms: number; name: string }];
   animals: [import('@terrago/shared').AnimalState[]];
 };
@@ -130,6 +132,8 @@ export class GameClient {
   prevPos = { x: 0, y: 0 };
   dir: Direction = 'down';
   moving = false;
+  /** Sitting (set by the server's sit emote; standing up happens when you move). */
+  pose: 'sit' | null = null;
   lastMoveAt = 0;
   /** Visual-only offset that smooths out reconciliation corrections. */
   correction = { x: 0, y: 0 };
@@ -260,11 +264,17 @@ export class GameClient {
       if (!d.with && this.remotes.has(this.ui.get().targetId ?? '')) this.setTarget(null);
     });
     socket.on('entity:update', (id, patch) => {
+      if (id === this.ui.get().self?.characterId) {
+        if ('pose' in patch) this.pose = patch.pose ?? null;
+        return;
+      }
       const r = this.remotes.get(id);
       if (!r) return;
       r.info = { ...r.info, ...patch };
       this.emit('look', id);
     });
+    socket.on('emote', (e) => this.emit('emote', e));
+    socket.on('entity:act', (e) => this.emit('work', e));
     socket.on('chat', (m) => {
       if (m.channel === 'whisper' && m.fromId !== this.ui.get().self?.characterId) audio.sfx('chat');
       this.ui.set((s) => ({ chat: [...s.chat.slice(-79), m] }));
@@ -441,6 +451,7 @@ export class GameClient {
     const next = stepMovement(this.pos, input, this.grid, PLAYER_SPEED * this.speed(), SIM.stepMs);
     this.dir = facingFor(input, this.dir);
     this.moving = true;
+    this.pose = null;
     this.lastMoveAt = performance.now();
     this.pos = next;
   }
@@ -691,6 +702,15 @@ export class GameClient {
 
   setTarget(id: string | null, engage = false): void {
     this.ui.set({ targetId: id, autoAttack: engage && !!id });
+  }
+
+  /** Do an emote (wave, dance, sit...). Everyone nearby sees it. */
+  emote(emote: string): void {
+    const s = this.socket;
+    if (!s?.connected) return;
+    s.emit('emote', emote, (res) => {
+      if (!res.ok && !/slow down/i.test(res.error)) pushNotice(this.ui, 'error', res.error, 2000);
+    });
   }
 
   /** Attack key: engage the current target, or the nearest monster. */

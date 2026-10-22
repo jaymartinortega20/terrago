@@ -3,7 +3,7 @@ import { after, before, describe, test } from 'node:test';
 import pg from 'pg';
 import { tileCenter, type ChatMessage, type GuildView, type InvitePayload, type PartyView, type PublicMonster } from '@terrago/shared';
 import type { GameServer } from '../../src/app';
-import { TEST_DB, ack, enterWorld, leaveWorld, newPlayer, resetDatabase, startTestServer, waitFor } from './helpers';
+import { TEST_DB, ack, enterWorld, leaveWorld, newPlayer, resetDatabase, startTestServer, waitFor, walk } from './helpers';
 
 let server: GameServer;
 let base: string;
@@ -175,5 +175,28 @@ describe('social (v0.6)', () => {
     const left = await db.query('SELECT count(*)::int AS n FROM guilds WHERE tag = $1', ['IRT']);
     assert.equal(left.rows[0].n, 0, 'last one out disbands the guild');
     for (const x of [A, B, C]) await leaveWorld(x!.socket);
+  });
+
+  test('emotes: nearby players see them; sitting lasts until you move', async () => {
+    const [A, B] = await crew(2);
+    const seen: any[] = [];
+    const looks: any[] = [];
+    B!.socket.on('emote', (e) => seen.push(e));
+    B!.socket.on('entity:update', (id, patch) => looks.push({ id, ...patch }));
+    await waitFor(() => server.world.players.get(B!.id)!.known.has(A!.id));
+    assert.equal((await ack(A!.socket, 'emote', 'wave')).ok, true);
+    await waitFor(() => seen.find((e) => e.id === A!.id && e.emote === 'wave'));
+    assert.equal((await ack(A!.socket, 'emote', 'dance')).ok, false, 'one emote per second');
+    assert.equal((await ack(A!.socket, 'emote', 'explode')).ok, false);
+    await new Promise((r) => setTimeout(r, 1050));
+    assert.equal((await ack(A!.socket, 'emote', 'sit')).ok, true);
+    await waitFor(() => looks.find((l) => l.id === A!.id && l.pose === 'sit'));
+    assert.equal(server.world.players.get(A!.id)!.toPublic().pose, 'sit');
+    await walk(A!.socket, A!.enter.ack, 1, 0, 4);
+    await waitFor(() => looks.find((l) => l.id === A!.id && l.pose === null), 4000);
+    await new Promise((r) => setTimeout(r, 1050));
+    assert.equal((await say(A, '/cheer')).ok, true, 'chat command works too');
+    await waitFor(() => seen.find((e) => e.id === A!.id && e.emote === 'cheer'));
+    for (const x of [A, B]) await leaveWorld(x!.socket);
   });
 });

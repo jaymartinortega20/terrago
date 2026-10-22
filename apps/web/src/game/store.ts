@@ -54,6 +54,8 @@ export interface UiState {
   notices: Notice[];
   panel: Panel;
   chatFocused: boolean;
+  /** Emote picker open. */
+  emoteMenu: boolean;
   ping: number | null;
   nearby: number;
   interactHint: string | null;
@@ -122,6 +124,7 @@ export const initialUi: UiState = {
   notices: [],
   panel: null,
   chatFocused: false,
+  emoteMenu: false,
   ping: null,
   nearby: 0,
   interactHint: null,
