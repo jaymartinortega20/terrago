@@ -16,7 +16,8 @@ test('weather is deterministic, regional, varied, and never inside caves', () =>
   const t = Date.UTC(2026, 9, 21, 15);
   assert.equal(weatherAt('meadow', t), weatherAt('forest', t), 'one valley, one sky');
   assert.equal(weatherAt('cave', t), 'clear');
-  assert.equal(weatherRegion('ruins'), null);
+  assert.equal(weatherRegion('cave'), null);
+  assert.equal(weatherRegion('desert'), 'desert');
   const seen = new Set<string>();
   for (let i = 0; i < 500; i++) seen.add(weatherAt('meadow', t + i * 12 * 60_000));
   assert.ok(seen.size >= 4, `variety: ${[...seen]}`);
@@ -28,4 +29,14 @@ test('nights are dark, days are bright', () => {
   const base = Math.floor(Date.now() / day) * day;
   assert.equal(darknessAt(base + day * 0.3), 0);
   assert.ok(darknessAt(base + day * 0.8) > 0.5);
+});
+
+test('world event schedule always picks a real event (no crash on any slot)', async () => {
+  const { currentEvent, nextEvent, EVENT_PERIOD_MS } = await import('../src');
+  const start = Date.UTC(2026, 0, 1);
+  for (let i = 0; i < 5000; i++) {
+    const t = start + i * EVENT_PERIOD_MS + 1000;
+    assert.ok(currentEvent(t)?.def.id, `slot ${i}`);
+    assert.ok(nextEvent(t).def.id);
+  }
 });

@@ -36,8 +36,16 @@ export function startEventDirector(deps: GameplayDeps): () => void {
       }
     }
   };
-  tick();
-  const timer = setInterval(tick, 5000);
+  // A bug in events must never take the game down.
+  const safe = () => {
+    try {
+      tick();
+    } catch (err) {
+      deps.log.error('event_tick_failed', { err });
+    }
+  };
+  safe();
+  const timer = setInterval(safe, 5000);
   timer.unref();
   return () => clearInterval(timer);
 }

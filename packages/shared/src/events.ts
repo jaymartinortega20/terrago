@@ -50,7 +50,7 @@ export const WORLD_EVENTS: WorldEventDef[] = [
 
 function pick(slot: number): WorldEventDef {
   let h = Math.imul(slot ^ 0x5bd1e995, 0x27d4eb2d) >>> 0;
-  h ^= h >>> 15;
+  h = (h ^ (h >>> 15)) >>> 0; // keep it unsigned so the index is never negative
   return WORLD_EVENTS[h % WORLD_EVENTS.length]!;
 }
 
