@@ -57,9 +57,9 @@ export interface CombatEvent {
   s: string;
   /** Target entity id. */
   t: string;
-  /** Amount (damage, or healing for kind 'heal'). */
+  /** Amount (damage, or healing for kind 'heal'). 'cast' = a skill was used (visual only; t is its target or centre). */
   a: number;
-  k: 'hit' | 'crit' | 'miss' | 'heal' | 'dot' | 'death';
+  k: 'hit' | 'crit' | 'miss' | 'heal' | 'dot' | 'death' | 'cast';
   /** Skill id, if any. */
   sk?: string;
 }

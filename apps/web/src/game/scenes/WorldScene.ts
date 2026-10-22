@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { QUESTS, getCrop, getItem, getMap, getMonster, getNode, getQuest } from '@terrago/game-data';
 import { itemIcon } from '../art/world';
 import { audio, trackFor } from '../audio';
+import { CombatFx, FIRE_PAL, HOLY_PAL, ICE_PAL, MAGIC_PAL, MONSTER_PAL, POISON_PAL, paletteFor, type WeaponType } from '../fx/CombatFx';
+import { fxSettings, type FxSettings } from '../fx/settings';
 import { monsterSheet } from '../art/monsters';
 import { mountSheet } from '../art/mounts';
 import {
@@ -53,6 +55,8 @@ interface Avatar {
   label: Phaser.GameObjects.Text;
   bubble: Phaser.GameObjects.Container | null;
   bubbleTimer: Phaser.Time.TimerEvent | null;
+  hand?: Phaser.GameObjects.Image | null;
+  handKey?: string | null;
 }
 
 /**
@@ -92,7 +96,10 @@ export class WorldScene extends Phaser.Scene {
     this.client = data.client;
   }
 
+  private fx!: CombatFx;
+
   create(): void {
+    this.fx = new CombatFx(this, LABEL_DEPTH - 8); // above the night overlay, below names
     const kb = this.input.keyboard!;
     // No key capture: chat inputs must still receive W/A/S/D and Space.
     kb.disableGlobalCapture();
@@ -260,6 +267,7 @@ export class WorldScene extends Phaser.Scene {
 
   private destroyAvatar(av: Avatar): void {
     av.mount?.destroy();
+    av.hand?.destroy();
     av.bubbleTimer?.remove();
     av.bubble?.destroy();
     av.sprite.destroy();
@@ -696,11 +704,14 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  /** Floating numbers for hits, crits, misses and heals. */
+  /** Floating numbers for hits, crits, misses and heals, plus the attack effects. */
   private showCombat(events: CombatEvent[]): void {
     const me = this.client.ui.get().self?.characterId;
+    const opts = fxSettings();
     for (const e of events) {
-      if (e.s === me && e.t !== me) {
+      if (e.k === 'cast') {
+        if (e.s === me) audio.sfx(['war_cry', 'evasion', 'hunters_mark', 'whirlwind', 'volley'].includes(e.sk ?? '') ? 'hit' : 'magic');
+      } else if (e.s === me && e.t !== me) {
         if (e.k === 'crit') audio.sfx('crit');
         else if (e.k === 'hit') audio.sfx(e.sk && ['fireball', 'smite', 'frost_nova', 'arcane'].some((k) => e.sk!.includes(k)) ? 'magic' : 'hit');
         else if (e.k === 'miss') audio.sfx('miss');
@@ -711,17 +722,25 @@ export class WorldScene extends Phaser.Scene {
       const pos = this.entityPos(e.t);
       if (!pos) continue;
       if (e.k === 'death') continue;
-      this.projectile(e);
+      try {
+        this.attackFx(e, opts);
+      } catch (err) {
+        // Effects are decoration; never let them break the game.
+        console.warn('[fx]', err);
+      }
+      if (e.k === 'cast') continue;
       const mine = e.t === me;
-      const text = e.k === 'miss' ? 'miss' : e.k === 'heal' ? `+${e.a}` : `${e.a}`;
-      const color = e.k === 'heal' ? '#7cf06a' : e.k === 'miss' ? '#c8c8c8' : mine ? '#ff6a5a' : e.k === 'crit' ? '#ffb02e' : e.k === 'dot' ? '#b6f06a' : '#ffffff';
-      const size = e.k === 'crit' ? '18px' : '14px';
-      const t = this.add
-        .text(pos.x + (Math.random() * 16 - 8), pos.y - pos.h - 4, e.k === 'crit' ? `${text}!` : text, { fontFamily: LABEL_FONT, fontSize: size, color, stroke: '#2a2030', strokeThickness: 4 })
-        .setOrigin(0.5, 1)
-        .setResolution(2)
-        .setDepth(LABEL_DEPTH + 30);
-      this.tweens.add({ targets: t, y: t.y - 26, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => t.destroy() });
+      if (opts.numbers) {
+        const text = e.k === 'miss' ? 'miss' : e.k === 'heal' ? `+${e.a}` : `${e.a}`;
+        const color = e.k === 'heal' ? '#7cf06a' : e.k === 'miss' ? '#c8c8c8' : mine ? '#ff6a5a' : e.k === 'crit' ? '#ffb02e' : e.k === 'dot' ? '#b6f06a' : '#ffffff';
+        const size = e.k === 'crit' ? '18px' : '14px';
+        const t = this.add
+          .text(pos.x + (Math.random() * 16 - 8), pos.y - pos.h - 4, e.k === 'crit' ? `${text}!` : text, { fontFamily: LABEL_FONT, fontSize: size, color, stroke: '#2a2030', strokeThickness: 4 })
+          .setOrigin(0.5, 1)
+          .setResolution(2)
+          .setDepth(LABEL_DEPTH + 30);
+        this.tweens.add({ targets: t, y: t.y - 26, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => t.destroy() });
+      }
       const mv = this.monsterViews.get(e.t);
       if (mv && (e.k === 'hit' || e.k === 'crit' || e.k === 'dot')) {
         mv.sprite.setTintFill(0xffffff);
@@ -730,49 +749,166 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
-  /** What flies from attacker to target: arrows for bows, orbs for magic. */
-  private projectileKind(e: CombatEvent): { color: number; arrow: boolean; size: number } | null {
-    const bySkill: Record<string, { color: number; arrow: boolean; size: number }> = {
-      fireball: { color: 0xf5a623, arrow: false, size: 6 },
-      smite: { color: 0xfff6a0, arrow: false, size: 5 },
-      aimed_shot: { color: 0xe8dcc0, arrow: true, size: 3 },
-      volley: { color: 0xe8dcc0, arrow: true, size: 3 },
-      hunters_mark: { color: 0xe8a03a, arrow: true, size: 3 },
-    };
-    if (e.sk) return bySkill[e.sk] ?? null;
-    if (e.k === 'heal' || e.k === 'dot') return null;
+  /** The weapon an entity holds: type, icon texture and tier. Monsters have none. */
+  private weaponOf(id: string): { type: WeaponType; icon: string; tier: number } | null {
     const self = this.client.ui.get().self;
-    let weaponItem: string | null | undefined = null;
-    if (self && e.s === self.characterId) weaponItem = this.client.ui.get().inventory?.equipment?.find((x) => x.slot === 0)?.itemId;
-    else if (this.client.remotes.has(e.s)) weaponItem = this.client.remotes.get(e.s)!.info.weapon;
-    else {
-      const m = this.client.monsters.get(e.s);
-      if (m && getMonster(m.info.monsterId)?.magic) return { color: 0xb06ad6, arrow: false, size: 5 };
-      return null;
-    }
-    const w = weaponItem ? getItem(weaponItem)?.equip : undefined;
-    if (!w?.weapon) return null;
-    if (w.weapon === 'bow') return { color: 0xe8dcc0, arrow: true, size: 3 };
-    if (w.weapon === 'staff' || w.weapon === 'wand') return { color: 0x8fd0ff, arrow: false, size: 5 };
-    return null;
+    let itemId: string | null | undefined;
+    if (self && id === self.characterId) itemId = this.client.ui.get().inventory?.equipment?.find((x) => x.slot === 0)?.itemId;
+    else if (this.client.remotes.has(id)) itemId = this.client.remotes.get(id)!.info.weapon;
+    else return null;
+    const def = itemId ? getItem(itemId) : undefined;
+    const type = def?.equip?.weapon as WeaponType | undefined;
+    if (!def || !type || type === 'shield') return { type: 'fist', icon: '', tier: 0 };
+    const tier = Number(def.icon.split(':')[2]) || 0;
+    return { type, icon: this.canvasTexture(`icon:${def.icon}`, () => itemIcon(def.icon, 2)), tier };
   }
 
-  private projectile(e: CombatEvent): void {
-    const kind = this.projectileKind(e);
+  private avatarOf(id: string): Avatar | null {
+    const self = this.client.ui.get().self;
+    if (self && id === self.characterId) return this.local;
+    return this.remotes.get(id) ?? null;
+  }
+
+  /** Hide the in-hand weapon while the swing copy is on screen. */
+  private swinging = new Map<string, number>();
+
+  private attackFx(e: CombatEvent, opts: FxSettings): void {
+    if (opts.level === 'off') return;
+    const full = opts.level === 'full';
+    const fx = this.fx;
     const from = this.entityPos(e.s);
-    const to = this.entityPos(e.t);
-    if (!kind || !from || !to) return;
-    const fx = from.x;
-    const fy = from.y - from.h * 0.6;
-    const tx = to.x;
-    const ty = to.y - to.h * 0.5;
-    if (Math.hypot(tx - fx, ty - fy) < 40) return;
-    const angle = Math.atan2(ty - fy, tx - fx);
-    const obj = kind.arrow
-      ? this.add.rectangle(fx, fy, 14, kind.size, kind.color).setStrokeStyle(1, 0x2a2030).setRotation(angle)
-      : this.add.circle(fx, fy, kind.size, kind.color).setStrokeStyle(2, 0xffffff, 0.6);
-    obj.setDepth(LABEL_DEPTH + 25);
-    this.tweens.add({ targets: obj, x: tx, y: ty, duration: Math.min(260, Math.hypot(tx - fx, ty - fy) * 1.1), onComplete: () => obj.destroy() });
+    const to = this.entityPos(e.t)!;
+    const me = this.client.ui.get().self?.characterId;
+    const w = this.weaponOf(e.s);
+    const monster = !w ? this.client.monsters.get(e.s) : undefined;
+    const pal = w ? paletteFor(e.s === me ? opts.style : 'weapon', w.tier, this.time.now) : monster && getMonster(monster.info.monsterId)?.magic ? MAGIC_PAL : MONSTER_PAL;
+    const icon = w?.icon || null;
+    const hold = (ms: number) => this.swinging.set(e.s, this.time.now + ms + 260);
+    const shake = () => {
+      if (e.s === me && opts.shake) this.cameras.main.shake(90, 0.003);
+    };
+    const land = (p = pal) => {
+      if (e.k === 'miss') fx.whoosh(to);
+      else {
+        fx.impact(to, p, e.k === 'crit', full);
+        if (e.k === 'crit') shake();
+      }
+    };
+    const melee = (p = pal, big = false) => {
+      if (!from || !w) return land(p);
+      hold(260);
+      const ms = fx.swing(e.s, from, to, w.type === 'bow' ? 'fist' : w.type, icon, p, { big, full });
+      this.time.delayedCall(ms, () => land(p));
+    };
+
+    if (e.k === 'heal') {
+      if (from && e.s !== e.t && full) fx.motes(from, 0x9cf06a);
+      return fx.heal(to, full);
+    }
+    if (e.k === 'dot') {
+      if (full) fx.bubbles(to, 0x9cf06a);
+      return;
+    }
+    if (e.k === 'cast') {
+      if (!from) return;
+      switch (e.sk) {
+        case 'whirlwind':
+          hold(fx.spin(from, icon, pal, 1.8 * TILE_SIZE * 0.6, full));
+          return;
+        case 'frost_nova':
+          return fx.nova(from, ICE_PAL, 2.2 * TILE_SIZE, full);
+        case 'volley':
+          if (w?.type === 'bow') fx.bow(from, to, icon);
+          return fx.rain(to, 2 * TILE_SIZE * 0.7, full);
+        case 'hunters_mark':
+          if (w?.type === 'bow') fx.bow(from, to, icon);
+          return fx.reticle(to, 0xe8a03a);
+        case 'war_cry':
+          return fx.shout(from, MONSTER_PAL);
+        case 'arcane_shield':
+          return fx.bubble(from, MAGIC_PAL);
+        case 'blessing':
+          return fx.motes(from, 0xf2c14e);
+        case 'evasion':
+          return fx.afterimage(this.avatarOf(e.s)?.sprite ?? null, MAGIC_PAL);
+        default:
+          return;
+      }
+    }
+
+    // Damage from an area skill: the cast already drew the big effect; just mark each hit.
+    if (e.sk === 'whirlwind') return land();
+    if (e.sk === 'frost_nova') return land(ICE_PAL);
+    if (e.sk === 'volley') return void this.time.delayedCall(220, () => land());
+
+    if (from) {
+      switch (e.sk) {
+        case 'power_strike':
+          return melee(pal, true);
+        case 'poison_blade':
+          return melee(POISON_PAL);
+        case 'backstab':
+          hold(200);
+          fx.backstab(from, to, icon, pal, full);
+          return void this.time.delayedCall(120, () => land());
+        case 'aimed_shot':
+          if (w?.type === 'bow') fx.bow(from, to, icon);
+          return fx.shoot(from, to, 'arrow', pal, { full, glow: true, onHit: () => land() });
+        case 'fireball':
+          if (w) fx.raise(from, to, icon, FIRE_PAL);
+          return fx.shoot(from, to, 'fire', FIRE_PAL, { full, onHit: () => (e.k === 'miss' ? land() : (fx.explode(to, FIRE_PAL, full), e.k === 'crit' && shake())) });
+        case 'smite':
+          if (w) fx.raise(from, to, icon, HOLY_PAL);
+          return void this.time.delayedCall(80, () => (e.k === 'miss' ? land() : (fx.beam(to, HOLY_PAL, full), land(HOLY_PAL))));
+      }
+    }
+
+    // Plain attacks.
+    if (!w) {
+      if (!from) return land();
+      if (pal === MAGIC_PAL) return fx.shoot(from, to, 'orb', pal, { full, onHit: () => land() });
+      fx.claws(to, pal, (monster && getMonster(monster.info.monsterId)?.boss) || from.h > 60);
+      if (full && e.k !== 'miss') fx.sparks(to.x, to.y - to.h * 0.5, pal.spark, 4, 14);
+      return;
+    }
+    if (!from) return land();
+    if (w.type === 'bow') {
+      fx.bow(from, to, icon);
+      hold(220);
+      return fx.shoot(from, to, 'arrow', pal, { full, onHit: () => land() });
+    }
+    if (w.type === 'staff' || w.type === 'wand') {
+      fx.raise(from, to, icon, pal);
+      hold(260);
+      return fx.shoot(from, to, 'orb', pal, { full, onHit: () => land() });
+    }
+    melee();
+  }
+
+  /** Draw each character's equipped weapon in their hand. */
+  private placeHand(av: Avatar, id: string, dir: Direction, moving: boolean, time: number, show: boolean): void {
+    const w = show && (this.swinging.get(id) ?? 0) < this.time.now ? this.weaponOf(id) : null;
+    const icon = w && w.type !== 'fist' ? w.icon : null;
+    if ((av.handKey ?? null) !== icon) {
+      av.hand?.destroy();
+      av.hand = icon ? this.add.image(0, 0, icon).setScale(0.68) : null;
+      av.handKey = icon;
+    }
+    if (!av.hand || !w) return;
+    const s = av.sprite;
+    const bob = moving && !av.mount ? (Math.floor(time / 130) % 2) * -1 : 0;
+    const base = s.y - 15 + bob;
+    const bow = w.type === 'bow';
+    av.hand.setFlipX(dir === 'left');
+    if (bow) av.hand.setOrigin(0.5, 0.6);
+    else av.hand.setOrigin(dir === 'left' ? 0.88 : 0.12, 0.88);
+    const lay = {
+      down: { x: -9, r: bow ? 0 : -0.15, d: 0.01 },
+      up: { x: 9, r: bow ? 0 : -0.15, d: -0.01 },
+      right: { x: 3, r: bow ? 0 : 0.35, d: 0.01 },
+      left: { x: -3, r: bow ? 0 : -0.35, d: 0.01 },
+    }[dir];
+    av.hand.setPosition(s.x + lay.x, base).setRotation(lay.r).setDepth(s.depth + lay.d);
   }
 
   private addRemote(r: RemotePlayer): void {
@@ -991,11 +1127,17 @@ export class WorldScene extends Phaser.Scene {
     const ly = client.prevPos.y + (client.pos.y - client.prevPos.y) * alpha + client.correction.y;
     this.setAvatarMount(this.local, client.ui.get().self?.mount);
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time);
+    const fxo = fxSettings();
+    const selfId = client.ui.get().self?.characterId;
+    if (selfId) this.placeHand(this.local, selfId, client.dir, client.moving, time, fxo.handWeapon);
 
     client.interpolateRemotes();
     for (const [id, r] of client.remotes) {
       const av = this.remotes.get(id);
-      if (av) this.placeAvatar(av, r.x, r.y, r.dir, r.moving, time);
+      if (av) {
+        this.placeAvatar(av, r.x, r.y, r.dir, r.moving, time);
+        this.placeHand(av, id, r.dir, r.moving, time, fxo.handWeapon);
+      }
     }
     this.targetRing.clear();
     const tid = client.ui.get().targetId;

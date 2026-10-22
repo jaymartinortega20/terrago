@@ -5,6 +5,7 @@ import { CLASSES, getItem, getMap } from '@terrago/game-data';
 import { QUALITIES, TILE_SIZE } from '@terrago/shared';
 import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
+import { FX_STYLES, fxSettings, setFxSettings, type FxLevel, type FxSettings, type FxStyle } from '../fx/settings';
 import type { GameClient } from '../net/client';
 import { useStore, type Panel } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
@@ -217,6 +218,42 @@ export function MapPanel({ client, onClose }: { client: GameClient; onClose: () 
   );
 }
 
+function FxSection() {
+  const [fx, setFx] = useState<FxSettings>(() => fxSettings());
+  const set = (p: Partial<FxSettings>) => setFx(setFxSettings(p));
+  const check = (k: 'handWeapon' | 'shake' | 'numbers', label: string) => (
+    <label className="mt-1 flex items-center gap-2 text-sm">
+      <input type="checkbox" checked={fx[k]} onChange={(e) => set({ [k]: e.target.checked })} data-testid={`fx-${k}`} /> {label}
+    </label>
+  );
+  return (
+    <>
+      <h3 className="mt-4 font-bold">Attack effects</h3>
+      <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Effect amount">
+        {(['full', 'light', 'off'] as FxLevel[]).map((l) => (
+          <button key={l} className={`px-btn small ${fx.level === l ? '' : 'ghost'}`} onClick={() => set({ level: l })} aria-pressed={fx.level === l} data-testid={`fx-level-${l}`}>
+            {l === 'full' ? 'Full' : l === 'light' ? 'Light' : 'Off'}
+          </button>
+        ))}
+      </div>
+      <label className="mt-2 flex items-center gap-2 text-sm">
+        <span className="w-20">Your colour</span>
+        <select className="flex-1 rounded border border-wood-dark/40 bg-white/70 px-1 py-0.5" value={fx.style} onChange={(e) => set({ style: e.target.value as FxStyle })} data-testid="fx-style">
+          {FX_STYLES.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      {check('handWeapon', 'Show weapons in hand')}
+      {check('shake', 'Shake screen on critical hits')}
+      {check('numbers', 'Show damage numbers')}
+      <p className="mt-1 text-xs text-wood-dark/70">Your colour applies to your own slashes, arrows and spells, and only you see it. Use Light or Off on slow devices.</p>
+    </>
+  );
+}
+
 export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client: GameClient; onClose: () => void; onLogout: () => void; onSwitch: () => void }) {
   const [s, setS] = useState<AudioSettings>(() => loadAudioSettings());
   const ping = useStore(client.ui, (st) => st.ping);
@@ -238,6 +275,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
         <input type="checkbox" checked={s.muted} onChange={(e) => setS({ ...s, muted: e.target.checked })} /> Mute all
       </label>
       <p className="mt-1 text-xs text-wood-dark/70">Music and sounds start after your first click or key press. Levels are saved in this browser.</p>
+      <FxSection />
       <h3 className="mt-4 font-bold">Connection</h3>
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>

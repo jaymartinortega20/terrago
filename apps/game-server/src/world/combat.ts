@@ -689,7 +689,8 @@ export class Combat {
       if (!this.inReach(p, foe, reach)) return 'Too far away.';
       if (!this.canSee(rt, p, foe, reach)) return 'No line of sight.';
       if (sk.kind === 'attack') this.strikePlayer(rt, p, foe, sk.magic, sk.mult, sk.id, now);
-      else if (sk.effect) foe.effects = [...foe.effects.filter((e) => e.id !== sk.effect!.id), { id: sk.effect.id, name: sk.effect.name, until: now + sk.effect.durationMs, mods: { ...sk.effect.mods } }];
+      else if (sk.effect) this.emit(rt, { s: p.id, t: foe.id, a: 0, k: 'cast', sk: sk.id });
+      if (sk.kind !== 'attack' && sk.effect) foe.effects = [...foe.effects.filter((e) => e.id !== sk.effect!.id), { id: sk.effect.id, name: sk.effect.name, until: now + sk.effect.durationMs, mods: { ...sk.effect.mods } }];
       p.rec.mp -= sk.mp;
       p.cooldowns.set(sk.id, now + sk.cooldownMs);
       this.pushEffects(p);
@@ -704,9 +705,12 @@ export class Combat {
         if (!this.inReach(p, monster, Math.max(sk.range, p.profile.weapon.range))) return 'Too far away.';
         if (!this.canSee(rt, p, monster, Math.max(sk.range, p.profile.weapon.range))) return 'No line of sight.';
         if (sk.kind === 'attack') this.strike(rt, p, monster, sk.magic, sk.mult, sk.id, now);
-        else if (monster.state !== 'chase') {
-          monster.state = 'chase';
-          monster.targetId = p.id;
+        else {
+          this.emit(rt, { s: p.id, t: monster.id, a: 0, k: 'cast', sk: sk.id });
+          if (monster.state !== 'chase') {
+            monster.state = 'chase';
+            monster.targetId = p.id;
+          }
         }
         if (sk.effect && monster.alive) {
           monster.effects = monster.effects.filter((e) => e.id !== sk.effect!.id);
@@ -721,6 +725,7 @@ export class Combat {
         const cy = sk.range > 0 && monster?.alive ? monster.y : p.y;
         if (sk.range > 0 && (!monster?.alive || !this.inReach(p, monster, sk.range))) return monster ? 'Too far away.' : 'Pick a target first.';
         if (sk.range > 0 && monster && !this.canSee(rt, p, monster, sk.range)) return 'No line of sight.';
+        this.emit(rt, { s: p.id, t: sk.range > 0 && monster ? monster.id : p.id, a: 0, k: 'cast', sk: sk.id });
         const hits = [...rt.monsters.values()]
           .filter((m) => m.alive && dist(m.x, m.y, cx, cy) <= (sk.radius ?? 2) * TILE)
           .sort((a, b) => dist(a.x, a.y, cx, cy) - dist(b.x, b.y, cx, cy))
@@ -736,6 +741,7 @@ export class Combat {
         if (mods.shield) mods.shield = scale(mods.shield, sk.effect!.scale);
         if (mods.regen) mods.regen = scale(mods.regen, sk.effect!.scale);
         p.effects = [...p.effects.filter((e) => e.id !== sk.effect!.id), { id: sk.effect!.id, name: sk.effect!.name, until: now + sk.effect!.durationMs, mods }];
+        this.emit(rt, { s: p.id, t: p.id, a: 0, k: 'cast', sk: sk.id });
         break;
       }
       case 'heal': {

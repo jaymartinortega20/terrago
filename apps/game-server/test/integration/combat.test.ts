@@ -90,6 +90,24 @@ describe('combat (v0.5)', () => {
     await leaveWorld(a.socket);
   });
 
+  test('buff and area skills tell everyone nearby so they can draw the effect', async () => {
+    const A = await newPlayer(base, { classId: 'warrior' });
+    await place(A.character.id, 'sunfield_plains', 45, 10);
+    const a = await enterWorld(base, A.browser.cookie, A.character.id);
+    const p = server.world.players.get(A.character.id)!;
+    p.rec.level = 30;
+    p.rec.mp = 500;
+    const events: CombatEvent[] = [];
+    a.socket.on('combat', (ev: CombatEvent[]) => events.push(...ev));
+    const cry = await ack(a.socket, 'skill', { skillId: 'war_cry', targetId: null });
+    assert.equal(cry.ok, true, JSON.stringify(cry));
+    await waitFor(() => events.find((e) => e.k === 'cast' && e.sk === 'war_cry' && e.s === p.id && e.t === p.id));
+    const spin = await ack(a.socket, 'skill', { skillId: 'whirlwind', targetId: null });
+    assert.equal(spin.ok, true, JSON.stringify(spin));
+    await waitFor(() => events.find((e) => e.k === 'cast' && e.sk === 'whirlwind'));
+    await leaveWorld(a.socket);
+  });
+
   test('dying sends you back to town with weakness and worn-down gear', async () => {
     const A = await newPlayer(base, { classId: 'rogue' });
     await place(A.character.id, 'sunfield_plains', 45, 30);
