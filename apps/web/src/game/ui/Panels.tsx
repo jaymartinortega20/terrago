@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { CLASSES, getItem, getMap } from '@terrago/game-data';
-import { QUALITIES, TILE_SIZE } from '@terrago/shared';
+import { BASE_OUTFIT_COUNT, OUTFITS, QUALITIES, TILE_SIZE } from '@terrago/shared';
+import { characterPreview } from '../art/characters';
 import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
 import { FX_STYLES, fxSettings, setFxSettings, type FxLevel, type FxSettings, type FxStyle } from '../fx/settings';
@@ -108,6 +109,55 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
   );
 }
 
+/** Outfits you can wear: the starter outfits plus any skins a game master gave you. */
+function Wardrobe({ client }: { client: GameClient }) {
+  const self = useStore(client.ui, (s) => s.self);
+  const [owned, setOwned] = useState<number[]>([]);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    client
+      .wardrobe()
+      .then((w) => setOwned(w.owned))
+      .catch(() => {});
+  }, [client]);
+  const choices = useMemo(() => [...OUTFITS.keys()].filter((i) => i < BASE_OUTFIT_COUNT || owned.includes(i)), [owned]);
+  const previews = useMemo(() => {
+    if (!self || typeof document === 'undefined') return {} as Record<number, string>;
+    return Object.fromEntries(choices.map((i) => [i, characterPreview({ ...self.appearance, outfit: i }, 'down', 2).toDataURL()]));
+  }, [choices, self]);
+  if (!self) return null;
+  return (
+    <>
+      <h3 className="mt-3 text-sm font-bold text-wood-dark">Wardrobe</h3>
+      <div className="mt-1 grid grid-cols-5 gap-1" data-testid="wardrobe">
+        {choices.map((i) => {
+          const o = OUTFITS[i]!;
+          const on = self.appearance.outfit === i;
+          return (
+            <button
+              key={i}
+              disabled={busy || on}
+              title={o.name}
+              onClick={async () => {
+                setBusy(true);
+                const r = await client.wear(i);
+                if (r) setOwned(r.owned);
+                setBusy(false);
+              }}
+              className={`flex flex-col items-center border-2 p-0.5 text-[9px] leading-tight ${on ? 'border-gold bg-gold/30' : o.exclusive ? 'border-[#b06ad6] bg-parchment-2' : 'border-ink bg-parchment-2'}`}
+              data-testid={`wear-${i}`}
+            >
+              {previews[i] && <img src={previews[i]} alt="" width={32} height={48} style={{ imageRendering: 'pixelated' }} />}
+              <span className="truncate">{o.exclusive ? '👑 ' : ''}{o.name}</span>
+            </button>
+          );
+        })}
+      </div>
+      {owned.length === 0 && <p className="mt-1 text-[11px] text-wood-dark/70">Exclusive skins appear here when a game master gives you one.</p>}
+    </>
+  );
+}
+
 export function CharacterPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const self = useStore(client.ui, (s) => s.self);
   if (!self) return null;
@@ -157,6 +207,7 @@ export function CharacterPanel({ client, onClose }: { client: GameClient; onClos
       </div>
       <h3 className="mt-3 text-sm font-bold text-wood-dark">Equipment</h3>
       <EquipmentGrid client={client} />
+      <Wardrobe client={client} />
       <table className="mt-3 w-full text-sm">
         <tbody>
           {rows.map(([k, v]) => (

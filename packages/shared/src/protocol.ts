@@ -145,7 +145,7 @@ export interface ServerToClientEvents {
   /** A boss is winding up an area attack: warn players (pixels, ms until impact). */
   'telegraph': (t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
   /** A visible player's look changed (mount, weapon). */
-  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null }) => void;
+  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('./types').Appearance }) => void;
   /** Someone nearby (or you) did an emote. */
   'emote': (e: { id: string; emote: import('./types').EmoteId }) => void;
   /** Someone nearby worked a tile (farming, mining, chopping...) — for their tool animation. */
@@ -193,6 +193,8 @@ export interface ClientToServerEvents {
   'portal:use': (portalId: string, ack: Ack<{ mapId: string }>) => void;
   'act': (req: ActRequest, ack: Ack<ActResult>) => void;
   'emote': (emote: string, ack: Ack<{ emote: string }>) => void;
+  'wardrobe:get': (ack: Ack<{ outfit: number; owned: number[] }>) => void;
+  'wardrobe:set': (outfit: number, ack: Ack<{ outfit: number; owned: number[] }>) => void;
   'shop:get': (npcId: string, ack: Ack<ShopView>) => void;
   'shop:buy': (req: { npcId: string; itemId: string; quantity: number }, ack: Ack<{ message: string }>) => void;
   'shop:sell': (req: { npcId: string; slot: number; quantity: number }, ack: Ack<{ message: string }>) => void;

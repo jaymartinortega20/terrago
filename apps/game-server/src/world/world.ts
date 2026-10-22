@@ -135,7 +135,7 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance }): void {
     if ('pet' in patch) p.conn?.send('self:update', { pet: patch.pet ?? null });
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
   }
@@ -458,6 +458,8 @@ export class World {
     } else {
       p = new Player(rec);
       p.profile = profileFor(rec);
+      p.rec.hp = Math.min(p.rec.hp, p.profile.maxHp);
+      p.rec.mp = Math.min(p.rec.mp, p.profile.maxMp);
       // Logged out inside a dungeon: the run is over; come back outside.
       const saved = getMap(p.mapId);
       if (saved?.dungeon && saved.respawn) {

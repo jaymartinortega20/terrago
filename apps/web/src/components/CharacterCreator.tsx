@@ -8,6 +8,7 @@ import {
   HAIR_COLORS,
   HAIR_STYLES,
   OUTFITS,
+  BASE_OUTFIT_COUNT,
   SKIN_TONES,
   checkCharacterName,
   type Appearance,
@@ -77,7 +78,7 @@ export function CharacterCreator({
       hairStyle: r(HAIR_STYLES.length),
       hairColor: r(HAIR_COLORS.length),
       eyeColor: r(EYE_COLORS.length),
-      outfit: r(OUTFITS.length),
+      outfit: r(BASE_OUTFIT_COUNT),
     });
   }
 
@@ -191,7 +192,7 @@ export function CharacterCreator({
           <div>
             <span className="block text-sm font-bold">Starter clothing</span>
             <div className="mt-1">
-              <Cycler label="outfit" options={OUTFITS.map((o) => o.name)} value={look.outfit} onChange={(i) => set('outfit', i)} />
+              <Cycler label="outfit" options={OUTFITS.slice(0, BASE_OUTFIT_COUNT).map((o) => o.name)} value={look.outfit} onChange={(i) => set('outfit', i)} />
             </div>
           </div>
         </div>

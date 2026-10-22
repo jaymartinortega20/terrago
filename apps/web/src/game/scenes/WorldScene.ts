@@ -220,9 +220,15 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('telegraph', (t) => this.showTelegraph(t)),
       this.client.on('animals', (list) => this.drawAnimals(list)),
       this.client.on('look', (id) => {
+        const self = this.client.ui.get().self;
+        if (self && id === self.characterId && this.local) {
+          this.local.sprite.setTexture(this.charTexture(self.appearance), this.local.sprite.frame.name);
+          return;
+        }
         const r = this.client.remotes.get(id);
         const av = this.remotes.get(id);
         if (r && av) {
+          av.sprite.setTexture(this.charTexture(r.info.appearance), av.sprite.frame.name);
           this.setAvatarMount(av, r.info.mount);
           av.label.setText(remoteLabel(r.info));
         }

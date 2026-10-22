@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ACCOUNT } from './constants';
-import { BODY_TYPES, EYE_COLORS, HAIR_COLORS, HAIR_STYLES, OUTFITS, SKIN_TONES } from './appearance';
+import { BASE_OUTFIT_COUNT, BODY_TYPES, EYE_COLORS, HAIR_COLORS, HAIR_STYLES, SKIN_TONES } from './appearance';
 import { isOffensiveName } from './profanity';
 import { CLASS_IDS } from './types';
 
@@ -66,7 +66,8 @@ export const appearanceSchema = z.object({
   hairStyle: idx(HAIR_STYLES.length),
   hairColor: idx(HAIR_COLORS.length),
   eyeColor: idx(EYE_COLORS.length),
-  outfit: idx(OUTFITS.length),
+  // Exclusive skins can't be picked at creation; an admin gives them.
+  outfit: idx(BASE_OUTFIT_COUNT),
 });
 
 export const createCharacterSchema = z.object({

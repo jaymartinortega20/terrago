@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { ITEMS } from '@terrago/game-data';
 import { adminApi, api, ApiError } from '@/lib/api';
 import { EconomyTab, FlagsTab, PlayerDetail, ServerSettings } from './panels';
+import { GmPanel, MyCharacters } from './gm';
 
 type Tab = 'overview' | 'economy' | 'reports' | 'flags' | 'players' | 'tools' | 'log';
 interface Overview {
@@ -245,7 +245,8 @@ function PlayersTab({ act, detail, setDetail }: { act: Act; detail: string | nul
     <>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or email…" className="w-full max-w-sm border-4 border-ink bg-parchment px-2 py-1 text-ink" data-testid="admin-search" />
       {detail && <PlayerDetail id={detail} onClose={() => setDetail(null)} onPlayer={setDetail} />}
-      {give && <GiveForm target={give} act={act} onClose={() => setGive(null)} />}
+      <MyCharacters onPick={(c) => setGive(c)} />
+      {give && <GmPanel target={give} act={act} onClose={() => setGive(null)} />}
       <div className="px-panel mt-2 overflow-x-auto p-2">
         <table className="w-full text-sm" data-testid="admin-players">
           <thead>
@@ -281,8 +282,8 @@ function PlayersTab({ act, detail, setDetail }: { act: Act; detail: string | nul
                     <button className="px-btn small" onClick={() => setDetail(p.id)} data-testid="admin-player-open">
                       Details
                     </button>
-                    <button className="px-btn ghost small" onClick={() => setGive({ id: p.id, name: p.name })}>
-                      Give
+                    <button className="px-btn ghost small" onClick={() => setGive({ id: p.id, name: p.name })} data-testid="admin-gm-open">
+                      GM tools
                     </button>
                     <button className="px-btn ghost small" onClick={() => act(() => adminApi.post('mute', { characterId: p.id, minutes: muted ? 0 : 60 }).then(load), muted ? 'Unmuted.' : 'Muted for 1 hour.')}>
                       {muted ? 'Unmute' : 'Mute 1h'}
@@ -312,40 +313,6 @@ function PlayersTab({ act, detail, setDetail }: { act: Act; detail: string | nul
         </table>
       </div>
     </>
-  );
-}
-
-function GiveForm({ target, act, onClose }: { target: { id: string; name: string }; act: Act; onClose: () => void }) {
-  const [gold, setGold] = useState(0);
-  const [itemId, setItemId] = useState('');
-  const [qty, setQty] = useState(1);
-  return (
-    <div className="px-panel mt-2 flex flex-wrap items-end gap-2 p-3 text-sm">
-      <b className="w-full">Send to {target.name}</b>
-      <label>
-        Gold <input type="number" min={0} value={gold} onChange={(e) => setGold(Number(e.target.value))} className="w-24 border-2 border-ink bg-parchment px-1" />
-      </label>
-      <label>
-        Item{' '}
-        <select value={itemId} onChange={(e) => setItemId(e.target.value)} className="border-2 border-ink bg-parchment">
-          <option value="">— none —</option>
-          {ITEMS.map((i) => (
-            <option key={i.id} value={i.id}>
-              {i.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Qty <input type="number" min={1} max={999} value={qty} onChange={(e) => setQty(Number(e.target.value))} className="w-16 border-2 border-ink bg-parchment px-1" />
-      </label>
-      <button className="px-btn green small" onClick={() => act(() => adminApi.post('give', { characterId: target.id, gold, itemId, quantity: qty }).then(onClose), `Sent to ${target.name}.`)}>
-        Send
-      </button>
-      <button className="px-btn ghost small" onClick={onClose}>
-        Cancel
-      </button>
-    </div>
   );
 }
 

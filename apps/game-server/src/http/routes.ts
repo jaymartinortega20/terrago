@@ -1,4 +1,4 @@
-import { WORLD_EVENTS, createCharacterSchema, currentEvent, firstIssue, loginSchema, registerSchema, type ManualEvent } from '@terrago/shared';
+import { OUTFITS, WORLD_EVENTS, createCharacterSchema, currentEvent, firstIssue, loginSchema, registerSchema, type ManualEvent } from '@terrago/shared';
 import { saveSettings, settings, validateSettings } from '../services/serverConfig';
 import { getDummyHash, hashPassword, needsRehash, verifyPassword } from '../auth/passwords';
 import {
@@ -19,7 +19,8 @@ import type { Metrics } from '../metrics';
 import type { SecurityEvents } from '../security/events';
 import { WindowLimiter } from '../security/rateLimit';
 import { createCharacter, listCharacters } from '../services/characters';
-import { grantKillRewards } from '../services/equipment';
+import { adminGive, adminHeal, adminSetGold, adminSetLevel, adminSetProfessions, adminTeleport, adminUnlockWaystones } from '../services/adminPowers';
+import { applyAppearance, ownedSkins } from '../net/wardrobe';
 import { getItem } from '@terrago/game-data';
 import { antibot } from '../security/antibot';
 import type { World } from '../world/world';
@@ -297,28 +298,108 @@ export function buildRouter(deps: Deps): Router {
     return {};
   });
 
+  /** Run a game-master power, turning game errors into 400s. */
+  const power = async <T>(fn: () => Promise<T>): Promise<T> => {
+    try {
+      return await fn();
+    } catch (err) {
+      if (err instanceof GameError) throw new HttpError(400, err.message);
+      throw err;
+    }
+  };
+
   router.post('/api/admin/give', async (ctx) => {
     const admin = await requireAdmin(ctx);
     const b = body(ctx);
     const id = uuid(b.characterId, 'character');
     const gold = Math.floor(Number(b.gold ?? 0));
-    const itemId = typeof b.itemId === 'string' && b.itemId ? b.itemId : null;
-    const quantity = Math.floor(Number(b.quantity ?? 1));
-    if (!Number.isSafeInteger(gold) || gold < 0 || gold > 10_000_000) throw new HttpError(400, 'Gold must be 0–10,000,000.');
-    if (itemId && (!getItem(itemId) || quantity < 1 || quantity > 999)) throw new HttpError(400, 'Unknown item or bad quantity.');
-    if (!gold && !itemId) throw new HttpError(400, 'Nothing to give.');
-    const res = await grantKillRewards(pool, id, { xp: 0, gold, items: itemId ? [{ itemId, quantity }] : [], monster: `admin:${admin.userId}` }, 'admin');
-    const p = world.players.get(id);
-    if (p && res.inventory) {
-      const prev = world.inventoryCache.get(id);
-      const inv = { ...res.inventory, equipment: res.inventory.equipment ?? prev?.equipment ?? [] };
-      world.inventoryCache.set(id, inv);
-      p.rec.gold = inv.gold;
-      p.conn?.send('inventory:update', inv);
-      world.system(p, `A game master sent you ${[gold ? `${gold} Gold` : '', itemId ? `${quantity}× ${getItem(itemId)!.name}` : ''].filter(Boolean).join(' and ')}.`);
+    const list: { itemId: string; quantity: number }[] = Array.isArray(b.items)
+      ? (b.items as { itemId?: unknown; quantity?: unknown }[]).map((i) => ({ itemId: String(i?.itemId ?? ''), quantity: Math.floor(Number(i?.quantity ?? 1)) }))
+      : typeof b.itemId === 'string' && b.itemId
+        ? [{ itemId: b.itemId, quantity: Math.floor(Number(b.quantity ?? 1)) }]
+        : [];
+    // Merge duplicates so one item can't be listed twice.
+    const merged = new Map<string, number>();
+    for (const i of list) merged.set(i.itemId, (merged.get(i.itemId) ?? 0) + i.quantity);
+    const items = [...merged].map(([itemId, quantity]) => ({ itemId, quantity }));
+    const res = await power(() => adminGive(pool, world, id, gold, items, admin.userId));
+    await audit(admin, 'give', id, { gold, items });
+    return { ...res, overflow: res.leftover };
+  });
+
+  router.post('/api/admin/gold', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    const id = uuid(b.characterId, 'character');
+    const gold = await power(() => adminSetGold(pool, world, id, Math.floor(Number(b.gold)), admin.userId));
+    await audit(admin, 'set_gold', id, { gold });
+    return { gold };
+  });
+
+  router.post('/api/admin/level', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    const id = uuid(b.characterId, 'character');
+    if (b.level !== undefined && b.level !== null && b.level !== '') await power(() => adminSetLevel(pool, world, id, Number(b.level)));
+    if (b.professions !== undefined && b.professions !== null && b.professions !== '') await power(() => adminSetProfessions(pool, world, id, Number(b.professions)));
+    await audit(admin, 'set_level', id, { level: b.level ?? null, professions: b.professions ?? null });
+    return {};
+  });
+
+  router.post('/api/admin/heal', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const id = uuid(body(ctx).characterId, 'character');
+    await power(() => adminHeal(pool, world, id));
+    await audit(admin, 'heal', id);
+    return {};
+  });
+
+  router.post('/api/admin/waystones', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const id = uuid(body(ctx).characterId, 'character');
+    const n = await power(() => adminUnlockWaystones(pool, id));
+    await audit(admin, 'unlock_waystones', id);
+    return { unlocked: n };
+  });
+
+  router.post('/api/admin/teleport', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    const id = uuid(b.characterId, 'character');
+    const mapId = String(b.mapId ?? '');
+    const tx = b.x === undefined || b.x === '' ? undefined : Number(b.x);
+    const ty = b.y === undefined || b.y === '' ? undefined : Number(b.y);
+    await power(() => adminTeleport(pool, world, id, mapId, tx, ty));
+    await audit(admin, 'teleport', id, { mapId, x: tx ?? null, y: ty ?? null });
+    return {};
+  });
+
+  router.post('/api/admin/skin', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    const id = uuid(b.characterId, 'character');
+    const outfit = Number(b.outfit);
+    if (!Number.isInteger(outfit) || !OUTFITS[outfit]?.exclusive) throw new HttpError(400, 'Pick one of the exclusive skins.');
+    if (b.revoke) {
+      await pool.query(`DELETE FROM character_skins WHERE character_id = $1 AND outfit = $2`, [id, outfit]);
+      const { rows } = await pool.query(`SELECT appearance->>'outfit' AS o FROM characters WHERE id = $1`, [id]);
+      if (Number(rows[0]?.o) === outfit) await applyAppearance(pool, world, id, { outfit: 0 });
+      await audit(admin, 'skin_revoke', id, { outfit });
+      return { owned: await ownedSkins(pool, id) };
     }
-    await audit(admin, 'give', id, { gold, itemId, quantity });
-    return { overflow: res.overflow };
+    await pool.query(`INSERT INTO character_skins (character_id, outfit, granted_by) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`, [id, outfit, admin.userId]);
+    if (b.wear) await applyAppearance(pool, world, id, { outfit });
+    const p = world.players.get(id);
+    if (p) world.system(p, `👑 You received the ${OUTFITS[outfit]!.name} skin! Wear it from Character → Wardrobe.`);
+    await audit(admin, 'skin_give', id, { outfit, wear: !!b.wear });
+    return { owned: await ownedSkins(pool, id) };
+  });
+
+  /** The admin's own characters (for "send to me"). */
+  router.get('/api/admin/mine', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const { rows } = await pool.query(`SELECT id, name, level FROM characters WHERE user_id = $1 AND deleted_at IS NULL ORDER BY last_played_at DESC NULLS LAST`, [admin.userId]);
+    return { characters: rows };
   });
 
   router.post('/api/admin/announce', async (ctx) => {
@@ -515,6 +596,7 @@ export function buildRouter(deps: Deps): Router {
       items: items.rows,
       gold: gold.rows.map(num),
       itemLog: itemLog.rows,
+      skins: await ownedSkins(pool, id),
       trades: trades.rows.map(num),
       market: market.rows.map(num),
       flags: flags.rows,

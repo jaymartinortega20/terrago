@@ -264,8 +264,13 @@ export class GameClient {
       if (!d.with && this.remotes.has(this.ui.get().targetId ?? '')) this.setTarget(null);
     });
     socket.on('entity:update', (id, patch) => {
-      if (id === this.ui.get().self?.characterId) {
+      const self = this.ui.get().self;
+      if (id === self?.characterId) {
         if ('pose' in patch) this.pose = patch.pose ?? null;
+        if (patch.appearance) {
+          this.ui.set({ self: { ...self, appearance: patch.appearance } });
+          this.emit('look', id);
+        }
         return;
       }
       const r = this.remotes.get(id);
@@ -702,6 +707,21 @@ export class GameClient {
 
   setTarget(id: string | null, engage = false): void {
     this.ui.set({ targetId: id, autoAttack: engage && !!id });
+  }
+
+  /** Your outfit and the skins you own. */
+  wardrobe(): Promise<{ outfit: number; owned: number[] }> {
+    return this.request('wardrobe:get');
+  }
+
+  /** Put on an outfit (a starter one or an owned skin). */
+  async wear(outfit: number): Promise<{ outfit: number; owned: number[] } | null> {
+    try {
+      return await this.request('wardrobe:set', outfit);
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message, 2500);
+      return null;
+    }
   }
 
   /** Do an emote (wave, dance, sit...). Everyone nearby sees it. */

@@ -53,7 +53,12 @@ function palette(a: Appearance): Palette {
 
 export function drawCharacterFrame(a: Appearance, dir: Direction, frame: Frame, accessory?: NpcAccessory): PixelBuffer {
   const side = dir === 'left' || dir === 'right';
-  let base = side ? drawSide(a, frame === 4 ? 0 : frame, accessory) : drawFrontBack(a, dir === 'up', frame === 4 ? 0 : frame, accessory);
+  // Skins add pieces: a cape (body) and one headpiece.
+  const extras = OUTFITS[a.outfit]?.extras ?? [];
+  const bodyAcc: NpcAccessory | undefined = accessory ?? (extras.includes('cape') ? 'cape' : undefined);
+  const head = extras.find((x) => x !== 'cape');
+  let base = side ? drawSide(a, frame === 4 ? 0 : frame, bodyAcc) : drawFrontBack(a, dir === 'up', frame === 4 ? 0 : frame, bodyAcc);
+  if (head && !accessory) drawHeadAccessory(base, head, side, dir === 'up');
   if (frame === 4) base = seated(base, a, side, dir === 'up');
   const buf = dir === 'right' ? base.mirrored() : base;
   buf.outline(OUTLINE);

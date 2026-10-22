@@ -17,6 +17,7 @@ import type { SecurityEvents } from '../security/events';
 import { TokenBucket } from '../security/rateLimit';
 import { loadCharacter, useItem } from '../services/characters';
 import { getInventory, moveInventoryItem } from '../services/inventory';
+import { ownedSkins, wearOutfit } from './wardrobe';
 import { getItem } from '@terrago/game-data';
 import { getNpc, talkToNpc } from '../services/npcs';
 import type { CharacterRecord } from '../world/characterState';
@@ -321,6 +322,8 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
       });
     });
     socket.on('emote', (emote, ack) => respond(ack, () => world.emote(p, emote)));
+    socket.on('wardrobe:get', (ack) => respond(ack, async () => ({ outfit: p.rec.appearance.outfit, owned: await ownedSkins(pool, p.id) })));
+    socket.on('wardrobe:set', (outfit, ack) => serial(ack, () => wearOutfit(pool, world, p, outfit)));
     socket.on('shop:get', (npcId, ack) => serial(ack, () => npcServices.shopGet(g, p, npcId)));
     socket.on('shop:buy', (req, ack) => serial(ack, () => npcServices.shopBuy(g, p, req)));
     socket.on('shop:sell', (req, ack) => serial(ack, () => npcServices.shopSell(g, p, req)));

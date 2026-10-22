@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';
 import pg from 'pg';
-import { currentEvent, setManualEvent } from '@terrago/shared';
+import { BASE_OUTFIT_COUNT, OUTFITS, currentEvent, setManualEvent } from '@terrago/shared';
 import type { GameServer } from '../../src/app';
-import { TEST_DB, enterWorld, leaveWorld, newPlayer, resetDatabase, startTestServer, waitFor } from './helpers';
+import { TEST_DB, ack, enterWorld, leaveWorld, newPlayer, resetDatabase, startTestServer, waitFor } from './helpers';
 
 let server: GameServer;
 let base: string;
@@ -114,6 +114,88 @@ describe('admin tools (economy, flags, player detail, settings, events)', () => 
     assert.equal(stop.status, 200);
     await waitFor(() => got.length === 2 && got[1] === null);
     assert.equal(currentEvent(Date.now()), null);
+    await leaveWorld(s.socket);
+  });
+
+  test('game master: give lots of items and Gold, set Gold/level/professions, heal, waystones, teleport', async () => {
+    const Admin = await makeAdmin();
+    const P = await newPlayer(base);
+    assert.equal((await P.browser.post('/api/admin/give', { characterId: P.character.id, gold: 5 })).status, 403, 'players cannot');
+    const s = await enterWorld(base, P.browser.cookie, P.character.id);
+    const g = await Admin.browser.post('/api/admin/give', {
+      characterId: P.character.id,
+      gold: 250_000_000,
+      items: [
+        { itemId: 'carrot', quantity: 500 },
+        { itemId: 'star_metal_sword', quantity: 1 },
+        { itemId: 'iron_ore', quantity: 9999 },
+      ],
+    });
+    assert.equal(g.status, 200, JSON.stringify(g.data));
+    assert.ok(g.data.bag > 0);
+    const gold = await db.query('SELECT gold FROM characters WHERE id = $1', [P.character.id]);
+    assert.ok(Number(gold.rows[0].gold) >= 250_000_000);
+    assert.equal(server.world.players.get(P.character.id)!.rec.gold, Number(gold.rows[0].gold), 'online player sees it at once');
+    assert.equal((await Admin.browser.post('/api/admin/give', { characterId: P.character.id, items: [{ itemId: 'nope', quantity: 1 }] })).status, 400);
+    assert.equal((await Admin.browser.post('/api/admin/give', { characterId: P.character.id, gold: 2_000_000_000 })).status, 400);
+
+    assert.equal((await Admin.browser.post('/api/admin/gold', { characterId: P.character.id, gold: 777 })).status, 200);
+    assert.equal(Number((await db.query('SELECT gold FROM characters WHERE id = $1', [P.character.id])).rows[0].gold), 777);
+    const led = await db.query(`SELECT count(*)::int AS n FROM currency_transactions WHERE character_id = $1 AND reason = 'admin'`, [P.character.id]);
+    assert.ok(led.rows[0].n >= 2, 'every change is on the ledger');
+
+    assert.equal((await Admin.browser.post('/api/admin/level', { characterId: P.character.id, level: 100, professions: 100 })).status, 200);
+    const pl = server.world.players.get(P.character.id)!;
+    assert.equal(pl.rec.level, 100);
+    assert.equal(pl.rec.skills.mining.level, 100);
+    assert.equal((await Admin.browser.post('/api/admin/level', { characterId: P.character.id, level: 101 })).status, 400);
+
+    pl.rec.hp = 1;
+    assert.equal((await Admin.browser.post('/api/admin/heal', { characterId: P.character.id })).status, 200);
+    assert.equal(pl.rec.hp, pl.profile.maxHp);
+    const w = await Admin.browser.post('/api/admin/waystones', { characterId: P.character.id });
+    assert.ok(w.data.unlocked >= 5);
+    assert.equal((await Admin.browser.post('/api/admin/teleport', { characterId: P.character.id, mapId: 'crystal_lake' })).status, 200);
+    await waitFor(() => server.world.players.get(P.character.id)?.mapId === 'crystal_lake');
+    assert.equal((await Admin.browser.post('/api/admin/teleport', { characterId: P.character.id, mapId: 'atlantis' })).status, 400);
+    // Offline level-up: full HP when they come back (capped to the real maximum).
+    const Q = await newPlayer(base);
+    await Admin.browser.post('/api/admin/level', { characterId: Q.character.id, level: 50 });
+    const q = await enterWorld(base, Q.browser.cookie, Q.character.id);
+    const pq = server.world.players.get(Q.character.id)!;
+    assert.equal(pq.rec.level, 50);
+    assert.equal(pq.rec.hp, pq.profile.maxHp);
+    await leaveWorld(q.socket);
+    const mine = await Admin.browser.get('/api/admin/mine');
+    assert.equal(mine.data.characters.length, 1);
+    await leaveWorld(s.socket);
+  });
+
+  test('skins: admins give exclusive skins; players can only wear what they own', async () => {
+    const Admin = await makeAdmin();
+    const P = await newPlayer(base);
+    const s = await enterWorld(base, P.browser.cookie, P.character.id);
+    const royal = OUTFITS.findIndex((o) => o.name === 'Royal Regalia');
+    assert.ok(royal >= BASE_OUTFIT_COUNT);
+    const no = await ack(s.socket, 'wardrobe:set', royal);
+    assert.equal(no.ok, false, 'not owned yet');
+    assert.equal((await Admin.browser.post('/api/admin/skin', { characterId: P.character.id, outfit: 0 })).status, 400, 'starter outfits are not skins');
+    const give = await Admin.browser.post('/api/admin/skin', { characterId: P.character.id, outfit: royal });
+    assert.deepEqual(give.data.owned, [royal]);
+    const yes = await ack(s.socket, 'wardrobe:set', royal);
+    assert.equal(yes.ok, true, JSON.stringify(yes));
+    assert.equal(server.world.players.get(P.character.id)!.rec.appearance.outfit, royal);
+    const w = await ack(s.socket, 'wardrobe:get');
+    assert.deepEqual(w.data, { outfit: royal, owned: [royal] });
+    await Admin.browser.post('/api/admin/skin', { characterId: P.character.id, outfit: royal, revoke: true });
+    assert.equal(server.world.players.get(P.character.id)!.rec.appearance.outfit, 0, 'taking a worn skin puts the starter outfit back on');
+    // Nobody can pick a skin when creating a character.
+    const bad = await P.browser.post('/api/characters', {
+      name: 'Sneakyking',
+      classId: 'warrior',
+      appearance: { bodyType: 'a', skinTone: 1, hairStyle: 0, hairColor: 1, eyeColor: 0, outfit: royal },
+    });
+    assert.equal(bad.status, 400);
     await leaveWorld(s.socket);
   });
 });
