@@ -35,6 +35,8 @@ export interface CharacterRecord {
   energy: number;
   energyUpdatedAt: number;
   skills: SkillSet;
+  /** Profession specializations: skill -> spec id. */
+  specs?: Record<string, string>;
   /** Worn items (slot = EQUIP_SLOTS index). */
   equipment: InventorySlot[];
 }
@@ -94,6 +96,7 @@ export function buildSelfState(rec: CharacterRecord, now = Date.now(), profile =
     derived: profile.derived,
     appearance: rec.appearance,
     skills: rec.skills,
+    specs: rec.specs ?? {},
     mount: null,
     speed: 1,
   };

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BALANCE, getCrop, getItem } from '@terrago/game-data';
-import { QUALITIES, SKILL_IDS, SKILL_NAMES, cropStatus, formatDuration, type FarmUpgradeView, type InventorySlot } from '@terrago/shared';
+import { QUALITIES, SKILL_IDS, SKILL_NAMES, SPEC_CHANGE_COST, SPEC_LEVEL, SPEC_MAX, getSpec, specsFor, cropStatus, formatDuration, type FarmUpgradeView, type InventorySlot } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
@@ -202,7 +202,10 @@ export function RepairPanel({ client, onClose }: { client: GameClient; onClose: 
 
 export function SkillsPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const skills = useStore(client.ui, (s) => s.self?.skills);
+  const specs = useStore(client.ui, (s) => s.self?.specs ?? {});
+  const [open, setOpen] = useState<string | null>(null);
   if (!skills) return null;
+  const used = Object.keys(specs).length;
   return (
     <Window title="Skills" onClose={onClose} testId="skills-panel">
       <h3 className="text-sm font-bold text-wood-dark">Professions</h3>
@@ -219,11 +222,51 @@ export function SkillsPanel({ client, onClose }: { client: GameClient; onClose: 
               <div className="px-bar mt-0.5">
                 <span style={{ width: `${pct}%`, background: '#5fa04a' }} />
               </div>
+              {specsFor(id).length > 0 && (
+                <div className="mt-0.5 flex items-center gap-1 text-[11px]">
+                  {specs[id] ? (
+                    <span className="font-bold text-gold-dark">★ {getSpec(specs[id]!)?.name}</span>
+                  ) : (
+                    <span className="text-wood-dark/70">{s.level >= SPEC_LEVEL ? 'Ready to specialize' : `Specialize at Lv ${SPEC_LEVEL}`}</span>
+                  )}
+                  {s.level >= SPEC_LEVEL && (
+                    <button className="ml-auto underline" onClick={() => setOpen(open === id ? null : id)} data-testid={`spec-open-${id}`}>
+                      {specs[id] ? 'change' : 'choose'}
+                    </button>
+                  )}
+                </div>
+              )}
+              {open === id && (
+                <div className="mt-1 space-y-1 border-2 border-ink/30 bg-parchment-2/50 p-1">
+                  {specsFor(id).map((sp) => (
+                    <div key={sp.id} className="flex items-start gap-1">
+                      <span className="flex-1">
+                        <b>{sp.name}</b> — {sp.description}
+                      </span>
+                      <button
+                        className="px-btn green small"
+                        disabled={specs[id] === sp.id || (!specs[id] && used >= SPEC_MAX)}
+                        onClick={async () => {
+                          if (specs[id] && !confirm(`Retrain as ${sp.name} for ${SPEC_CHANGE_COST.toLocaleString()} Gold?`)) return;
+                          await client.chooseSpec(id, sp.id);
+                          setOpen(null);
+                        }}
+                        data-testid={`spec-${sp.id}`}
+                      >
+                        {specs[id] === sp.id ? 'Yours' : specs[id] ? `◉${SPEC_CHANGE_COST}` : 'Pick'}
+                      </button>
+                    </div>
+                  ))}
+                  {!specs[id] && used >= SPEC_MAX && <p className="text-[#a33]">You already have {SPEC_MAX} specializations.</p>}
+                </div>
+              )}
             </li>
           );
         })}
       </ul>
-      <p className="mt-2 text-[11px] text-wood-dark/80">Professions level up to 100. Each level is slower than the last.</p>
+      <p className="mt-2 text-[11px] text-wood-dark/80">
+        Professions level up to 100. Each level is slower than the last. At level {SPEC_LEVEL} you can specialize — at most {SPEC_MAX} professions, so trade with other specialists for the rest.
+      </p>
     </Window>
   );
 }

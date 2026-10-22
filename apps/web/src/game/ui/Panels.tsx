@@ -234,7 +234,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>
       <p className="text-xs leading-relaxed">
-        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Attack: F (or click a monster) · Skills: Q R T · Next target: Tab · Ride: Z · Quests: J · Journal (dailies, achievements, ranks): L · Market: P · Friends: O · Guild: G · Trade / Party / Duel: click a player · Chat: /g world, /p party, /gu guild, /w name, /r reply · Close: Esc
+        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Attack: F (or click a monster) · Skills: Q R T · Next target: Tab · Ride: Z · Quests: J · Journal (dailies, achievements, ranks): L · Crafting recipes: N · Market: P · Friends: O · Guild: G · Trade / Party / Duel: click a player · Chat: /g world, /p party, /gu guild, /w name, /r reply · Close: Esc
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button className="px-btn ghost small" onClick={onSwitch}>
@@ -255,7 +255,7 @@ export const MENU: { id: Exclude<Panel, null> | string; label: string; key: stri
   { id: 'quests', label: 'Quests', key: 'J' },
   { id: 'map', label: 'Map', key: 'M' },
   { id: 'journal', label: 'Journal', key: 'L' },
-  { id: 'crafting', label: 'Crafting', key: 'R', version: 'v0.8' },
+  { id: 'crafting', label: 'Crafting', key: 'N' },
   { id: 'market', label: 'Market', key: 'P' },
   { id: 'guild', label: 'Guild', key: 'G' },
   { id: 'friends', label: 'Friends', key: 'O' },

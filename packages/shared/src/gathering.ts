@@ -52,6 +52,8 @@ export interface RecipeDef {
   fee: number;
   inputs: { itemId: string; quantity: number }[];
   output: { itemId: string; quantity: number };
+  /** Only this profession specialization can craft it (top-tier gear). */
+  spec?: string;
 }
 
 /** Node state as a world object: depleted until a timestamp. */

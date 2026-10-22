@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { getItem, recipesFor } from '@terrago/game-data';
-import { FISHING_STEP_MS, SKILL_NAMES, fishingStart, fishingStep, type FishingState, type StationType } from '@terrago/shared';
+import { MAPS, RECIPES, getItem, recipesFor } from '@terrago/game-data';
+import { FISHING_STEP_MS, SKILL_NAMES, getSpec, type SkillId, fishingStart, fishingStep, type FishingState, type StationType } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
@@ -25,6 +25,7 @@ export function CraftPanel({ client, onClose }: { client: GameClient; onClose: (
   const inv = useStore(client.ui, (s) => s.inventory);
   const skills = useStore(client.ui, (s) => s.self?.skills);
   const [busy, setBusy] = useState(false);
+  const specs = useStore(client.ui, (s) => s.self?.specs ?? {});
   if (!station || !inv || !skills) return null;
   const have = (id: string) => inv.slots.filter((s) => s.itemId === id).reduce((n, s) => n + s.quantity, 0);
   const recipes = recipesFor(station);
@@ -34,7 +35,7 @@ export function CraftPanel({ client, onClose }: { client: GameClient; onClose: (
         {recipes.map((r) => {
           const out = getItem(r.output.itemId)!;
           const lvl = skills[r.skill].level;
-          const locked = lvl < r.level;
+          const locked = lvl < r.level || (!!r.spec && specs[r.skill] !== r.spec);
           const max = Math.min(50, ...r.inputs.map((i) => Math.floor(have(i.itemId) / i.quantity)), r.fee > 0 ? Math.floor(inv.gold / r.fee) : 50);
           return (
             <li key={r.id} className={`border-2 border-parchment-3 bg-parchment-2 p-1.5 ${locked ? 'opacity-55' : ''}`} data-testid={`recipe-${r.id}`}>
@@ -46,7 +47,8 @@ export function CraftPanel({ client, onClose }: { client: GameClient; onClose: (
                   </p>
                   <p className="text-[11px] text-wood-dark">
                     {SKILL_NAMES[r.skill]} {r.level}
-                    {locked && ` (you: ${lvl})`} · +{r.xp} XP{r.fee ? ` · ${r.fee} Gold fee` : ''}
+                    {lvl < r.level && ` (you: ${lvl})`} · +{r.xp} XP{r.fee ? ` · ${r.fee} Gold fee` : ''}
+                    {r.spec && <b className="ml-1 text-gold-dark">★ {getSpec(r.spec)?.name} only</b>}
                   </p>
                 </div>
                 <button className="px-btn green small" disabled={busy || locked || max < 1} onClick={async () => { setBusy(true); await client.craft(r.id, 1); setBusy(false); }}>
@@ -185,5 +187,85 @@ export function FishingOverlay({ client }: { client: GameClient }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** Where each crafting station stands (map names), from the map data. */
+const STATION_PLACES: Record<string, string[]> = (() => {
+  const out: Record<string, string[]> = {};
+  for (const m of Object.values(MAPS))
+    for (const o of m.objects)
+      if (o.kind === 'prop' && STATION_TITLES[o.type]) {
+        const list = (out[o.type] ??= []);
+        if (!list.includes(m.name)) list.push(m.name);
+      }
+  return out;
+})();
+
+/** The Crafting menu: every recipe, what it needs, and where to make it. */
+export function RecipeBook({ client, onClose }: { client: GameClient; onClose: () => void }) {
+  const inv = useStore(client.ui, (s) => s.inventory);
+  const skills = useStore(client.ui, (s) => s.self?.skills);
+  const specs = useStore(client.ui, (s) => s.self?.specs ?? {});
+  const profs = [...new Set(RECIPES.map((r) => r.skill))];
+  const [prof, setProf] = useState<string>(profs[0] ?? 'smithing');
+  const [q, setQ] = useState('');
+  const [canMake, setCanMake] = useState(false);
+  if (!inv || !skills) return null;
+  const have = (id: string) => inv.slots.filter((s) => s.itemId === id).reduce((n, s) => n + s.quantity, 0);
+  const list = RECIPES.filter((r) => r.skill === prof)
+    .filter((r) => !q || getItem(r.output.itemId)?.name.toLowerCase().includes(q.toLowerCase()))
+    .filter((r) => !canMake || (skills[r.skill as SkillId].level >= r.level && r.inputs.every((i) => have(i.itemId) >= i.quantity)))
+    .sort((a, b) => a.level - b.level);
+  return (
+    <Window title="Crafting — recipe book" onClose={onClose} testId="recipe-book" wide>
+      <div className="mb-2 flex flex-wrap gap-1">
+        {profs.map((p) => (
+          <button key={p} className={`border-2 border-ink px-1.5 text-xs ${p === prof ? 'bg-gold font-bold' : 'bg-parchment'}`} onClick={() => setProf(p)} data-testid={`book-${p}`}>
+            {SKILL_NAMES[p as SkillId]} {skills[p as SkillId]?.level}
+            {specs[p] ? ' ★' : ''}
+          </button>
+        ))}
+      </div>
+      <div className="mb-2 flex items-center gap-2 text-xs">
+        <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.stopPropagation()} placeholder="Search…" className="min-w-0 flex-1 border-2 border-ink bg-parchment px-1" />
+        <label>
+          <input type="checkbox" checked={canMake} onChange={(e) => setCanMake(e.target.checked)} /> I can make it now
+        </label>
+      </div>
+      <p className="mb-1 text-[11px] text-wood-dark/80">Craft at the station shown — walk up to it and press E (or tap it).</p>
+      <ul className="space-y-1">
+        {list.length === 0 && <li className="text-sm">Nothing here yet.</li>}
+        {list.map((r) => {
+          const out = getItem(r.output.itemId)!;
+          const lvl = skills[r.skill as SkillId].level;
+          const specLocked = !!r.spec && specs[r.skill] !== r.spec;
+          return (
+            <li key={r.id} className={`border-2 border-parchment-3 bg-parchment-2 p-1.5 text-xs ${lvl < r.level ? 'opacity-60' : ''}`}>
+              <div className="flex items-center gap-2">
+                <PixelIcon icon={out.icon} size={24} />
+                <b className="truncate" style={{ color: out.rarity === 'common' ? undefined : RARITY_COLOR[out.rarity] }}>
+                  {out.name}
+                  {r.output.quantity > 1 && ` ×${r.output.quantity}`}
+                </b>
+                <span className="ml-auto whitespace-nowrap">Lv {r.level}{r.fee ? ` · ◉${r.fee}` : ''}</span>
+              </div>
+              <p className="mt-0.5">
+                {r.inputs.map((i) => (
+                  <span key={i.itemId} className={`mr-2 ${have(i.itemId) >= i.quantity ? 'text-leaf-dark' : 'text-[#a33]'}`}>
+                    {i.quantity}× {getItem(i.itemId)?.name}
+                  </span>
+                ))}
+              </p>
+              <p className="text-wood-dark/80">
+                {STATION_TITLES[r.station]?.split(' —')[0] ?? r.station}
+                {STATION_PLACES[r.station]?.length ? ` · ${STATION_PLACES[r.station]!.join(', ')}` : ''}
+                {r.spec && <span className={specLocked ? 'ml-1 font-bold text-[#a33]' : 'ml-1 font-bold text-gold-dark'}>★ {getSpec(r.spec)?.name} only</span>}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </Window>
   );
 }

@@ -921,6 +921,10 @@ export class GameClient {
     this.ui.set({ trade: null });
   }
 
+  chooseSpec(skill: string, spec: string) {
+    return this.run('spec:choose', { skill, spec });
+  }
+
   // --- Social ---------------------------------------------------------------
   partyInvite(playerId: string) {
     this.ui.set({ playerMenu: null });

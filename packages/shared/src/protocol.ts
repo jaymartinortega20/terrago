@@ -225,6 +225,7 @@ export interface ClientToServerEvents {
   'guild:rank': (req: { id: string; rank: GuildRank }, ack: Ack<{ message: string }>) => void;
   'guild:treasury': (req: { amount: number }, ack: Ack<{ message: string }>) => void;
   'guild:motd': (text: string, ack: Ack<null>) => void;
+  'spec:choose': (req: { skill: string; spec: string }, ack: Ack<{ message: string }>) => void;
   'journal:get': (ack: Ack<JournalView>) => void;
   'daily:login': (ack: Ack<{ message: string }>) => void;
   'daily:task': (taskId: string, ack: Ack<{ message: string }>) => void;

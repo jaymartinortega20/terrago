@@ -23,7 +23,7 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
+import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
 import * as social from './social';
 import * as journal from './journal';
 import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
@@ -320,6 +320,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('trade:lock', (ack) => respond(ack, () => lockTrade(p)));
     socket.on('trade:confirm', (ack) => serial(ack, () => confirmTrade(g, p)));
     socket.on('trade:cancel', () => cancelTrade(p));
+    socket.on('spec:choose', (req, ack) => serial(ack, () => chooseSpecialization(g, p, req)));
     socket.on('journal:get', (ack) => respond(ack, () => journal.journal(g, p)));
     socket.on('daily:login', (ack) => serial(ack, () => journal.claimLogin(g, p)));
     socket.on('daily:task', (id, ack) => serial(ack, () => journal.claimTask(g, p, id)));

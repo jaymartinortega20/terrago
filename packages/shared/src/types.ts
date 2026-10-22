@@ -80,6 +80,8 @@ export interface SelfState {
   /** Item id of the mount being ridden, and its speed multiplier (1 = on foot). */
   mount: string | null;
   speed: number;
+  /** Profession specializations: skill -> spec id. */
+  specs?: Record<string, string>;
 }
 
 /** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */

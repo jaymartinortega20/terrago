@@ -15,7 +15,7 @@ import { ItemSlot } from './ui/ItemSlot';
 import { MobileControls } from './ui/MobileControls';
 import { CharacterPanel, InventoryPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
-import { CraftPanel, FishingOverlay, LiftPanel } from './ui/GatherPanels';
+import { CraftPanel, FishingOverlay, LiftPanel, RecipeBook } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
 import { EnvBadge, WeatherLayer } from './ui/Atmosphere';
 import { JournalPanel, ProgressToasts } from './ui/JournalUi';
@@ -145,6 +145,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'p') open('market');
       else if (k === 'o') open('friends');
       else if (k === 'l') open('journal');
+      else if (k === 'n') open('crafting');
       else if (k === 'g') open('guild');
       else if (k === 'q') client.useSkill(0);
       else if (k === 'r') client.useSkill(1);
@@ -236,6 +237,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
           {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'crafting' && <RecipeBook client={client} onClose={() => open(null)} />}
           {panel === 'journal' && <JournalPanel client={client} onClose={() => open(null)} />}
           {panel === 'friends' && <FriendsPanel client={client} onClose={() => open(null)} />}
           {panel === 'guild' && <GuildPanel client={client} onClose={() => open(null)} />}

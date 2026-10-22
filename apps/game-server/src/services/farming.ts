@@ -18,6 +18,7 @@ import {
 import { GameError, withTransaction, type Pool, type Tx } from '../db';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
 import { changeGold, logItemMovement } from './ledger';
+import { specFor } from './specs';
 import { getSkill, grantCharacterXpTx, grantSkillXpTx, spendEnergyTx, type ProgressDelta } from './progress';
 
 /**
@@ -280,9 +281,11 @@ export function harvest(pool: Pool, characterId: string, index: number, rand: ()
 
     const farming = await getSkill(ctx.tx, characterId, 'farming');
     const fert = p.crop.fertilizer ? getItem(p.crop.fertilizer)?.fertilizer : undefined;
-    const quality = rollQuality(def.quality, farming.level, def.levelRequired, fert?.quality ?? 0, rand);
+    const cropMaster = (await specFor(ctx.tx, characterId, 'farming')) === 'crop_master';
+    const quality = rollQuality(def.quality, farming.level, def.levelRequired, (fert?.quality ?? 0) + (cropMaster ? 1 : 0), rand);
     const [min, max] = def.yield;
     let qty = min + Math.floor(rand() * (max - min + 1));
+    if (cropMaster && rand() < 0.3) qty += 1;
     if (rand() < Math.min(0.3, Math.max(0, farming.level - def.levelRequired) * 0.01)) qty += 1; // skilled bonus
 
     const produce = getItem(def.produceItem)!;

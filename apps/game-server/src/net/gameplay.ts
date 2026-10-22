@@ -36,6 +36,7 @@ import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gather
 import { cast } from './fishing';
 import { cancelTrade } from './trade';
 import { partyOf } from './social';
+import { chooseSpec } from '../services/specs';
 import { progressEvent, track } from './journal';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
@@ -103,6 +104,19 @@ export function pushInventory(world: World, p: Player, inv: Inventory | null): v
   p.rec.gold = inv.gold;
   if (inv.equipment) world.setEquipment(p, inv.equipment);
   p.conn?.send('inventory:update', full);
+}
+
+/** Choose or change a profession specialization. */
+export async function chooseSpecialization(deps: GameplayDeps, p: Player, req: unknown): Promise<{ message: string }> {
+  const r = (req ?? {}) as { skill?: unknown; spec?: unknown };
+  const res = await chooseSpec(deps.pool, p.id, r.skill, r.spec);
+  p.rec.specs = res.specs;
+  p.conn?.send('self:update', { specs: res.specs });
+  if (res.gold !== null) {
+    const inv = deps.world.inventoryCache.get(p.id);
+    if (inv) pushInventory(deps.world, p, { ...inv, gold: res.gold });
+  }
+  return { message: res.message };
 }
 
 /** Late-bound hooks (set up in app.ts) for things that need the full deps. */

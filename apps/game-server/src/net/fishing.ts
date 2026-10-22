@@ -33,11 +33,11 @@ function end(p: Player): void {
   sessions.delete(p.id);
 }
 
-function pickFish(table: string, fishingLevel: number): FishDef | null {
+function pickFish(table: string, fishingLevel: number, rareHunter = false): FishDef | null {
   const pool = fishFor(table, timeOfDay(Date.now()));
   if (pool.length === 0) return null;
   // Fish far above your level still bite, but rarely.
-  const weights = pool.map((f) => f.weight * (f.level <= fishingLevel ? 1 : f.level <= fishingLevel + 10 ? 0.25 : 0.05));
+  const weights = pool.map((f) => f.weight * (f.level <= fishingLevel ? 1 : f.level <= fishingLevel + 10 ? 0.25 : 0.05) * (rareHunter && f.level >= 30 ? 2.5 : 1));
   let r = Math.random() * weights.reduce((a, b) => a + b, 0);
   for (let i = 0; i < pool.length; i++) if ((r -= weights[i]!) < 0) return pool[i]!;
   return pool[0]!;
@@ -48,13 +48,14 @@ export async function cast(deps: GameplayDeps, p: Player, table: string, prefer?
   const paid = await castLine(deps.pool, p.id, prefer);
   pushInventory(deps.world, p, paid.inventory);
   applyDelta(deps.world, p, paid.delta);
-  const fish = pickFish(table, paid.fishing);
+  const spec = p.rec.specs?.fishing;
+  const fish = pickFish(table, paid.fishing, spec === 'rare_fish_hunter');
   if (!fish) throw new GameError('Nothing seems to live in this water.');
   const now = Date.now();
   const s: Session = {
     id: randomUUID(),
     fish,
-    params: { seed: randomInt(1, 2_000_000_000), difficulty: fish.difficulty, zone: fishingZone(paid.rodTier, paid.fishing), maxSteps: 600 },
+    params: { seed: randomInt(1, 2_000_000_000), difficulty: fish.difficulty, zone: fishingZone(paid.rodTier, paid.fishing) * (spec === 'deep_sea_fisher' ? 1.25 : 1), maxSteps: 600 },
     // Fish bite faster in the rain.
     biteAt: now + Math.round((1800 + randomInt(0, 4500)) * (isWet(weatherAt(deps.world.runtimeOf(p).def.theme, now)) ? 0.6 : 1)),
     hookedAt: null,

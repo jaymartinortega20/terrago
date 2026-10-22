@@ -2057,7 +2057,8 @@
   "output": {
    "itemId": "obsidian_sword",
    "quantity": 1
-  }
+  },
+  "spec": "weapon_smith"
  },
  {
   "id": "make_w_obsidian_bow",
@@ -2083,7 +2084,8 @@
   "output": {
    "itemId": "obsidian_bow",
    "quantity": 1
-  }
+  },
+  "spec": "bowyer"
  },
  {
   "id": "make_w_obsidian_staff",
@@ -2109,7 +2111,8 @@
   "output": {
    "itemId": "obsidian_staff",
    "quantity": 1
-  }
+  },
+  "spec": "bowyer"
  },
  {
   "id": "forge_w_obsidian_mace",
@@ -2131,7 +2134,8 @@
   "output": {
    "itemId": "obsidian_mace",
    "quantity": 1
-  }
+  },
+  "spec": "weapon_smith"
  },
  {
   "id": "forge_w_obsidian_dagger",
@@ -2153,7 +2157,8 @@
   "output": {
    "itemId": "obsidian_dagger",
    "quantity": 1
-  }
+  },
+  "spec": "weapon_smith"
  },
  {
   "id": "forge_a_obsidian_head",
@@ -2175,7 +2180,8 @@
   "output": {
    "itemId": "obsidian_head",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_a_obsidian_chest",
@@ -2197,7 +2203,8 @@
   "output": {
    "itemId": "obsidian_chest",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_a_obsidian_gloves",
@@ -2219,7 +2226,8 @@
   "output": {
    "itemId": "obsidian_gloves",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_a_obsidian_boots",
@@ -2241,7 +2249,8 @@
   "output": {
    "itemId": "obsidian_boots",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_w_star_metal_sword",
@@ -2263,7 +2272,8 @@
   "output": {
    "itemId": "star_metal_sword",
    "quantity": 1
-  }
+  },
+  "spec": "weapon_smith"
  },
  {
   "id": "make_w_star_metal_bow",
@@ -2289,7 +2299,8 @@
   "output": {
    "itemId": "star_metal_bow",
    "quantity": 1
-  }
+  },
+  "spec": "bowyer"
  },
  {
   "id": "make_w_star_metal_staff",
@@ -2315,7 +2326,8 @@
   "output": {
    "itemId": "star_metal_staff",
    "quantity": 1
-  }
+  },
+  "spec": "bowyer"
  },
  {
   "id": "forge_w_star_metal_mace",
@@ -2337,7 +2349,8 @@
   "output": {
    "itemId": "star_metal_mace",
    "quantity": 1
-  }
+  },
+  "spec": "weapon_smith"
  },
  {
   "id": "forge_w_star_metal_dagger",
@@ -2359,7 +2372,8 @@
   "output": {
    "itemId": "star_metal_dagger",
    "quantity": 1
-  }
+  },
+  "spec": "weapon_smith"
  },
  {
   "id": "forge_a_star_metal_head",
@@ -2381,7 +2395,8 @@
   "output": {
    "itemId": "star_metal_head",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_a_star_metal_chest",
@@ -2403,7 +2418,8 @@
   "output": {
    "itemId": "star_metal_chest",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_a_star_metal_gloves",
@@ -2425,7 +2441,8 @@
   "output": {
    "itemId": "star_metal_gloves",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_a_star_metal_boots",
@@ -2447,7 +2464,8 @@
   "output": {
    "itemId": "star_metal_boots",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "jewel_copper_ring",
@@ -2889,7 +2907,8 @@
   "output": {
    "itemId": "obsidian_shield",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  },
  {
   "id": "forge_shield_star_metal_shield",
@@ -2911,6 +2930,7 @@
   "output": {
    "itemId": "star_metal_shield",
    "quantity": 1
-  }
+  },
+  "spec": "armor_smith"
  }
 ]

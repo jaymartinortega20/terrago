@@ -15,3 +15,4 @@ export * from './farming';
 export * from './gathering';
 export * from './combat';
 export * from './environment';
+export * from './specializations';

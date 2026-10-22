@@ -8,6 +8,7 @@ export { buildSelfState } from '../world/characterState';
 import { consumeFromSlotTx, grantItemsTx, loadSlots, lockCharacter, toState } from './inventory';
 export { loadSlots };
 import { changeGold } from './ledger';
+import { loadSpecs } from './specs';
 import { loadSkills } from './progress';
 
 function toSummary(r: Record<string, any>): CharacterSummary {
@@ -114,6 +115,7 @@ export async function loadCharacter(pool: Pool, userId: string, characterId: str
     energy: r.energy,
     energyUpdatedAt: new Date(r.energy_updated_at).getTime(),
     skills: await loadSkills(pool, characterId),
+    specs: await loadSpecs(pool, characterId),
     equipment: toInventorySlots((await loadSlots(pool, characterId, 'equip')).slots),
   };
   return sanitizePosition(rec);

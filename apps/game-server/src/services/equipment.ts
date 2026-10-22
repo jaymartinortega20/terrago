@@ -12,6 +12,7 @@ import {
 } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
+import { specFor } from './specs';
 import { changeGold, logItemMovement } from './ledger';
 import { grantCharacterXpTx, type ProgressDelta } from './progress';
 
@@ -146,7 +147,8 @@ export async function enhance(pool: Pool, characterId: string, equipSlot: unknow
     if (!stones.ok) throw new GameError(`You need ${cost.stones} Enhancement Stone${cost.stones > 1 ? 's' : ''}.`);
     await logItemMovement(tx, { itemId: 'enhancement_stone', quantity: cost.stones, from: characterId, reason: 'enhance' });
     const { after } = await changeGold(tx, characterId, -cost.gold, 'enhance', { type: 'item', id: def.id });
-    const success = rand() < enhanceChance(lvl);
+    const alchemist = (await specFor(tx, characterId, 'alchemy')) === 'enhancement_alchemist';
+    const success = rand() < enhanceChance(lvl) + (alchemist ? 0.05 : 0);
     const next = success ? lvl + 1 : lvl >= ENHANCE_SAFE_LEVEL ? lvl - 1 : lvl;
     const eqSlots = eq.slots.map((s) => (s ? { ...s } : null));
     eqSlots[equipSlot as number] = { ...item, enhance: next };

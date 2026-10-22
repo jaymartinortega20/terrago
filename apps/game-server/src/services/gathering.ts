@@ -1,5 +1,7 @@
 import { BALANCE, getItem, getRecipe } from '@terrago/game-data';
 import { addItem, removeItemById, type NodeDef, type Slots, type ToolKind } from '@terrago/shared';
+import { getSpec } from '@terrago/shared';
+import { specEffect, specFor } from './specs';
 import { GameError, withTransaction, type Pool, type Tx } from '../db';
 import { pickTool } from './farming';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
@@ -155,6 +157,9 @@ export async function craft(pool: Pool, characterId: string, recipeId: unknown, 
     await lockCharacter(tx, characterId);
     const skill = await getSkill(tx, characterId, recipe.skill);
     if (skill.level < recipe.level) throw new GameError(`You need ${recipe.skill} level ${recipe.level}.`);
+    const spec = await specFor(tx, characterId, recipe.skill);
+    if (recipe.spec && recipe.spec !== spec) throw new GameError(`Only a ${getSpec(recipe.spec)?.name ?? 'specialist'} can make this. Find one on the Marketplace!`);
+    const fx = specEffect(recipe, spec);
     let { capacity, slots } = await loadSlots(tx, characterId);
     const changed = new Set<number>();
     for (const i of recipe.inputs) {
@@ -165,18 +170,20 @@ export async function craft(pool: Pool, characterId: string, recipeId: unknown, 
       for (const r of res.removed) await logItemMovement(tx, { itemId: i.itemId, quantity: r.quantity, quality: r.quality, from: characterId, reason: 'craft', ref: { type: 'recipe', id: recipe.id } });
     }
     let gold = (await lockCharacter(tx, characterId)).gold;
-    if (recipe.fee > 0) gold = (await changeGold(tx, characterId, -recipe.fee * n, 'craft', { type: 'recipe', id: recipe.id })).after;
-    slots = await giveItems(tx, characterId, slots, [{ itemId: out.id, quantity: recipe.output.quantity * n, quality: 0 }], 'craft', changed);
+    if (recipe.fee > 0 && !fx.noFee) gold = (await changeGold(tx, characterId, -recipe.fee * n, 'craft', { type: 'recipe', id: recipe.id })).after;
+    const made = recipe.output.quantity * n * fx.outMult;
+    const xp = Math.round(recipe.xp * n * fx.xpMult);
+    slots = await giveItems(tx, characterId, slots, [{ itemId: out.id, quantity: made, quality: 0 }], 'craft', changed);
     await writeSlots(tx, characterId, slots, [...changed]);
-    const s = await grantSkillXpTx(tx, characterId, recipe.skill, recipe.xp * n);
+    const s = await grantSkillXpTx(tx, characterId, recipe.skill, xp);
     const delta: ProgressDelta = { skill: { id: recipe.skill, progress: s, levelsGained: s.levelsGained } };
-    delta.character = await grantCharacterXpTx(tx, characterId, Math.round(recipe.xp * n * CHARACTER_XP_SHARE));
+    delta.character = await grantCharacterXpTx(tx, characterId, Math.round(xp * CHARACTER_XP_SHARE));
     void BALANCE;
     return {
-      message: `Crafted ${recipe.output.quantity * n}× ${out.name}. (+${recipe.xp * n} XP)`,
+      message: `Crafted ${made}× ${out.name}.${fx.outMult > 1 ? ' (Specialist bonus: doubled!)' : ''} (+${xp} XP)`,
       inventory: toState(capacity, gold, slots),
       delta,
-      items: [{ itemId: out.id, quantity: recipe.output.quantity * n, quality: 0 }],
+      items: [{ itemId: out.id, quantity: made, quality: 0 }],
     };
   });
 }
