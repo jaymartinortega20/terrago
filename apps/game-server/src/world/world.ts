@@ -1,4 +1,5 @@
 import { BALANCE, getMap, getNode, npcsForMap, toNpcPublic, type NpcDef } from '@terrago/game-data';
+import { settings } from '../services/serverConfig';
 import {
   AOI,
   CHAT,
@@ -28,6 +29,7 @@ import {
   type PublicPlayer,
   type SnapshotEntity,
   type WorldObject,
+  manualEvent,
 } from '@terrago/shared';
 import { randomUUID } from 'node:crypto';
 import type { Logger } from '../logger';
@@ -485,7 +487,13 @@ export class World {
       ack: p.lastSeq,
       recentChat,
       objects: [...rt.objects.values()],
+      manualEvent: manualEvent(),
     });
+    const motd = settings().motd;
+    if (motd && !p.motdShown) {
+      p.motdShown = true;
+      this.system(p, `📜 ${motd}`);
+    }
   }
 
   /**

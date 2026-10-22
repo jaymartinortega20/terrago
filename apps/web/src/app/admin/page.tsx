@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { ITEMS } from '@terrago/game-data';
 import { adminApi, api, ApiError } from '@/lib/api';
+import { EconomyTab, FlagsTab, PlayerDetail, ServerSettings } from './panels';
 
-type Tab = 'overview' | 'reports' | 'players' | 'tools' | 'log';
+type Tab = 'overview' | 'economy' | 'reports' | 'flags' | 'players' | 'tools' | 'log';
 interface Overview {
   stats: Record<string, number>;
   online: { id: string; name: string; level: number; mapId: string; connected: boolean }[];
@@ -46,6 +47,11 @@ export default function AdminPage() {
   const [ok, setOk] = useState<boolean | null>(null);
   const [tab, setTab] = useState<Tab>('overview');
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
+  const openPlayer = useCallback((id: string) => {
+    setDetail(id);
+    setTab('players');
+  }, []);
 
   useEffect(() => {
     api
@@ -82,7 +88,7 @@ export default function AdminPage() {
         </Link>
         <span className="text-outline text-xl font-bold">Admin</span>
         <nav className="ml-auto flex flex-wrap gap-1">
-          {(['overview', 'reports', 'players', 'tools', 'log'] as Tab[]).map((t) => (
+          {(['overview', 'economy', 'reports', 'flags', 'players', 'tools', 'log'] as Tab[]).map((t) => (
             <button key={t} className={`px-btn small ${tab === t ? 'green' : 'ghost'}`} onClick={() => setTab(t)} data-testid={`admin-tab-${t}`}>
               {t[0]!.toUpperCase() + t.slice(1)}
             </button>
@@ -97,7 +103,9 @@ export default function AdminPage() {
       <section className="mt-4">
         {tab === 'overview' && <OverviewTab act={act} />}
         {tab === 'reports' && <ReportsTab act={act} />}
-        {tab === 'players' && <PlayersTab act={act} />}
+        {tab === 'economy' && <EconomyTab onPlayer={openPlayer} />}
+        {tab === 'flags' && <FlagsTab act={act} onPlayer={openPlayer} />}
+        {tab === 'players' && <PlayersTab act={act} detail={detail} setDetail={setDetail} />}
         {tab === 'tools' && <ToolsTab act={act} />}
         {tab === 'log' && <LogTab />}
       </section>
@@ -224,7 +232,7 @@ function ReportsTab({ act }: { act: Act }) {
   );
 }
 
-function PlayersTab({ act }: { act: Act }) {
+function PlayersTab({ act, detail, setDetail }: { act: Act; detail: string | null; setDetail: (id: string | null) => void }) {
   const [q, setQ] = useState('');
   const [rows, setRows] = useState<PlayerRow[] | null>(null);
   const [give, setGive] = useState<{ id: string; name: string } | null>(null);
@@ -236,6 +244,7 @@ function PlayersTab({ act }: { act: Act }) {
   return (
     <>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or email…" className="w-full max-w-sm border-4 border-ink bg-parchment px-2 py-1 text-ink" data-testid="admin-search" />
+      {detail && <PlayerDetail id={detail} onClose={() => setDetail(null)} onPlayer={setDetail} />}
       {give && <GiveForm target={give} act={act} onClose={() => setGive(null)} />}
       <div className="px-panel mt-2 overflow-x-auto p-2">
         <table className="w-full text-sm" data-testid="admin-players">
@@ -269,6 +278,9 @@ function PlayersTab({ act }: { act: Act }) {
                   </td>
                   <td>{when(p.last_played_at)}</td>
                   <td className="flex flex-wrap justify-end gap-1 py-1">
+                    <button className="px-btn small" onClick={() => setDetail(p.id)} data-testid="admin-player-open">
+                      Details
+                    </button>
                     <button className="px-btn ghost small" onClick={() => setGive({ id: p.id, name: p.name })}>
                       Give
                     </button>
@@ -340,6 +352,7 @@ function GiveForm({ target, act, onClose }: { target: { id: string; name: string
 function ToolsTab({ act }: { act: Act }) {
   const [text, setText] = useState('');
   return (
+    <>
     <div className="px-panel max-w-xl p-3">
       <h2 className="font-bold">Server announcement</h2>
       <p className="text-xs text-wood-dark/80">Shows to everyone online as a banner and in chat.</p>
@@ -353,6 +366,8 @@ function ToolsTab({ act }: { act: Act }) {
         Send to everyone
       </button>
     </div>
+    <ServerSettings act={act} />
+    </>
   );
 }
 

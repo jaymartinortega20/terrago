@@ -97,6 +97,8 @@ export interface EnterWorldPayload {
   inventory: InventoryState;
   /** Last movement sequence the server applied (for reconnects mid-session). */
   ack: number;
+  /** World event an admin started by hand, if any. */
+  manualEvent?: import('./events').ManualEvent | null;
   /** Recent local chat so a reconnecting player has context. */
   recentChat: ChatMessage[];
   /** Interactive objects in this map (farm plots...). */
@@ -151,6 +153,8 @@ export interface ServerToClientEvents {
   'achievement': (a: { id: string; name: string; icon: string; gold: number }) => void;
   /** Server-wide announcement (admins). */
   'announce': (text: string) => void;
+  /** An admin started or stopped a world event. */
+  'event:manual': (ev: import('./events').ManualEvent | null) => void;
   'party': (party: PartyView | null) => void;
   'friends': (friends: FriendsView) => void;
   'guild': (guild: GuildView | null) => void;

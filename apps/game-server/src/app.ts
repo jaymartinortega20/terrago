@@ -19,6 +19,7 @@ import { startEventDirector } from './net/events';
 import { AntiBot, setAntiBot } from './security/antibot';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
+import { loadSettings } from './services/serverConfig';
 import { World } from './world/world';
 import { combatHooks, hooks, loadMapObjects, onMapEntered, rainTick, type GameplayDeps } from './net/gameplay';
 
@@ -48,6 +49,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     if (res.applied.length) log.info('migrations_applied', { applied: res.applied });
   }
   await syncItemDefinitions(pool);
+  await loadSettings(pool);
 
   const security = new SecurityEvents(pool, log);
   const chatLog = new ChatLog(pool, log);

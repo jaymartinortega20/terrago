@@ -59,6 +59,8 @@ export class Player {
   dungeonDifficulty: import('@terrago/shared').DifficultyId = 'normal';
   /** Chat mute set by a moderator (ms since epoch). */
   mutedUntil = 0;
+  /** Message of the day already shown this session. */
+  motdShown = false;
   /** Recent lines this player said (any channel), attached to reports. */
   said: { ch: string; text: string; ts: number }[] = [];
   /** Starter quest chain progress (loaded at join). */

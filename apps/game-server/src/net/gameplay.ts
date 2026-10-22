@@ -1,4 +1,5 @@
 import { BALANCE, QUESTS, getCrop, getItem, getMap, getNode, getRecipe, mineFloorId, mineFloorNumber, ladderRowsFor } from '@terrago/game-data';
+import { settings } from '../services/serverConfig';
 import {
   cropStatus,
   formatDuration,
@@ -495,7 +496,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
         void r.player
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
-            r.xp = Math.round(r.xp * eventMult('xp', Date.now()));
+            r.xp = Math.round(r.xp * eventMult('xp', Date.now()) * settings().xpRate);
             // Pet perks: small, never game-breaking.
             const perk = r.player.pet ? getItem(r.player.pet)?.pet?.perk : undefined;
             if (perk === 'xp') r.xp = Math.round(r.xp * 1.05);

@@ -1,4 +1,5 @@
-import { createCharacterSchema, firstIssue, loginSchema, registerSchema } from '@terrago/shared';
+import { WORLD_EVENTS, createCharacterSchema, currentEvent, firstIssue, loginSchema, registerSchema, type ManualEvent } from '@terrago/shared';
+import { saveSettings, settings, validateSettings } from '../services/serverConfig';
 import { getDummyHash, hashPassword, needsRehash, verifyPassword } from '../auth/passwords';
 import {
   SESSION_COOKIE,
@@ -82,6 +83,7 @@ export function buildRouter(deps: Deps): Router {
 
   router.post('/api/auth/register', async (ctx) => {
     limit(limits.registerIp, ctx.ip ?? 'unknown');
+    if (!settings().registrationOpen) throw new HttpError(403, 'New accounts are closed right now. Please try again later.');
     const parsed = registerSchema.safeParse(ctx.body);
     if (!parsed.success) throw new HttpError(400, firstIssue(parsed.error));
     const { email, password } = parsed.data;
@@ -334,6 +336,236 @@ export function buildRouter(deps: Deps): Router {
       `SELECT a.id, a.action, a.target, a.details, a.created_at, u.email FROM admin_actions a JOIN users u ON u.id = a.admin_id ORDER BY a.id DESC LIMIT 100`,
     );
     return { log: rows };
+  });
+
+  // --- Economy dashboard ------------------------------------------------------
+
+  /** Gold that only changes hands between players (not created or destroyed). */
+  const TRANSFERS = ['trade', 'marketplace_sale', 'marketplace_purchase'];
+  const BOT_KINDS = ['bot_timing', 'bot_loop', 'bot_marathon', 'trade_ring', 'multi_account', 'movement_flood', 'socket_flood', 'duplicate_login'];
+  const windowDays = (ctx: Ctx) => {
+    const d = Number(ctx.url.searchParams.get('days') ?? 7);
+    return Number.isFinite(d) ? Math.max(1, Math.min(90, Math.round(d))) : 7;
+  };
+
+  router.get('/api/admin/economy', async (ctx) => {
+    await requireAdmin(ctx);
+    const days = windowDays(ctx);
+    const since = `now() - make_interval(days => $1::int)`;
+    const [byReason, daily, supply, market, stall, trades, topItems, rare, bigMoves, giftTrades, overpriced, flags] = await Promise.all([
+      pool.query(
+        `SELECT reason, coalesce(sum(amount) FILTER (WHERE amount > 0), 0)::bigint AS gained, coalesce(-sum(amount) FILTER (WHERE amount < 0), 0)::bigint AS spent, count(*)::int AS n
+           FROM currency_transactions WHERE created_at > ${since} GROUP BY reason`,
+        [days],
+      ),
+      pool.query(
+        `SELECT to_char(date_trunc('day', created_at), 'YYYY-MM-DD') AS day,
+                coalesce(sum(amount) FILTER (WHERE amount > 0 AND reason <> ALL($2)), 0)::bigint AS created,
+                coalesce(-sum(amount) FILTER (WHERE amount < 0 AND reason <> ALL($2)), 0)::bigint - coalesce(sum(amount) FILTER (WHERE reason = ANY($2)), 0)::bigint AS removed
+           FROM currency_transactions WHERE created_at > ${since} GROUP BY 1 ORDER BY 1`,
+        [days, TRANSFERS],
+      ),
+      pool.query(
+        `SELECT (SELECT coalesce(sum(gold), 0) FROM characters WHERE deleted_at IS NULL)::bigint AS players,
+                (SELECT coalesce(sum(treasury), 0) FROM guilds)::bigint AS guilds,
+                (SELECT count(*) FROM characters WHERE deleted_at IS NULL AND gold > 0)::int AS holders`,
+      ),
+      pool.query(`SELECT count(*)::int AS trades, coalesce(sum(total), 0)::bigint AS volume, coalesce(sum(tax), 0)::bigint AS tax FROM marketplace_transactions WHERE created_at > ${since}`, [days]),
+      pool.query(`SELECT count(*)::int AS trades, coalesce(-sum(amount), 0)::bigint AS volume FROM currency_transactions WHERE ref_type = 'stall' AND reason = 'marketplace_purchase' AND created_at > ${since}`, [days]),
+      pool.query(`SELECT count(*)::int AS trades, coalesce(sum(a_gold + b_gold), 0)::bigint AS gold FROM direct_trade_logs WHERE created_at > ${since}`, [days]),
+      pool.query(
+        `SELECT t.item_id, i.name, i.rarity, count(*)::int AS trades, sum(t.quantity)::int AS quantity, sum(t.total)::bigint AS volume,
+                round(sum(t.total)::numeric / sum(t.quantity), 1)::float AS avg_price,
+                min(t.total::numeric / t.quantity)::float AS min_price, max(t.total::numeric / t.quantity)::float AS max_price
+           FROM marketplace_transactions t JOIN items i ON i.id = t.item_id
+          WHERE t.created_at > ${since} GROUP BY 1, 2, 3 ORDER BY volume DESC LIMIT 15`,
+        [days],
+      ),
+      pool.query(
+        `SELECT i.id AS item_id, i.name, i.rarity, t.reason, sum(t.quantity)::int AS quantity
+           FROM item_transactions t JOIN items i ON i.id = t.item_id
+          WHERE t.created_at > ${since} AND t.from_character_id IS NULL AND i.rarity IN ('rare', 'epic', 'legendary', 'mythic')
+          GROUP BY 1, 2, 3, 4
+          ORDER BY array_position(ARRAY['mythic', 'legendary', 'epic', 'rare'], i.rarity), quantity DESC LIMIT 30`,
+        [days],
+      ),
+      pool.query(
+        `SELECT t.id, t.character_id, c.name, t.amount, t.reason, t.ref_type, t.ref_id, t.created_at
+           FROM currency_transactions t JOIN characters c ON c.id = t.character_id
+          WHERE t.created_at > ${since} AND t.reason IN ('trade', 'admin', 'marketplace_sale') AND abs(t.amount) >= 50000
+          ORDER BY abs(t.amount) DESC LIMIT 20`,
+        [days],
+      ),
+      pool.query(
+        `SELECT d.id, d.created_at, a.name AS a_name, b.name AS b_name, d.a_id, d.b_id, d.a_gold, d.b_gold, d.a_items, d.b_items
+           FROM direct_trade_logs d JOIN characters a ON a.id = d.a_id JOIN characters b ON b.id = d.b_id
+          WHERE d.created_at > ${since}
+            AND ((d.a_gold >= 10000 AND d.b_gold = 0 AND jsonb_array_length(d.b_items) = 0) OR (d.b_gold >= 10000 AND d.a_gold = 0 AND jsonb_array_length(d.a_items) = 0))
+          ORDER BY greatest(d.a_gold, d.b_gold) DESC LIMIT 20`,
+        [days],
+      ),
+      pool.query(
+        `WITH u AS (SELECT id, item_id, seller_id, buyer_id, total, quantity, created_at, total::numeric / quantity AS unit
+                      FROM marketplace_transactions WHERE created_at > now() - interval '30 days'),
+              med AS (SELECT item_id, percentile_cont(0.5) WITHIN GROUP (ORDER BY unit) AS m, count(*) AS n FROM u GROUP BY item_id)
+         SELECT u.id, u.item_id, i.name, u.total, u.quantity, u.unit::float AS unit, med.m::float AS median, u.created_at, s.name AS seller, b.name AS buyer
+           FROM u JOIN med USING (item_id) JOIN items i ON i.id = u.item_id JOIN characters s ON s.id = u.seller_id JOIN characters b ON b.id = u.buyer_id
+          WHERE med.n >= 3 AND u.unit > 5 * med.m AND u.total >= 5000 AND u.created_at > ${since}
+          ORDER BY u.total DESC LIMIT 20`,
+        [days],
+      ),
+      pool.query(`SELECT count(*)::int AS n FROM security_events WHERE kind = ANY($1) AND reviewed_at IS NULL`, [BOT_KINDS]),
+    ]);
+    const sources = byReason.rows.filter((r) => !TRANSFERS.includes(r.reason) && Number(r.gained) > 0).map((r) => ({ reason: r.reason, amount: Number(r.gained) }));
+    const sinks = byReason.rows.filter((r) => !TRANSFERS.includes(r.reason) && Number(r.spent) > 0).map((r) => ({ reason: r.reason, amount: Number(r.spent) }));
+    // Gold that vanished inside transfers (sales tax: buyer pays more than the seller gets).
+    const transferNet = byReason.rows.filter((r) => TRANSFERS.includes(r.reason)).reduce((a, r) => a + Number(r.gained) - Number(r.spent), 0);
+    if (transferNet < 0) sinks.push({ reason: 'sales_tax', amount: -transferNet });
+    sources.sort((a, b) => b.amount - a.amount);
+    sinks.sort((a, b) => b.amount - a.amount);
+    const created = sources.reduce((a, r) => a + r.amount, 0);
+    const removed = sinks.reduce((a, r) => a + r.amount, 0);
+    const num = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'string' && /^-?\d+$/.test(v) ? Number(v) : v]));
+    return {
+      days,
+      totals: { created, removed, net: created - removed, supply: Number(supply.rows[0].players) + Number(supply.rows[0].guilds), playerGold: Number(supply.rows[0].players), guildGold: Number(supply.rows[0].guilds), holders: supply.rows[0].holders },
+      sources,
+      sinks,
+      daily: daily.rows.map(num),
+      market: { ...num(market.rows[0]), stallTrades: stall.rows[0].trades, stallVolume: Number(stall.rows[0].volume), directTrades: trades.rows[0].trades, directTradeGold: Number(trades.rows[0].gold) },
+      topItems: topItems.rows.map(num),
+      rare: rare.rows,
+      suspicious: { bigMoves: bigMoves.rows.map(num), giftTrades: giftTrades.rows.map(num), overpriced: overpriced.rows.map(num), openFlags: flags.rows[0].n },
+    };
+  });
+
+  // --- Anti-bot and security flags -----------------------------------------------
+
+  router.get('/api/admin/flags', async (ctx) => {
+    await requireAdmin(ctx);
+    const all = ctx.url.searchParams.get('status') === 'all';
+    const { rows } = await pool.query(
+      `SELECT e.id, e.kind, e.details, e.created_at, host(e.ip) AS ip, e.reviewed_at, e.review_note, e.character_id,
+              c.name AS character_name, coalesce(e.user_id, c.user_id) AS user_id, u.email, u.status AS user_status, r.email AS reviewed_by
+         FROM security_events e
+         LEFT JOIN characters c ON c.id = e.character_id
+         LEFT JOIN users u ON u.id = coalesce(e.user_id, c.user_id)
+         LEFT JOIN users r ON r.id = e.reviewed_by
+        WHERE e.kind = ANY($1) AND ($2 OR e.reviewed_at IS NULL)
+        ORDER BY e.created_at DESC LIMIT 200`,
+      [BOT_KINDS, all],
+    );
+    return { flags: rows };
+  });
+
+  router.post('/api/admin/flag', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    if (!Number.isInteger(b.id)) throw new HttpError(400, 'Bad request.');
+    const verdict = b.verdict === 'actioned' ? 'actioned' : 'cleared';
+    const note = `${verdict}${b.note ? `: ${String(b.note).slice(0, 200)}` : ''}`;
+    const { rowCount } = await pool.query(`UPDATE security_events SET reviewed_at = now(), reviewed_by = $2, review_note = $3 WHERE id = $1 AND reviewed_at IS NULL`, [b.id, admin.userId, note]);
+    if (!rowCount) throw new HttpError(404, 'Already reviewed or not found.');
+    await audit(admin, 'flag_' + verdict, String(b.id), { note: b.note ?? null });
+    return {};
+  });
+
+  // --- One player in detail ------------------------------------------------------
+
+  router.get('/api/admin/player', async (ctx) => {
+    await requireAdmin(ctx);
+    const id = uuid(ctx.url.searchParams.get('id'), 'character');
+    const ch = await pool.query(
+      `SELECT c.id, c.name, c.level, c.class_id, c.gold, c.map_id, c.created_at, c.last_played_at, c.chat_muted_until, c.xp,
+              u.id AS user_id, u.email, u.status, u.banned_until, u.ban_reason, u.created_at AS account_created
+         FROM characters c JOIN users u ON u.id = c.user_id WHERE c.id = $1`,
+      [id],
+    );
+    if (!ch.rows[0]) throw new HttpError(404, 'No such character.');
+    const userId = ch.rows[0].user_id;
+    const [items, gold, itemLog, trades, market, flags, reports, alts] = await Promise.all([
+      pool.query(`SELECT ii.container, ii.slot, ii.item_id, ii.quantity, ii.quality, ii.durability, i.name, i.rarity FROM inventory_items ii JOIN items i ON i.id = ii.item_id WHERE ii.character_id = $1 ORDER BY ii.container, ii.slot`, [id]),
+      pool.query(`SELECT id, amount, balance_after, reason, ref_type, ref_id, created_at FROM currency_transactions WHERE character_id = $1 ORDER BY id DESC LIMIT 100`, [id]),
+      pool.query(
+        `SELECT t.id, t.item_id, i.name, t.quantity, t.reason, t.created_at, t.from_character_id = $1 AS outgoing, coalesce(f.name, '') AS from_name, coalesce(o.name, '') AS to_name
+           FROM item_transactions t JOIN items i ON i.id = t.item_id
+           LEFT JOIN characters f ON f.id = t.from_character_id LEFT JOIN characters o ON o.id = t.to_character_id
+          WHERE t.from_character_id = $1 OR t.to_character_id = $1 ORDER BY t.id DESC LIMIT 100`,
+        [id],
+      ),
+      pool.query(
+        `SELECT d.id, d.created_at, a.name AS a_name, b.name AS b_name, d.a_gold, d.b_gold, d.a_items, d.b_items
+           FROM direct_trade_logs d JOIN characters a ON a.id = d.a_id JOIN characters b ON b.id = d.b_id
+          WHERE d.a_id = $1 OR d.b_id = $1 ORDER BY d.id DESC LIMIT 50`,
+        [id],
+      ),
+      pool.query(
+        `SELECT t.id, t.created_at, i.name, t.quantity, t.total, t.tax, s.name AS seller, b.name AS buyer
+           FROM marketplace_transactions t JOIN items i ON i.id = t.item_id JOIN characters s ON s.id = t.seller_id JOIN characters b ON b.id = t.buyer_id
+          WHERE t.seller_id = $1 OR t.buyer_id = $1 ORDER BY t.id DESC LIMIT 50`,
+        [id],
+      ),
+      pool.query(`SELECT id, kind, details, created_at, review_note FROM security_events WHERE character_id = $1 OR user_id = $2 ORDER BY id DESC LIMIT 50`, [id, userId]),
+      pool.query(`SELECT r.id, r.reason, r.status, r.created_at, rc.name AS reporter FROM player_reports r JOIN characters rc ON rc.id = r.reporter_id WHERE r.target_id = $1 ORDER BY r.id DESC LIMIT 30`, [id]),
+      pool.query(`SELECT id, name, level FROM characters WHERE user_id = $1 AND id <> $2 AND deleted_at IS NULL`, [userId, id]),
+    ]);
+    const num = (r: Record<string, unknown>) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, typeof v === 'string' && /^-?\d+$/.test(v) && k !== 'ref_id' ? Number(v) : v]));
+    return {
+      character: { ...num(ch.rows[0]), online: !!world.players.get(id)?.conn },
+      items: items.rows,
+      gold: gold.rows.map(num),
+      itemLog: itemLog.rows,
+      trades: trades.rows.map(num),
+      market: market.rows.map(num),
+      flags: flags.rows,
+      reports: reports.rows,
+      alts: alts.rows,
+    };
+  });
+
+  // --- Live server settings and events ----------------------------------------------
+
+  router.get('/api/admin/settings', async (ctx) => {
+    await requireAdmin(ctx);
+    return { settings: settings(), events: WORLD_EVENTS.map((e) => ({ id: e.id, name: e.name, description: e.description })), current: currentEvent(Date.now()) };
+  });
+
+  router.post('/api/admin/settings', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    let patch;
+    try {
+      const { manualEvent: _ignored, ...rest } = b;
+      patch = validateSettings(rest);
+    } catch (err) {
+      throw new HttpError(400, (err as Error).message);
+    }
+    delete patch.manualEvent;
+    if (!Object.keys(patch).length) throw new HttpError(400, 'Nothing to change.');
+    const next = await saveSettings(pool, patch);
+    await audit(admin, 'settings', null, patch);
+    return { settings: next };
+  });
+
+  router.post('/api/admin/event', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    let ev: ManualEvent | null = null;
+    if (b.id) {
+      const minutes = Math.round(Number(b.minutes ?? 40));
+      if (!Number.isFinite(minutes) || minutes < 5 || minutes > 24 * 60) throw new HttpError(400, 'Length must be 5–1440 minutes.');
+      const now = Date.now();
+      ev = { id: String(b.id), start: now, end: now + minutes * 60_000 };
+    }
+    try {
+      validateSettings({ manualEvent: ev });
+    } catch (err) {
+      throw new HttpError(400, (err as Error).message);
+    }
+    await saveSettings(pool, { manualEvent: ev });
+    for (const p of world.players.values()) p.conn?.send('event:manual', ev);
+    await audit(admin, ev ? 'event_start' : 'event_stop', ev?.id ?? null, ev ? { minutes: (ev.end - ev.start) / 60_000 } : {});
+    return { current: currentEvent(Date.now()) };
   });
 
   return router;

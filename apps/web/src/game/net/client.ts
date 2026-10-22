@@ -35,6 +35,7 @@ import {
   type ServerToClientEvents,
   type Snapshot,
   type WorldObject,
+  setManualEvent,
 } from '@terrago/shared';
 import { api, GAME_SERVER_URL } from '@/lib/api';
 import { initialUi, pushNotice, Store, type UiState } from '../store';
@@ -245,6 +246,7 @@ export class GameClient {
       this.ui.set({ achievementToast: a });
       setTimeout(() => this.ui.get().achievementToast === a && this.ui.set({ achievementToast: null }), 5000);
     });
+    socket.on('event:manual', (ev) => setManualEvent(ev));
     socket.on('announce', (text) => {
       audio.sfx('quest');
       this.ui.set({ announcement: text });
@@ -367,6 +369,7 @@ export class GameClient {
     this.pending = [];
     this.seq = Math.max(this.seq, p.ack);
     this.serverOffset = p.serverTime - Date.now();
+    setManualEvent(p.manualEvent ?? null);
     this.remotes.clear();
     this.monsters.clear();
     this.objects.clear();

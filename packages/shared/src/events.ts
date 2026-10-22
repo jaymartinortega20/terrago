@@ -54,6 +54,21 @@ function pick(slot: number): WorldEventDef {
   return WORLD_EVENTS[h % WORLD_EVENTS.length]!;
 }
 
+/** An event an admin started by hand (overrides the schedule while it runs). */
+export interface ManualEvent {
+  id: string;
+  start: number;
+  end: number;
+}
+
+let manual: ManualEvent | null = null;
+export function setManualEvent(m: ManualEvent | null): void {
+  manual = m;
+}
+export function manualEvent(): ManualEvent | null {
+  return manual;
+}
+
 let forced: string | null | undefined;
 /** Tests: 'off' disables events, an event id forces it, undefined = normal schedule. */
 export function setEventOverride(v: string | null | undefined): void {
@@ -62,6 +77,11 @@ export function setEventOverride(v: string | null | undefined): void {
 
 /** The event running now, if any, with its start and end. */
 export function currentEvent(now: number): { def: WorldEventDef; start: number; end: number } | null {
+  // An event an admin started by hand beats the schedule (and test overrides).
+  if (manual && now >= manual.start && now < manual.end) {
+    const def = WORLD_EVENTS.find((e) => e.id === manual!.id);
+    if (def) return { def, start: manual.start, end: manual.end };
+  }
   if (forced === 'off') return null;
   if (forced) {
     const def = WORLD_EVENTS.find((e) => e.id === forced);
