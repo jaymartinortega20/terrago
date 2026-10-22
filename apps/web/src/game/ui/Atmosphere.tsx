@@ -36,7 +36,7 @@ export function WeatherLayer({ client }: { client: GameClient }) {
 }
 
 /** "🌙 21:40 · 🌧 Rain · 🍂 Autumn" for the location box. */
-export function EnvBadge({ client }: { client: GameClient }) {
+export function EnvBadge({ client, compact }: { client: GameClient; compact?: boolean }) {
   useStore(client.ui, (s) => s.mapId);
   const now = useNow(client, 2000);
   const theme = client.map?.theme;
@@ -49,7 +49,7 @@ export function EnvBadge({ client }: { client: GameClient }) {
   return (
     <span className="ml-2 text-parchment/80" data-testid="env" title={`${season[0]!.toUpperCase() + season.slice(1)} — ${days} day${days === 1 ? '' : 's'} left. In-season crops grow 25% faster. Rain waters your farm and makes fish bite sooner.`}>
       {hour >= 20 || hour < 6 ? '🌙' : '☀'} {clock}
-      {outdoor && ` · ${WEATHER_ICON[w]} ${WEATHER_LABEL[w]}`} · {SEASON_ICON[season]}
+      {outdoor && ` · ${WEATHER_ICON[w]}${compact ? '' : ` ${WEATHER_LABEL[w]}`}`} · {SEASON_ICON[season]}
     </span>
   );
 }

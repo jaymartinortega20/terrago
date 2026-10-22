@@ -150,13 +150,13 @@ function Leaderboards({ client }: { client: GameClient }) {
 }
 
 /** Achievement unlocked, announcements, and the "daily reward ready" nudge. */
-export function ProgressToasts({ client, openJournal }: { client: GameClient; openJournal: () => void }) {
+export function ProgressToasts({ client, openJournal, touch }: { client: GameClient; openJournal: () => void; touch?: boolean }) {
   const toast = useStore(client.ui, (s) => s.achievementToast);
   const ann = useStore(client.ui, (s) => s.announcement);
   const ready = useStore(client.ui, (s) => s.dailyReady);
   const panel = useStore(client.ui, (s) => s.panel);
   return (
-    <div className="pointer-events-none absolute top-36 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
+    <div className={`pointer-events-none absolute left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 ${touch ? 'top-[38%]' : 'top-36'}`}>
       {ann && (
         <div className="px-panel max-w-[90vw] px-4 py-2 text-center font-bold text-wood-dark" role="alert" data-testid="announcement">
           📢 {ann}
@@ -173,7 +173,7 @@ export function ProgressToasts({ client, openJournal }: { client: GameClient; op
       )}
       {ready && panel !== 'journal' && (
         <button className="px-btn green small pointer-events-auto" onClick={openJournal} data-testid="daily-ready">
-          🎁 Daily reward ready! (L)
+          🎁 Daily reward ready!{touch ? '' : ' (L)'}
         </button>
       )}
     </div>

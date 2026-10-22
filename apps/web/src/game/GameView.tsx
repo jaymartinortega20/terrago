@@ -182,13 +182,15 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       </div>
 
       {/* Top-right: location + menu */}
-      <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-        <div className="px-panel-dark pointer-events-auto px-3 py-1 text-right text-xs" data-testid="location">
+      <div className="absolute top-2 right-2 z-30 flex flex-col items-end gap-2">
+        <div className={`px-panel-dark pointer-events-auto px-3 py-1 text-right text-xs ${touch ? "max-w-[44vw] truncate px-2" : ""}`} data-testid="location">
           <span className="font-bold text-gold">{mapName}</span>
-          <span className="ml-2 text-parchment/70">
-            ({tile.x}, {tile.y})
-          </span>
-          <EnvBadge client={client} />
+          {!touch && (
+            <span className="ml-2 text-parchment/70">
+              ({tile.x}, {tile.y})
+            </span>
+          )}
+          <EnvBadge client={client} compact={touch} />
           <span className="ml-2 text-parchment/70">👥 {nearby}</span>
           <span className="ml-2 text-parchment/70">{ping === null ? '' : `${ping}ms`}</span>
         </div>
@@ -296,7 +298,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <QuestOfferWindow client={client} />
       <QuestRewardWindow client={client} />
       <SocialPopups client={client} />
-      <ProgressToasts client={client} openJournal={() => open('journal')} />
+      <ProgressToasts client={client} openJournal={() => open('journal')} touch={touch} />
       <TradeWindow client={client} />
       <ProfileWindow client={client} />
 

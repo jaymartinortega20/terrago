@@ -8,7 +8,7 @@ Current version: **0.5** — multiplayer world, farming, gathering, fishing, cra
 
 ![Two players meeting at the Greenhaven fountain](docs/screenshots/chat.png)
 
-**Milestone status:** the Version 0.1 success test passes in two real browsers (see, move, chat, refresh and reconnect with saved data): 12/12 checks. 62 unit tests and 17 integration tests (real PostgreSQL + Socket.IO) pass. A 100-bot load test runs at ~16% CPU on 2 vCPUs with full 10 Hz updates and zero errors. Details in [docs/testing.md](docs/testing.md).
+**Status:** Version 1.0 (public beta) — farming, gathering, crafting, combat, quests, marketplace and trading, parties/guilds/friends, dungeons and bosses, five regions with weather/day-night/seasons, dailies/achievements/leaderboards, admin panel and synthesized sound. 74 unit and 45 integration tests pass; browser checks cover every stage including phone screens. Details in [docs/testing.md](docs/testing.md).
 
 ## What works in v0.1
 
@@ -104,6 +104,7 @@ docs/             architecture, deployment, testing
 * [Free deployment](docs/deploy-free.md) — Vercel + Render + Neon, no domain or payment needed
 * [Production deployment](docs/deployment.md) — Vercel (web) + Singapore VPS (game server, PostgreSQL, Caddy) + your domain, backups
 * [Testing](docs/testing.md) — what is tested and the latest results
+* [Operations](docs/operations.md) — backups, uptime alerts, logs (do this before inviting players)
 
 ## Principles
 

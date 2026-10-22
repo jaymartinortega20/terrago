@@ -1,0 +1,32 @@
+# Nightly database backup. Off until you add a repository secret named
+# DATABASE_URL (Settings -> Secrets and variables -> Actions). The dump is kept
+# as a private workflow artifact for 30 days. Never commit the connection string.
+name: Nightly backup
+on:
+  schedule:
+    - cron: '17 18 * * *' # 02:17 Manila time
+  workflow_dispatch: {}
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip when no database secret is set
+        id: check
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: echo "enabled=$([ -n "$DATABASE_URL" ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - name: Install PostgreSQL client
+        if: steps.check.outputs.enabled == 'yes'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: Dump
+        if: steps.check.outputs.enabled == 'yes'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pg_dump --no-owner --format=custom "$DATABASE_URL" -f terrago-$(date -u +%F).dump && ls -lh terrago-*.dump
+      - name: Keep the dump
+        if: steps.check.outputs.enabled == 'yes'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terrago-backup
+          path: terrago-*.dump
+          retention-days: 30
