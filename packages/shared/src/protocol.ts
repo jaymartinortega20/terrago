@@ -143,7 +143,7 @@ export interface ServerToClientEvents {
   /** A boss is winding up an area attack: warn players (pixels, ms until impact). */
   'telegraph': (t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
   /** A visible player's look changed (mount, weapon). */
-  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null }) => void;
+  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null }) => void;
   'quests': (quests: QuestState[]) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
   'invite': (invite: InvitePayload) => void;

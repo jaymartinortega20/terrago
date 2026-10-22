@@ -299,6 +299,22 @@
    {
     "itemId": "war_wolf",
     "price": 60000
+   },
+   {
+    "itemId": "spotted_deer",
+    "price": 12000
+   },
+   {
+    "itemId": "tusked_boar",
+    "price": 30000
+   },
+   {
+    "itemId": "pet_dog",
+    "price": 1500
+   },
+   {
+    "itemId": "pet_cat",
+    "price": 1500
    }
   ],
   "buys": []

@@ -502,8 +502,12 @@ export async function onJoin(deps: GameplayDeps, p: Player, fresh: boolean): Pro
     p.blocked = s.blocked;
     p.friendIds = new Set(await db.friendIds(deps.pool, p.id));
     if (s.guild) setGuild(deps.world, p, s.guild);
-    const m = await deps.pool.query(`SELECT chat_muted_until FROM characters WHERE id = $1`, [p.id]);
+    const m = await deps.pool.query(`SELECT chat_muted_until, pet FROM characters WHERE id = $1`, [p.id]);
     p.mutedUntil = m.rows[0]?.chat_muted_until ? new Date(m.rows[0].chat_muted_until).getTime() : 0;
+    if (m.rows[0]?.pet) {
+      p.pet = m.rows[0].pet;
+      deps.world.broadcastLook(p, { pet: p.pet });
+    }
     for (const id of p.friendIds) {
       const q = deps.world.players.get(id);
       if (q?.conn) {

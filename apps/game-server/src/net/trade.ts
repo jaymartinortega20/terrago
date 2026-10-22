@@ -3,6 +3,7 @@ import { TILE_SIZE, type TradeOfferItem, type TradeSide, type TradeView } from '
 import { GameError } from '../db';
 import { executeTrade } from '../services/market';
 import type { Player } from '../world/player';
+import { antibot } from '../security/antibot';
 import { pushInventory, type GameplayDeps } from './gameplay';
 
 /**
@@ -148,6 +149,7 @@ export async function confirmTrade(deps: GameplayDeps, p: Player): Promise<{ mes
       { characterId: s.a.player.id, items: s.a.items, gold: s.a.gold },
       { characterId: s.b.player.id, items: s.b.items, gold: s.b.gold },
     );
+    void antibot?.trade(s.a.player.id, s.b.player.id).catch(() => {});
     pushInventory(deps.world, s.a.player, res.a);
     pushInventory(deps.world, s.b.player, res.b);
     s.executing = false;

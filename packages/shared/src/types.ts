@@ -82,6 +82,8 @@ export interface SelfState {
   speed: number;
   /** Profession specializations: skill -> spec id. */
   specs?: Record<string, string>;
+  /** Active pet item id. */
+  pet?: string | null;
 }
 
 /** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */
@@ -146,6 +148,8 @@ export interface PublicPlayer {
   guild?: string | null;
   /** Name of the player's open stall, if any. */
   shop?: string | null;
+  /** Active pet (item id). */
+  pet?: string | null;
 }
 
 export type ItemCategory =
@@ -184,8 +188,10 @@ export interface ItemDef {
   fertilizer?: { quality: number; speed: number };
   /** Wearable: slot and stat bonuses. */
   equip?: EquipDef;
+  /** Companion pet: look and small perk. */
+  pet?: { kind: string; color: string; perk: 'gold' | 'fish' | 'xp' | 'regen' | 'dragon' };
   /** Rideable: speed multiplier and look. */
-  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' };
+  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' | 'boar' };
 }
 
 export type ToolKind = 'hoe' | 'can' | 'pickaxe' | 'axe' | 'rod' | 'sickle';

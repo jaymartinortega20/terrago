@@ -27,6 +27,7 @@ import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDia
 import * as social from './social';
 import * as journal from './journal';
 import * as eco from './economy';
+import { antibot } from '../security/antibot';
 import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
 import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
@@ -282,6 +283,16 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
             throw new GameError(cons.hp ? "You're already at full health." : 'Your MP is already full.');
           }
           if (p.dead) throw new GameError("You can't do that right now.");
+          const petDef = inv ? getItem(inv.itemId)?.pet : undefined;
+          if (inv && petDef) {
+            // Pets aren't used up: using one calls it to your side (or sends it home).
+            const next = p.pet === inv.itemId ? null : inv.itemId;
+            await pool.query('UPDATE characters SET pet = $2 WHERE id = $1', [p.id, next]);
+            p.pet = next;
+            world.broadcastLook(p, { pet: next });
+            const name = getItem(inv.itemId)!.name;
+            return { inventory: world.inventoryCache.get(p.id)!, message: next ? `${name} is following you.` : `${name} went home.` };
+          }
           const res = await useItem(pool, p.id, slot as number);
           p.rec.hp = Math.min(p.profile.maxHp, p.rec.hp + res.hp);
           p.rec.mp = Math.min(p.profile.maxMp, p.rec.mp + res.mp);
@@ -299,7 +310,10 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     const g = { pool, world, log };
     const serial = <T>(ack: unknown, fn: () => Promise<T> | T) => respond(ack, () => p.serial(async () => fn()));
 
-    socket.on('act', (req, ack) => serial(ack, () => act(g, p, req)));
+    socket.on('act', (req, ack) => {
+      antibot?.action(p);
+      serial(ack, () => act(g, p, req));
+    });
     socket.on('shop:get', (npcId, ack) => serial(ack, () => npcServices.shopGet(g, p, npcId)));
     socket.on('shop:buy', (req, ack) => serial(ack, () => npcServices.shopBuy(g, p, req)));
     socket.on('shop:sell', (req, ack) => serial(ack, () => npcServices.shopSell(g, p, req)));
@@ -365,13 +379,14 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('quest:complete', (req, ack) => serial(ack, () => questServices.complete(g, p, req)));
     socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));
     socket.on('enhance', (req, ack) => serial(ack, () => gear.enhance(g, p, req)));
-    socket.on('attack', (targetId, ack) =>
+    socket.on('attack', (targetId, ack) => {
+      antibot?.action(p);
       respond(ack, () => {
         const res = world.combat.attack(world.runtimeOf(p), p, targetId);
         if (typeof res === 'string') throw new GameError(res);
         return res;
-      }),
-    );
+      });
+    });
     socket.on('skill', (req, ack) =>
       respond(ack, () => {
         const r = (req ?? {}) as { skillId?: unknown; targetId?: unknown };

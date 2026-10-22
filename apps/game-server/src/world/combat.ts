@@ -366,7 +366,7 @@ export class Combat {
     // Regeneration: fast out of combat, slow in it; Blessing adds more.
     const ooc = now - p.lastCombatAt > OUT_OF_COMBAT_MS;
     const sec = dtMs / 1000;
-    let hpRegen = p.profile.maxHp * (ooc ? 0.03 : 0.004) * sec;
+    let hpRegen = p.profile.maxHp * (ooc ? 0.03 * (p.pet === 'pet_slime' ? 1.2 : 1) : 0.004) * sec;
     for (const e of p.effects) if (e.mods.regen) hpRegen += e.mods.regen * sec;
     const mpRegen = p.profile.maxMp * (ooc ? 0.03 : 0.008) * sec;
     p.regenCarry += hpRegen;

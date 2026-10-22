@@ -20,6 +20,7 @@ import { WindowLimiter } from '../security/rateLimit';
 import { createCharacter, listCharacters } from '../services/characters';
 import { grantKillRewards } from '../services/equipment';
 import { getItem } from '@terrago/game-data';
+import { antibot } from '../security/antibot';
 import type { World } from '../world/world';
 import { HttpError, Router, type Ctx } from './router';
 
@@ -98,6 +99,7 @@ export function buildRouter(deps: Deps): Router {
     }
     await startSession(ctx, userId);
     log.info('account_registered', { userId });
+    void antibot?.registered(userId, ctx.ip).catch(() => {});
     return { user: { id: userId, email } };
   });
 

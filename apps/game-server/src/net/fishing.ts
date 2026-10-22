@@ -58,7 +58,7 @@ export async function cast(deps: GameplayDeps, p: Player, table: string, prefer?
     fish,
     params: { seed: randomInt(1, 2_000_000_000), difficulty: fish.difficulty, zone: fishingZone(paid.rodTier, paid.fishing) * (spec === 'deep_sea_fisher' ? 1.25 : 1), maxSteps: 600 },
     // Fish bite faster in the rain.
-    biteAt: now + Math.round((1800 + randomInt(0, 4500)) * (isWet(weatherAt(deps.world.runtimeOf(p).def.theme, now)) ? 0.6 : 1) / frenzy),
+    biteAt: now + Math.round((1800 + randomInt(0, 4500)) * (isWet(weatherAt(deps.world.runtimeOf(p).def.theme, now)) ? 0.6 : 1) * (p.pet && getItem(p.pet)?.pet?.perk === 'fish' ? 0.85 : 1) / frenzy),
     hookedAt: null,
     state: 'waiting',
     timer: null,

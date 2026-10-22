@@ -11,7 +11,13 @@ export type SecurityEventKind =
   | 'movement_flood'
   | 'invalid_packet'
   | 'chat_rate_limited'
-  | 'duplicate_login';
+  | 'duplicate_login'
+  | 'account_registered'
+  | 'bot_timing'
+  | 'bot_loop'
+  | 'bot_marathon'
+  | 'trade_ring'
+  | 'multi_account';
 
 /**
  * Records security-relevant events in the database (for moderation and the

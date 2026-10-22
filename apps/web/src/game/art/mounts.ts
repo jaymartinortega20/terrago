@@ -24,6 +24,7 @@ function frame(kind: string, color: string, f: number): PixelBuffer {
     b.vline(x + pose[i]!, legY, 21, dark);
     b.set(x + pose[i]!, 21, '#2a2030');
   });
+  if (kind === 'boar') b.set(29, 6, '#efe7cf').set(28, 5, '#efe7cf').vline(21, 1, 4, dark);
   if (kind === 'wyvern') {
     // Wings (flap between frames), a long tail and a horned head.
     const wing = shade(color, 0.25);

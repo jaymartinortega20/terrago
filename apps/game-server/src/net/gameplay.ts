@@ -40,6 +40,7 @@ import { partyOf } from './social';
 import { closeStall, rememberVisit } from './economy';
 import { chooseSpec } from '../services/specs';
 import { progressEvent, track } from './journal';
+import { antibot } from '../security/antibot';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
@@ -495,6 +496,12 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
             r.xp = Math.round(r.xp * eventMult('xp', Date.now()));
+            // Pet perks: small, never game-breaking.
+            const perk = r.player.pet ? getItem(r.player.pet)?.pet?.perk : undefined;
+            if (perk === 'xp') r.xp = Math.round(r.xp * 1.05);
+            if (perk === 'dragon') r.xp = Math.round(r.xp * 1.1);
+            if (perk === 'gold') r.gold = Math.round(r.gold * 1.1);
+            if (perk === 'dragon') r.gold = Math.round(r.gold * 1.05);
             if (r.monster.def.boss) progressEvent(d, r.player, 'boss', r.monster.def.id);
             if (r.monster.def.boss && (r.gold || r.items.length)) {
               // Boss loot once per day per character (XP always).
@@ -672,6 +679,7 @@ export const market = {
       if (inv) pushInventory(deps.world, seller, { ...inv, gold: res.sellerGold });
       seller.conn?.send('notice', { kind: 'success', text: `Sold ${res.qty}× ${res.itemName} on the market: +${res.net.toLocaleString()} Gold (after tax).` });
       track(deps, seller, 'market_sales');
+      void antibot?.trade(seller.id, p.id).catch(() => {});
     }
     return { message: res.message };
   },

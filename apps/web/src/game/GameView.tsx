@@ -263,7 +263,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       )}
 
       {/* Notices */}
-      <div className="absolute top-20 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">
+      <div className="absolute top-32 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1">
         {notices.map((n) => (
           <div
             key={n.id}

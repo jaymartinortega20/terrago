@@ -79,6 +79,11 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
                 Use
               </button>
             )}
+            {def.pet && (
+              <button className="px-btn green small" onClick={() => client.useItem(sel.slot)} data-testid="pet-toggle">
+                Call / dismiss
+              </button>
+            )}
             {def.equip && (
               <button className="px-btn green small" onClick={() => client.equip(sel.slot)} data-testid="equip-item">
                 Equip

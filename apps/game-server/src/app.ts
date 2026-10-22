@@ -16,6 +16,7 @@ import { savePositions } from './services/characters';
 import { chatCommand, onLeave as socialLeave } from './net/social';
 import { track } from './net/journal';
 import { startEventDirector } from './net/events';
+import { AntiBot, setAntiBot } from './security/antibot';
 import { ChatLog } from './services/chatLog';
 import { syncItemDefinitions } from './services/itemsSync';
 import { World } from './world/world';
@@ -68,6 +69,8 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     combat: combatHooks((): GameplayDeps => ({ pool, world, log })),
   });
   hooks.level = (p) => track({ pool, world, log }, p, 'level', p.rec.level, 'max');
+  const bots = new AntiBot(world, pool, security);
+  setAntiBot(bots);
   const metrics = new Metrics(world, pool);
   const tickets = new TicketStore();
   const router = buildRouter({ config, pool, log, security, world, metrics, tickets });
@@ -132,6 +135,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
         clearInterval(saveTimer);
         clearInterval(energyTimer);
         clearInterval(rainTimer);
+        bots.stop();
         stopEvents();
         await world.shutdown();
         io.close();

@@ -5365,5 +5365,138 @@
     "luk": 8
    }
   }
+ },
+ {
+  "id": "pet_dog",
+  "name": "Loyal Pup",
+  "description": "A happy dog that follows you everywhere. Sniffs out a little extra Gold (+10% from monsters). Use it to call or dismiss.",
+  "icon": "pet:dog:a8743f",
+  "category": "cosmetic",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 300,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "pet": {
+   "kind": "dog",
+   "color": "#a8743f",
+   "perk": "gold"
+  }
+ },
+ {
+  "id": "pet_cat",
+  "name": "Lazy Cat",
+  "description": "Naps near water, wakes up for fish. Fish bite 15% faster. Use it to call or dismiss.",
+  "icon": "pet:cat:e8a03a",
+  "category": "cosmetic",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 300,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "pet": {
+   "kind": "cat",
+   "color": "#e8a03a",
+   "perk": "fish"
+  }
+ },
+ {
+  "id": "pet_fox",
+  "name": "Clever Fox",
+  "description": "Quick and curious. +5% experience from monsters. Use it to call or dismiss.",
+  "icon": "pet:fox:d8602a",
+  "category": "cosmetic",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 800,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "pet": {
+   "kind": "fox",
+   "color": "#d8602a",
+   "perk": "xp"
+  }
+ },
+ {
+  "id": "pet_slime",
+  "name": "Pet Slime",
+  "description": "A tiny King Slime heir. Out of combat you heal 20% faster. Use it to call or dismiss.",
+  "icon": "pet:slime:7cc35a",
+  "category": "cosmetic",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 800,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "pet": {
+   "kind": "slime",
+   "color": "#7cc35a",
+   "perk": "regen"
+  }
+ },
+ {
+  "id": "pet_dragonling",
+  "name": "Dragonling",
+  "description": "A baby dragon. +10% experience and +5% Gold from monsters. Use it to call or dismiss.",
+  "icon": "pet:dragonling:c0392b",
+  "category": "cosmetic",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 5000,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "pet": {
+   "kind": "dragonling",
+   "color": "#c0392b",
+   "perk": "dragon"
+  }
+ },
+ {
+  "id": "tusked_boar",
+  "name": "Tusked Boar",
+  "description": "Stubborn, sturdy and surprisingly fast.",
+  "icon": "mount:boar:7a5a3a",
+  "category": "mount",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 4000,
+  "levelRequirement": 20,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.55,
+   "color": "#7a5a3a",
+   "kind": "boar"
+  }
+ },
+ {
+  "id": "spotted_deer",
+  "name": "Spotted Deer",
+  "description": "Light-footed and graceful.",
+  "icon": "mount:stag:c98a4a",
+  "category": "mount",
+  "rarity": "uncommon",
+  "stackSize": 1,
+  "vendorValue": 2500,
+  "levelRequirement": 10,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.5,
+   "color": "#c98a4a",
+   "kind": "stag"
+  }
  }
 ]

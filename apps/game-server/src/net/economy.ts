@@ -7,6 +7,7 @@ import { changeGold } from '../services/ledger';
 import { lockCharacter } from '../services/inventory';
 import { buyFromStall } from '../services/market';
 import type { Player } from '../world/player';
+import { antibot } from '../security/antibot';
 import { applyDelta, npcService, pushInventory, type GameplayDeps } from './gameplay';
 
 /**
@@ -153,6 +154,7 @@ export async function buyStall(deps: GameplayDeps, p: Player, req: unknown): Pro
   pushInventory(deps.world, p, res.buyer);
   pushInventory(deps.world, q, res.seller);
   q.stall?.prices.delete(r.slot as number);
+  void antibot?.trade(q.id, p.id).catch(() => {});
   q.conn?.send('notice', { kind: 'success', text: `${p.name} bought ${res.qty}× ${res.itemName} from your stall: +${Math.floor(res.total * 0.97).toLocaleString()} Gold.` });
   if (q.stall && q.stall.prices.size === 0) closeStall(deps, q);
   return { message: `Bought ${res.qty}× ${res.itemName} for ${res.total.toLocaleString()} Gold.` };

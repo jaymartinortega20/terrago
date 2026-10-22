@@ -843,6 +843,60 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private animalSprites: Phaser.GameObjects.Image[] = [];
+  private pets = new Map<string, { item: string; sprite: Phaser.GameObjects.Sprite }>();
+
+  private static PET_ART: Record<string, { shape: string; scale: number }> = {
+    dog: { shape: 'wolf', scale: 0.5 },
+    cat: { shape: 'rat', scale: 0.7 },
+    fox: { shape: 'wolf', scale: 0.45 },
+    slime: { shape: 'slime', scale: 0.55 },
+    dragonling: { shape: 'bat', scale: 0.75 },
+  };
+
+  /** Pets trot after their owners (local player and everyone visible). */
+  private updatePets(): void {
+    const want = new Map<string, { item: string; x: number; y: number; dir: string }>();
+    const self = this.client.ui.get().self;
+    if (self?.pet && this.local) want.set(self.characterId, { item: self.pet, x: this.local.sprite.x, y: this.local.sprite.y, dir: this.client.dir });
+    for (const [id, r] of this.client.remotes) {
+      const av = this.remotes.get(id);
+      if (r.info.pet && av) want.set(id, { item: r.info.pet, x: av.sprite.x, y: av.sprite.y, dir: r.dir });
+    }
+    for (const [id, pet] of this.pets)
+      if (want.get(id)?.item !== pet.item) {
+        pet.sprite.destroy();
+        this.pets.delete(id);
+      }
+    for (const [id, w] of want) {
+      let pet = this.pets.get(id);
+      if (!pet) {
+        const def = getItem(w.item)?.pet;
+        if (!def) continue;
+        const art = WorldScene.PET_ART[def.kind] ?? WorldScene.PET_ART.dog!;
+        const key = `pet:${def.kind}:${def.color}`;
+        if (!this.textures.exists(key)) {
+          const sheet = monsterSheet(art.shape, def.color);
+          const tex = this.textures.addCanvas(key, sheet.canvas)!;
+          tex.add(0, 0, 0, 0, sheet.w * 2, sheet.h * 2);
+          tex.add(1, 0, sheet.w * 2, 0, sheet.w * 2, sheet.h * 2);
+        }
+        pet = { item: w.item, sprite: this.add.sprite(w.x - 20, w.y, key, 0).setOrigin(0.5, 1).setScale(art.scale) };
+        this.pets.set(id, pet);
+      }
+      const side = w.dir === 'left' ? 22 : -22;
+      const tx = w.x + (w.dir === 'up' || w.dir === 'down' ? -18 : side);
+      const ty = w.y + (w.dir === 'up' ? 14 : w.dir === 'down' ? -6 : 2);
+      const sp = pet.sprite;
+      const dx = tx - sp.x;
+      const dy = ty - sp.y;
+      const moving = Math.hypot(dx, dy) > 3;
+      sp.x += dx * 0.12;
+      sp.y += dy * 0.12;
+      if (Math.abs(dx) > 1) sp.setFlipX(dx < 0);
+      sp.setFrame(moving && Math.floor(this.time.now / 160) % 2 ? 1 : 0);
+      sp.setDepth(sp.y);
+    }
+  }
 
   /** Draw the homestead's animals wandering around the pen. */
   private drawAnimals(list: { id: number; kind: string }[]): void {
@@ -908,6 +962,7 @@ export class WorldScene extends Phaser.Scene {
     const client = this.client;
     this.updateLighting(time);
     this.updateSound(time);
+    this.updatePets();
     // Phaser's delta is smoothed toward 60 FPS; movement must follow real time
     // or slow devices would walk slower than the server allows.
     const nowMs = performance.now();
