@@ -47,3 +47,18 @@ Render → your service → **Logs**. Every line is JSON. Useful searches:
 Pushing to `main` deploys automatically. Database changes (migrations) run
 by themselves when the server starts. Bigger updates: run the backup workflow
 first (Actions → Run workflow).
+
+## 5. Admin panel (`/admin`)
+
+Only accounts whose email is in `ADMIN_EMAILS` on Render (or that have the admin role) can open it.
+
+- **Economy** — Gold created and removed by source and sink, a daily chart, how much Gold exists, marketplace/stall/trade volume, the most traded items with prices, rare items created, and suspicious transactions (gold given away for nothing, sales far above the usual price, very large moves). If *Net change* stays strongly positive for weeks, the economy is inflating: add sinks or reduce rewards.
+- **Flags** — anti-bot and security signals. Nothing is ever banned automatically: mark each as *It's fine* or *Handled* with a note.
+- **Players** — search, then **Details** for inventory and bank, Gold and item history, trades, market sales, flags, reports and the account's other characters. Mute, ban, kick and give from there.
+- **Tools** — server-wide announcement; start or stop any world event (it reaches everyone immediately); message of the day; XP rate (×1–×3); open or close new sign-ups (useful during an attack or maintenance).
+
+Every admin action is recorded in the **Log** tab.
+
+## 6. Load test
+
+`npm run loadtest -- --bots 100 --duration 60` against a non-production server started with `DISABLE_RATE_LIMITS=true`. Last run (October 2026): 100 bots, 0 errors, 0 disconnects, socket round-trip p99 6 ms, server CPU ~15%, memory ~257 MB, no database queueing.
