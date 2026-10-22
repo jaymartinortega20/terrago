@@ -309,6 +309,20 @@ function homestead(): MapDef {
   m.rect(31, 25, 4, 1, 'w', true);
 
   m.reserve(17, 24, 6, 6);
+  // Animal pen (south-west): fenced, gate on the north side by the path.
+  const pen = { x: 3, y: 21, w: 11, h: 6 };
+  for (let x = pen.x; x < pen.x + pen.w; x++) {
+    if (x !== 7 && x !== 8) m.prop('fence_h', x, pen.y);
+    m.prop('fence_h', x, pen.y + pen.h);
+  }
+  for (let y = pen.y + 1; y < pen.y + pen.h; y++) {
+    m.prop('fence_v', pen.x, y);
+    m.prop('fence_v', pen.x + pen.w - 1, y);
+  }
+  m.prop('hay_bale', 11, 22);
+  m.prop('barrel', 4, 22);
+  m.prop('sign', 9, 20, 'Animal pen — buy chickens, sheep and cows from Farmer Rowan, then tend them here.');
+  m.reserve(pen.x, pen.y, pen.w, pen.h + 1);
   m.forestBorder(r, 2, 3, [{ side: 's', from: 18, to: 21 }]);
   for (const [x, y] of [[5, 22], [8, 25]] as const) m.tryNode('rock_stone', x, y, true);
   for (const [x, y] of [[26, 4], [30, 6], [35, 4]] as const) m.tryNode('tree_softwood', x, y, true);
@@ -327,6 +341,7 @@ function homestead(): MapDef {
     portals: [{ id: 'hs_exit', x: 18, y: 29, w: 4, h: 1, to: 'sunfield_plains', toX: 7, toY: 21, toDir: 'right', label: 'Sunfield Plains' }],
     instanced: true,
     farmPlots: plots,
+    pen: { x: 4, y: 22, w: 9, h: 5 },
     theme: 'meadow',
     fishing: 'pond',
   });

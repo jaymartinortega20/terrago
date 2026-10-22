@@ -181,6 +181,7 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('monsterRemove', (id) => this.removeMonster(id)),
       this.client.on('combat', (ev) => this.showCombat(ev)),
       this.client.on('telegraph', (t) => this.showTelegraph(t)),
+      this.client.on('animals', (list) => this.drawAnimals(list)),
       this.client.on('look', (id) => {
         const r = this.client.remotes.get(id);
         const av = this.remotes.get(id);
@@ -400,7 +401,7 @@ export class WorldScene extends Phaser.Scene {
     const def = getCrop(o.crop.cropId);
     if (!def) return soil;
     const st = cropStatus(o.crop, def, now);
-    const badge = st.ready ? 'ready' : !st.watered ? 'dry' : '';
+    const badge = st.ready ? 'ready' : st.pests ? 'pests' : !st.watered ? 'dry' : '';
     return `${soil}|${def.id}:${st.stage}|${badge}`;
   }
 
@@ -444,6 +445,24 @@ export class WorldScene extends Phaser.Scene {
         }
       }
       if (badge === 'dry') parts.push(this.add.image(x + TILE_SIZE - 6, y + 2, this.bufferTexture('badge:dry', needsWaterArt)).setOrigin(0.5, 1).setDepth(LABEL_DEPTH - 4).setAlpha(0.9));
+      if (badge === 'pests') {
+        // Little bugs crawling over the crop.
+        const key = this.canvasTexture('badge:pests', () => {
+          const c = document.createElement('canvas');
+          c.width = c.height = TILE_SIZE;
+          const ctx = c.getContext('2d')!;
+          for (const [bx, by] of [[9, 12], [19, 9], [14, 20], [23, 17], [6, 22]] as const) {
+            ctx.fillStyle = '#2a2030';
+            ctx.fillRect(bx, by, 4, 3);
+            ctx.fillStyle = '#7a9a3a';
+            ctx.fillRect(bx + 1, by, 2, 1);
+          }
+          return c;
+        });
+        const bugs = this.add.image(x, y, key).setOrigin(0, 0).setDepth(y + TILE_SIZE - 5);
+        this.tweens.add({ targets: bugs, x: x + 2, yoyo: true, repeat: -1, duration: 260 });
+        parts.push(bugs);
+      }
       if (badge === 'ready') {
         const sp = this.add.image(x + TILE_SIZE - 6, y + 4, this.bufferTexture('badge:ready', readyArt)).setOrigin(0.5, 1).setDepth(LABEL_DEPTH - 4);
         this.tweens.add({ targets: sp, alpha: 0.35, yoyo: true, repeat: -1, duration: 600 });
@@ -821,6 +840,31 @@ export class WorldScene extends Phaser.Scene {
     if (av.mount) av.mount.setPosition(rx, ry + 4).setFlipX(dir === 'left').setFrame(moving ? Math.floor(time / 110) % 2 : 0).setDepth(dir === 'up' ? y + 1 : y);
     av.label.setPosition(rx, ry - 46 - lift);
     av.bubble?.setPosition(rx, ry - 62 - lift);
+  }
+
+  private animalSprites: Phaser.GameObjects.Image[] = [];
+
+  /** Draw the homestead's animals wandering around the pen. */
+  private drawAnimals(list: { id: number; kind: string }[]): void {
+    this.animalSprites.forEach((a) => a.destroy());
+    this.animalSprites = [];
+    const pen = this.client.map?.pen;
+    if (!pen) return;
+    for (const a of list) {
+      const key = this.canvasTexture(`animal:${a.kind}`, () => itemIcon(`animal:${a.kind}`, a.kind === 'chicken' ? 2 : 3));
+      const px = () => (pen.x + 0.5 + Math.random() * (pen.w - 1)) * TILE_SIZE;
+      const py = () => (pen.y + 0.8 + Math.random() * (pen.h - 1)) * TILE_SIZE;
+      const img = this.add.image(px(), py(), key).setOrigin(0.5, 1);
+      img.setDepth(img.y);
+      const wander = () => {
+        if (!img.active) return;
+        const nx = px();
+        img.setFlipX(nx < img.x);
+        this.tweens.add({ targets: img, x: nx, y: py(), duration: 2500 + Math.random() * 2500, delay: 800 + Math.random() * 3000, onUpdate: () => img.setDepth(img.y), onComplete: wander });
+      };
+      wander();
+      this.animalSprites.push(img);
+    }
   }
 
   private areaTrack: string | null = null;

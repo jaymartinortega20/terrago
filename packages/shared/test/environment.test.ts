@@ -9,7 +9,7 @@ test('seasons change every Monday (UTC), in order', () => {
   assert.equal(seasonAt(Date.UTC(2026, 9, 26, 0, 0, 1)), 'winter');
   assert.equal(seasonAt(Date.UTC(2026, 10, 2, 0, 0, 1)), 'spring');
   assert.equal(seasonSpeed(['autumn'], Date.UTC(2026, 9, 21)), IN_SEASON_SPEED);
-  assert.equal(seasonSpeed(['summer'], Date.UTC(2026, 9, 21)), 1);
+  assert.equal(seasonSpeed(['summer'], Date.UTC(2026, 9, 21)), 0.85);
 });
 
 test('weather is deterministic, regional, varied, and never inside caves', () => {

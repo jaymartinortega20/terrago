@@ -27,7 +27,7 @@ import {
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
 import type { Logger } from '../logger';
-import { clearPlot, farmUpgradeView, fertilize, harvest, loadFarm, plant, plotsForTier, rainWater, till, upgradeFarm, water, type FarmResult } from '../services/farming';
+import { clearPests, clearPlot, farmUpgradeView, fertilize, harvest, loadFarm, plant, plotsForTier, rainWater, till, upgradeFarm, water, type FarmResult } from '../services/farming';
 import type { toState } from '../services/inventory';
 import { getNpc, npcOffers } from '../services/npcs';
 import type { ProgressDelta } from '../services/progress';
@@ -263,6 +263,7 @@ export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<
   const canTier = hasTool(world, p, 'can');
   const doWater = () => run(water(pool, p.id, wateringArea(rt.def, tx, ty, canTier, p.dir), selDef?.tool?.kind === 'can' ? prefer : undefined));
 
+  if (status?.pests) return run(clearPests(pool, p.id, plot.index));
   if (status?.ready) {
     const r = await run(harvest(pool, p.id, plot.index));
     questEvent(deps, p, 'harvest', crop!.cropId);

@@ -31,7 +31,7 @@ function wear(slots: Slots, slot: number): { slots: Slots; broke: string | null 
   return { slots: next, broke: next[slot]!.durability === 0 ? (getItem(s.itemId)?.name ?? 'tool') : null };
 }
 
-async function giveItems(
+export async function giveItems(
   tx: Tx,
   characterId: string,
   slots: Slots,

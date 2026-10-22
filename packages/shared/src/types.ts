@@ -159,7 +159,8 @@ export type ItemCategory =
   | 'consumable'
   | 'quest'
   | 'cosmetic'
-  | 'mount';
+  | 'mount'
+  | 'animal';
 
 export interface ItemDef {
   id: string;
@@ -559,4 +560,42 @@ export interface StallView {
   sellerName: string;
   name: string;
   items: StallItem[];
+}
+
+// ---------------------------------------------------------------------------
+// Farm animals
+// ---------------------------------------------------------------------------
+
+export interface AnimalDef {
+  id: string;
+  name: string;
+  /** Item you buy and release into your pen. */
+  item: string;
+  product: string;
+  /** One product per this much fed time. */
+  everyMs: number;
+  level: number;
+}
+
+/** Products wait in the pen up to this many per animal. */
+export const ANIMAL_PRODUCT_CAP = 3;
+/** One portion of feed keeps an animal fed this long. */
+export const ANIMAL_FEED_MS = 24 * 60 * 60_000;
+
+/** Animals allowed by farm tier (1..5). */
+export const PEN_CAPACITY = [0, 2, 4, 6, 8, 10];
+
+export interface AnimalState {
+  id: number;
+  kind: string;
+  fedUntil: number;
+  collectedAt: number;
+  /** Products ready to collect now. */
+  ready: number;
+}
+
+/** How many products an animal has made since its last collection (only fed time counts). */
+export function animalReady(a: { fedUntil: number; collectedAt: number }, def: AnimalDef, now: number): number {
+  const fedTime = Math.max(0, Math.min(now, a.fedUntil) - a.collectedAt);
+  return Math.min(ANIMAL_PRODUCT_CAP, Math.floor(fedTime / def.everyMs));
 }

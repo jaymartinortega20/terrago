@@ -2932,5 +2932,139 @@
    "quantity": 1
   },
   "spec": "armor_smith"
+ },
+ {
+  "id": "mill_feed",
+  "station": "mill",
+  "skill": "cooking",
+  "level": 1,
+  "xp": 2,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "wheat",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "animal_feed",
+   "quantity": 3
+  }
+ },
+ {
+  "id": "mill_corn_feed",
+  "station": "mill",
+  "skill": "cooking",
+  "level": 3,
+  "xp": 2,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "corn",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "animal_feed",
+   "quantity": 2
+  }
+ },
+ {
+  "id": "make_cheese",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 8,
+  "xp": 14,
+  "fee": 2,
+  "inputs": [
+   {
+    "itemId": "milk",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "cheese",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "churn_butter",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 6,
+  "xp": 8,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "milk",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "butter",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "cook_omelette",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 4,
+  "xp": 9,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "egg",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "omelette",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "bake_butter_cake",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 14,
+  "xp": 22,
+  "fee": 5,
+  "inputs": [
+   {
+    "itemId": "flour",
+    "quantity": 2
+   },
+   {
+    "itemId": "butter",
+    "quantity": 1
+   },
+   {
+    "itemId": "egg",
+    "quantity": 2
+   }
+  ],
+  "output": {
+   "itemId": "honey_cake",
+   "quantity": 1
+  }
+ },
+ {
+  "id": "weave_wool",
+  "station": "loom",
+  "skill": "crafting",
+  "level": 5,
+  "xp": 8,
+  "fee": 1,
+  "inputs": [
+   {
+    "itemId": "wool",
+    "quantity": 3
+   }
+  ],
+  "output": {
+   "itemId": "linen",
+   "quantity": 2
+  }
  }
 ]

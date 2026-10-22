@@ -25,8 +25,11 @@ export function seasonEndsAt(now: number): number {
 /** In-season crops grow this much faster. */
 export const IN_SEASON_SPEED = 1.25;
 
+/** Out-of-season crops still grow, just slower. */
+export const OFF_SEASON_SPEED = 0.85;
+
 export function seasonSpeed(seasons: readonly Season[], now: number): number {
-  return seasons.includes(seasonAt(now)) ? IN_SEASON_SPEED : 1;
+  return seasons.includes(seasonAt(now)) ? IN_SEASON_SPEED : OFF_SEASON_SPEED;
 }
 
 export const WEATHERS = ['clear', 'cloudy', 'rain', 'storm', 'fog', 'snow'] as const;

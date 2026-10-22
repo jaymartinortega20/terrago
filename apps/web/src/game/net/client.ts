@@ -103,6 +103,7 @@ type ClientEvents = {
   /** A tile action happened (for effects): tile + kind. */
   acted: [{ tx: number; ty: number; message: string | null }];
   telegraph: [{ id: string; x: number; y: number; r: number; ms: number; name: string }];
+  animals: [import('@terrago/shared').AnimalState[]];
 };
 
 export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -345,6 +346,8 @@ export class GameClient {
 
   private onEnter(p: EnterWorldPayload): void {
     this.ui.set({ stallOpenName: null, stallView: null });
+    if (getMap(p.map.id)?.pen && p.map.owner?.id === p.self.characterId) setTimeout(() => void this.loadAnimals(), 300);
+    else this.animals = [];
     if (!this.journalChecked) {
       this.journalChecked = true;
       setTimeout(() => void this.loadJournal(), 1500);
@@ -514,6 +517,10 @@ export class GameClient {
         return { x: p.x, y: p.y, w: d.w, h: d.h, hint: `Use ${name}`, run: () => this.ui.set(p.type === 'enhance_altar' ? { panel: 'enhance' } : { panel: 'craft', station: p.type }) };
       }
     }
+    const pen = map.pen;
+    if (pen && this.ui.get().mapOwnerId === this.ui.get().self?.characterId && tx >= pen.x - 1 && tx <= pen.x + pen.w && ty >= pen.y - 1 && ty <= pen.y + pen.h) {
+      return { x: tx, y: ty, w: 1, h: 1, hint: 'Tend animals', run: () => this.ui.set({ panel: 'animals' }) };
+    }
     for (const p of map.objects) {
       if (p.kind !== 'prop' || p.type !== 'teleport_pad') continue;
       if (tx >= p.x && tx < p.x + 3 && ty >= p.y && ty < p.y + 3) return { x: p.x, y: p.y, w: 3, h: 3, hint: 'Travel (waystone)', run: () => this.ui.set({ panel: 'travel' }) };
@@ -557,6 +564,7 @@ export class GameClient {
       if (!def) return null;
       const st = cropStatus(o.crop, def, now);
       if (st.ready) return `Harvest ${def.name}`;
+      if (st.pests) return `Clear pests (${def.name})`;
       if (!st.watered) return `Water ${def.name}`;
       return `${def.name} ${Math.floor(st.progress * 100)}%`;
     }
@@ -925,6 +933,33 @@ export class GameClient {
   tradeCancel() {
     this.socket?.emit('trade:cancel');
     this.ui.set({ trade: null });
+  }
+
+  // --- Farm animals ---------------------------------------------------------
+  animals: import('@terrago/shared').AnimalState[] = [];
+
+  private setAnimals(list: import('@terrago/shared').AnimalState[]): void {
+    this.animals = list;
+    this.ui.set((s) => ({ animalsVersion: s.animalsVersion + 1 }));
+    this.emit('animals', list);
+  }
+
+  async loadAnimals(): Promise<void> {
+    try {
+      this.setAnimals(await this.request('animals:get'));
+    } catch {
+      /* not in a homestead */
+    }
+  }
+
+  async animalAction(kind: 'add' | 'feed' | 'collect', slot?: number): Promise<void> {
+    try {
+      const list = await this.request<import('@terrago/shared').AnimalState[]>(`animals:${kind}`, ...(kind === 'add' ? [slot] : []));
+      this.setAnimals(list);
+      if (kind === 'collect') audio.sfx('harvest');
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
   }
 
   // --- Bank, travel, stalls -------------------------------------------------

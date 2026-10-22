@@ -19,6 +19,7 @@ import type {
   GuildRank,
   PlayerProfile,
   BankViewState,
+  AnimalState,
   TravelOption,
   StallView,
   JournalView,
@@ -237,6 +238,10 @@ export interface ClientToServerEvents {
   'stall:close': (ack: Ack<null>) => void;
   'stall:view': (sellerId: string, ack: Ack<StallView>) => void;
   'stall:buy': (req: { sellerId: string; slot: number; itemId: string; price: number }, ack: Ack<{ message: string }>) => void;
+  'animals:get': (ack: Ack<AnimalState[]>) => void;
+  'animals:add': (slot: number, ack: Ack<AnimalState[]>) => void;
+  'animals:feed': (ack: Ack<AnimalState[]>) => void;
+  'animals:collect': (ack: Ack<AnimalState[]>) => void;
   'spec:choose': (req: { skill: string; spec: string }, ack: Ack<{ message: string }>) => void;
   'journal:get': (ack: Ack<JournalView>) => void;
   'daily:login': (ack: Ack<{ message: string }>) => void;

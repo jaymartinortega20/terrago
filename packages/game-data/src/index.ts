@@ -4,6 +4,7 @@ import {
   validateMapDef,
   type CropDef,
   type AchievementDef,
+  type AnimalDef,
   type DailyTaskDef,
   type FishDef,
   type MonsterDef,
@@ -45,6 +46,7 @@ import frostpineJson from '../data/maps/frostpine_peaks.json';
 import mirefenJson from '../data/maps/mirefen_swamp.json';
 import dungeonsJson from '../data/dungeons.json';
 import achievementsJson from '../data/achievements.json';
+import animalsJson from '../data/animals.json';
 import dailiesJson from '../data/dailies.json';
 import { DUNGEON_PREFIX, MINE_FLOORS, generateDungeon, generateMineFloor, mineFloorNumber, type DungeonDef } from './mapgen';
 
@@ -139,6 +141,9 @@ export const MONSTERS: readonly MonsterDef[] = monstersJson as MonsterDef[];
 export const SKILLS: readonly SkillDef[] = skillsJson as SkillDef[];
 export const QUESTS: readonly QuestDef[] = questsJson as QuestDef[];
 
+export const ANIMALS: readonly AnimalDef[] = animalsJson as AnimalDef[];
+export const getAnimal = (id: string) => ANIMALS.find((a) => a.id === id);
+export const animalForItem = (itemId: string) => ANIMALS.find((a) => a.item === itemId);
 export const ACHIEVEMENTS: readonly AchievementDef[] = achievementsJson as AchievementDef[];
 export const DAILY_TASKS: readonly DailyTaskDef[] = dailiesJson as DailyTaskDef[];
 

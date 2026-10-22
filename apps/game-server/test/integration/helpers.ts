@@ -14,6 +14,9 @@ export async function resetDatabase(): Promise<void> {
   await pool.end();
 }
 
+// Random farm pests would make growth tests flaky; tests that want them set 'always'.
+process.env.TERRAGO_PESTS ??= 'off';
+
 export async function startTestServer(extraEnv: Record<string, string> = {}): Promise<GameServer> {
   const config = loadConfig({
     NODE_ENV: 'test',

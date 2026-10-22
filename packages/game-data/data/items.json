@@ -4876,5 +4876,170 @@
     "vit": 4
    }
   }
+ },
+ {
+  "id": "chicken",
+  "name": "Chicken",
+  "description": "A plump hen. Release her in your homestead pen; feed her and she lays eggs.",
+  "icon": "animal:chicken",
+  "category": "animal",
+  "rarity": "uncommon",
+  "stackSize": 10,
+  "vendorValue": 120,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "sheep",
+  "name": "Sheep",
+  "description": "A woolly sheep for your homestead pen. Fed sheep grow wool.",
+  "icon": "animal:sheep",
+  "category": "animal",
+  "rarity": "uncommon",
+  "stackSize": 10,
+  "vendorValue": 350,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "cow",
+  "name": "Cow",
+  "description": "A gentle milk cow for your homestead pen. Fed cows give milk.",
+  "icon": "animal:cow",
+  "category": "animal",
+  "rarity": "rare",
+  "stackSize": 10,
+  "vendorValue": 500,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "animal_feed",
+  "name": "Animal Feed",
+  "description": "Milled grain for your animals. One portion keeps an animal fed for a day.",
+  "icon": "food:feed:c9a84a",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 3,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "egg",
+  "name": "Egg",
+  "description": "Fresh from the coop.",
+  "icon": "food:egg",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 6,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "milk",
+  "name": "Milk",
+  "description": "Creamy and fresh. Cooks turn it into cheese and butter.",
+  "icon": "food:milk",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 10,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "wool",
+  "name": "Wool",
+  "description": "Soft fleece. Weave it into cloth at a loom.",
+  "icon": "fiber",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 12,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "cheese",
+  "name": "Cheese",
+  "description": "Aged, sharp and filling. Restores 35 Energy and 40 HP.",
+  "icon": "food:cheese",
+  "category": "consumable",
+  "rarity": "uncommon",
+  "stackSize": 50,
+  "vendorValue": 45,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "consumable": {
+   "energy": 35,
+   "hp": 40
+  }
+ },
+ {
+  "id": "butter",
+  "name": "Butter",
+  "description": "Golden and rich. Bakers love it.",
+  "icon": "food:cheese:f8e6a0",
+  "category": "material",
+  "rarity": "common",
+  "stackSize": 99,
+  "vendorValue": 22,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "omelette",
+  "name": "Omelette",
+  "description": "Fluffy eggs. Restores 25 Energy and 60 HP.",
+  "icon": "food:omelette:f2d86a",
+  "category": "consumable",
+  "rarity": "common",
+  "stackSize": 50,
+  "vendorValue": 30,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "consumable": {
+   "energy": 25,
+   "hp": 60
+  }
+ },
+ {
+  "id": "honey_cake",
+  "name": "Butter Cake",
+  "description": "A celebration in every bite. Restores 60 Energy.",
+  "icon": "food:pie:f2d86a",
+  "category": "consumable",
+  "rarity": "uncommon",
+  "stackSize": 50,
+  "vendorValue": 80,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "consumable": {
+   "energy": 60
+  }
  }
 ]

@@ -106,11 +106,40 @@
      "skill": "farming",
      "level": 15
     }
+   },
+   {
+    "itemId": "animal_feed",
+    "price": 6
+   },
+   {
+    "itemId": "chicken",
+    "price": 400,
+    "requires": {
+     "skill": "farming",
+     "level": 5
+    }
+   },
+   {
+    "itemId": "sheep",
+    "price": 1100,
+    "requires": {
+     "skill": "farming",
+     "level": 10
+    }
+   },
+   {
+    "itemId": "cow",
+    "price": 1600,
+    "requires": {
+     "skill": "farming",
+     "level": 15
+    }
    }
   ],
   "buys": [
    "crop",
-   "seed"
+   "seed",
+   "animal"
   ]
  },
  {

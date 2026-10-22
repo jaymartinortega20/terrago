@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getItem } from '@terrago/game-data';
-import { QUALITIES, type BankViewState, type InventorySlot, type TravelOption } from '@terrago/shared';
+import { animalForItem, getAnimal, getItem } from '@terrago/game-data';
+import { ANIMAL_PRODUCT_CAP, PEN_CAPACITY, formatDuration, QUALITIES, type BankViewState, type InventorySlot, type TravelOption } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { ItemSlot } from './ItemSlot';
@@ -187,5 +187,59 @@ export function StallBrowseWindow({ client }: { client: GameClient }) {
         </ul>
       </Window>
     </div>
+  );
+}
+
+/** The homestead animal pen. */
+export function AnimalsPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
+  useStore(client.ui, (s) => s.animalsVersion);
+  const inv = useStore(client.ui, (s) => s.inventory);
+  useEffect(() => void client.loadAnimals(), [client]);
+  const list = client.animals;
+  const now = client.serverNow();
+  const feed = inv?.slots.filter((s) => s.itemId === 'animal_feed').reduce((n, s) => n + s.quantity, 0) ?? 0;
+  const inBag = inv?.slots.filter((s) => animalForItem(s.itemId)) ?? [];
+  const ready = list.reduce((n, a) => n + a.ready, 0);
+  return (
+    <Window title="Animal pen" onClose={onClose} testId="animals-panel">
+      <p className="text-xs text-wood-dark/80">
+        Fed animals make eggs, wool or milk (up to {ANIMAL_PRODUCT_CAP} each before you collect). One Animal Feed keeps an animal fed for a day. Pen size grows with your farm
+        tier (up to {PEN_CAPACITY[PEN_CAPACITY.length - 1]}).
+      </p>
+      <ul className="mt-2 space-y-1">
+        {list.length === 0 && <li className="text-sm">Your pen is empty. Farmer Rowan sells chickens, sheep and cows.</li>}
+        {list.map((a) => {
+          const def = getAnimal(a.kind);
+          const fed = a.fedUntil > now;
+          return (
+            <li key={a.id} className="flex items-center gap-2 border-2 border-ink/20 px-2 py-1 text-sm">
+              <b>{def?.name}</b>
+              <span className={`text-xs ${fed ? 'text-leaf-dark' : 'text-[#a33]'}`}>{fed ? `fed · ${formatDuration(a.fedUntil - now)} left` : 'hungry'}</span>
+              <span className="ml-auto text-xs">{a.ready > 0 ? `${a.ready}× ${getItem(def?.product ?? '')?.name}` : '—'}</span>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="mt-2 flex flex-wrap gap-1">
+        <button className="px-btn small" disabled={!list.length} onClick={() => void client.animalAction('feed')} data-testid="animals-feed">
+          Feed all ({feed} feed)
+        </button>
+        <button className="px-btn green small" disabled={!ready} onClick={() => void client.animalAction('collect')} data-testid="animals-collect">
+          Collect ({ready})
+        </button>
+      </div>
+      {inBag.length > 0 && (
+        <div className="mt-2 border-t-2 border-ink/20 pt-2 text-sm">
+          <p className="font-bold">Release into the pen</p>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {inBag.map((s) => (
+              <button key={s.slot} className="px-btn small" onClick={() => void client.animalAction('add', s.slot)} data-testid={`animals-add-${s.itemId}`}>
+                {getItem(s.itemId)?.name} ×{s.quantity}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </Window>
   );
 }

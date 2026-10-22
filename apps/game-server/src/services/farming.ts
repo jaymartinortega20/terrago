@@ -57,6 +57,7 @@ function rowToPlot(r: Record<string, any>): PlotState {
         speed: Number(r.speed),
         fertilizer: r.fertilizer,
         harvests: r.harvests,
+        pestAt: r.pest_at_ms === null || r.pest_at_ms === undefined ? null : Number(r.pest_at_ms),
       }
     : null;
   return { index: r.plot_index, tilled: r.tilled, wetUntil: new Date(r.water_until).getTime(), crop };
@@ -89,7 +90,7 @@ async function writePlot(tx: Tx, characterId: string, p: StoredPlot): Promise<vo
   const c = p.crop;
   await tx.query(
     `UPDATE farm_plots SET tilled = $3, crop_id = $4, planted_at = CASE WHEN $4::text IS NULL THEN NULL ELSE COALESCE(planted_at, now()) END,
-            growth_done_ms = $5, progress_at = $6, water_until = $7, speed = $8, fertilizer = $9, harvests = $10, updated_at = now()
+            growth_done_ms = $5, progress_at = $6, water_until = $7, speed = $8, fertilizer = $9, harvests = $10, pest_at_ms = $11, updated_at = now()
       WHERE character_id = $1 AND plot_index = $2`,
     [
       characterId,
@@ -102,6 +103,7 @@ async function writePlot(tx: Tx, characterId: string, p: StoredPlot): Promise<vo
       c?.speed ?? 1,
       c?.fertilizer ?? null,
       c?.harvests ?? 0,
+      c?.pestAt == null ? null : Math.round(c.pestAt),
     ],
   );
 }
@@ -230,9 +232,14 @@ export function plant(pool: Pool, characterId: string, index: number, prefer?: n
     ctx.delta.energy = await spendEnergyTx(ctx.tx, characterId, F().energy.plant, ctx.now);
     // In-season crops grow faster.
     const season = seasonSpeed(crop.seasons, ctx.now);
-    p.crop = { cropId: crop.id, growthDone: 0, progressAt: ctx.now, waterUntil: p.wetUntil, speed: season, fertilizer: null, harvests: 0 };
+    // Farm risk: pests may show up partway through. Skill and Crop Masters lower the odds.
+    const cropMaster = (await specFor(ctx.tx, characterId, 'farming')) === 'crop_master';
+    // (Tests can switch pests off with TERRAGO_PESTS=off for deterministic growth.)
+    const pestChance = process.env.TERRAGO_PESTS === 'off' ? 0 : process.env.TERRAGO_PESTS === 'always' ? 1 : Math.max(0.03, 0.15 - farming.level * 0.002) * (cropMaster ? 0.5 : 1);
+    const pestAt = Math.random() < pestChance ? Math.round(crop.growthMs * (0.35 + Math.random() * 0.3)) : null;
+    p.crop = { cropId: crop.id, growthDone: 0, progressAt: ctx.now, waterUntil: p.wetUntil, speed: season, fertilizer: null, harvests: 0, pestAt };
     const wet = p.wetUntil > ctx.now;
-    const tip = season > 1 ? ` It's ${seasonAt(ctx.now)} — ${crop.name} grows faster in season!` : '';
+    const tip = season > 1 ? ` It's ${seasonAt(ctx.now)} — ${crop.name} grows faster in season!` : ` ${crop.name} is out of season (${seasonAt(ctx.now)}) and grows a little slower.`;
     return { message: (wet ? `Planted ${crop.name}.` : `Planted ${crop.name}. Water it so it can grow!`) + tip, plots: [p] };
   });
 }
@@ -321,6 +328,22 @@ export function rainWater(pool: Pool, characterId: string): Promise<FarmResult> 
       plots.push(p);
     }
     return { message: plots.length ? 'The rain watered your fields.' : null, plots };
+  });
+}
+
+/** Shoo the pests off a crop so it can grow again. */
+export function clearPests(pool: Pool, characterId: string, index: number): Promise<FarmResult> {
+  return farmTx(pool, characterId, async (ctx) => {
+    checkUnlocked(ctx, index);
+    const p = await lockPlot(ctx.tx, characterId, index);
+    const def = p.crop ? getCrop(p.crop.cropId) : undefined;
+    if (!p.crop || !def || !cropStatus(p.crop, def, ctx.now).pests) throw new GameError('No pests here.');
+    // Settle growth (it was stalled) and remove the pests.
+    p.crop = { ...waterCrop(p.crop, def, ctx.now, 0), waterUntil: p.crop.waterUntil, pestAt: null };
+    ctx.delta.energy = await spendEnergyTx(ctx.tx, characterId, F().energy.plant, ctx.now);
+    const s = await grantSkillXpTx(ctx.tx, characterId, 'farming', 3);
+    ctx.delta.skill = { id: 'farming', progress: s, levelsGained: s.levelsGained };
+    return { message: `You chased the pests off the ${def.name.toLowerCase()}.`, plots: [p] };
   });
 }
 

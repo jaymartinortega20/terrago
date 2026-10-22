@@ -317,6 +317,16 @@ export function drawExtraIcon(icon: string, b: PixelBuffer): boolean {
         case 'pie':
           b.ellipse(1, 6, 14, 8, '#d39a4f').ellipse(2, 5, 12, 6, hex(c, '#e8862e')).hline(3, 12, 7, '#e8b56a');
           break;
+        case 'egg':
+          b.ellipse(4, 2, 8, 12, '#f4ead2').ellipse(6, 4, 3, 4, '#ffffff');
+          break;
+        case 'milk':
+          b.rect(5, 1, 6, 3, '#cfe8f5').rect(4, 4, 8, 10, '#f8f8f4').rect(4, 4, 8, 2, '#4a7fd6');
+          break;
+        case 'cheese':
+          for (let y = 5; y < 13; y++) b.hline(2 + Math.max(0, 8 - y), 13, y, '#f2c14e');
+          b.set(7, 9, '#d6a23a').set(10, 7, '#d6a23a').set(11, 11, '#d6a23a');
+          break;
         case 'skewer':
           b.hline(1, 14, 8, '#e8dcc0');
           for (const x of [3, 7, 11]) b.ellipse(x - 1, 5, 4, 6, hex(c, '#a8473a'));
@@ -352,6 +362,19 @@ export function drawExtraIcon(icon: string, b: PixelBuffer): boolean {
       for (const x of [3, 5, 8, 10]) b.vline(x, 11, 14, shade(col, -0.3));
       if (a === 'stag') b.set(10, 0, '#d6c79f').set(12, 0, '#d6c79f');
       b.rect(5, 5, 4, 2, '#7a3a2a');
+      return true;
+    }
+    case 'animal': {
+      if (a === 'chicken') {
+        b.ellipse(3, 5, 9, 8, '#f4f1e6').ellipse(9, 2, 5, 5, '#f4f1e6').set(13, 4, '#e8a03a').set(11, 3, '#2a2030').set(10, 1, '#e0483a').set(11, 1, '#e0483a');
+        b.vline(6, 12, 14, '#e8a03a').vline(9, 12, 14, '#e8a03a');
+      } else {
+        const col = a === 'cow' ? '#f4f1e6' : '#e8e0cc';
+        b.ellipse(1, 5, 12, 7, col).ellipse(10, 3, 5, 5, a === 'cow' ? '#f4f1e6' : '#5a5260').set(13, 5, '#2a2030');
+        if (a === 'cow') b.ellipse(3, 6, 4, 3, '#2a2030').ellipse(8, 8, 3, 2, '#2a2030').set(11, 2, '#d6c79f').set(14, 2, '#d6c79f');
+        else for (const [x, y] of [[2, 6], [5, 5], [8, 6], [4, 9], [7, 9]] as const) b.set(x, y, '#ffffff');
+        for (const x of [3, 5, 8, 10]) b.vline(x, 11, 14, '#5a5260');
+      }
       return true;
     }
     case 'chest':

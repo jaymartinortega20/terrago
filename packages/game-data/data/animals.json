@@ -1,0 +1,26 @@
+[
+ {
+  "id": "chicken",
+  "name": "Chicken",
+  "item": "chicken",
+  "product": "egg",
+  "everyMs": 1800000,
+  "level": 5
+ },
+ {
+  "id": "sheep",
+  "name": "Sheep",
+  "item": "sheep",
+  "product": "wool",
+  "everyMs": 3600000,
+  "level": 10
+ },
+ {
+  "id": "cow",
+  "name": "Cow",
+  "item": "cow",
+  "product": "milk",
+  "everyMs": 2700000,
+  "level": 15
+ }
+]

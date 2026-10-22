@@ -333,6 +333,10 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('stall:close', (ack) => respond(ack, () => eco.closeStall(g, p)));
     socket.on('stall:view', (id, ack) => respond(ack, () => eco.viewStall(g, p, id)));
     socket.on('stall:buy', (req, ack) => serial(ack, () => eco.buyStall(g, p, req)));
+    socket.on('animals:get', (ack) => respond(ack, () => eco.animals.get(g, p)));
+    socket.on('animals:add', (slot, ack) => serial(ack, () => eco.animals.add(g, p, slot)));
+    socket.on('animals:feed', (ack) => serial(ack, () => eco.animals.feed(g, p)));
+    socket.on('animals:collect', (ack) => serial(ack, () => eco.animals.collect(g, p)));
     socket.on('spec:choose', (req, ack) => serial(ack, () => chooseSpecialization(g, p, req)));
     socket.on('journal:get', (ack) => respond(ack, () => journal.journal(g, p)));
     socket.on('daily:login', (ack) => serial(ack, () => journal.claimLogin(g, p)));

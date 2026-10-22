@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -93,6 +93,8 @@ export interface UiState {
   journal: import('@terrago/shared').JournalView | null;
   /** Another player's stall being browsed. */
   stallView: import('@terrago/shared').StallView | null;
+  /** Bumped when the animal list changes. */
+  animalsVersion: number;
   /** Name of your own open stall. */
   stallOpenName: string | null;
   /** Today's login reward is waiting. */
@@ -149,6 +151,7 @@ export const initialUi: UiState = {
   journal: null,
   stallView: null,
   stallOpenName: null,
+  animalsVersion: 0,
   dailyReady: false,
   achievementToast: null,
   announcement: null,

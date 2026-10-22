@@ -2,11 +2,12 @@ import { getItem, getMap, waystones } from '@terrago/game-data';
 import { TILE_SIZE, sanitizeChatText, maskProfanity, type StallView, type TravelOption } from '@terrago/shared';
 import { GameError, withTransaction } from '../db';
 import { bankMove, bankUpgrade, bankView } from '../services/bank';
+import { addAnimal, collectAnimals, feedAnimals, listAnimals } from '../services/animals';
 import { changeGold } from '../services/ledger';
 import { lockCharacter } from '../services/inventory';
 import { buyFromStall } from '../services/market';
 import type { Player } from '../world/player';
-import { npcService, pushInventory, type GameplayDeps } from './gameplay';
+import { applyDelta, npcService, pushInventory, type GameplayDeps } from './gameplay';
 
 /**
  * Bank vaults, waystone travel and player market stalls.
@@ -156,3 +157,42 @@ export async function buyStall(deps: GameplayDeps, p: Player, req: unknown): Pro
   if (q.stall && q.stall.prices.size === 0) closeStall(deps, q);
   return { message: `Bought ${res.qty}× ${res.itemName} for ${res.total.toLocaleString()} Gold.` };
 }
+
+// --- Farm animals ------------------------------------------------------------
+
+function atPen(p: Player): void {
+  const def = getMap(p.mapId);
+  const pen = def?.pen;
+  if (!pen || p.instanceOwner?.id !== p.id) throw new GameError('Tend your animals at the pen on your homestead.');
+  const tx = p.x / TILE_SIZE;
+  const ty = p.y / TILE_SIZE;
+  if (tx < pen.x - 3 || tx > pen.x + pen.w + 3 || ty < pen.y - 3 || ty > pen.y + pen.h + 3) throw new GameError('Walk over to the animal pen.');
+}
+
+export const animals = {
+  get(deps: GameplayDeps, p: Player) {
+    return listAnimals(deps.pool, p.id);
+  },
+  async add(deps: GameplayDeps, p: Player, slot: unknown) {
+    atPen(p);
+    const r = await addAnimal(deps.pool, p.id, slot);
+    pushInventory(deps.world, p, r.inventory);
+    p.conn?.send('notice', { kind: 'success', text: r.message });
+    return r.animals;
+  },
+  async feed(deps: GameplayDeps, p: Player) {
+    atPen(p);
+    const r = await feedAnimals(deps.pool, p.id);
+    pushInventory(deps.world, p, r.inventory);
+    p.conn?.send('notice', { kind: 'success', text: r.message });
+    return r.animals;
+  },
+  async collect(deps: GameplayDeps, p: Player) {
+    atPen(p);
+    const r = await collectAnimals(deps.pool, p.id);
+    pushInventory(deps.world, p, r.inventory);
+    applyDelta(deps.world, p, r.delta);
+    p.conn?.send('notice', { kind: 'success', text: r.message });
+    return r.animals;
+  },
+};

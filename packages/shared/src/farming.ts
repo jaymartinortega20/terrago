@@ -45,6 +45,8 @@ export interface CropState {
   speed: number;
   fertilizer: string | null;
   harvests: number;
+  /** Pests arrive when growth reaches this many ms; growth stops until they're cleared. */
+  pestAt?: number | null;
 }
 
 export interface PlotState {
@@ -61,7 +63,7 @@ export const CROP_STAGES = 4;
 export function cropGrowth(c: CropState, def: CropDef, now: number): number {
   const wetEnd = Math.min(now, c.waterUntil);
   const wet = Math.max(0, wetEnd - c.progressAt);
-  return Math.min(def.growthMs, c.growthDone + wet * c.speed);
+  return Math.min(c.pestAt ?? def.growthMs, def.growthMs, c.growthDone + wet * c.speed);
 }
 
 export interface CropStatus {
@@ -75,6 +77,8 @@ export interface CropStatus {
   remainingMs: number | null;
   /** True if the soil will dry out before the crop is ready. */
   needsWaterSoon: boolean;
+  /** Pests are eating it: growth has stopped until you clear them. */
+  pests: boolean;
 }
 
 export function cropStatus(c: CropState, def: CropDef, now: number): CropStatus {
@@ -85,7 +89,8 @@ export function cropStatus(c: CropState, def: CropDef, now: number): CropStatus 
   const stage = ready ? CROP_STAGES - 1 : Math.min(CROP_STAGES - 2, Math.floor(progress * (CROP_STAGES - 1)));
   const remainingMs = ready ? null : Math.ceil((def.growthMs - g) / c.speed);
   const needsWaterSoon = !ready && (!watered || c.waterUntil - now < (remainingMs ?? 0));
-  return { stage, ready, watered, progress, remainingMs, needsWaterSoon };
+  const pests = !ready && c.pestAt != null && g >= c.pestAt;
+  return { stage, ready, watered, progress, remainingMs, needsWaterSoon, pests };
 }
 
 /** Settle growth to `now` and wet the soil for `waterMs`. */
@@ -102,6 +107,7 @@ export function afterHarvest(c: CropState, def: CropDef, now: number): CropState
     growthDone: Math.max(0, def.growthMs - def.regrowMs),
     progressAt: now,
     harvests: c.harvests + 1,
+    pestAt: null,
   };
 }
 
