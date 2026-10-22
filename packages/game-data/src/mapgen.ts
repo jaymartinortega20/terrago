@@ -1,4 +1,4 @@
-import { PROP_TYPES, TILE_SIZE, type MapDef, type MapObject, type NodePlacement, type PropType } from '@terrago/shared';
+import { PROP_TYPES, TILE_SIZE, type BuildingStyle, type MapDef, type MapObject, type NodePlacement, type PropType } from '@terrago/shared';
 
 /**
  * Map building toolkit. Used by scripts/generate-maps.ts to write the
@@ -97,8 +97,8 @@ export class MapBuilder {
     this.reserve(x - 1, y - 1, d.w + 2, d.h + 2);
   }
 
-  building(id: string, name: string, x: number, y: number, w: number, h: number, roof: string, wall: string, doorX: number) {
-    this.objects.push({ kind: 'building', id, name, x, y, w, h, roof, wall, doorX });
+  building(id: string, name: string, x: number, y: number, w: number, h: number, roof: string, wall: string, doorX: number, style?: BuildingStyle) {
+    this.objects.push({ kind: 'building', id, name, x, y, w, h, roof, wall, doorX, ...(style ? { style } : {}) });
     this.occupy(x, y, w, h);
     this.reserve(x + doorX, y + h, 1, 1);
     this.reserve(x - 1, y - 1, w + 2, h + 2);

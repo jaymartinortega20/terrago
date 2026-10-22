@@ -790,10 +790,15 @@ function dragonspire(): MapDef {
   // Summit (world boss)
   m.rect(36, 2, 24, 12, ':', true);
   m.prop('sign', 34, 13, 'The Summit. The Ancient Wyvern. Recommended: 15–25 players of level 90+.');
+  // The dragon knights' citadel guards the eastern slopes.
+  m.rect(40, 26, 13, 10, ':', true);
+  m.building('dragon_citadel', 'Dragonspire Citadel', 41, 27, 11, 7, '#8a2a2a', '#5e5550', 5, 'castle');
+  m.prop('torch', 44, 35);
+  m.prop('torch', 48, 35);
   for (let i = 0; i < 6; i++) {
     const x = 34 + Math.floor(r() * 24);
     const y = 20 + Math.floor(r() * 20);
-    m.rect(x, y, 2, 2, 'L', true);
+    if (m.free(x, y, 2, 2)) m.rect(x, y, 2, 2, 'L', true);
   }
   m.scatterNodes(r, [{ type: 'rock_dragonstone', solid: true, weight: 2 }, { type: 'rock_starmetal', solid: true, weight: 2 }], 12, undefined, 'na');
   m.scatterProps(r, ['tree_snow', 'rock', 'bones', 'tree_dead'], 60, undefined, 'na');

@@ -1,4 +1,4 @@
-import { PROP_TYPES, type BuildingDef, type GroundTileKey, type MapDef, type PropType } from '@terrago/shared';
+import { PROP_TYPES, type GroundTileKey, type MapDef, type PropType } from '@terrago/shared';
 import { drawExtraIcon } from './icons';
 import { ART_SCALE, OUTLINE, PixelBuffer, SHADOW, makeCanvas, mix, seeded, shade } from './pixel';
 
@@ -674,83 +674,7 @@ function drawProp(type: PropType, variant: number): PixelBuffer {
 // Buildings
 // ---------------------------------------------------------------------------
 
-export interface BuildingArt {
-  canvas: HTMLCanvasElement;
-  /** Sign position relative to the canvas's bottom-left, in screen px. */
-  signX: number;
-  signY: number;
-}
-
-const WALL_H = 38;
-const ROOF_OVERHANG = 8;
-
-export function buildingArt(def: BuildingDef): BuildingArt {
-  const w = def.w * T;
-  const h = def.h * T + ROOF_OVERHANG;
-  const b = new PixelBuffer(w, h);
-  const roof = def.roof;
-  const wall = def.wall;
-  const wallTop = h - WALL_H;
-  const beam = '#6b4a2e';
-
-  // Walls
-  b.rect(1, wallTop, w - 2, WALL_H, wall);
-  b.hline(1, w - 2, wallTop, beam).hline(1, w - 2, wallTop + 1, shade(beam, 0.2));
-  b.vline(1, wallTop, h - 1, beam).vline(w - 2, wallTop, h - 1, beam);
-  for (let x = 32; x < w - 8; x += 32) b.vline(x, wallTop, h - 1, beam);
-  b.hline(1, w - 2, h - 1, shade(wall, -0.35)).hline(1, w - 2, h - 2, shade(wall, -0.15));
-
-  // Door
-  const doorCx = def.doorX * T + T / 2;
-  const dx0 = doorCx - 6;
-  b.rect(dx0 - 1, h - 22, 14, 22, '#5a3e26');
-  b.rect(dx0, h - 21, 12, 21, '#8a5530');
-  b.vline(dx0 + 6, h - 21, h - 1, '#6e4224');
-  b.rect(dx0 + 2, h - 18, 3, 6, '#7a4a2a').rect(dx0 + 8, h - 18, 3, 6, '#7a4a2a');
-  b.set(dx0 + 9, h - 10, '#e3c35a');
-
-  // Windows, avoiding the door
-  for (let x = 8; x + 12 < w - 4; x += 24) {
-    if (Math.abs(x + 6 - doorCx) < 16) continue;
-    const y = wallTop + 10;
-    b.rect(x - 1, y - 1, 14, 12, '#5a3e26');
-    b.rect(x, y, 12, 10, '#9fd3ec');
-    b.rect(x, y, 5, 4, '#d4eefa');
-    b.vline(x + 6, y, y + 9, '#5a3e26').hline(x, x + 11, y + 5, '#5a3e26');
-    b.hline(x - 2, x + 13, y + 11, shade(wall, -0.3));
-  }
-
-  // Sign plank above the door
-  const signW = 30;
-  const sx = Math.max(2, Math.min(w - signW - 2, doorCx - signW / 2));
-  const sy = wallTop + 3;
-  b.rect(sx, sy, signW, 7, '#8a5d33').rect(sx + 1, sy + 1, signW - 2, 5, '#b8844d');
-
-  // Roof: shingle courses
-  const roofBottom = wallTop - 1;
-  for (let y = 0; y <= roofBottom; y++) {
-    const inset = Math.max(0, 6 - y);
-    const course = Math.floor((roofBottom - y) / 4);
-    const inCourse = (roofBottom - y) % 4;
-    const base = inCourse === 0 ? shade(roof, -0.22) : roof;
-    b.hline(inset, w - 1 - inset, y, base);
-    if (inCourse === 2) {
-      for (let x = inset + ((course % 2) * 3); x < w - inset; x += 6) b.set(x, y, shade(roof, 0.12));
-    }
-  }
-  b.hline(6, w - 7, 0, shade(roof, 0.3)).hline(5, w - 6, 1, shade(roof, 0.18));
-  b.hline(0, w - 1, roofBottom, shade(roof, -0.45)).hline(0, w - 1, roofBottom - 1, shade(roof, -0.3));
-  b.shadeIf((x, y) => y <= roofBottom && x > w - 8 && y > 2, shade(roof, -0.15));
-
-  if (def.id === 'tavern' || def.id === 'blacksmith') {
-    const cx = def.id === 'tavern' ? w - 30 : 14;
-    b.rect(cx, 0, 8, 12, '#8a817a').hline(cx - 1, cx + 8, 0, '#6b645e').vline(cx + 7, 1, 11, '#6b645e');
-  }
-
-  b.outline(OUTLINE);
-  const canvas = b.toCanvas();
-  return { canvas, signX: (sx + signW / 2) * ART_SCALE, signY: -(h - sy - 3.5) * ART_SCALE };
-}
+export { buildingArt, type BuildingArt } from './buildings';
 
 // ---------------------------------------------------------------------------
 // Item icons (16x16 logical)

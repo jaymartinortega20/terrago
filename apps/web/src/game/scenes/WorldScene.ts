@@ -296,22 +296,13 @@ export class WorldScene extends Phaser.Scene {
     this.night = this.add.rectangle(0, 0, W, H, 0x0a0f2c, 0).setOrigin(0, 0).setDepth(LABEL_DEPTH - 10);
     this.mapLayer.push(this.night);
     this.glows = [];
+    this.windowGlows = [];
+    this.chimneys = [];
     const indoor = !weatherRegion(map.theme);
     this.indoorDim = indoor ? (map.dungeon ? 0.32 : 0.22) : 0;
     for (const o of map.objects) {
       if (o.kind !== 'prop' || !['lamp', 'torch', 'campfire'].includes(o.type)) continue;
-      const key = this.canvasTexture('glow', () => {
-        const c = document.createElement('canvas');
-        c.width = c.height = 128;
-        const ctx = c.getContext('2d')!;
-        const grad = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
-        grad.addColorStop(0, 'rgba(255,200,120,1)');
-        grad.addColorStop(0.45, 'rgba(255,170,90,0.45)');
-        grad.addColorStop(1, 'rgba(255,150,60,0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 128, 128);
-        return c;
-      });
+      const key = this.glowKey();
       const g = this.add
         .image((o.x + 0.5) * TILE_SIZE, (o.y + 0.5) * TILE_SIZE, key)
         .setScale(o.type === 'campfire' ? 1.6 : 1.1)
@@ -331,6 +322,18 @@ export class WorldScene extends Phaser.Scene {
         const bx = o.x * TILE_SIZE;
         const by = (o.y + o.h) * TILE_SIZE;
         this.mapLayer.push(this.add.image(bx, by, key).setOrigin(0, 1).setDepth(by));
+        // Night: windows light up, lanterns and torches glow, chimneys smoke.
+        for (const wdw of art.windows) {
+          const g = this.add.rectangle(bx + wdw.x, by + wdw.y, wdw.w, wdw.h, 0xffc060, 0).setOrigin(0, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(LABEL_DEPTH - 9);
+          this.windowGlows.push(g);
+          this.mapLayer.push(g);
+        }
+        for (const l of art.lights) {
+          const g = this.add.image(bx + l.x, by + l.y, this.glowKey()).setScale(l.r / 40).setAlpha(0).setBlendMode(Phaser.BlendModes.ADD).setDepth(LABEL_DEPTH - 9);
+          this.glows.push(g);
+          this.mapLayer.push(g);
+        }
+        for (const c of art.chimneys) this.chimneys.push({ x: bx + c.x, y: by + c.y, next: 0 });
         this.mapLayer.push(
           this.add
             .text(bx + art.signX, by + art.signY, o.name, { fontFamily: LABEL_FONT, fontSize: '9px', color: '#fff6dc', fontStyle: 'bold' })
@@ -1081,6 +1084,36 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private night: Phaser.GameObjects.Rectangle | null = null;
+  private windowGlows: Phaser.GameObjects.Rectangle[] = [];
+  private chimneys: { x: number; y: number; next: number }[] = [];
+
+  private glowKey(): string {
+    return this.canvasTexture('glow', () => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d')!;
+      const grad = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
+      grad.addColorStop(0, 'rgba(255,200,120,1)');
+      grad.addColorStop(0.45, 'rgba(255,170,90,0.45)');
+      grad.addColorStop(1, 'rgba(255,150,60,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+      return c;
+    });
+  }
+
+  /** Chimney smoke: a soft grey puff now and then from every chimney on screen. */
+  private updateSmoke(time: number): void {
+    if (!this.chimneys.length) return;
+    const view = this.cameras.main.worldView;
+    for (const c of this.chimneys) {
+      if (time < c.next) continue;
+      c.next = time + 650 + Math.random() * 500;
+      if (!view.contains(c.x, c.y + 40)) continue;
+      const puff = this.add.circle(c.x + (Math.random() * 4 - 2), c.y - 2, 4 + Math.random() * 2, 0xd8d4cc, 0.55).setDepth(LABEL_DEPTH - 11);
+      this.tweens.add({ targets: puff, x: puff.x + 10 + Math.random() * 8, y: puff.y - 34 - Math.random() * 14, scale: 2.6, alpha: 0, duration: 2600, ease: 'Sine.easeOut', onComplete: () => puff.destroy() });
+    }
+  }
   private glows: Phaser.GameObjects.Image[] = [];
   private indoorDim = 0;
 
@@ -1092,11 +1125,14 @@ export class WorldScene extends Phaser.Scene {
     const flicker = 0.85 + Math.sin(time / 130) * 0.05 + Math.sin(time / 47) * 0.04;
     const glow = Math.min(0.5, (dark + (this.indoorDim ? 0.15 : 0)) * 0.75) * flicker;
     for (const g of this.glows) g.setAlpha(glow * 1.6);
+    const lit = Math.max(0, Math.min(0.85, (dark - 0.12) * 1.6));
+    for (const w of this.windowGlows) w.setFillStyle(0xffc060, lit * (0.9 + Math.sin(time / 600 + w.x) * 0.06));
   }
 
   override update(time: number): void {
     const client = this.client;
     this.updateLighting(time);
+    this.updateSmoke(time);
     this.updateSound(time);
     this.updatePets();
     // Phaser's delta is smoothed toward 60 FPS; movement must follow real time

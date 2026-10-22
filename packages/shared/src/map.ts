@@ -108,7 +108,11 @@ export interface BuildingDef {
   wall: string;
   /** Door column, relative to x. The door is on the bottom row. */
   doorX: number;
+  /** Look of the building (the client picks a default by id when missing). */
+  style?: BuildingStyle;
 }
+
+export type BuildingStyle = 'brick' | 'timber' | 'stone' | 'marble' | 'cottage' | 'castle';
 
 export interface PropDef {
   kind: 'prop';

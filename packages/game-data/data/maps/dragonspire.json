@@ -120,16 +120,16 @@
   "===============================nnnnnnnnnnnnnnnnnLLnnnnnnnnnn####",
   "===============================nnnnaaaaannnnnnLLnnnnnnnnnnnnnn##",
   "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnaaaaannnnnnLLnnnnnnnnnnnnnnn#",
-  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnaaaaannnnnnnnnnnnnnnnnnnnnnn#",
-  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnLLnnnLLnnnnnnn#",
-  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnLLnnnLLnnnnnnn#",
-  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
-  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnaaaaannnn####",
-  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnLLnnnnnnnnnaaaaannnn####",
-  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnLLnnnnnnnnnaaaaannn#####",
-  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn####",
-  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn###",
-  "###nnnnnnaaaaannnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn##",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnaaaaa:::::::::::::nnnnnnnnnn#",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::nLLnnnnnnn#",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::nLLnnnnnnn#",
+  "###nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::nnnnnnnn###",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::aaannnn####",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::aaannnn####",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::aaannn#####",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::nnnnnnn####",
+  "####nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::nnnnnnnn###",
+  "###nnnnnnaaaaannnnnnnnnnnnnnnnnnnnnnnnnn:::::::::::::nnnnnnnnn##",
   "###nnnnnnaaaaannnnnnnnnaaaaannnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn#",
   "###nnnnnnaaaaannnnnnnnnaaaaannnnnnnnnaaaaannnnnnnnnnnnnnnnnnnnn#",
   "###nnnnnnnnnnnnnnnnnnnnaaaaannnnnnnnnLLaaannnnnnnnnnnnnnnnnnnnn#",
@@ -175,6 +175,31 @@
    "x": 34,
    "y": 13,
    "text": "The Summit. The Ancient Wyvern. Recommended: 15–25 players of level 90+."
+  },
+  {
+   "kind": "building",
+   "id": "dragon_citadel",
+   "name": "Dragonspire Citadel",
+   "x": 41,
+   "y": 27,
+   "w": 11,
+   "h": 7,
+   "roof": "#8a2a2a",
+   "wall": "#5e5550",
+   "doorX": 5,
+   "style": "castle"
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 44,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 48,
+   "y": 35
   },
   {
    "kind": "prop",
@@ -316,21 +341,9 @@
   },
   {
    "kind": "prop",
-   "type": "tree_snow",
-   "x": 49,
-   "y": 36
-  },
-  {
-   "kind": "prop",
    "type": "tree_dead",
    "x": 34,
    "y": 11
-  },
-  {
-   "kind": "prop",
-   "type": "tree_snow",
-   "x": 46,
-   "y": 35
   },
   {
    "kind": "prop",
@@ -377,12 +390,6 @@
   {
    "kind": "prop",
    "type": "bones",
-   "x": 51,
-   "y": 25
-  },
-  {
-   "kind": "prop",
-   "type": "bones",
    "x": 38,
    "y": 17
   },
@@ -391,12 +398,6 @@
    "type": "bones",
    "x": 23,
    "y": 43
-  },
-  {
-   "kind": "prop",
-   "type": "tree_snow",
-   "x": 7,
-   "y": 33
   },
   {
    "kind": "prop",
@@ -427,12 +428,6 @@
    "type": "tree_dead",
    "x": 19,
    "y": 30
-  },
-  {
-   "kind": "prop",
-   "type": "tree_snow",
-   "x": 53,
-   "y": 36
   },
   {
    "kind": "prop",
@@ -535,6 +530,36 @@
    "type": "bones",
    "x": 9,
    "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 20,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 29,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 13,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 21,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 8,
+   "y": 42
   }
  ],
  "nodes": [
@@ -590,7 +615,7 @@
   {
    "id": "n7",
    "type": "rock_dragonstone",
-   "x": 50,
+   "x": 7,
    "y": 32,
    "solid": true
   },
