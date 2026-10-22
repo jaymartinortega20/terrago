@@ -130,7 +130,8 @@
   ],
   "services": [
    "shop",
-   "repair"
+   "repair",
+   "enhance"
   ]
  },
  {

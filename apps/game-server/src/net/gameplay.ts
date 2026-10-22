@@ -388,7 +388,7 @@ export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void>
 // NPC services
 // ---------------------------------------------------------------------------
 
-export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job') {
+export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job' | 'enhance') {
   const npc = getNpc(npcId);
   if (!npc || !npcOffers(npc, service)) throw new GameError("They can't help with that.");
   if (!world.npcInRange(p, npc)) throw new GameError("You're too far away.");
@@ -481,8 +481,11 @@ export const gear = {
     return null;
   },
   async enhance(deps: GameplayDeps, p: Player, req: unknown) {
-    if (!nearStation(deps.world, p, 'enhance_altar')) throw new GameError('Stand at the Enhancement Altar in Greenhaven.');
-    const res = await enhance(deps.pool, p.id, (req as { equipSlot?: unknown })?.equipSlot);
+    const r = (req ?? {}) as { equipSlot?: unknown; npcId?: unknown };
+    // At the town blacksmith (or the old altar).
+    if (r.npcId) npcService(deps.world, p, r.npcId, 'enhance');
+    else if (!nearStation(deps.world, p, 'enhance_altar')) throw new GameError('Talk to Blacksmith Toren in Oakhaven to upgrade your gear.');
+    const res = await enhance(deps.pool, p.id, r.equipSlot);
     pushInventory(deps.world, p, res.inventory);
     return { success: res.success, message: res.message };
   },

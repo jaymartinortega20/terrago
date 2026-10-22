@@ -595,5 +595,98 @@
    "color": "#5fd4e6"
   },
   "solid": false
+ },
+ {
+  "id": "gem_ruby",
+  "name": "Ruby Vein",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 2,
+  "level": 41,
+  "yields": 2,
+  "respawnMs": 240000,
+  "xp": 70,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "ruby",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "stone",
+    "chance": 0.5,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "kind": "crystal",
+   "color": "#e0483a"
+  },
+  "solid": true
+ },
+ {
+  "id": "gem_sapphire",
+  "name": "Sapphire Vein",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 2,
+  "level": 55,
+  "yields": 2,
+  "respawnMs": 300000,
+  "xp": 95,
+  "energy": 2,
+  "drops": [
+   {
+    "itemId": "sapphire",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "stone",
+    "chance": 0.5,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "kind": "crystal",
+   "color": "#4a7fd6"
+  },
+  "solid": true
+ },
+ {
+  "id": "gem_diamond",
+  "name": "Diamond Vein",
+  "skill": "mining",
+  "tool": "pickaxe",
+  "toolTier": 3,
+  "level": 75,
+  "yields": 2,
+  "respawnMs": 420000,
+  "xp": 150,
+  "energy": 3,
+  "drops": [
+   {
+    "itemId": "diamond",
+    "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "crystal_ore",
+    "chance": 0.4,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "kind": "crystal",
+   "color": "#dff4ff"
+  },
+  "solid": true
  }
 ]

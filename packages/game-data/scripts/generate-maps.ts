@@ -498,6 +498,8 @@ function desolateCrags(): MapDef {
     { type: 'rock_gold', solid: true, weight: 2 },
     { type: 'rock_coal', solid: true, weight: 2 },
   ], 26, undefined, 'ka');
+  // Low-tier upgrade gems.
+  m.scatterNodes(r, [{ type: 'gem_ruby', solid: true, weight: 3 }, { type: 'gem_sapphire', solid: true, weight: 1 }], 10, undefined, 'ka');
   m.scatterProps(r, ['rock', 'rock', 'stalagmite', 'tree_dead', 'bones'], 45, undefined, 'ka');
   return m.toMap({
     id: 'desolate_crags',
@@ -548,6 +550,8 @@ function glacialDepths(): MapDef {
     { type: 'rock_obsidian', solid: true, weight: 2 },
     { type: 'rock_starmetal', solid: true, weight: 1 },
   ], 24, undefined, 'nc');
+  // High-tier upgrade gems.
+  m.scatterNodes(r, [{ type: 'gem_sapphire', solid: true, weight: 2 }, { type: 'gem_diamond', solid: true, weight: 2 }], 10, undefined, 'nc');
   m.scatterProps(r, ['tree_snow', 'rock', 'stalagmite', 'stalagmite'], 45, undefined, 'nc');
   return m.toMap({
     id: 'glacial_depths',

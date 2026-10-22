@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';
 import pg from 'pg';
+import { NPCS } from '@terrago/game-data';
 import { tileCenter, type CombatEvent, type PublicMonster } from '@terrago/shared';
 import type { GameServer } from '../../src/app';
 import { TEST_DB, ack, enterWorld, leaveWorld, newPlayer, resetDatabase, startTestServer, waitFor } from './helpers';
@@ -161,5 +162,42 @@ describe('combat (v0.5)', () => {
     assert.equal(un.ok, true);
     assert.equal(p.profile.derived.physicalDefense, def0);
     await leaveWorld(a.socket);
+  });
+
+  test('upgrades at the blacksmith use mined gems by tier; others see the glow and wings', async () => {
+    const npc = NPCS.find((n) => n.id === 'blacksmith_toren')!;
+    const A = await newPlayer(base, { classId: 'warrior' });
+    const B = await newPlayer(base, { classId: 'mage' });
+    await place(A.character.id, npc.mapId, npc.x, npc.y + 1, 'up');
+    await place(B.character.id, npc.mapId, npc.x + 1, npc.y + 1, 'up');
+    await db.query('UPDATE characters SET level = 40, gold = 100000 WHERE id = $1', [A.character.id]);
+    await db.query(`INSERT INTO inventories (character_id, container, capacity) VALUES ($1, 'equip', 9) ON CONFLICT DO NOTHING`, [A.character.id]);
+    await db.query(
+      `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, durability, enhance) VALUES ($1, 'equip', 3, 'padded_chest', 1, 180, 3), ($1, 'bag', 10, 'fairy_wings', 1, 400, 0)`,
+      [A.character.id],
+    );
+    const a = await enterWorld(base, A.browser.cookie, A.character.id);
+    const b = await enterWorld(base, B.browser.cookie, B.character.id);
+    const looks: any[] = [];
+    b.socket.on('entity:update', (id: string, patch: any) => id === A.character.id && looks.push(patch));
+    await waitFor(() => server.world.players.get(B.character.id)!.known.has(A.character.id));
+    const noGem = await ack(a.socket, 'enhance', { equipSlot: 3, npcId: npc.id });
+    assert.equal(noGem.ok, false);
+    assert.match(noGem.error, /Sapphire/);
+    await db.query(`INSERT INTO inventory_items (character_id, container, slot, item_id, quantity) VALUES ($1, 'bag', 11, 'sapphire', 30)`, [A.character.id]);
+    let level = 3;
+    for (let i = 0; i < 15 && level < 4; i++) {
+      const r = await ack(a.socket, 'enhance', { equipSlot: 3, npcId: npc.id });
+      assert.equal(r.ok, true, JSON.stringify(r));
+      level = (await db.query(`SELECT enhance FROM inventory_items WHERE character_id = $1 AND container = 'equip' AND slot = 3`, [A.character.id])).rows[0].enhance;
+    }
+    assert.equal(level, 4);
+    const used = await db.query(`SELECT coalesce(sum(quantity), 0)::int AS n FROM item_transactions WHERE from_character_id = $1 AND item_id = 'sapphire' AND reason = 'enhance'`, [A.character.id]);
+    assert.ok(used.rows[0].n >= 1, 'sapphires were spent');
+    await waitFor(() => looks.find((l) => l.armorGlow === 4), 3000);
+    assert.equal((await ack(a.socket, 'equip', { from: 10 })).ok, true);
+    await waitFor(() => looks.find((l) => l.back === 'fairy_wings'), 3000);
+    assert.equal(server.world.players.get(A.character.id)!.toPublic().back, 'fairy_wings');
+    for (const s of [a, b]) await leaveWorld(s.socket);
   });
 });

@@ -1231,7 +1231,8 @@ export class GameClient {
 
   async enhance(equipSlot: number): Promise<void> {
     try {
-      const r = await this.request<{ success: boolean; message: string }>('enhance', { equipSlot });
+      const npcId = this.ui.get().serviceNpc;
+      const r = await this.request<{ success: boolean; message: string }>('enhance', npcId && this.ui.get().panel === 'enhance' ? { equipSlot, npcId } : { equipSlot });
       pushNotice(this.ui, r.success ? 'success' : 'error', r.message, 4000);
     } catch (e) {
       pushNotice(this.ui, 'error', (e as Error).message);

@@ -124,7 +124,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
   /** Hotbar: first press selects the slot, pressing a selected food eats it. */
   const pressSlot = (slot: number) => {
     const item = ui.get().inventory?.slots.find((s) => s.slot === slot);
-    if (ui.get().selectedSlot === slot && item && getItem(item.itemId)?.consumable) client.useItem(slot);
+    if (ui.get().selectedSlot === slot && item && (getItem(item.itemId)?.consumable || getItem(item.itemId)?.unlock)) client.useItem(slot);
     else client.selectSlot(slot);
   };
   const [menuOpen, setMenuOpen] = useState(false);

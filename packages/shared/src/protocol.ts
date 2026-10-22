@@ -145,7 +145,7 @@ export interface ServerToClientEvents {
   /** A boss is winding up an area attack: warn players (pixels, ms until impact). */
   'telegraph': (t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
   /** A visible player's look changed (mount, weapon). */
-  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('./types').Appearance; job?: import('./types').JobId | null }) => void;
+  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('./types').Appearance; job?: import('./types').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null }) => void;
   /** Someone nearby (or you) did an emote. */
   'emote': (e: { id: string; emote: import('./types').EmoteId }) => void;
   /** Someone nearby worked a tile (farming, mining, chopping...) — for their tool animation. */
@@ -212,7 +212,7 @@ export interface ClientToServerEvents {
   'skill': (req: { skillId: string; targetId: string | null }, ack: Ack<{ cooldownMs: number }>) => void;
   'equip': (req: { from: number }, ack: Ack<null>) => void;
   'unequip': (req: { slot: number }, ack: Ack<null>) => void;
-  'enhance': (req: { equipSlot: number }, ack: Ack<{ success: boolean; message: string }>) => void;
+  'enhance': (req: { equipSlot: number; npcId?: string }, ack: Ack<{ success: boolean; message: string }>) => void;
   'mount:toggle': (ack: Ack<{ mount: string | null }>) => void;
   'market:search': (q: MarketQuery, ack: Ack<{ listings: MarketListing[]; total: number }>) => void;
   'market:mine': (ack: Ack<{ listings: MarketListing[] }>) => void;

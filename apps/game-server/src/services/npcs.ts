@@ -16,6 +16,7 @@ const ACTION_LABELS: Record<DialogueActionId, string> = {
   lift: 'Take the lift',
   bank: 'Open my vault',
   job: 'Choose my second job',
+  enhance: 'Upgrade my gear',
   quest_offer: 'Quest',
   quest_complete: 'Complete quest',
 };

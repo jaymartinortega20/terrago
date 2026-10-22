@@ -143,9 +143,16 @@ export async function enhance(pool: Pool, characterId: string, equipSlot: unknow
     const lvl = item.enhance ?? 0;
     if (lvl >= MAX_ENHANCE) throw new GameError(`${def.name} is already +${MAX_ENHANCE}.`);
     const cost = enhanceCost(lvl, def.vendorValue);
-    const stones = removeItemById(bag.slots, 'enhancement_stone', cost.stones);
-    if (!stones.ok) throw new GameError(`You need ${cost.stones} Enhancement Stone${cost.stones > 1 ? 's' : ''}.`);
-    await logItemMovement(tx, { itemId: 'enhancement_stone', quantity: cost.stones, from: characterId, reason: 'enhance' });
+    // Gems from mining (Ruby / Sapphire / Diamond). Blessed Enhancement Stones count as Rubies.
+    let stones = removeItemById(bag.slots, cost.gem, cost.gems);
+    let paidWith: string = cost.gem;
+    if (!stones.ok && cost.gem === 'ruby') {
+      stones = removeItemById(bag.slots, 'enhancement_stone', cost.gems);
+      paidWith = 'enhancement_stone';
+    }
+    const gemName = getItem(cost.gem)?.name ?? cost.gem;
+    if (!stones.ok) throw new GameError(`You need ${cost.gems} ${gemName}${cost.gems > 1 ? 's' : ''} for +${lvl + 1}. Mine them in the ${cost.gem === 'diamond' ? 'Glacial Depths' : 'Desolate Crags'}.`);
+    await logItemMovement(tx, { itemId: paidWith, quantity: cost.gems, from: characterId, reason: 'enhance' });
     const { after } = await changeGold(tx, characterId, -cost.gold, 'enhance', { type: 'item', id: def.id });
     const alchemist = (await specFor(tx, characterId, 'alchemy')) === 'enhancement_alchemist';
     const success = rand() < enhanceChance(lvl) + (alchemist ? 0.05 : 0);

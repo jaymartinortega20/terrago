@@ -181,6 +181,10 @@ export interface PublicPlayer {
   pose?: 'sit' | null;
   /** Second job, shown under the name. */
   job?: JobId | null;
+  /** Upgrade level of the weapon and best armor piece (for the glow), and the back item (wings). */
+  weaponGlow?: number;
+  armorGlow?: number;
+  back?: string | null;
 }
 
 /** Emotes players can do (chat /wave, or the emote menu). */
@@ -227,6 +231,10 @@ export interface ItemDef {
   pet?: { kind: string; color: string; perk: 'gold' | 'fish' | 'xp' | 'regen' | 'dragon' };
   /** Rideable: speed multiplier and look. */
   mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' | 'boar' };
+  /** Used from the bag: unlock an exclusive skin (by outfit name) or open a cache. */
+  unlock?: { skin?: string; cache?: 'infernal' };
+  /** Wings (back slot): their look. */
+  wings?: { style: 'fairy' | 'angel' | 'demon' | 'dragon'; color: string };
 }
 
 export type ToolKind = 'hoe' | 'can' | 'pickaxe' | 'axe' | 'rod' | 'sickle';
@@ -288,7 +296,7 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job' | 'enhance';
 
 export interface DialogueAction {
   id: DialogueActionId;

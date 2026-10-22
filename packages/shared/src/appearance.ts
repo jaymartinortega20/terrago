@@ -48,6 +48,7 @@ export const OUTFITS: readonly OutfitPalette[] = [
   { name: 'Shadow Assassin', shirt: '#2e2838', shirtShade: '#1e1a26', pants: '#1e1a26', shoes: '#141018', accent: '#b06ad6', robe: false, exclusive: true, extras: ['hood'] },
   { name: 'Frost Archmage', shirt: '#8fd0ff', shirtShade: '#5fa0d0', pants: '#5fa0d0', shoes: '#2f4a6a', accent: '#ffffff', robe: true, exclusive: true, extras: ['hood'] },
   { name: 'Forest Warden', shirt: '#3c8a3a', shirtShade: '#2c6a2a', pants: '#5d4426', shoes: '#33291c', accent: '#d8b45a', robe: false, exclusive: true, extras: ['cape', 'bandana'] },
+  { name: 'Infernal Warlord', shirt: '#2a1a1e', shirtShade: '#1a1014', pants: '#3a1a1a', shoes: '#140c0c', accent: '#ff5a2a', robe: false, exclusive: true, extras: ['cape', 'helmet'] },
   { name: 'Game Master', shirt: '#f4f0e6', shirtShade: '#cfc6b0', pants: '#cfc6b0', shoes: '#8a6420', accent: '#e8c24a', robe: true, exclusive: true, extras: ['cape', 'crown'] },
 ] as const;
 

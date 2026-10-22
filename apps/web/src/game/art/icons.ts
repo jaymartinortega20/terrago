@@ -235,6 +235,22 @@ export function drawExtraIcon(icon: string, b: PixelBuffer): boolean {
     case 'armor':
       armor(b, a ?? 'chest', c);
       return true;
+    case 'wings': {
+      // A pair of small wings: icon:style:color
+      const col = `#${c ?? 'ffffff'}`;
+      const dark = shade(col, -0.3);
+      for (const flip of [false, true]) {
+        for (let y = 2; y < 13; y++) {
+          const w = Math.round(Math.sin(((y - 2) / 11) * Math.PI) * 5) + (y < 7 ? 1 : 0);
+          for (let x = 0; x < w; x++) {
+            const px = flip ? 9 + x : 6 - x;
+            b.set(px, y, a === 'demon' || a === 'dragon' ? (x === w - 1 || y % 3 === 0 ? dark : col) : (x + y) % 3 === 0 ? shade(col, -0.12) : col);
+          }
+        }
+      }
+      b.rect(7, 5, 2, 5, '#8a6a42');
+      return true;
+    }
     case 'fertilizer':
       b.ellipse(2, 4, 12, 11, a === 'speed' ? '#5aa0a0' : '#8a6a42').rect(5, 2, 6, 3, '#6b4628');
       b.rect(5, 7, 6, 5, a === 'speed' ? '#b6f0d8' : '#c9e07a').set(7, 8, a === 'speed' ? '#5fc49a' : '#6f9a3c');

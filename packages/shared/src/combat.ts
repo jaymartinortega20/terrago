@@ -51,8 +51,20 @@ export function enhanceChance(n: number): number {
 /** Above this level a failure drops the item one level (never destroys it). */
 export const ENHANCE_SAFE_LEVEL = 6;
 
-export function enhanceCost(n: number, vendorValue: number): { gold: number; stones: number } {
-  return { gold: Math.round((50 + vendorValue * 0.5) * (n + 1) ** 1.6), stones: n < 4 ? 1 : n < 7 ? 2 : 3 };
+/** Upgrade gems by tier: Ruby for +1..+3, Sapphire for +4..+6, Diamond for +7..+10. */
+export type UpgradeGem = 'ruby' | 'sapphire' | 'diamond';
+
+/** Cost to go from +n to +n+1: Gold plus gems (stones = gems, for older callers). */
+export function enhanceCost(n: number, vendorValue: number): { gold: number; gem: UpgradeGem; gems: number; stones: number } {
+  const gem: UpgradeGem = n < 3 ? 'ruby' : n < 6 ? 'sapphire' : 'diamond';
+  const gems = [1, 1, 2, 1, 2, 2, 1, 2, 2, 3][n] ?? 3;
+  return { gold: Math.round((50 + vendorValue * 0.5) * (n + 1) ** 1.6), gem, gems, stones: gems };
+}
+
+/** How brightly upgraded gear glows: 0 none, 1 faint blue (+4), 2 purple (+7), 3 white-gold radiance (+10). */
+export function glowTier(enhance: number | undefined | null): 0 | 1 | 2 | 3 {
+  const e = enhance ?? 0;
+  return e >= 10 ? 3 : e >= 7 ? 2 : e >= 4 ? 1 : 0;
 }
 
 export interface ClassGrowth {

@@ -76,9 +76,9 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
             )}
           </ul>
           <div className="mt-2 flex gap-2">
-            {def.consumable && (
+            {(def.consumable || def.unlock) && (
               <button className="px-btn green small" onClick={() => client.useItem(sel.slot)} data-testid="use-item">
-                Use
+                {def.unlock?.cache ? 'Open' : def.unlock?.skin ? 'Unlock skin' : 'Use'}
               </button>
             )}
             {def.pet && (

@@ -18,6 +18,7 @@ import { TokenBucket } from '../security/rateLimit';
 import { loadCharacter, useItem } from '../services/characters';
 import { getInventory, moveInventoryItem } from '../services/inventory';
 import { addStatPoints, advanceJob } from './jobs';
+import { useUnlock } from '../services/unlocks';
 import { ownedSkins, wearOutfit } from './wardrobe';
 import { getItem } from '@terrago/game-data';
 import { getNpc, talkToNpc } from '../services/npcs';
@@ -294,6 +295,13 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
             world.broadcastLook(p, { pet: next });
             const name = getItem(inv.itemId)!.name;
             return { inventory: world.inventoryCache.get(p.id)!, message: next ? `${name} is following you.` : `${name} went home.` };
+          }
+          if (inv && getItem(inv.itemId)?.unlock) {
+            const u = await useUnlock(pool, p.id, p.rec.classId, slot as number);
+            const full = { ...u.inventory, equipment: world.inventoryCache.get(p.id)?.equipment ?? [] };
+            world.inventoryCache.set(p.id, full);
+            p.conn?.send('inventory:update', full);
+            return { inventory: full, message: u.message };
           }
           const res = await useItem(pool, p.id, slot as number);
           p.rec.hp = Math.min(p.profile.maxHp, p.rec.hp + res.hp);

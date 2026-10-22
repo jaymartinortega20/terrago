@@ -1,6 +1,16 @@
-import { getClass, getJob, getMonster, getSkillDef } from '@terrago/game-data';
+import { getClass, getItem, getJob, getMonster, getSkillDef } from '@terrago/game-data';
 
 const RESOURCE_NAME = { mana: 'Mana', rage: 'Rage', energy: 'Energy' } as const;
+
+/** How each companion fights: damage multiplier, attack interval, crit bonus, heals. */
+const COMPANIONS: Record<string, { mult: number; everyMs: number; crit?: number; heal?: boolean }> = {
+  dog: { mult: 0.5, everyMs: 2200 },
+  cat: { mult: 0.7, everyMs: 1800 },
+  fox: { mult: 0.75, everyMs: 1800, crit: 15 },
+  slime: { mult: 0.3, everyMs: 2500, heal: true },
+  dragonling: { mult: 1.05, everyMs: 2000 },
+  hawk: { mult: 1.0, everyMs: 1600, crit: 10 },
+};
 import {
   OUT_OF_COMBAT_MS,
   PLAYER_BODY,
@@ -313,10 +323,41 @@ export class Combat {
       this.rand,
     );
     p.lastCombatAt = now;
+    // A companion defends its owner: it goes for whatever is attacking them.
+    if (!p.fightTarget || !rt.monsters.get(p.fightTarget)?.alive) p.fightTarget = m.id;
     // LUK: perfect dodge (0.1% per point, up to 20%) ignores the hit entirely.
     const perfectDodge = Math.min(0.2, p.profile.stats.luck * 0.001);
     if (res.miss || this.rand() < perfectDodge) return this.emit(rt, { s: m.id, t: p.id, a: 0, k: 'miss' });
-    this.damagePlayer(rt, p, Math.round(res.damage * effectMult(p.effects, 'taken', now)), m.id, res.crit ? 'crit' : 'hit');
+    // A dog draws some of the attacks onto itself.
+    const guard = p.pet && getItem(p.pet)?.pet?.kind === 'dog' ? 0.85 : 1;
+    this.damagePlayer(rt, p, Math.round(res.damage * effectMult(p.effects, 'taken', now) * guard), m.id, res.crit ? 'crit' : 'hit');
+  }
+
+  /**
+   * Pets and the Beastmaster's hawk fight alongside their owner: every couple
+   * of seconds they hit the monster the owner is fighting. Kill credit and loot
+   * go to the owner. The slime pet heals instead of biting hard.
+   */
+  private companionTick(rt: MapRuntime, p: Player, now: number): void {
+    if (now < p.companionNextAt || rt.def.safeZone) return;
+    const hawk = p.rec.job === 'beastmaster';
+    const pet = p.pet ? getItem(p.pet)?.pet : undefined;
+    if (!hawk && !pet) return;
+    if (now - p.lastCombatAt > 8000) return;
+    const m = p.fightTarget ? rt.monsters.get(p.fightTarget) : undefined;
+    if (!m?.alive || dist(p.x, p.y, m.x, m.y) > 7 * TILE) return;
+    const kind = hawk ? 'hawk' : pet!.kind;
+    const spec = COMPANIONS[kind] ?? COMPANIONS.dog!;
+    p.companionNextAt = now + spec.everyMs;
+    const crit = this.rand() * 100 < 5 + (spec.crit ?? 0);
+    const base = (6 + p.rec.level * 1.6) * spec.mult * (crit ? 1.5 : 1) * (0.85 + this.rand() * 0.3);
+    const dmg = Math.max(1, Math.round(base * effectMult(m.effects, 'taken', now)));
+    this.damageMonster(rt, m, dmg, p, crit ? 'crit' : 'hit', hawk ? 'hawk' : 'pet');
+    if (spec.heal && !p.dead) {
+      const amount = Math.max(1, Math.round(p.profile.maxHp * 0.02));
+      p.rec.hp = Math.min(p.profile.maxHp, p.rec.hp + amount);
+      this.emit(rt, { s: p.id, t: p.id, a: amount, k: 'heal', sk: 'pet' });
+    }
   }
 
   damagePlayer(rt: MapRuntime, p: Player, amount: number, source: string, kind: CombatEvent['k']): void {
@@ -369,6 +410,7 @@ export class Combat {
     const before = p.effects.length;
     p.effects = p.effects.filter((e) => e.until > now);
     if (p.effects.length !== before) this.pushEffects(p);
+    this.companionTick(rt, p, now);
     // Regeneration: fast out of combat, slow in it; Blessing adds more.
     const ooc = now - p.lastCombatAt > OUT_OF_COMBAT_MS;
     const sec = dtMs / 1000;
@@ -500,6 +542,7 @@ export class Combat {
     const atk = this.attackerOf(p, magic, now);
     atk.critChance += effectSum(m.effects, 'critTaken', now);
     const res = rollHit(atk, { level: m.level, def: magic ? m.stats.def * 0.8 : m.stats.def, evasion: m.stats.evasion }, mult, this.rand);
+    p.fightTarget = m.id;
     if (!res.miss && !skill) this.gainRage(p, res.crit ? 10 : 6);
     if (m.state === 'idle' || m.state === 'return') {
       m.state = 'chase';

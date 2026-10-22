@@ -156,48 +156,6 @@
   {
    "kind": "prop",
    "type": "rock",
-   "x": 12,
-   "y": 14
-  },
-  {
-   "kind": "prop",
-   "type": "bones",
-   "x": 45,
-   "y": 35
-  },
-  {
-   "kind": "prop",
-   "type": "bones",
-   "x": 59,
-   "y": 14
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 5,
-   "y": 14
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
-   "x": 58,
-   "y": 33
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
-   "x": 59,
-   "y": 16
-  },
-  {
-   "kind": "prop",
-   "type": "bones",
-   "x": 54,
-   "y": 26
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
    "x": 58,
    "y": 29
   },
@@ -282,6 +240,12 @@
   {
    "kind": "prop",
    "type": "rock",
+   "x": 44,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
    "x": 53,
    "y": 34
   },
@@ -314,6 +278,12 @@
    "type": "stalagmite",
    "x": 41,
    "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 6,
+   "y": 15
   },
   {
    "kind": "prop",
@@ -356,12 +326,6 @@
    "type": "tree_dead",
    "x": 9,
    "y": 8
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 59,
-   "y": 44
   },
   {
    "kind": "prop",
@@ -422,6 +386,42 @@
    "type": "tree_dead",
    "x": 22,
    "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 42,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 14,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 19,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 27,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 55,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 46,
+   "y": 37
   }
  ],
  "nodes": [
@@ -605,6 +605,76 @@
    "type": "rock_coal",
    "x": 59,
    "y": 39,
+   "solid": true
+  },
+  {
+   "id": "n26",
+   "type": "gem_ruby",
+   "x": 41,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n27",
+   "type": "gem_ruby",
+   "x": 24,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n28",
+   "type": "gem_sapphire",
+   "x": 54,
+   "y": 12,
+   "solid": true
+  },
+  {
+   "id": "n29",
+   "type": "gem_sapphire",
+   "x": 49,
+   "y": 41,
+   "solid": true
+  },
+  {
+   "id": "n30",
+   "type": "gem_ruby",
+   "x": 60,
+   "y": 44,
+   "solid": true
+  },
+  {
+   "id": "n31",
+   "type": "gem_ruby",
+   "x": 55,
+   "y": 4,
+   "solid": true
+  },
+  {
+   "id": "n32",
+   "type": "gem_ruby",
+   "x": 4,
+   "y": 43,
+   "solid": true
+  },
+  {
+   "id": "n33",
+   "type": "gem_ruby",
+   "x": 27,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n34",
+   "type": "gem_ruby",
+   "x": 36,
+   "y": 44,
+   "solid": true
+  },
+  {
+   "id": "n35",
+   "type": "gem_sapphire",
+   "x": 54,
+   "y": 26,
    "solid": true
   }
  ]

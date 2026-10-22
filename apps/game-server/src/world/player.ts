@@ -4,6 +4,13 @@ import type { CharacterRecord } from './characterState';
 import type { Connection } from './connection';
 
 /** A character that is currently in the world (connected or briefly link-dead). */
+/** What others see of someone's gear: upgrade glow on weapon/armor, and the back item (wings). */
+export function gearLook(equipment: { slot: number; itemId: string; enhance?: number }[]): { weaponGlow: number; armorGlow: number; back: string | null } {
+  const at = (slot: number) => equipment.find((e) => e.slot === slot);
+  const armor = equipment.filter((e) => e.slot >= 2 && e.slot <= 5).map((e) => e.enhance ?? 0);
+  return { weaponGlow: at(0)?.enhance ?? 0, armorGlow: armor.length ? Math.max(...armor) : 0, back: at(8)?.itemId ?? null };
+}
+
 export class Player {
   readonly id: string;
   readonly userId: string;
@@ -59,6 +66,9 @@ export class Player {
   dungeonDifficulty: import('@terrago/shared').DifficultyId = 'normal';
   /** Chat mute set by a moderator (ms since epoch). */
   mutedUntil = 0;
+  /** The monster this player is fighting (their pet or hawk attacks it too). */
+  fightTarget: string | null = null;
+  companionNextAt = 0;
   /** Sitting down (cleared when they move). */
   pose: 'sit' | null = null;
   lastEmoteAt = 0;
@@ -134,6 +144,7 @@ export class Player {
       pet: this.pet,
       pose: this.pose,
       job: this.rec.job ?? null,
+      ...gearLook(this.rec.equipment ?? []),
     };
   }
 

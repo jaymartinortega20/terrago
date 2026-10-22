@@ -154,12 +154,17 @@ export function EnhancePanel({ client, onClose }: { client: GameClient; onClose:
   const inv = useStore(client.ui, (s) => s.inventory);
   const [busy, setBusy] = useState(false);
   if (!inv) return null;
-  const stones = inv.slots.filter((s) => s.itemId === 'enhancement_stone').reduce((n, s) => n + s.quantity, 0);
+  const count = (id: string) => inv.slots.filter((s) => s.itemId === id).reduce((n, s) => n + s.quantity, 0);
+  const have = { ruby: count('ruby') + count('enhancement_stone'), sapphire: count('sapphire'), diamond: count('diamond') };
   return (
-    <Window title="Enhancement Altar" onClose={onClose} testId="enhance-panel" wide>
+    <Window title="Blacksmith: Upgrades" onClose={onClose} testId="enhance-panel" wide>
       <p className="text-xs">
-        Strengthen worn equipment (+8% stats per level, up to +{MAX_ENHANCE}). Costs Gold and Enhancement Stones even on failure. Failures above +{ENHANCE_SAFE_LEVEL} drop the item one level — it is
-        never destroyed. You have <b>{stones}</b> stones.
+        Upgrade worn gear up to +{MAX_ENHANCE} (+8% stats per level). Each upgrade costs Gold and gems, even on failure: <b className="text-[#c0392b]">Ruby</b> for +1–+3,{' '}
+        <b className="text-[#2f5fa8]">Sapphire</b> for +4–+6, <b>Diamond</b> for +7–+10. Mine them in the Desolate Crags and Glacial Depths. Failures above +{ENHANCE_SAFE_LEVEL} drop the item one
+        level; it is never destroyed. Upgraded gear glows: blue from +4, purple from +7, radiant gold at +10.
+      </p>
+      <p className="mt-1 text-xs" data-testid="gem-count">
+        You have <b>{have.ruby}</b> Ruby (incl. blessed stones) · <b>{have.sapphire}</b> Sapphire · <b>{have.diamond}</b> Diamond
       </p>
       <ul className="mt-2 space-y-1">
         {(inv.equipment ?? []).map((e) => {
@@ -176,7 +181,8 @@ export function EnhancePanel({ client, onClose }: { client: GameClient; onClose:
                 </p>
                 {lvl < MAX_ENHANCE ? (
                   <p>
-                    → +{lvl + 1}: {Math.round(enhanceChance(lvl) * 100)}% · {cost.gold} Gold · {cost.stones} stone{cost.stones > 1 ? 's' : ''}
+                    → +{lvl + 1}: {Math.round(enhanceChance(lvl) * 100)}% · {cost.gold} Gold · {cost.gems} {getItem(cost.gem)?.name}
+                    {cost.gems > 1 ? 's' : ''}
                   </p>
                 ) : (
                   <p>Maximum level.</p>
@@ -184,14 +190,14 @@ export function EnhancePanel({ client, onClose }: { client: GameClient; onClose:
               </div>
               <button
                 className="px-btn green small"
-                disabled={busy || lvl >= MAX_ENHANCE || stones < cost.stones || inv.gold < cost.gold}
+                disabled={busy || lvl >= MAX_ENHANCE || have[cost.gem] < cost.gems || inv.gold < cost.gold}
                 onClick={async () => {
                   setBusy(true);
                   await client.enhance(e.slot);
                   setBusy(false);
                 }}
               >
-                Enhance
+                Upgrade
               </button>
             </li>
           );

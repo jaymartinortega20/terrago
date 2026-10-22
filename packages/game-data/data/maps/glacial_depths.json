@@ -192,72 +192,6 @@
   },
   {
    "kind": "prop",
-   "type": "rock",
-   "x": 36,
-   "y": 6
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
-   "x": 7,
-   "y": 34
-  },
-  {
-   "kind": "prop",
-   "type": "tree_snow",
-   "x": 50,
-   "y": 41
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 36,
-   "y": 14
-  },
-  {
-   "kind": "prop",
-   "type": "tree_snow",
-   "x": 3,
-   "y": 13
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
-   "x": 46,
-   "y": 10
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 41,
-   "y": 14
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
-   "x": 46,
-   "y": 6
-  },
-  {
-   "kind": "prop",
-   "type": "tree_snow",
-   "x": 59,
-   "y": 30
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 30,
-   "y": 20
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
-   "x": 13,
-   "y": 26
-  },
-  {
-   "kind": "prop",
    "type": "stalagmite",
    "x": 50,
    "y": 36
@@ -297,12 +231,6 @@
    "type": "stalagmite",
    "x": 45,
    "y": 43
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 23,
-   "y": 22
   },
   {
    "kind": "prop",
@@ -367,12 +295,6 @@
   {
    "kind": "prop",
    "type": "stalagmite",
-   "x": 23,
-   "y": 29
-  },
-  {
-   "kind": "prop",
-   "type": "stalagmite",
    "x": 24,
    "y": 31
   },
@@ -402,9 +324,15 @@
   },
   {
    "kind": "prop",
-   "type": "rock",
-   "x": 25,
-   "y": 23
+   "type": "stalagmite",
+   "x": 59,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 22,
+   "y": 22
   },
   {
    "kind": "prop",
@@ -451,13 +379,85 @@
   {
    "kind": "prop",
    "type": "stalagmite",
-   "x": 29,
-   "y": 11
+   "x": 34,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 26,
+   "y": 42
   },
   {
    "kind": "prop",
    "type": "stalagmite",
-   "x": 34,
+   "x": 41,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_snow",
+   "x": 24,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 14,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 14,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 14,
+   "y": 21
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 58,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 10,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 23,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 5,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 58,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 3,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 3,
    "y": 18
   }
  ],
@@ -628,6 +628,76 @@
    "type": "rock_starmetal",
    "x": 52,
    "y": 20,
+   "solid": true
+  },
+  {
+   "id": "n24",
+   "type": "gem_sapphire",
+   "x": 36,
+   "y": 6,
+   "solid": true
+  },
+  {
+   "id": "n25",
+   "type": "gem_diamond",
+   "x": 7,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n26",
+   "type": "gem_sapphire",
+   "x": 50,
+   "y": 41,
+   "solid": true
+  },
+  {
+   "id": "n27",
+   "type": "gem_sapphire",
+   "x": 22,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n28",
+   "type": "gem_sapphire",
+   "x": 30,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n29",
+   "type": "gem_sapphire",
+   "x": 20,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n30",
+   "type": "gem_diamond",
+   "x": 24,
+   "y": 22,
+   "solid": true
+  },
+  {
+   "id": "n31",
+   "type": "gem_sapphire",
+   "x": 40,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n32",
+   "type": "gem_sapphire",
+   "x": 27,
+   "y": 18,
+   "solid": true
+  },
+  {
+   "id": "n33",
+   "type": "gem_diamond",
+   "x": 13,
+   "y": 26,
    "solid": true
   }
  ]

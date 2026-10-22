@@ -16,6 +16,7 @@ import {
   tileCenter,
   type Appearance,
   type ChatMessage,
+  glowTier,
   type Direction,
   type MoveInput,
   type NpcAccessory,
@@ -29,6 +30,7 @@ import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../ar
 import { nodeArt } from '../art/nodes';
 import { CHAR_FRAMES_PER_DIR, FRAME_ACTION, FRAME_SIT, buildCharacterSheet, characterSheetKey } from '../art/characters';
 import { emoteIcon } from '../art/emotes';
+import { wingCanvas } from '../art/wings';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
 import type { GameClient, RemoteMonster, RemotePlayer } from '../net/client';
@@ -67,7 +69,17 @@ interface Avatar {
   bowUntil?: number;
   emote?: Phaser.GameObjects.Image | null;
   tinted?: boolean;
+  /** Wings (back slot) and upgrade glows. */
+  wings?: [Phaser.GameObjects.Image, Phaser.GameObjects.Image] | null;
+  wingKey?: string | null;
+  weaponGlow?: Phaser.GameObjects.Image | null;
+  aura?: Phaser.GameObjects.Image | null;
+  nextSparkle?: number;
 }
+
+const GLOW_COLOR = [0, 0x5fb0ff, 0xc07aff, 0xffe9a8] as const;
+const HAWK_SKILLS = new Set(['falcon_strike', 'blind_blitz', 'hunters_eye']);
+const HAWK_PAL = { core: 0xe8c890, glow: 0x8a5a2a, spark: 0xffffff };
 
 /**
  * The world view. Rendering only — all rules live on the server, and
@@ -302,6 +314,9 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private destroyAvatar(av: Avatar): void {
+    av.wings?.forEach((w) => w.destroy());
+    av.weaponGlow?.destroy();
+    av.aura?.destroy();
     av.emote?.destroy();
     av.mount?.destroy();
     av.hand?.destroy();
@@ -765,7 +780,10 @@ export class WorldScene extends Phaser.Scene {
       const now = this.time.now;
       const srcAv = this.avatarOf(e.s);
       const tgtAv = this.avatarOf(e.t);
-      if (srcAv && e.k !== 'death' && e.k !== 'dot') this.pose(srcAv, 280, e.s !== e.t ? pos : undefined);
+      const companion = e.sk === 'pet' || e.sk === 'hawk';
+      if (companion && e.s !== e.t) this.companionStrike(e.s, e.sk === 'hawk', pos.x, pos.y);
+      if (HAWK_SKILLS.has(e.sk ?? '')) this.companionStrike(e.s, true, pos.x, pos.y);
+      if (srcAv && !companion && e.k !== 'death' && e.k !== 'dot') this.pose(srcAv, 280, e.s !== e.t ? pos : undefined);
       if (tgtAv && (e.k === 'hit' || e.k === 'crit')) tgtAv.hurtUntil = now + (e.k === 'crit' ? 260 : 170);
       if (tgtAv && e.k === 'death') tgtAv.deadUntil = now + 1800;
       if (e.k === 'death') continue;
@@ -883,6 +901,10 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
+    // A pet's bite or the hawk's talons: a quick impact on the target.
+    if (e.sk === 'pet' || e.sk === 'hawk') return void this.time.delayedCall(170, () => land(e.sk === 'hawk' ? HAWK_PAL : pal));
+    if (HAWK_SKILLS.has(e.sk ?? '')) return void this.time.delayedCall(200, () => land(HAWK_PAL));
+
     // Damage from an area skill: the cast already drew the big effect; just mark each hit.
     if (e.sk === 'whirlwind') return land();
     if (e.sk === 'frost_nova') return land(ICE_PAL);
@@ -930,6 +952,105 @@ export class WorldScene extends Phaser.Scene {
       return fx.shoot(from, to, 'orb', pal, { full, onHit: () => land() });
     }
     melee();
+  }
+
+  /** A soft white radial glow (tinted per use). */
+  private whiteGlowKey(): string {
+    return this.canvasTexture('glow_white', () => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d')!;
+      const grad = ctx.createRadialGradient(64, 64, 2, 64, 64, 64);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.35, 'rgba(255,255,255,0.5)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+      return c;
+    });
+  }
+
+  /** Gear others can see: weapon/armor upgrade level and the back item (wings). */
+  private gearOf(id: string): { weaponGlow: number; armorGlow: number; back: string | null } {
+    const self = this.client.ui.get().self;
+    if (self && id === self.characterId) {
+      const eq = this.client.ui.get().inventory?.equipment ?? [];
+      const armor = eq.filter((e) => e.slot >= 2 && e.slot <= 5).map((e) => e.enhance ?? 0);
+      return { weaponGlow: eq.find((e) => e.slot === 0)?.enhance ?? 0, armorGlow: armor.length ? Math.max(...armor) : 0, back: eq.find((e) => e.slot === 8)?.itemId ?? null };
+    }
+    const r = this.client.remotes.get(id);
+    return { weaponGlow: r?.info.weaponGlow ?? 0, armorGlow: r?.info.armorGlow ?? 0, back: r?.info.back ?? null };
+  }
+
+  /** Wings that flap behind the character, and the glow of upgraded gear (+4 blue, +7 purple, +10 radiant gold). */
+  private placeGear(av: Avatar, id: string, dir: Direction, moving: boolean, time: number): void {
+    const look = this.gearOf(id);
+    const s = av.sprite;
+    const now = this.time.now;
+    const dead = (av.deadUntil ?? 0) > now;
+    // --- Wings
+    const def = look.back ? getItem(look.back)?.wings : undefined;
+    const wkey = def ? `wing:${def.style}:${def.color}` : null;
+    if ((av.wingKey ?? null) !== wkey) {
+      av.wings?.forEach((w) => w.destroy());
+      av.wings = null;
+      av.wingKey = wkey;
+      if (def && wkey) {
+        const tex = this.canvasTexture(wkey, () => wingCanvas(def.style, def.color));
+        const alpha = def.style === 'fairy' ? 0.82 : 1;
+        av.wings = [this.add.image(0, 0, tex).setOrigin(0, 0.6).setAlpha(alpha), this.add.image(0, 0, tex).setFlipX(true).setOrigin(1, 0.6).setAlpha(alpha)];
+      }
+    }
+    if (av.wings) {
+      const side = dir === 'left' || dir === 'right';
+      const flap = 0.8 + (moving ? 0.22 : 0.1) * Math.sin(time / (moving ? 85 : 240));
+      const sx = side ? 0.5 : 1;
+      const back = dir === 'right' ? -5 : dir === 'left' ? 5 : 0;
+      const y = s.y - 30;
+      const [right, left] = av.wings;
+      // Raised and angled up from the shoulder blades; they beat faster while moving.
+      const tilt = -0.32 - (flap - 0.8) * 0.6;
+      right.setPosition(s.x + 3 + back, y).setScale(flap * sx * 0.85, 0.85).setRotation(tilt).setDepth(dir === 'up' ? s.depth + 0.02 : s.depth - 0.02).setVisible(!dead);
+      left.setPosition(s.x - 3 + back, y).setScale(flap * sx * 0.85, 0.85).setRotation(-tilt).setDepth(dir === 'up' ? s.depth + 0.02 : s.depth - 0.02).setVisible(!dead);
+    }
+    // --- Armor aura
+    const ta = glowTier(look.armorGlow);
+    if (ta && !dead) {
+      av.aura ??= this.add.image(0, 0, this.whiteGlowKey()).setBlendMode(Phaser.BlendModes.ADD);
+      av.aura
+        .setPosition(s.x, s.y - 20)
+        .setTint(GLOW_COLOR[ta])
+        .setScale(0.35 + ta * 0.08, 0.5 + ta * 0.08)
+        .setAlpha(0.18 + ta * 0.07 + Math.sin(time / 400) * 0.06)
+        .setDepth(s.depth - 0.03);
+    } else if (av.aura) {
+      av.aura.destroy();
+      av.aura = null;
+    }
+    // --- Weapon glow (follows the weapon in hand)
+    const tw = glowTier(look.weaponGlow);
+    const hand = av.hand && av.hand.visible ? av.hand : null;
+    if (tw && hand && !dead) {
+      av.weaponGlow ??= this.add.image(0, 0, this.whiteGlowKey()).setBlendMode(Phaser.BlendModes.ADD);
+      const flip = hand.flipX ? -1 : 1;
+      const gx = hand.x + flip * 7;
+      const gy = hand.y - 8;
+      av.weaponGlow
+        .setPosition(gx, gy)
+        .setTint(GLOW_COLOR[tw])
+        .setScale(0.16 + tw * 0.07)
+        .setAlpha(0.45 + tw * 0.12 + Math.sin(time / 180) * 0.12)
+        .setDepth(hand.depth + 0.01);
+      // +10: radiant sparkles drifting off the blade.
+      if (tw === 3 && now > (av.nextSparkle ?? 0)) {
+        av.nextSparkle = now + 160;
+        const sp = this.add.rectangle(gx + (Math.random() * 12 - 6), gy + (Math.random() * 12 - 6), 2, 2, Math.random() < 0.5 ? 0xffffff : 0xffe48a).setDepth(LABEL_DEPTH - 8).setBlendMode(Phaser.BlendModes.ADD);
+        this.tweens.add({ targets: sp, y: sp.y - 14, alpha: 0, duration: 700, onComplete: () => sp.destroy() });
+      }
+    } else if (av.weaponGlow) {
+      av.weaponGlow.destroy();
+      av.weaponGlow = null;
+    }
   }
 
   /** Draw each character's equipped weapon in their hand. */
@@ -1102,7 +1223,61 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private animalSprites: Phaser.GameObjects.Image[] = [];
-  private pets = new Map<string, { item: string; sprite: Phaser.GameObjects.Sprite }>();
+  private pets = new Map<string, { item: string; sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
+  /** Beastmasters' hawks, by owner. */
+  private hawks = new Map<string, { sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
+
+  /** Send a companion (pet or hawk) diving at a target for a moment. */
+  private companionStrike(ownerId: string, hawk: boolean, x: number, y: number): void {
+    const c = hawk ? this.hawks.get(ownerId) : this.pets.get(ownerId);
+    if (c) c.strike = { x, y, at: this.time.now };
+  }
+
+  /** Hawks circle above their Beastmaster and dive when it attacks. */
+  private updateHawks(time: number): void {
+    const want = new Map<string, { x: number; y: number }>();
+    const self = this.client.ui.get().self;
+    if (self?.job === 'beastmaster' && this.local) want.set(self.characterId, { x: this.local.sprite.x, y: this.local.sprite.y });
+    for (const [id, r] of this.client.remotes) {
+      const av = this.remotes.get(id);
+      if (r.info.job === 'beastmaster' && av) want.set(id, { x: av.sprite.x, y: av.sprite.y });
+    }
+    for (const [id, h] of this.hawks)
+      if (!want.has(id)) {
+        h.sprite.destroy();
+        this.hawks.delete(id);
+      }
+    const key = 'pet:hawk';
+    if (want.size && !this.textures.exists(key)) {
+      const sheet = monsterSheet('bat', '#8a5a2a');
+      const tex = this.textures.addCanvas(key, sheet.canvas)!;
+      tex.add(0, 0, 0, 0, sheet.w * 2, sheet.h * 2);
+      tex.add(1, 0, sheet.w * 2, 0, sheet.w * 2, sheet.h * 2);
+    }
+    for (const [id, w] of want) {
+      let h = this.hawks.get(id);
+      if (!h) {
+        h = { sprite: this.add.sprite(w.x, w.y - 60, key, 0).setOrigin(0.5, 1).setScale(0.62).setTint(0xd8b080) };
+        this.hawks.set(id, h);
+      }
+      const sp = h.sprite;
+      // Circle lazily above the owner's head.
+      let tx = w.x + Math.cos(time / 900 + id.length) * 22;
+      let ty = w.y - 52 + Math.sin(time / 450) * 5;
+      if (h.strike) {
+        const k = (this.time.now - h.strike.at) / 420;
+        if (k >= 1) h.strike = undefined;
+        else {
+          const dive = Math.sin(k * Math.PI);
+          tx = tx + (h.strike.x - tx) * dive;
+          ty = ty + (h.strike.y - 10 - ty) * dive;
+        }
+      }
+      sp.x += (tx - sp.x) * (h.strike ? 0.5 : 0.1);
+      sp.y += (ty - sp.y) * (h.strike ? 0.5 : 0.1);
+      sp.setFlipX(tx < sp.x).setFrame(Math.floor(time / 110) % 2).setDepth(LABEL_DEPTH - 12);
+    }
+  }
 
   private static PET_ART: Record<string, { shape: string; scale: number }> = {
     dog: { shape: 'wolf', scale: 0.5 },
@@ -1143,14 +1318,24 @@ export class WorldScene extends Phaser.Scene {
         this.pets.set(id, pet);
       }
       const side = w.dir === 'left' ? 22 : -22;
-      const tx = w.x + (w.dir === 'up' || w.dir === 'down' ? -18 : side);
-      const ty = w.y + (w.dir === 'up' ? 14 : w.dir === 'down' ? -6 : 2);
+      let tx = w.x + (w.dir === 'up' || w.dir === 'down' ? -18 : side);
+      let ty = w.y + (w.dir === 'up' ? 14 : w.dir === 'down' ? -6 : 2);
+      if (pet.strike) {
+        // Pounce at the target and come back.
+        const k = (this.time.now - pet.strike.at) / 380;
+        if (k >= 1) pet.strike = undefined;
+        else {
+          const jump = Math.sin(k * Math.PI);
+          tx += (pet.strike.x - tx) * jump;
+          ty += (pet.strike.y - ty) * jump;
+        }
+      }
       const sp = pet.sprite;
       const dx = tx - sp.x;
       const dy = ty - sp.y;
       const moving = Math.hypot(dx, dy) > 3;
-      sp.x += dx * 0.12;
-      sp.y += dy * 0.12;
+      sp.x += dx * (pet.strike ? 0.45 : 0.12);
+      sp.y += dy * (pet.strike ? 0.45 : 0.12);
       if (Math.abs(dx) > 1) sp.setFlipX(dx < 0);
       sp.setFrame(moving && Math.floor(this.time.now / 160) % 2 ? 1 : 0);
       sp.setDepth(sp.y);
@@ -1255,6 +1440,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateSmoke(time);
     this.updateSound(time);
     this.updatePets();
+    this.updateHawks(time);
     // Phaser's delta is smoothed toward 60 FPS; movement must follow real time
     // or slow devices would walk slower than the server allows.
     const nowMs = performance.now();
@@ -1285,7 +1471,10 @@ export class WorldScene extends Phaser.Scene {
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time, { sit: client.pose === 'sit', speed: client.speed() });
     const fxo = fxSettings();
     const selfId = client.ui.get().self?.characterId;
-    if (selfId) this.placeHand(this.local, selfId, client.dir, client.moving, time, fxo.handWeapon);
+    if (selfId) {
+      this.placeHand(this.local, selfId, client.dir, client.moving, time, fxo.handWeapon);
+      this.placeGear(this.local, selfId, client.dir, client.moving, time);
+    }
 
     client.interpolateRemotes();
     for (const [id, r] of client.remotes) {
@@ -1293,6 +1482,7 @@ export class WorldScene extends Phaser.Scene {
       if (av) {
         this.placeAvatar(av, r.x, r.y, r.dir, r.moving, time, { sit: r.info.pose === 'sit' });
         this.placeHand(av, id, r.dir, r.moving, time, fxo.handWeapon);
+        this.placeGear(av, id, r.dir, r.moving, time);
       }
     }
     this.targetRing.clear();

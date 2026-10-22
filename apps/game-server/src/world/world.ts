@@ -41,7 +41,7 @@ import { buildSelfState, profileFor, type CharacterRecord, type PositionSave } f
 import { Combat, type CombatHooks, type Monster } from './combat';
 import type { Connection } from './connection';
 import { collisionGridFor } from './grids';
-import { Player } from './player';
+import { Player, gearLook } from './player';
 import { SpatialGrid } from './spatialGrid';
 
 export interface MapRuntime {
@@ -135,7 +135,7 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance; job?: import('@terrago/shared').JobId | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance; job?: import('@terrago/shared').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null }): void {
     if ('pet' in patch) p.conn?.send('self:update', { pet: patch.pet ?? null });
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
   }
@@ -228,10 +228,15 @@ export class World {
   /** Worn equipment changed: recompute stats and tell the client. */
   setEquipment(p: Player, equipment: InventorySlot[]): void {
     const before = p.rec.equipment?.find((e) => e.slot === 0)?.itemId ?? null;
+    const lookBefore = gearLook(p.rec.equipment ?? []);
     p.rec.equipment = equipment;
     this.refreshProfile(p);
     const after = equipment.find((e) => e.slot === 0)?.itemId ?? null;
-    if (before !== after) this.broadcastLook(p, { weapon: after });
+    const look = gearLook(equipment);
+    if (before !== after || look.weaponGlow !== lookBefore.weaponGlow || look.armorGlow !== lookBefore.armorGlow || look.back !== lookBefore.back) {
+      this.broadcastLook(p, { weapon: after, ...look });
+      p.conn?.send('entity:update', p.id, look);
+    }
   }
 
   refreshProfile(p: Player): void {

@@ -898,7 +898,7 @@
  {
   "id": "sapphire",
   "name": "Sapphire",
-  "description": "A rough sapphire. Jewelers and enchanters pay well.",
+  "description": "A rough sapphire. The blacksmith uses it to upgrade gear from +4 to +6.",
   "icon": "gem:4a7fd6",
   "category": "material",
   "rarity": "rare",
@@ -926,7 +926,7 @@
  {
   "id": "ruby",
   "name": "Ruby",
-  "description": "A rough ruby. Jewelers and enchanters pay well.",
+  "description": "A rough ruby. The blacksmith uses it to upgrade gear from +1 to +3.",
   "icon": "gem:e0483a",
   "category": "material",
   "rarity": "rare",
@@ -940,7 +940,7 @@
  {
   "id": "diamond",
   "name": "Diamond",
-  "description": "A rough diamond. Jewelers and enchanters pay well.",
+  "description": "A rough diamond. The blacksmith uses it to upgrade gear from +7 to +10.",
   "icon": "gem:dff4ff",
   "category": "material",
   "rarity": "epic",
@@ -2085,7 +2085,7 @@
  {
   "id": "enhancement_stone",
   "name": "Enhancement Stone",
-  "description": "Used at the Enhancement Altar to strengthen equipment.",
+  "description": "A blessed stone. The blacksmith accepts it instead of a Ruby for upgrades up to +3.",
   "icon": "stone_enh",
   "category": "material",
   "rarity": "uncommon",
@@ -5497,6 +5497,287 @@
    "speed": 1.5,
    "color": "#c98a4a",
    "kind": "stag"
+  }
+ },
+ {
+  "id": "fairy_wings",
+  "name": "Fairy Wings",
+  "description": "Delicate, shimmering wings. They hum softly when you move.",
+  "icon": "wings:fairy:9fe8ff",
+  "category": "armor",
+  "rarity": "rare",
+  "stackSize": 1,
+  "vendorValue": 1200,
+  "levelRequirement": 30,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 400,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "agi": 4,
+    "mdef": 6,
+    "def": 3
+   }
+  },
+  "wings": {
+   "style": "fairy",
+   "color": "#9fe8ff"
+  }
+ },
+ {
+  "id": "angel_wings",
+  "name": "Angel Wings",
+  "description": "Pure white feathers that never get dirty.",
+  "icon": "wings:angel:fff6e8",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 6000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 400,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "def": 12,
+    "mdef": 18,
+    "int": 6,
+    "vit": 4
+   }
+  },
+  "wings": {
+   "style": "angel",
+   "color": "#fff6e8"
+  }
+ },
+ {
+  "id": "demon_wings",
+  "name": "Demon Wings",
+  "description": "Leathery and dark. Warm to the touch.",
+  "icon": "wings:demon:6a1a3a",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 6000,
+  "levelRequirement": 70,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 400,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "def": 14,
+    "mdef": 10,
+    "str": 6,
+    "luk": 4
+   }
+  },
+  "wings": {
+   "style": "demon",
+   "color": "#6a1a3a"
+  }
+ },
+ {
+  "id": "dragon_wings",
+  "name": "Dragon Wings",
+  "description": "Torn from the Infernal Titan's brood. Embers drift from them.",
+  "icon": "wings:dragon:d0301a",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 25000,
+  "levelRequirement": 95,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 400,
+  "equip": {
+   "slot": "cape",
+   "stats": {
+    "def": 24,
+    "mdef": 22,
+    "str": 8,
+    "agi": 6,
+    "vit": 8
+   }
+  },
+  "wings": {
+   "style": "dragon",
+   "color": "#d0301a"
+  }
+ },
+ {
+  "id": "infernal_greatsword",
+  "name": "Infernal Greatsword",
+  "description": "Forged in the Infernal Caldera from the Titan's own fire. Mythic.",
+  "icon": "weapon:sword:6",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 12000,
+  "levelRequirement": 95,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 165,
+    "str": 8
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "infernal_longbow",
+  "name": "Infernal Longbow",
+  "description": "Forged in the Infernal Caldera from the Titan's own fire. Mythic.",
+  "icon": "weapon:bow:6",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 12000,
+  "levelRequirement": 95,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 152,
+    "agi": 10
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "archer"
+   ]
+  }
+ },
+ {
+  "id": "infernal_fang",
+  "name": "Infernal Fang",
+  "description": "Forged in the Infernal Caldera from the Titan's own fire. Mythic.",
+  "icon": "weapon:dagger:6",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 12000,
+  "levelRequirement": 95,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 142,
+    "crit": 12
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "archer"
+   ]
+  }
+ },
+ {
+  "id": "infernal_staff",
+  "name": "Infernal Staff",
+  "description": "Forged in the Infernal Caldera from the Titan's own fire. Mythic.",
+  "icon": "weapon:staff:6",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 12000,
+  "levelRequirement": 95,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 172,
+    "int": 10,
+    "mp": 95
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "classes": [
+    "mage"
+   ],
+   "magic": true
+  }
+ },
+ {
+  "id": "infernal_scepter",
+  "name": "Infernal Scepter",
+  "description": "Forged in the Infernal Caldera from the Titan's own fire. Mythic.",
+  "icon": "weapon:mace:6",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 12000,
+  "levelRequirement": 95,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1200,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 152,
+    "atk": 32,
+    "mp": 78
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "classes": [
+    "acolyte"
+   ],
+   "magic": true
+  }
+ },
+ {
+  "id": "infernal_cache",
+  "name": "Infernal Cache",
+  "description": "A smoldering chest from the Titan's hoard. Use it: a mythic weapon for your class is inside.",
+  "icon": "chest:d0301a",
+  "category": "consumable",
+  "rarity": "mythic",
+  "stackSize": 10,
+  "vendorValue": 1,
+  "levelRequirement": 1,
+  "tradable": false,
+  "bind": "pickup",
+  "maxDurability": null,
+  "unlock": {
+   "cache": "infernal"
+  }
+ },
+ {
+  "id": "skin_infernal_warlord",
+  "name": "Infernal Warlord Skin",
+  "description": "Use it to unlock the Infernal Warlord armor skin in your wardrobe (Character window).",
+  "icon": "scroll",
+  "category": "consumable",
+  "rarity": "mythic",
+  "stackSize": 10,
+  "vendorValue": 1,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "unlock": {
+   "skin": "Infernal Warlord"
   }
  }
 ]
