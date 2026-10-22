@@ -144,6 +144,8 @@ export interface PublicPlayer {
   weapon?: string | null;
   /** Guild tag shown under the name. */
   guild?: string | null;
+  /** Name of the player's open stall, if any. */
+  shop?: string | null;
 }
 
 export type ItemCategory =
@@ -244,7 +246,7 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank';
 
 export interface DialogueAction {
   id: DialogueActionId;
@@ -522,4 +524,39 @@ export interface LeaderboardRow {
   level: number;
   value: number;
   guild: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Bank, waystones, player stalls
+// ---------------------------------------------------------------------------
+
+export interface BankViewState {
+  capacity: number;
+  tier: number;
+  next: { capacity: number; cost: number } | null;
+  slots: InventorySlot[];
+}
+
+export interface TravelOption {
+  mapId: string;
+  name: string;
+  fee: number;
+  known: boolean;
+  here: boolean;
+}
+
+export interface StallItem {
+  slot: number;
+  itemId: string;
+  quantity: number;
+  quality: number;
+  enhance: number;
+  price: number;
+}
+
+export interface StallView {
+  sellerId: string;
+  sellerName: string;
+  name: string;
+  items: StallItem[];
 }

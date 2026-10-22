@@ -95,6 +95,9 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
           </div>
         </div>
       )}
+      <button className="px-btn ghost small mt-2" onClick={() => client.ui.set({ panel: 'stall' })} data-testid="open-stall-setup">
+        🏪 My market stall
+      </button>
     </Window>
   );
 }
@@ -234,7 +237,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>
       <p className="text-xs leading-relaxed">
-        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Attack: F (or click a monster) · Skills: Q R T · Next target: Tab · Ride: Z · Quests: J · Journal (dailies, achievements, ranks): L · Crafting recipes: N · Market: P · Friends: O · Guild: G · Trade / Party / Duel: click a player · Chat: /g world, /p party, /gu guild, /w name, /r reply · Close: Esc
+        Move: WASD / Arrows · Talk / use: E or Space (or click a nearby tile) · Chat: Enter · Inventory: I · Character: C · Skills: K · Map: M · Select hotbar item: 1–9 (press again to eat) · Attack: F (or click a monster) · Skills: Q R T · Next target: Tab · Ride: Z · Quests: J · Journal (dailies, achievements, ranks): L · Crafting recipes: N · Market: P · Market stall: Inventory → My market stall · Waystones: step on a pad · Friends: O · Guild: G · Trade / Party / Duel: click a player · Chat: /g world, /p party, /gu guild, /w name, /r reply · Close: Esc
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button className="px-btn ghost small" onClick={onSwitch}>

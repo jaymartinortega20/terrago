@@ -26,6 +26,7 @@ import type { World } from '../world/world';
 import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
 import * as social from './social';
 import * as journal from './journal';
+import * as eco from './economy';
 import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
 import { grantStarterWeapon } from '../services/equipment';
 import { cancelFishing, hook, reel } from './fishing';
@@ -215,7 +216,10 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
   }
 
   function registerHandlers(socket: GameSocket, p: Player): void {
-    socket.on('move', (cmd) => world.enqueueMove(p, cmd));
+    socket.on('move', (cmd) => {
+      if (p.stall && Array.isArray(cmd) && (cmd[1] || cmd[2])) eco.closeStall({ pool, world, log }, p);
+      world.enqueueMove(p, cmd);
+    });
 
     socket.on('chat:send', (text, ack) =>
       respond(ack, () => {
@@ -320,6 +324,15 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('trade:lock', (ack) => respond(ack, () => lockTrade(p)));
     socket.on('trade:confirm', (ack) => serial(ack, () => confirmTrade(g, p)));
     socket.on('trade:cancel', () => cancelTrade(p));
+    socket.on('bank:get', (npcId, ack) => serial(ack, () => eco.bank.get(g, p, npcId)));
+    socket.on('bank:move', (req, ack) => serial(ack, () => eco.bank.move(g, p, req)));
+    socket.on('bank:upgrade', (npcId, ack) => serial(ack, () => eco.bank.upgrade(g, p, npcId)));
+    socket.on('travel:list', (ack) => respond(ack, () => eco.travelList(g, p)));
+    socket.on('travel:go', (mapId, ack) => serial(ack, () => eco.travelGo(g, p, mapId)));
+    socket.on('stall:open', (req, ack) => respond(ack, () => eco.openStall(g, p, req)));
+    socket.on('stall:close', (ack) => respond(ack, () => eco.closeStall(g, p)));
+    socket.on('stall:view', (id, ack) => respond(ack, () => eco.viewStall(g, p, id)));
+    socket.on('stall:buy', (req, ack) => serial(ack, () => eco.buyStall(g, p, req)));
     socket.on('spec:choose', (req, ack) => serial(ack, () => chooseSpecialization(g, p, req)));
     socket.on('journal:get', (ack) => respond(ack, () => journal.journal(g, p)));
     socket.on('daily:login', (ack) => serial(ack, () => journal.claimLogin(g, p)));

@@ -51,6 +51,8 @@ export class Player {
   /** Last whisper partner, for /r. */
   replyTo: string | null = null;
   nextGlobalAt = 0;
+  /** Open market stall: its name and the bag slots on sale with unit prices. */
+  stall: { name: string; prices: Map<number, { itemId: string; price: number }> } | null = null;
   /** Chat mute set by a moderator (ms since epoch). */
   mutedUntil = 0;
   /** Recent lines this player said (any channel), attached to reports. */
@@ -119,6 +121,7 @@ export class Player {
       mount: this.mount,
       weapon: this.rec.equipment?.find((e) => e.slot === 0)?.itemId ?? null,
       guild: this.guild?.tag ?? null,
+      shop: this.stall?.name ?? null,
     };
   }
 

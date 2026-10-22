@@ -983,6 +983,7 @@ export class WorldScene extends Phaser.Scene {
   }
 }
 
-function remoteLabel(info: { name: string; level: number; guild?: string | null }): string {
-  return `${info.guild ? `[${info.guild}] ` : ''}${info.name} · Lv ${info.level}`;
+function remoteLabel(info: { name: string; level: number; guild?: string | null; shop?: string | null }): string {
+  const base = `${info.guild ? `[${info.guild}] ` : ''}${info.name} · Lv ${info.level}`;
+  return info.shop ? `[Shop] ${info.shop}\n${base}` : base;
 }

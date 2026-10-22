@@ -385,3 +385,37 @@ export function validateGameData(): string[] {
   }
   return errors;
 }
+
+// ---------------------------------------------------------------------------
+// Waystones (teleport pads) — found from the maps themselves
+// ---------------------------------------------------------------------------
+
+export interface Waystone {
+  mapId: string;
+  name: string;
+  /** Arrival tile (centre of the pad). */
+  x: number;
+  y: number;
+  fee: number;
+}
+
+const WAYSTONE_FEES: Record<string, number> = {
+  greenhaven: 20,
+  sunfield_plains: 15,
+  crystal_lake: 30,
+  whisperwood: 45,
+  irondeep_entrance: 45,
+  frostpine_peaks: 120,
+  mirefen_swamp: 160,
+};
+
+let waystoneCache: Waystone[] | null = null;
+export function waystones(): Waystone[] {
+  if (waystoneCache) return waystoneCache;
+  waystoneCache = [];
+  for (const m of Object.values(MAPS)) {
+    const pad = m.objects.find((o) => o.kind === 'prop' && o.type === 'teleport_pad');
+    if (pad) waystoneCache.push({ mapId: m.id, name: m.name, x: pad.x + 1, y: pad.y + 1, fee: WAYSTONE_FEES[m.id] ?? 50 });
+  }
+  return waystoneCache;
+}

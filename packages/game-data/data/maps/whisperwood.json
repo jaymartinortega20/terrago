@@ -178,6 +178,12 @@
   },
   {
    "kind": "prop",
+   "type": "teleport_pad",
+   "x": 53,
+   "y": 27
+  },
+  {
+   "kind": "prop",
    "type": "tree_ancient",
    "x": 0,
    "y": 0
@@ -3677,12 +3683,6 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
-   "x": 56,
-   "y": 30
-  },
-  {
-   "kind": "prop",
    "type": "tree_oak",
    "x": 12,
    "y": 37
@@ -3869,12 +3869,6 @@
   },
   {
    "kind": "prop",
-   "type": "stump",
-   "x": 54,
-   "y": 27
-  },
-  {
-   "kind": "prop",
    "type": "bush",
    "x": 24,
    "y": 6
@@ -3959,12 +3953,6 @@
   },
   {
    "kind": "prop",
-   "type": "bush",
-   "x": 54,
-   "y": 30
-  },
-  {
-   "kind": "prop",
    "type": "mushroom_big",
    "x": 9,
    "y": 29
@@ -4010,6 +3998,24 @@
    "type": "tree_pine",
    "x": 37,
    "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 19,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 32,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_ancient",
+   "x": 6,
+   "y": 21
   }
  ],
  "nodes": [

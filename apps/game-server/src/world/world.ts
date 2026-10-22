@@ -130,7 +130,7 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null }): void {
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
   }
 

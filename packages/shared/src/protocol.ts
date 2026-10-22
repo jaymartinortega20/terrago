@@ -18,6 +18,9 @@ import type {
   GuildView,
   GuildRank,
   PlayerProfile,
+  BankViewState,
+  TravelOption,
+  StallView,
   JournalView,
   LeaderboardId,
   LeaderboardRow,
@@ -138,7 +141,7 @@ export interface ServerToClientEvents {
   /** A boss is winding up an area attack: warn players (pixels, ms until impact). */
   'telegraph': (t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
   /** A visible player's look changed (mount, weapon). */
-  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null }) => void;
+  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null }) => void;
   'quests': (quests: QuestState[]) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
   'invite': (invite: InvitePayload) => void;
@@ -225,6 +228,15 @@ export interface ClientToServerEvents {
   'guild:rank': (req: { id: string; rank: GuildRank }, ack: Ack<{ message: string }>) => void;
   'guild:treasury': (req: { amount: number }, ack: Ack<{ message: string }>) => void;
   'guild:motd': (text: string, ack: Ack<null>) => void;
+  'bank:get': (npcId: string, ack: Ack<BankViewState>) => void;
+  'bank:move': (req: { npcId: string; dir: 'deposit' | 'withdraw'; slot: number }, ack: Ack<BankViewState>) => void;
+  'bank:upgrade': (npcId: string, ack: Ack<{ message: string; bank: BankViewState }>) => void;
+  'travel:list': (ack: Ack<{ atWaystone: boolean; options: TravelOption[] }>) => void;
+  'travel:go': (mapId: string, ack: Ack<{ message: string }>) => void;
+  'stall:open': (req: { name: string; items: { slot: number; price: number }[] }, ack: Ack<{ message: string }>) => void;
+  'stall:close': (ack: Ack<null>) => void;
+  'stall:view': (sellerId: string, ack: Ack<StallView>) => void;
+  'stall:buy': (req: { sellerId: string; slot: number; itemId: string; price: number }, ack: Ack<{ message: string }>) => void;
   'spec:choose': (req: { skill: string; spec: string }, ack: Ack<{ message: string }>) => void;
   'journal:get': (ack: Ack<JournalView>) => void;
   'daily:login': (ack: Ack<{ message: string }>) => void;

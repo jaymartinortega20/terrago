@@ -95,11 +95,11 @@
   "uuuuuuufuuufuffuuuufuuuuufuuuuufuuuuufuufuuuufkkkkkkkkkkkkkkuuuu",
   "uuuuuufuuuuuufuuuuuuuuuufuuubbbbbbbbbbbbbbbbbbkkkkkkkkkkkkkkuuuu",
   "uuuuufuufuufufuuuuuuuuufuuuubbbbbbbbbbbbbbbbbbkkkkkkkkkkkkkkuuff",
-  "uuuuufuuuuuufuuuuufuffuuuuufbbbbbbbbbbbbbbbbbbkkkkkkkkkkkkkkuufu",
-  "fuu========uuuufuqqufufuuuuubbbuuufufufuuuuuufkkkkkkkkkkkkkkuuuf",
-  "uuu========fuuufuqqffuufuuuubbbuufufuuuuuuuuuukkkkkkkkkkkkkkuffu",
-  "uuu========fuuuuuqqufuuuuuuubbbuuffuufufuuufuukkkkkkkkkkkkkkuuuu",
-  "fuu========ufuufuuuuuuuufuqqbbbqufuuuuuuuuuuuukkkkkkkkkkkkkkuufu",
+  "uuuuufuuuuuu=====ufuffuuuuufbbbbbbbbbbbbbbbbbbkkkkkkkkkkkkkkuufu",
+  "fuu========u=====qqufufuuuuubbbuuufufufuuuuuufkkkkkkkkkkkkkkuuuf",
+  "uuu========f=====qqffuufuuuubbbuufufuuuuuuuuuukkkkkkkkkkkkkkuffu",
+  "uuu========f=====qqufuuuuuuubbbuuffuufufuuufuukkkkkkkkkkkkkkuuuu",
+  "fuu========u=====uuuuuuufuqqbbbqufuuuuuuuuuuuukkkkkkkkkkkkkkuufu",
   "uuu========uuuuuufuuufuuuuqqbbbquuuuuuuuuuuuuukkkkkkkkkkkkkkuuuf",
   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbquuufffuufuuuuuufuuuuufuuufuuufuu",
   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfufuuuufuufuufufuuuuuufuuuuuuuufu",
@@ -142,6 +142,12 @@
    "type": "campfire",
    "x": 6,
    "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "teleport_pad",
+   "x": 13,
+   "y": 15
   },
   {
    "kind": "prop",
@@ -3956,12 +3962,6 @@
   },
   {
    "kind": "prop",
-   "type": "stump",
-   "x": 9,
-   "y": 35
-  },
-  {
-   "kind": "prop",
    "type": "tree_dead",
    "x": 27,
    "y": 25
@@ -4202,12 +4202,6 @@
   },
   {
    "kind": "prop",
-   "type": "tree_swamp",
-   "x": 14,
-   "y": 16
-  },
-  {
-   "kind": "prop",
    "type": "mushroom_big",
    "x": 6,
    "y": 11
@@ -4229,6 +4223,12 @@
    "type": "tree_dead",
    "x": 15,
    "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_swamp",
+   "x": 39,
+   "y": 18
   },
   {
    "kind": "prop",
@@ -4413,12 +4413,6 @@
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 16,
-   "y": 13
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
    "x": 36,
    "y": 37
   },
@@ -4493,6 +4487,18 @@
    "type": "stump",
    "x": 29,
    "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 23,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 39,
+   "y": 22
   }
  ],
  "nodes": [
@@ -4575,150 +4581,150 @@
   },
   {
    "id": "n11",
-   "type": "tree_spirit",
-   "x": 13,
-   "y": 14,
-   "solid": true
-  },
-  {
-   "id": "n12",
-   "type": "plant_mushroom",
-   "x": 39,
-   "y": 18,
+   "type": "plant_glowcap",
+   "x": 12,
+   "y": 36,
    "solid": false
   },
   {
-   "id": "n13",
+   "id": "n12",
    "type": "plant_herb",
    "x": 54,
    "y": 32,
    "solid": false
   },
   {
-   "id": "n14",
+   "id": "n13",
    "type": "plant_mushroom",
    "x": 45,
    "y": 26,
    "solid": false
   },
   {
-   "id": "n15",
+   "id": "n14",
    "type": "plant_glowcap",
    "x": 26,
    "y": 42,
    "solid": false
   },
   {
-   "id": "n16",
+   "id": "n15",
    "type": "plant_glowcap",
    "x": 26,
    "y": 14,
    "solid": false
   },
   {
-   "id": "n17",
+   "id": "n16",
    "type": "plant_mushroom",
    "x": 29,
    "y": 29,
    "solid": false
   },
   {
-   "id": "n18",
+   "id": "n17",
    "type": "plant_mushroom",
    "x": 48,
    "y": 36,
    "solid": false
   },
   {
-   "id": "n19",
+   "id": "n18",
    "type": "tree_spirit",
    "x": 9,
    "y": 28,
    "solid": true
   },
   {
-   "id": "n20",
+   "id": "n19",
    "type": "plant_mushroom",
    "x": 31,
    "y": 26,
    "solid": false
   },
   {
-   "id": "n21",
+   "id": "n20",
    "type": "plant_mushroom",
    "x": 5,
    "y": 5,
    "solid": false
   },
   {
-   "id": "n22",
+   "id": "n21",
    "type": "plant_mushroom",
    "x": 32,
    "y": 22,
    "solid": false
   },
   {
-   "id": "n23",
+   "id": "n22",
    "type": "plant_herb",
    "x": 58,
    "y": 29,
    "solid": false
   },
   {
-   "id": "n24",
+   "id": "n23",
    "type": "tree_spirit",
    "x": 26,
    "y": 7,
    "solid": true
   },
   {
-   "id": "n25",
+   "id": "n24",
    "type": "plant_herb",
    "x": 51,
    "y": 31,
    "solid": false
   },
   {
-   "id": "n26",
+   "id": "n25",
    "type": "plant_glowcap",
    "x": 36,
    "y": 33,
    "solid": false
   },
   {
-   "id": "n27",
+   "id": "n26",
    "type": "plant_glowcap",
    "x": 21,
    "y": 15,
    "solid": false
   },
   {
-   "id": "n28",
+   "id": "n27",
    "type": "plant_mushroom",
    "x": 59,
    "y": 33,
    "solid": false
   },
   {
-   "id": "n29",
+   "id": "n28",
    "type": "plant_mushroom",
    "x": 9,
    "y": 7,
    "solid": false
   },
   {
-   "id": "n30",
+   "id": "n29",
    "type": "plant_glowcap",
    "x": 6,
    "y": 13,
    "solid": false
   },
   {
-   "id": "n31",
+   "id": "n30",
    "type": "tree_spirit",
    "x": 22,
    "y": 39,
    "solid": true
+  },
+  {
+   "id": "n31",
+   "type": "plant_herb",
+   "x": 9,
+   "y": 35,
+   "solid": false
   }
  ]
 }

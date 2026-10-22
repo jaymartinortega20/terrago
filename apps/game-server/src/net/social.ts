@@ -518,6 +518,7 @@ export async function onJoin(deps: GameplayDeps, p: Player, fresh: boolean): Pro
 
 /** Leaving the world for good: leave the party, tell friends. */
 export function onLeave(deps: GameplayDeps, p: Player): void {
+  p.stall = null;
   if (p.party) removeFromParty(p, `${p.name} went offline and left the party.`);
   for (const id of p.friendIds) {
     const q = deps.world.players.get(id);

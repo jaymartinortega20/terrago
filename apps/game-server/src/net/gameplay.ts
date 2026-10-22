@@ -36,6 +36,7 @@ import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gather
 import { cast } from './fishing';
 import { cancelTrade } from './trade';
 import { partyOf } from './social';
+import { closeStall, rememberVisit } from './economy';
 import { chooseSpec } from '../services/specs';
 import { progressEvent, track } from './journal';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
@@ -368,6 +369,8 @@ export async function rainTick(deps: GameplayDeps): Promise<void> {
 
 export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void> {
   cancelTrade(p, 'Trade cancelled — you left the area.');
+  closeStall(deps, p, true);
+  await rememberVisit(deps, p);
   questEvent(deps, p, 'visit', p.mapId);
   const floor = mineFloorNumber(p.mapId);
   if (floor && floor % 5 === 0) {
@@ -379,7 +382,7 @@ export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void>
 // NPC services
 // ---------------------------------------------------------------------------
 
-function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift') {
+export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank') {
   const npc = getNpc(npcId);
   if (!npc || !npcOffers(npc, service)) throw new GameError("They can't help with that.");
   if (!world.npcInRange(p, npc)) throw new GameError("You're too far away.");

@@ -34,7 +34,7 @@ export async function lockCharacter(tx: Tx, characterId: string): Promise<{ gold
   return { gold: Number(rows[0].gold) };
 }
 
-export type Container = 'bag' | 'equip';
+export type Container = 'bag' | 'equip' | 'bank';
 
 export async function loadSlots(tx: Tx | Pool, characterId: string, container: Container = 'bag'): Promise<{ capacity: number; slots: Slots }> {
   const cap = await tx.query<{ capacity: number }>(`SELECT capacity FROM inventories WHERE character_id = $1 AND container = $2`, [characterId, container]);

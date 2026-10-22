@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -91,6 +91,10 @@ export interface UiState {
   invites: import('@terrago/shared').InvitePayload[];
   profile: import('@terrago/shared').PlayerProfile | null;
   journal: import('@terrago/shared').JournalView | null;
+  /** Another player's stall being browsed. */
+  stallView: import('@terrago/shared').StallView | null;
+  /** Name of your own open stall. */
+  stallOpenName: string | null;
   /** Today's login reward is waiting. */
   dailyReady: boolean;
   achievementToast: { id: string; name: string; icon: string; gold: number } | null;
@@ -143,6 +147,8 @@ export const initialUi: UiState = {
   profile: null,
   chatDraft: null,
   journal: null,
+  stallView: null,
+  stallOpenName: null,
   dailyReady: false,
   achievementToast: null,
   announcement: null,

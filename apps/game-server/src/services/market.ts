@@ -254,3 +254,36 @@ export async function executeTrade(pool: Pool, a: TradeOffer, b: TradeOffer): Pr
     return { a: toState(bagA.capacity, goldA, slotsA), b: toState(bagB.capacity, goldB, slotsB) };
   });
 }
+
+/** Buy from a player's stall: the item comes straight out of the seller's bag. 3% tax. */
+export async function buyFromStall(
+  pool: Pool,
+  buyerId: string,
+  sellerId: string,
+  slot: number,
+  expect: { itemId: string; unitPrice: number },
+): Promise<{ buyer: Inv; seller: Inv; total: number; qty: number; itemName: string }> {
+  if (buyerId === sellerId) throw new GameError("That's your own shop.");
+  return withTransaction(pool, async (tx) => {
+    await lockPair(tx, buyerId, sellerId);
+    const sb = await loadSlots(tx, sellerId);
+    const item = sb.slots[slot];
+    if (!item || item.itemId !== expect.itemId || item.bound) throw new GameError('That item is no longer for sale.');
+    const def = getItem(item.itemId)!;
+    const qty = item.quantity;
+    const total = expect.unitPrice * qty;
+    const tax = Math.max(1, Math.floor(total * 0.03));
+    const bb = await loadSlots(tx, buyerId);
+    const added = addItem(bb.slots, { ...item }, qty, def.stackSize);
+    if (!added.ok) throw new GameError('Your bag is full.');
+    const taken = removeFromSlot(sb.slots, slot, qty);
+    if (!taken.ok) throw new GameError(taken.error);
+    const ref = { type: 'stall', id: sellerId };
+    const buyerGold = (await changeGold(tx, buyerId, -total, 'marketplace_purchase', ref)).after;
+    const sellerGold = (await changeGold(tx, sellerId, total - tax, 'marketplace_sale', ref)).after;
+    await writeSlots(tx, sellerId, taken.slots, [slot]);
+    await writeSlots(tx, buyerId, added.slots, added.changed);
+    await logItemMovement(tx, { itemId: item.itemId, quantity: qty, quality: item.quality, from: sellerId, to: buyerId, reason: 'marketplace', ref });
+    return { buyer: toState(bb.capacity, buyerGold, added.slots), seller: toState(sb.capacity, sellerGold, taken.slots), total, qty, itemName: def.name };
+  });
+}

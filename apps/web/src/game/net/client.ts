@@ -271,6 +271,7 @@ export class GameClient {
     socket.on('inventory:update', (inventory) => this.ui.set((s) => ({ inventory: { ...inventory, equipment: inventory.equipment ?? s.inventory?.equipment ?? [] } })));
     socket.on('notice', (n) => {
       pushNotice(this.ui, n.kind, n.text);
+      if (/Your stall is closed/.test(n.text)) this.ui.set({ stallOpenName: null });
       if (n.kind === 'error') audio.sfx(/defeated/i.test(n.text) ? 'death' : 'error');
       else if (/Level up|level \d+!/.test(n.text)) audio.sfx('levelup');
       else if (/Trade complete/.test(n.text)) audio.sfx('trade');
@@ -343,6 +344,7 @@ export class GameClient {
   }
 
   private onEnter(p: EnterWorldPayload): void {
+    this.ui.set({ stallOpenName: null, stallView: null });
     if (!this.journalChecked) {
       this.journalChecked = true;
       setTimeout(() => void this.loadJournal(), 1500);
@@ -511,6 +513,10 @@ export class GameClient {
         const name = STATION_NAMES[p.type] ?? p.type;
         return { x: p.x, y: p.y, w: d.w, h: d.h, hint: `Use ${name}`, run: () => this.ui.set(p.type === 'enhance_altar' ? { panel: 'enhance' } : { panel: 'craft', station: p.type }) };
       }
+    }
+    for (const p of map.objects) {
+      if (p.kind !== 'prop' || p.type !== 'teleport_pad') continue;
+      if (tx >= p.x && tx < p.x + 3 && ty >= p.y && ty < p.y + 3) return { x: p.x, y: p.y, w: 3, h: 3, hint: 'Travel (waystone)', run: () => this.ui.set({ panel: 'travel' }) };
     }
     const tile = map.tiles[ty]?.[tx];
     if (tile && FISHABLE_TILES.has(tile) && map.fishing) {
@@ -919,6 +925,59 @@ export class GameClient {
   tradeCancel() {
     this.socket?.emit('trade:cancel');
     this.ui.set({ trade: null });
+  }
+
+  // --- Bank, travel, stalls -------------------------------------------------
+  bankGet(npcId: string) {
+    return this.request<import('@terrago/shared').BankViewState>('bank:get', npcId);
+  }
+
+  async bankMove(npcId: string, dir: 'deposit' | 'withdraw', slot: number) {
+    try {
+      return await this.request<import('@terrago/shared').BankViewState>('bank:move', { npcId, dir, slot });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
+  }
+
+  bankUpgrade(npcId: string) {
+    return this.run<{ message: string; bank: import('@terrago/shared').BankViewState }>('bank:upgrade', npcId);
+  }
+
+  travelList() {
+    return this.request<{ atWaystone: boolean; options: import('@terrago/shared').TravelOption[] }>('travel:list');
+  }
+
+  async travelGo(mapId: string) {
+    const r = await this.run('travel:go', mapId);
+    if (r) {
+      this.ui.set({ panel: null });
+      audio.sfx('portal');
+    }
+  }
+
+  stallOpen(name: string, items: { slot: number; price: number }[]) {
+    return this.run('stall:open', { name, items });
+  }
+
+  stallClose() {
+    return this.run('stall:close');
+  }
+
+  async stallView(sellerId: string): Promise<void> {
+    this.ui.set({ playerMenu: null });
+    try {
+      this.ui.set({ stallView: await this.request('stall:view', sellerId) });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  async stallBuy(sellerId: string, slot: number, itemId: string, price: number) {
+    const r = await this.run('stall:buy', { sellerId, slot, itemId, price });
+    await this.stallView(sellerId).catch(() => this.ui.set({ stallView: null }));
+    return r;
   }
 
   chooseSpec(skill: string, spec: string) {

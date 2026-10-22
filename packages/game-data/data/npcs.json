@@ -461,5 +461,40 @@
    ]
   ],
   "services": []
+ },
+ {
+  "id": "banker_orrin",
+  "name": "Banker Orrin",
+  "title": "Greenhaven Bank",
+  "mapId": "greenhaven",
+  "x": 54,
+  "y": 12,
+  "dir": "left",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 2,
+   "hairStyle": 4,
+   "hairColor": 0,
+   "eyeColor": 2,
+   "outfit": 1
+  },
+  "accessory": "hat",
+  "firstMeeting": {
+   "lines": [
+    "Orrin, at your service. Your vault is safe with us \u2014 every coin and every carrot.",
+    "Thirty stacks to start. Bigger vaults cost a little Gold, but they never forget a thing."
+   ]
+  },
+  "greetings": [
+   [
+    "Deposits, withdrawals, upgrades. What'll it be?"
+   ],
+   [
+    "Safe as stone, our vaults."
+   ]
+  ],
+  "services": [
+   "bank"
+  ]
  }
 ]

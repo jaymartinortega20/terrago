@@ -382,6 +382,11 @@ export function SocialPopups({ client }: { client: GameClient }) {
         <div className="px-panel p-2 text-sm" data-testid="player-menu">
           <p className="font-bold text-wood-dark">{menu.name}</p>
           <div className="mt-1 flex flex-wrap gap-1">
+            {client.remotes.get(menu.id)?.info.shop && (
+              <button className="px-btn green small" onClick={() => void client.stallView(menu.id)} data-testid="player-stall">
+                Stall
+              </button>
+            )}
             <button className="px-btn small" onClick={() => void client.tradeRequest(menu.id)} data-testid="player-trade">
               Trade
             </button>

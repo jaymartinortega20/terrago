@@ -108,7 +108,7 @@ function greenhaven(): MapDef {
   m.prop('teleport_pad', 16, 39);
   m.prop('lamp', 14, 38);
   m.prop('lamp', 20, 38);
-  m.prop('sign', 15, 42, 'Teleport Station — waystones are still being attuned.');
+  m.prop('sign', 15, 42, 'Teleport Station — step on a waystone to travel to any region you have visited (small fee).');
 
   // --- Exits ------------------------------------------------------------------
   m.prop('sign', 29, 3, 'North: Irondeep Mine. Bring a pickaxe.');
@@ -215,6 +215,7 @@ function sunfield(): MapDef {
   m.rect(29, 34, 4, 1, 'w', true);
 
   m.reserve(27, 1, 6, 4);
+  waystone(m, 34, 7, '.');
   m.forestBorder(r, 2, 3, [
     { side: 'n', from: 28, to: 31 },
     { side: 'w', from: 19, to: 23 },
@@ -332,6 +333,12 @@ function homestead(): MapDef {
 }
 
 /** West of Greenhaven: old forest, hardwood, herbs, a river — and (later) wolves. */
+/** A waystone (3x3 teleport pad) on cleared ground. */
+function waystone(m: MapBuilder, x: number, y: number, ground: string) {
+  m.rect(x - 1, y - 1, 5, 5, ground, true);
+  m.prop('teleport_pad', x, y);
+}
+
 /** A dungeon gate (3x2) with its entry portal on the row in front. */
 function dungeonGate(m: MapBuilder, id: string, ground: string): PortalDef {
   const d = DUNGEONS.find((x) => x.id === id)!;
@@ -362,6 +369,7 @@ function whisperwood(): MapDef {
   m.prop('campfire', 48, 28);
   m.prop('sign', 50, 26, 'Whisperwood Ranger Camp. Hardwood grows deep in the forest; elder trees deeper still.');
   m.reserve(43, 25, 9, 7);
+  waystone(m, 53, 27, 'f');
   m.border(r, 2, 4, [{ side: 'e', from: 21, to: 24 }, { side: 'n', from: 25, to: 33 }, { side: 's', from: 23, to: 31 }], ['tree_pine', 'tree_oak', 'tree_ancient']);
   const crypt = dungeonGate(m, 'mossy_crypt', 'k');
   m.rect(10, 18, 3, 2, '=', true); // path from the trail to the crypt
@@ -424,6 +432,7 @@ function crystalLake(): MapDef {
   m.prop('campfire', 12, 26);
   m.prop('tent', 9, 25);
   m.reserve(8, 24, 7, 5);
+  waystone(m, 7, 15, '.');
   m.forestBorder(r, 2, 3, [{ side: 'w', from: 20, to: 24 }]);
   m.scatterProps(r, ['reeds', 'reeds', 'reeds'], 22, undefined, 's');
   m.scatterGround(r, 0.06, ',');
@@ -471,6 +480,7 @@ function irondeepEntrance(): MapDef {
   m.prop('sign', 24, 10, 'Irondeep Mine. Forty floors deep. Floors 1–5: stone and copper. Iron below 6, silver below 11, gold below 21.');
   m.prop('crate', 15, 9);
   m.prop('barrel', 16, 9);
+  waystone(m, 13, 14, ':');
   m.rect(22, 11, 9, 3, ':', true); // path east to the hollow
   m.rect(21, 18, 19, 3, '=', true); // mountain path east, up to the Frostpine Peaks
   const hollow = dungeonGate(m, 'ember_hollow', 'a');
@@ -516,6 +526,7 @@ function frostpine(): MapDef {
   m.rect(4, 18, 9, 5, ':', true);
   m.prop('tent', 5, 18);
   m.prop('campfire', 8, 20);
+  waystone(m, 5, 29, 'n');
   m.prop('sign', 11, 23, 'Frostpine Peaks. Wolves on the slopes, yetis by the lake. The Frost Giant walks the northern plateau.');
   // Frozen lake
   const cx = 34;
@@ -577,6 +588,7 @@ function mirefen(): MapDef {
   m.rect(3, 15, 8, 5, '=', true);
   m.prop('tent', 3, 15);
   m.prop('campfire', 6, 17);
+  waystone(m, 13, 15, '=');
   m.prop('sign', 10, 19, 'Mirefen Swamp. Stay on the boardwalks. Witches nest in the old ruins to the east.');
   // Witch ruins (east)
   m.rect(46, 6, 14, 14, 'k', true);

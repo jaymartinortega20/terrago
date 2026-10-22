@@ -14,6 +14,7 @@ const ACTION_LABELS: Record<DialogueActionId, string> = {
   farm_upgrade: 'Expand my farm',
   repair: 'Repair my tools',
   lift: 'Take the lift',
+  bank: 'Open my vault',
   quest_offer: 'Quest',
   quest_complete: 'Complete quest',
 };

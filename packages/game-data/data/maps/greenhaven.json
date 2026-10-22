@@ -436,7 +436,7 @@
    "type": "sign",
    "x": 15,
    "y": 42,
-   "text": "Teleport Station — waystones are still being attuned."
+   "text": "Teleport Station — step on a waystone to travel to any region you have visited (small fee)."
   },
   {
    "kind": "prop",
