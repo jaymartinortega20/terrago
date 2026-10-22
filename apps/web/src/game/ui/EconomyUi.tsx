@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { animalForItem, getAnimal, getItem } from '@terrago/game-data';
-import { ANIMAL_PRODUCT_CAP, PEN_CAPACITY, formatDuration, QUALITIES, type BankViewState, type InventorySlot, type TravelOption } from '@terrago/shared';
+import { DUNGEONS, animalForItem, getAnimal, getItem } from '@terrago/game-data';
+import { DIFFICULTIES, ANIMAL_PRODUCT_CAP, PEN_CAPACITY, formatDuration, QUALITIES, type BankViewState, type InventorySlot, type TravelOption } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { ItemSlot } from './ItemSlot';
@@ -240,6 +240,38 @@ export function AnimalsPanel({ client, onClose }: { client: GameClient; onClose:
           </div>
         </div>
       )}
+    </Window>
+  );
+}
+
+/** Dungeon gate: pick a difficulty (party members follow their leader's run). */
+export function DungeonPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
+  const id = useStore(client.ui, (s) => s.dungeonGate);
+  const level = useStore(client.ui, (s) => s.self?.level ?? 1);
+  const party = useStore(client.ui, (s) => s.party);
+  const me = useStore(client.ui, (s) => s.self?.characterId);
+  const d = DUNGEONS.find((x) => x.id === id);
+  if (!d) return null;
+  const follower = !!party && party.leaderId !== me;
+  return (
+    <Window title={d.name} onClose={onClose} testId="dungeon-panel">
+      <p className="text-sm">
+        Recommended level {d.levels[0]}–{d.levels[1]}. Your party shares one run; harder modes add levels, health and damage — and roll the loot more times.
+      </p>
+      {follower && <p className="mt-1 text-xs font-bold text-gold-dark">You're in a party: you'll join your leader's run.</p>}
+      <ul className="mt-2 space-y-1">
+        {DIFFICULTIES.map((x) => (
+          <li key={x.id} className="flex items-center gap-2 border-2 border-ink/20 px-2 py-1 text-sm">
+            <b>{x.name}</b>
+            <span className="text-xs text-wood-dark/80">
+              +{x.levels} levels · ×{x.hp} HP · {x.lootRolls}× loot{x.minLevel ? ` · Lv ${x.minLevel}+` : ''}
+            </span>
+            <button className="px-btn green small ml-auto" disabled={level < x.minLevel} onClick={() => void client.enterDungeon(d.id, x.id)} data-testid={`dungeon-${x.id}`}>
+              Enter
+            </button>
+          </li>
+        ))}
+      </ul>
     </Window>
   );
 }

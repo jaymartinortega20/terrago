@@ -1,5 +1,5 @@
-import { getItem, getMap, waystones } from '@terrago/game-data';
-import { TILE_SIZE, sanitizeChatText, maskProfanity, type StallView, type TravelOption } from '@terrago/shared';
+import { DUNGEONS, getItem, getMap, waystones } from '@terrago/game-data';
+import { DIFFICULTIES, TILE_SIZE, sanitizeChatText, maskProfanity, type StallView, type TravelOption } from '@terrago/shared';
 import { GameError, withTransaction } from '../db';
 import { bankMove, bankUpgrade, bankView } from '../services/bank';
 import { addAnimal, collectAnimals, feedAnimals, listAnimals } from '../services/animals';
@@ -196,3 +196,24 @@ export const animals = {
     return r.animals;
   },
 };
+
+// --- Dungeon gates -----------------------------------------------------------
+
+/** Enter a dungeon from its gate with a chosen difficulty (the party follows the leader's choice). */
+export async function enterDungeon(deps: GameplayDeps, p: Player, req: unknown): Promise<{ message: string }> {
+  const r = (req ?? {}) as { dungeonId?: unknown; difficulty?: unknown };
+  const d = DUNGEONS.find((x) => x.id === r.dungeonId);
+  const diff = DIFFICULTIES.find((x) => x.id === r.difficulty);
+  if (!d || !diff) throw new GameError('Unknown dungeon.');
+  if (d.entrance.map !== p.mapId || Math.hypot(p.x - (d.entrance.x + 1.5) * TILE_SIZE, p.y - (d.entrance.y + 2) * TILE_SIZE) > 5 * TILE_SIZE)
+    throw new GameError('Stand at the dungeon gate.');
+  if (p.rec.level < diff.minLevel) throw new GameError(`${diff.name} needs level ${diff.minLevel}.`);
+  if (p.party && p.party.leaderId !== p.id) {
+    const leader = deps.world.players.get(p.party.leaderId);
+    await deps.world.enterDungeon(p, `dg_${d.id}`);
+    return { message: `You joined your party leader's run${leader ? ` (${leader.dungeonDifficulty})` : ''}.` };
+  }
+  p.dungeonDifficulty = diff.id;
+  await deps.world.enterDungeon(p, `dg_${d.id}`);
+  return { message: `${d.name} — ${diff.name}. Good luck!` };
+}

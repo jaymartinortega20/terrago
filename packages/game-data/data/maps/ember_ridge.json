@@ -1,0 +1,597 @@
+{
+ "id": "ember_ridge",
+ "name": "Ember Ridge",
+ "safeZone": false,
+ "music": "volcano",
+ "spawn": {
+  "x": 2,
+  "y": 23,
+  "dir": "right"
+ },
+ "portals": [
+  {
+   "id": "er_west",
+   "x": 0,
+   "y": 22,
+   "w": 1,
+   "h": 3,
+   "to": "dusthaven_desert",
+   "toX": 61,
+   "toY": 23,
+   "toDir": "left",
+   "label": "Dusthaven Desert"
+  },
+  {
+   "id": "er_north",
+   "x": 30,
+   "y": 0,
+   "w": 4,
+   "h": 1,
+   "to": "ancient_ruins",
+   "toX": 31,
+   "toY": 45,
+   "toDir": "up",
+   "label": "Ancient Ruins"
+  }
+ ],
+ "theme": "volcano",
+ "levels": [
+  50,
+  65
+ ],
+ "respawn": {
+  "mapId": "ember_ridge",
+  "x": 11,
+  "y": 20
+ },
+ "spawns": [
+  {
+   "monster": "magma_hound",
+   "level": [
+    50,
+    55
+   ],
+   "count": 8,
+   "area": {
+    "x": 14,
+    "y": 27,
+    "w": 28,
+    "h": 15
+   }
+  },
+  {
+   "monster": "ember_elemental",
+   "level": [
+    54,
+    59
+   ],
+   "count": 6,
+   "area": {
+    "x": 38,
+    "y": 26,
+    "w": 20,
+    "h": 16
+   }
+  },
+  {
+   "monster": "obsidian_golem",
+   "level": [
+    59,
+    65
+   ],
+   "count": 5,
+   "area": {
+    "x": 38,
+    "y": 4,
+    "w": 20,
+    "h": 16
+   }
+  }
+ ],
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "##############################====##############################",
+  "##############################====##############################",
+  "###aaa###########aaa##########====###########aaa###########aaa##",
+  "###aaaaa#######aaaaaaa#######a====aa#######aaaaaa########aaaa###",
+  "###aaaaaaaa#aaaaaaaaaaaaa#aaaa====aaaaa#aaaaaaaaaaaaa#aaaaaaa###",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaa::::::::::aaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaaaaLLLLaaaaa====aaaaaaaa::::::::::aaaaaaaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaLLLLaaaaa====aaaaaaaa::::::::::aaaaaaaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaLLLLaaaaa====aaaaaaaa::::::::::aaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaa::::::::::aaaaaaaaaa##",
+  "###aaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaa::::::::::aaaaaaaaa###",
+  "###aaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaa::::::::::aaaaaaaaa###",
+  "##aaaa:::::::::aa:::::aaaaaaaa====aaaaaaaaaaLLaaaaaaaaaaaaaaaa##",
+  "##aaaa:::::::::aa:::::aaaaaaaa====aaaaaaaaaaLLaaaaaaaaaaaaaaaa##",
+  "##aaaa:::::::::aa:::::aaaaaaaa====aaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaa:::::::::aa:::::aaaaaaaa====aaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaa:::::::::aa:::::aaaaaaaa====aaaaaaaaaaaLLaaaaaaaaaaaaaaaa#",
+  "#aaaaa:::::::::aaaaaaaaaaaaaaa====aaaaaaaaaaaLLaaaaaaaaaaaaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaa====aaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "==================================aaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "==================================aaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "==================================aaaaaaaaaaaaaaaaaaaaaaaaaaa###",
+  "###aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa###",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaaaaLLLLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaaaaLLLLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaLLLaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaLLLaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaLLLaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "###aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa###",
+  "###aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa###",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaLLLaaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaLLLaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaLLLLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaLLLLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "#aaaaaaaaaaaaaaaaaLLLLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "##aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa##",
+  "###aaaaa#######aaaaaaa#######aaaaaaa#######aaaaaaa######aaaaa###",
+  "################################################################",
+  "################################################################",
+  "################################################################"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 7,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 11,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 13,
+   "y": 20,
+   "text": "Ember Ridge. Hounds and fire spirits on the slopes; obsidian golems by the old forges."
+  },
+  {
+   "kind": "prop",
+   "type": "teleport_pad",
+   "x": 18,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "furnace",
+   "x": 43,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "anvil",
+   "x": 47,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 33,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 22,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 9,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 36,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 5,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 4,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 18,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 31,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 8,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 25,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 23,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 39,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 41,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 45,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 45,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 56,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 39,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 42,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 27,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 5,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 49,
+   "y": 22
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 3,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 38,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 49,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 25,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 12,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 39,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 56,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 16,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 35,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 31,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 54,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 2,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 48,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 29,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 3,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 57,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 56,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 54,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 41,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 38,
+   "y": 23
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 39,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 56,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 28,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 53,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 54,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 4,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 28,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 26,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "stalagmite",
+   "x": 43,
+   "y": 21
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "rock_coal",
+   "x": 5,
+   "y": 8,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "rock_coal",
+   "x": 8,
+   "y": 41,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "rock_coal",
+   "x": 56,
+   "y": 39,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "rock_mithril",
+   "x": 39,
+   "y": 8,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "rock_coal",
+   "x": 26,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "rock_coal",
+   "x": 44,
+   "y": 26,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "rock_obsidian",
+   "x": 37,
+   "y": 42,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "rock_mithril",
+   "x": 4,
+   "y": 5,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "rock_coal",
+   "x": 40,
+   "y": 32,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "rock_mithril",
+   "x": 48,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "rock_mithril",
+   "x": 59,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "rock_obsidian",
+   "x": 37,
+   "y": 7,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "rock_obsidian",
+   "x": 36,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "rock_obsidian",
+   "x": 54,
+   "y": 20,
+   "solid": true
+  },
+  {
+   "id": "n14",
+   "type": "rock_obsidian",
+   "x": 7,
+   "y": 33,
+   "solid": true
+  },
+  {
+   "id": "n15",
+   "type": "rock_obsidian",
+   "x": 54,
+   "y": 16,
+   "solid": true
+  }
+ ]
+}

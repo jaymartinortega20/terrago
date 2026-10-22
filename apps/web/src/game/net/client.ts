@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, skillsForClass } from '@terrago/game-data';
+import { DUNGEONS, NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, skillsForClass } from '@terrago/game-data';
 import {
   CHAT,
   CODE_DIR,
@@ -522,6 +522,13 @@ export class GameClient {
       return { x: tx, y: ty, w: 1, h: 1, hint: 'Tend animals', run: () => this.ui.set({ panel: 'animals' }) };
     }
     for (const p of map.objects) {
+      if (p.kind !== 'prop' || p.type !== 'dungeon_gate') continue;
+      if (tx >= p.x && tx < p.x + 3 && ty >= p.y && ty < p.y + 3) {
+        const d = DUNGEONS.find((x) => x.entrance.map === map.id && x.entrance.x === p.x && x.entrance.y === p.y);
+        if (d) return { x: p.x, y: p.y, w: 3, h: 2, hint: `Enter ${d.name}`, run: () => this.ui.set({ panel: 'dungeon', dungeonGate: d.id }) };
+      }
+    }
+    for (const p of map.objects) {
       if (p.kind !== 'prop' || p.type !== 'teleport_pad') continue;
       if (tx >= p.x && tx < p.x + 3 && ty >= p.y && ty < p.y + 3) return { x: p.x, y: p.y, w: 3, h: 3, hint: 'Travel (waystone)', run: () => this.ui.set({ panel: 'travel' }) };
     }
@@ -933,6 +940,11 @@ export class GameClient {
   tradeCancel() {
     this.socket?.emit('trade:cancel');
     this.ui.set({ trade: null });
+  }
+
+  async enterDungeon(dungeonId: string, difficulty: import('@terrago/shared').DifficultyId) {
+    const r = await this.run('dungeon:enter', { dungeonId, difficulty });
+    if (r) this.ui.set({ panel: null });
   }
 
   // --- Farm animals ---------------------------------------------------------

@@ -19,7 +19,7 @@ import { CraftPanel, FishingOverlay, LiftPanel, RecipeBook } from './ui/GatherPa
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
 import { EnvBadge, EventBadge, WeatherLayer } from './ui/Atmosphere';
 import { JournalPanel, ProgressToasts } from './ui/JournalUi';
-import { AnimalsPanel, BankPanel, StallBrowseWindow, StallSetupPanel, TravelPanel } from './ui/EconomyUi';
+import { AnimalsPanel, BankPanel, DungeonPanel, StallBrowseWindow, StallSetupPanel, TravelPanel } from './ui/EconomyUi';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
 import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
 import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
@@ -239,6 +239,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'repair' && <RepairPanel client={client} onClose={() => open(null)} />}
           {panel === 'craft' && <CraftPanel client={client} onClose={() => open(null)} />}
           {panel === 'lift' && <LiftPanel client={client} onClose={() => open(null)} />}
+          {panel === 'dungeon' && <DungeonPanel client={client} onClose={() => open(null)} />}
           {panel === 'animals' && <AnimalsPanel client={client} onClose={() => open(null)} />}
           {panel === 'bank' && <BankPanel client={client} onClose={() => open(null)} />}
           {panel === 'travel' && <TravelPanel client={client} onClose={() => open(null)} />}

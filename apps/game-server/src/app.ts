@@ -58,7 +58,9 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     onLeave: (p) => socialLeave({ pool, world, log }, p),
     dungeonOwner: (p) => {
       const leader = p.party ? world.players.get(p.party.leaderId) : undefined;
-      return leader?.conn ? { id: leader.id, name: leader.name } : { id: p.id, name: p.name };
+      const who = leader?.conn ? leader : p;
+      // Each difficulty is its own instance.
+      return { id: who.dungeonDifficulty === 'normal' ? who.id : `${who.id}~${who.dungeonDifficulty}`, name: who.name };
     },
     security,
     loadObjects: (def, owner) => loadMapObjects(pool, def, owner),

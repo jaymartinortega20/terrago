@@ -53,6 +53,8 @@ export class Player {
   nextGlobalAt = 0;
   /** Open market stall: its name and the bag slots on sale with unit prices. */
   stall: { name: string; prices: Map<number, { itemId: string; price: number }> } | null = null;
+  /** Dungeon difficulty this player (as party leader) picks. */
+  dungeonDifficulty: import('@terrago/shared').DifficultyId = 'normal';
   /** Chat mute set by a moderator (ms since epoch). */
   mutedUntil = 0;
   /** Recent lines this player said (any channel), attached to reports. */

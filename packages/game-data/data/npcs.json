@@ -496,5 +496,139 @@
   "services": [
    "bank"
   ]
+ },
+ {
+  "id": "caravan_zara",
+  "name": "Caravan Master Zara",
+  "title": "Desert Caravan",
+  "mapId": "dusthaven_desert",
+  "x": 10,
+  "y": 20,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 4,
+   "hairStyle": 2,
+   "hairColor": 0,
+   "eyeColor": 3,
+   "outfit": 2
+  },
+  "accessory": "bandana",
+  "firstMeeting": {
+   "lines": [
+    "Zara. My caravans cross the dunes \u2014 when the scorpions let them.",
+    "Bandits on the roads, golems in the sand. Clear the way and you'll have friends in every oasis."
+   ]
+  },
+  "greetings": [
+   [
+    "Water's worth more than gold out here."
+   ],
+   [
+    "Stay off the open dunes at noon."
+   ]
+  ],
+  "services": []
+ },
+ {
+  "id": "forgewarden_hal",
+  "name": "Forgewarden Hal",
+  "title": "Ember Ridge",
+  "mapId": "ember_ridge",
+  "x": 10,
+  "y": 20,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 2,
+   "hairStyle": 1,
+   "hairColor": 5,
+   "eyeColor": 1,
+   "outfit": 3
+  },
+  "accessory": "helmet",
+  "firstMeeting": {
+   "lines": [
+    "Hal. I guard the old dwarf forges on this ridge.",
+    "Magma hounds and fire spirits, and golems of black glass. Bring your best armor \u2014 and bring water."
+   ]
+  },
+  "greetings": [
+   [
+    "The mountain breathes fire. Respect it."
+   ],
+   [
+    "Obsidian? The golems are made of it. Help yourself."
+   ]
+  ],
+  "services": []
+ },
+ {
+  "id": "archivist_elowen",
+  "name": "Archivist Elowen",
+  "title": "Ancient Ruins",
+  "mapId": "ancient_ruins",
+  "x": 30,
+  "y": 42,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 1,
+   "hairStyle": 4,
+   "hairColor": 3,
+   "eyeColor": 4,
+   "outfit": 4
+  },
+  "accessory": "hood",
+  "firstMeeting": {
+   "lines": [
+    "Elowen. I study the empire that built these halls.",
+    "The Stoneheart Golem guards the central court. It takes a small army to wake it \u2014 and to put it back to sleep.",
+    "Below us lies the Sunken Sanctum. A lich drowned there long ago. He didn't stay dead."
+   ]
+  },
+  "greetings": [
+   [
+    "Every stone here has a story."
+   ],
+   [
+    "Mind the sentinels. They still think it's wartime."
+   ]
+  ],
+  "services": []
+ },
+ {
+  "id": "hunter_kade",
+  "name": "Dragon Hunter Kade",
+  "title": "Dragonspire",
+  "mapId": "dragonspire",
+  "x": 10,
+  "y": 22,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 3,
+   "hairStyle": 3,
+   "hairColor": 1,
+   "eyeColor": 0,
+   "outfit": 5
+  },
+  "accessory": "cape",
+  "firstMeeting": {
+   "lines": [
+    "Kade. I hunt dragons. Mostly they hunt me.",
+    "Drakes on the slopes, dragon knights on the bridges \u2014 and at the summit, the Ancient Wyvern.",
+    "Twenty of the best fighters in TerraGo, maybe. That's what it'll take."
+   ]
+  },
+  "greetings": [
+   [
+    "Fire-proof cloak? Good. Now a bigger one."
+   ],
+   [
+    "If you hear wings, run."
+   ]
+  ],
+  "services": []
  }
 ]

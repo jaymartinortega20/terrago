@@ -113,5 +113,62 @@
    "monster": "magma_tyrant",
    "level": 32
   }
+ },
+ {
+  "id": "sunken_sanctum",
+  "name": "The Sunken Sanctum",
+  "levels": [
+   70,
+   80
+  ],
+  "seed": 9191,
+  "floor": "k",
+  "wall": "r",
+  "entrance": {
+   "map": "ancient_ruins",
+   "x": 44,
+   "y": 30
+  },
+  "exit": {
+   "mapId": "ancient_ruins",
+   "x": 45,
+   "y": 34
+  },
+  "rooms": 5,
+  "props": [
+   "ruin_pillar",
+   "bones",
+   "crystal"
+  ],
+  "trash": [
+   {
+    "monster": "cursed_knight",
+    "level": [
+     71,
+     74
+    ],
+    "count": 3
+   },
+   {
+    "monster": "wraith",
+    "level": [
+     72,
+     75
+    ],
+    "count": 2
+   },
+   {
+    "monster": "ruin_sentinel",
+    "level": [
+     74,
+     76
+    ],
+    "count": 1
+   }
+  ],
+  "boss": {
+   "monster": "sanctum_lich",
+   "level": 80
+  }
  }
 ]

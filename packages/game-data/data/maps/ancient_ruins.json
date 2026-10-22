@@ -1,0 +1,719 @@
+{
+ "id": "ancient_ruins",
+ "name": "Ancient Ruins",
+ "safeZone": false,
+ "music": "ruins",
+ "spawn": {
+  "x": 31,
+  "y": 45,
+  "dir": "up"
+ },
+ "portals": [
+  {
+   "id": "ar_south",
+   "x": 30,
+   "y": 47,
+   "w": 4,
+   "h": 1,
+   "to": "ember_ridge",
+   "toX": 31,
+   "toY": 2,
+   "toDir": "down",
+   "label": "Ember Ridge"
+  },
+  {
+   "id": "ar_east",
+   "x": 63,
+   "y": 20,
+   "w": 1,
+   "h": 3,
+   "to": "dragonspire",
+   "toX": 2,
+   "toY": 23,
+   "toDir": "right",
+   "label": "Dragonspire"
+  },
+  {
+   "id": "gate_sunken_sanctum",
+   "x": 44,
+   "y": 32,
+   "w": 3,
+   "h": 1,
+   "to": "dg_sunken_sanctum",
+   "toX": 5,
+   "toY": 12,
+   "toDir": "right",
+   "label": "The Sunken Sanctum"
+  }
+ ],
+ "theme": "ruins",
+ "levels": [
+  65,
+  80
+ ],
+ "respawn": {
+  "mapId": "ancient_ruins",
+  "x": 31,
+  "y": 37
+ },
+ "spawns": [
+  {
+   "monster": "cursed_knight",
+   "level": [
+    65,
+    70
+   ],
+   "count": 8,
+   "area": {
+    "x": 6,
+    "y": 8,
+    "w": 12,
+    "h": 30
+   }
+  },
+  {
+   "monster": "wraith",
+   "level": [
+    68,
+    73
+   ],
+   "count": 6,
+   "area": {
+    "x": 42,
+    "y": 26,
+    "w": 16,
+    "h": 16
+   }
+  },
+  {
+   "monster": "ruin_sentinel",
+   "level": [
+    72,
+    78
+   ],
+   "count": 6,
+   "area": {
+    "x": 42,
+    "y": 4,
+    "w": 16,
+    "h": 14
+   }
+  },
+  {
+   "monster": "stoneheart_golem",
+   "level": [
+    78,
+    78
+   ],
+   "count": 1,
+   "area": {
+    "x": 28,
+    "y": 9,
+    "w": 4,
+    "h": 4
+   }
+  }
+ ],
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "################################################################",
+  "kkk#######kkkkkkk#######kkkkkkk#######kkkkkkk#######kkkkkkk#####",
+  "kkkkkk#kkkkkkkkkkkkk#kkkkkkkkkkkkk#kkkkkkkkkkkkk#kkkkkkkkkkkkk##",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkk####",
+  "###kkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkk####",
+  "##kkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkk###",
+  "#kkkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkk###",
+  "#kkkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkk###",
+  "kkkkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkkk##",
+  "kkkkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkkk##",
+  "#kkkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkk###",
+  "##kkkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkk::::::::::::::::::::kkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk==================================",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkk==================================",
+  "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk==================================",
+  "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "##kkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkk###",
+  "###kkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkk####",
+  "####kkkkkkkkkkkkkkkkkkkkkk=========k=====kkkkkkkkkkkkkkkkkkk####",
+  "###kkkkkkkkkkkkkkkkkkkkkkk=========k=====kkkkkkkkkkkkkkkkkkk####",
+  "##kkkkkkkkkkkkkkkkkkkkkkkk=========k=====kkkkkkkkkkkkkkkkkkkk###",
+  "#kkkkkkkkkkkkkkkkkkkkkkkkk=========k=====kkkkkkkkkkkkkkkkkkkk###",
+  "kkkkkkkkkkkkkkkkkkkkkkkkkk=========k=====kkkkkkkkkkkkkkkkkkkkk##",
+  "kkkkkkkkkkkkkkkkkkkkkkkkkk=========kkkkkkkkkkkkkkkkkkkkkkkkkkk##",
+  "#kkkk####kkkkkkkkkk####kkkkkkk====###kkkkkkkkkk####kkkkkkkkkk###",
+  "############kkk###########kkk#====######kkk###########kkk#######",
+  "##############################====##############################"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 27,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 31,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 33,
+   "y": 44,
+   "text": "Ancient Ruins. Sentinels still guard the halls. The Stoneheart Golem sleeps in the central court."
+  },
+  {
+   "kind": "prop",
+   "type": "teleport_pad",
+   "x": 37,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 20,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 39,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 20,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 39,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 29,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 28,
+   "y": 18,
+   "text": "The Stoneheart Court. Recommended: 8–15 players of level 70+."
+  },
+  {
+   "kind": "prop",
+   "type": "dungeon_gate",
+   "x": 44,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 43,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 47,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 48,
+   "y": 32,
+   "text": "The Sunken Sanctum. Recommended level 70–80. Click the gate to pick Normal, Hard, Nightmare or Mythic. Your party shares one run."
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 11,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 17,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 23,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 6,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 7,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 28,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 58,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 9,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 26,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 9,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 16,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 54,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 41,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 44,
+   "y": 44
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 11,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 11,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 17,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 7,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 37,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 38,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 48,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 6,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 58,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 4,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 36,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 6,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 43,
+   "y": 42
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 58,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 15,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 10,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 12,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 52,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 2,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 17,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 35,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 7,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 58,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 11,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 11,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 49,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 17,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 39,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 5,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 23,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 18,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 28,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 54,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 44,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 54,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 49,
+   "y": 24
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 14,
+   "y": 3
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 50,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 27,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 41,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 25,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 43,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 55,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 21,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 15,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 42,
+   "y": 24
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "rock_starmetal",
+   "x": 40,
+   "y": 26,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "rock_obsidian",
+   "x": 14,
+   "y": 17,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "rock_obsidian",
+   "x": 51,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "rock_crystal",
+   "x": 19,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "rock_obsidian",
+   "x": 45,
+   "y": 14,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "rock_obsidian",
+   "x": 56,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "rock_starmetal",
+   "x": 52,
+   "y": 29,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "rock_crystal",
+   "x": 15,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "rock_obsidian",
+   "x": 40,
+   "y": 34,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "rock_obsidian",
+   "x": 52,
+   "y": 16,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "rock_starmetal",
+   "x": 41,
+   "y": 11,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "rock_crystal",
+   "x": 19,
+   "y": 32,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "rock_crystal",
+   "x": 13,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "rock_starmetal",
+   "x": 12,
+   "y": 5,
+   "solid": true
+  }
+ ]
+}

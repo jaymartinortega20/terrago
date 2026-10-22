@@ -102,6 +102,10 @@ const TRACKS: Record<string, Track> = {
   dungeon: { bpm: 120, root: 48, scale: MINOR, chords: [0, 5, 6, 4], lead: 'sawtooth', bass: 'square', seed: 89, density: 0.6, drums: true, gain: 0.6 },
   snow: { bpm: 80, root: 62, scale: [0, 2, 4, 7, 11], chords: [0, 3, 1, 4], lead: 'sine', bass: 'triangle', seed: 97, density: 0.35, drums: false, gain: 0.9 },
   swamp: { bpm: 88, root: 52, scale: DORIAN, chords: [0, 3, 6, 4], lead: 'triangle', bass: 'square', seed: 101, density: 0.45, drums: true, gain: 0.7 },
+  desert: { bpm: 96, root: 52, scale: [0, 1, 4, 5, 7, 8, 10], chords: [0, 1, 0, 6], lead: 'square', bass: 'triangle', seed: 131, density: 0.5, drums: true, gain: 0.7 },
+  volcano: { bpm: 108, root: 45, scale: MINOR, chords: [0, 6, 5, 4], lead: 'sawtooth', bass: 'square', seed: 137, density: 0.55, drums: true, gain: 0.55 },
+  ruins: { bpm: 72, root: 57, scale: [0, 2, 3, 6, 7, 8, 11], chords: [0, 3, 5, 4], lead: 'triangle', bass: 'sine', seed: 149, density: 0.35, drums: false, gain: 0.85 },
+  dragon: { bpm: 126, root: 50, scale: MINOR, chords: [0, 5, 3, 6], lead: 'sawtooth', bass: 'sawtooth', seed: 151, density: 0.7, drums: true, gain: 0.5 },
   boss: { bpm: 140, root: 45, scale: MINOR, chords: [0, 0, 5, 4], lead: 'sawtooth', bass: 'sawtooth', seed: 113, density: 0.8, drums: true, gain: 0.55 },
 };
 
@@ -110,6 +114,10 @@ export function trackFor(music: string | null | undefined, theme?: string): stri
   const m = (music ?? '').toLowerCase();
   if (!m && !theme) return null;
   if (m.includes('dungeon')) return 'dungeon';
+  if (m.includes('desert')) return 'desert';
+  if (m.includes('volcano')) return 'volcano';
+  if (m.includes('ruins')) return 'ruins';
+  if (m.includes('dragon')) return 'dragon';
   if (m.includes('cave')) return 'cave';
   if (m.includes('snow')) return 'snow';
   if (m.includes('swamp')) return 'swamp';

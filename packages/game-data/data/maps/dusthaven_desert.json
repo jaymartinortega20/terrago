@@ -1,0 +1,729 @@
+{
+ "id": "dusthaven_desert",
+ "name": "Dusthaven Desert",
+ "safeZone": false,
+ "music": "desert",
+ "spawn": {
+  "x": 2,
+  "y": 23,
+  "dir": "right"
+ },
+ "portals": [
+  {
+   "id": "dd_west",
+   "x": 0,
+   "y": 22,
+   "w": 1,
+   "h": 3,
+   "to": "crystal_lake",
+   "toX": 57,
+   "toY": 22,
+   "toDir": "left",
+   "label": "Crystal Lake"
+  },
+  {
+   "id": "dd_east",
+   "x": 63,
+   "y": 22,
+   "w": 1,
+   "h": 3,
+   "to": "ember_ridge",
+   "toX": 2,
+   "toY": 23,
+   "toDir": "right",
+   "label": "Ember Ridge"
+  }
+ ],
+ "theme": "desert",
+ "levels": [
+  38,
+  50
+ ],
+ "respawn": {
+  "mapId": "dusthaven_desert",
+  "x": 11,
+  "y": 20
+ },
+ "spawns": [
+  {
+   "monster": "sand_scorpion",
+   "level": [
+    38,
+    42
+   ],
+   "count": 8,
+   "area": {
+    "x": 18,
+    "y": 26,
+    "w": 26,
+    "h": 16
+   }
+  },
+  {
+   "monster": "dust_bandit",
+   "level": [
+    41,
+    45
+   ],
+   "count": 7,
+   "area": {
+    "x": 38,
+    "y": 6,
+    "w": 18,
+    "h": 13
+   }
+  },
+  {
+   "monster": "sand_golem",
+   "level": [
+    45,
+    50
+   ],
+   "count": 5,
+   "area": {
+    "x": 46,
+    "y": 27,
+    "w": 14,
+    "h": 15
+   }
+  }
+ ],
+ "width": 64,
+ "height": 48,
+ "tileSize": 32,
+ "tiles": [
+  "################################################################",
+  "################################################################",
+  "#####shhshhs#######hhsssss#######hssssss#######ssssssh#######s##",
+  "###sssshsshssssssssssshhssssshsshshssssssshsshhsssshssshhsshsss#",
+  "##shshssssssssssssshhhsssshssshssssshhsssshhssssshsshssssshshhss",
+  "##hsssssssshhhssshhssshssssss.........hsssshsshssshsshsssshssssh",
+  "###ssshhsshshhsssshssssshsssss~~~~~~~hhshsshsssssssssssssssshss#",
+  "###shshsshhhhssssssssssssshsss~~~~~~~sshsssssshhshssssshssssss##",
+  "####shhhsssshshshsssssssshhsss~~~~~~~shhssssssssshsshsssssshs###",
+  "####sshsshsssssssssssshssssshs~~~~~~~ssskkkkkkkkkkkkssssssss####",
+  "####sshsssssshssshssshsshssss.........sskkkkkkkkkkkkssssshss####",
+  "####shshsshssshshssssshsshssssshsshshssskkkkkkkkkkkkhssshhss####",
+  "####hsssssssshssshhsssshssssssshssshsssskkkkkkkkkkkkhhshsssss###",
+  "###sssshhhshsshsshhssshsshsssssssssssssskkkkkkkkkkkksshssssssss#",
+  "###ssssssssssshsshssshsshsshshsshsshssshkkkkkkkkkkkkssssssshsss#",
+  "##ssss=========hh=====sssshsssshssshshsskkkkkkkkkkkksssssshshsss",
+  "###shs=========ss=====sssshhshsshhhssssskkkkkkkkkkkksshhssshsss#",
+  "###shh=========hs=====shsshshshsssshhsssssssshsshhsssssssshsshs#",
+  "####sh=========ss=====sssshsssshshsssshsssssssssssshsssssshhs###",
+  "####sh=========ss=====shhssssssssshssssssssshssshhhhhsssshss####",
+  "####hh=========sshshsshhhssssssshsshsshhsssshshssshssshhssss####",
+  "####hhsshssssssshssshsshsssshshshhhsshhhsssshshshsssssssssss####",
+  "================================================================",
+  "================================================================",
+  "================================================================",
+  "##shsshhssssssssshsssssssshhhhhsssshsshssshhshsssssssssssshssssh",
+  "##ssshsshsshhsshssssshsssshhsssssssssssssssssssshsssssssssssshss",
+  "###sshhssshshssshhsshhhhsssshshsssssssshsssssssssssshhssshhhsss#",
+  "###ssshshhshsshhsssshhssssshsssssssssssssssshshhshsssssshsssss##",
+  "####hssssshhsssshshhsshshshhssssshsssssssssshssssssshssshshsh###",
+  "####sshsssssssssssshhhssshsssssssssssssssshhshhshssshssshsss####",
+  "####ssssshshhssssssshhhsssshsssshshshssshssshsssshsssshssssh####",
+  "####ssssshhsshshhsssshshssshsssssshshsssshshshsshhshsshshssh####",
+  "###sssshsshsshhsssssshsshssshssssshshhssssssshhshssshsssssshh###",
+  "###sshssssshhssssssssssshssssssshssssshsssshsshsssssshhssssssss#",
+  "###ssshshshhhhhsshsssssssshshhhsssssssssssssssshhhsssshhsssssss#",
+  "##sssssshssshssssssssssssshsshsssshssshhshsshssshsssssshshssssss",
+  "###ssssssssshssshshsshsssssssssshssssshshsshsssssshshssshhsssss#",
+  "###hhhhhhsshssssshssssshssshsshshshssssssssssssssssssssssssshhs#",
+  "####ssshssshhsssshsshshsssshhsssshssssshhsssssshhsssssssshshs###",
+  "####hsssshsssssssshsssshssshsshsssssshssshshshshsssssshsssss####",
+  "####shsssssssshhssssssssssshshsshsssshsshhsssssshsshhhssssss####",
+  "####ssssssshhhssshsssssshsssssssshsssssshssshshshshssssshsss####",
+  "####sssssssssssssssssssshssshsssssshhshsssssshssssssshshsshsh###",
+  "###sshshssssshsssssshshshhsssssshssshssshhsssssshshsshsshshsss##",
+  "####sssssssshs####ssshsssssh####ssssssshss####hhsshsssss###sshs#",
+  "#####hsshsss#######ssssshs#######ssssshh#######hsshssh#######sss",
+  "########ss############ss############ss############sh############"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "tent",
+   "x": 7,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "campfire",
+   "x": 11,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "sign",
+   "x": 13,
+   "y": 20,
+   "text": "Dusthaven Desert. Scorpions in the dunes, bandits on the ridges, golems in the deep sand."
+  },
+  {
+   "kind": "prop",
+   "type": "teleport_pad",
+   "x": 18,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 40,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 51,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 40,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "ruin_pillar",
+   "x": 51,
+   "y": 16
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 48,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 52,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 43,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 50,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 51,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 49,
+   "y": 31
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 21,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 37,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 33,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 58,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 38,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 50,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 53,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 26,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 57,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 25,
+   "y": 43
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 4,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 57,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 48,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 34,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 8,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 6,
+   "y": 9
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 39,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 9,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 14,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 18,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 51,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 26,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 32,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 41,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 16,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 36,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 52,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 57,
+   "y": 20
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 32,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 27,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 31,
+   "y": 14
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 32,
+   "y": 41
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 8,
+   "y": 10
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 21,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 19,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 35,
+   "y": 29
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 55,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 13,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 56,
+   "y": 36
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 59,
+   "y": 27
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 35,
+   "y": 18
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 30,
+   "y": 33
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 57,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 27,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 42,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 24,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_dead",
+   "x": 35,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 13,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 50,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 15,
+   "y": 11
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 48,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 10,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 31,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 25,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 9,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 34,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 16,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 26,
+   "y": 26
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 9,
+   "y": 32
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 16,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 58,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 7,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "bones",
+   "x": 54,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "cactus",
+   "x": 39,
+   "y": 19
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n0",
+   "type": "rock_gold",
+   "x": 11,
+   "y": 9,
+   "solid": true
+  },
+  {
+   "id": "n1",
+   "type": "rock_gold",
+   "x": 10,
+   "y": 13,
+   "solid": true
+  },
+  {
+   "id": "n2",
+   "type": "rock_gold",
+   "x": 46,
+   "y": 38,
+   "solid": true
+  },
+  {
+   "id": "n3",
+   "type": "rock_gold",
+   "x": 31,
+   "y": 28,
+   "solid": true
+  },
+  {
+   "id": "n4",
+   "type": "rock_mithril",
+   "x": 9,
+   "y": 44,
+   "solid": true
+  },
+  {
+   "id": "n5",
+   "type": "rock_mithril",
+   "x": 17,
+   "y": 43,
+   "solid": true
+  },
+  {
+   "id": "n6",
+   "type": "rock_gold",
+   "x": 17,
+   "y": 10,
+   "solid": true
+  },
+  {
+   "id": "n7",
+   "type": "rock_mithril",
+   "x": 57,
+   "y": 17,
+   "solid": true
+  },
+  {
+   "id": "n8",
+   "type": "rock_silver",
+   "x": 23,
+   "y": 42,
+   "solid": true
+  },
+  {
+   "id": "n9",
+   "type": "rock_gold",
+   "x": 9,
+   "y": 3,
+   "solid": true
+  },
+  {
+   "id": "n10",
+   "type": "rock_silver",
+   "x": 39,
+   "y": 30,
+   "solid": true
+  },
+  {
+   "id": "n11",
+   "type": "rock_gold",
+   "x": 24,
+   "y": 37,
+   "solid": true
+  },
+  {
+   "id": "n12",
+   "type": "rock_gold",
+   "x": 41,
+   "y": 5,
+   "solid": true
+  },
+  {
+   "id": "n13",
+   "type": "rock_silver",
+   "x": 56,
+   "y": 43,
+   "solid": true
+  },
+  {
+   "id": "n14",
+   "type": "rock_gold",
+   "x": 58,
+   "y": 32,
+   "solid": true
+  },
+  {
+   "id": "n15",
+   "type": "rock_mithril",
+   "x": 21,
+   "y": 41,
+   "solid": true
+  }
+ ]
+}

@@ -20,6 +20,18 @@
    "toY": 22,
    "toDir": "left",
    "label": "Greenhaven"
+  },
+  {
+   "id": "cl_east",
+   "x": 59,
+   "y": 21,
+   "w": 1,
+   "h": 3,
+   "to": "dusthaven_desert",
+   "toX": 2,
+   "toY": 23,
+   "toDir": "right",
+   "label": "Dusthaven Desert"
   }
  ],
  "theme": "lake",
@@ -67,50 +79,50 @@
  "height": 44,
  "tileSize": 32,
  "tiles": [
-  ".,..**........*.......,.....*........,,........,..**........",
-  ".....,,..............*...................*..................",
-  "........*..,....,...*.......................................",
-  "....,..*......,.*......,.........................**.*.......",
-  "....,.....................,..,.*....,.............,.........",
-  ",...........................*.*...,.........,.....,........*",
-  ",............*..........,.......*.*....*................*..*",
-  ".........*..............*..*......sssss,................,...",
-  "........,.............,..*...sssssssssssssss................",
-  "......,,..................sssssssssssssssssssss.......*....*",
-  "........,*.....*.,....*..ssssswwwwwwwwwwwwwsssss............",
-  "...........,...........sssswwwww~~~~~~~~~wwwwwssss.........,",
-  "...........*..........sssswww~~~~~~~~~~~~~~~wwwssss..*......",
-  ",.....,.......*......ssswww~~~~~~~~~~~~~~~~~~~wwwsss*...,...",
-  "..................,.ssswww~~~~~~~~~~~~~~~~~~~~~wwwsss.*.....",
-  "..............,....ssswww~~~~~~~~~~~~~~~~~~~~~~~wwwsss....*.",
+  ".......*,............,,...........*..................,......",
+  "......*,.............,....,................,..**............",
+  ".*,....,......,............*.............,........*...,.....",
+  "............,..............,...**...........................",
+  ",......*.................*...,..............................",
+  "..........*......*...,...........*..........................",
+  "...................,.,.**...............,...*...,...........",
+  ".*.......,..*.,*.....*...,........sssss.....................",
+  ".........,.......*...,...,...sssssssssssssss...........,..,.",
+  "..........................sssssssssssssssssssss.......*,....",
+  ",.......,...*............ssssswwwwwwwwwwwwwsssss............",
+  ".............*.........sssswwwww~~~~~~~~~wwwwwssss..........",
+  "..............*.......sssswww~~~~~~~~~~~~~~~wwwssss.........",
+  "........,.,....,.,...ssswww~~~~~~~~~~~~~~~~~~~wwwsss..*.*...",
+  "..*.................ssswww~~~~~~~~~~~~~~~~~~~~~wwwsss.......",
+  "...................ssswww~~~~~~~~~~~~~~~~~~~~~~~wwwsss......",
   "..................ssswww~~~~~~~~~~~~~~~~~~~~~~~~~wwwsss,....",
-  ".............,,...sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss.....",
-  ".....*...........sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
-  "............,....sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss...*",
-  "...........,.....sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
-  "================ssssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
-  "================ssbbbbbb~~~~~~~~~~~~~~~~~~~~~~~~~~~~wsss..,.",
-  "================ssssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss...,",
+  "..................sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss.....",
+  "...,...........,.sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
   ".................sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
-  "...............*.sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
-  "..,..............sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
-  ".......,..........sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss.,...",
-  "...,**............ssswww~~~~~~~~~~~~~~~~~~~~~~~~~wwwsss.....",
-  "...*..........,....ssswww~~~~~~~~~~~~~~~~~~~~~~~wwwsss......",
-  "..,*................ssswww~~~~~~~~~~~~~~~~~~~~~wwwsss,.....*",
-  "........,............ssswww~~~~~~~~~~~~~~~~~~~wwwsss........",
-  ".........**.,.........sssswww~~~~~~~~~~~~~~~wwwssss.........",
-  "..........,....*.......sssswwwww~~~~~~~~~wwwwwssss..........",
-  "*........................ssssswwwwwwwwwwwwwsssss....,.......",
-  "........*......*..........sssssssssssssssssssss....*........",
-  "...........,.,...............sssssssssssssss...,.......,..**",
-  "................,..*.,..........,.sssss...*.........*.*.....",
-  "*...............,...........,...,..............,..,...*.....",
-  "..........................,....,.......,..............*.....",
-  ".........*.....................................*............",
-  "....................,.,*...,.,..............................",
-  ".*.*.....*..........................,.......................",
-  "..,......,.................................................."
+  ".................sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
+  "================ssssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wws======",
+  "================ssbbbbbb~~~~~~~~~~~~~~~~~~~~~~~~~~~~ws======",
+  "================ssssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wws======",
+  ".................sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
+  ".................sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
+  "..*...,,.........sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....",
+  "..,...............sssww~~~~~~~~~~~~~~~~~~~~~~~~~~~wwsss....,",
+  "..................ssswww~~~~~~~~~~~~~~~~~~~~~~~~~wwwsss.....",
+  "*.,,...............ssswww~~~~~~~~~~~~~~~~~~~~~~~wwwsss.....,",
+  "......,.............ssswww~~~~~~~~~~~~~~~~~~~~~wwwsss*.,*..,",
+  "*.,...........*......ssswww~~~~~~~~~~~~~~~~~~~wwwsss.....,..",
+  ".......,.,............sssswww~~~~~~~~~~~~~~~wwwssss.........",
+  "......*...............,sssswwwww~~~~~~~~~wwwwwssss*......,..",
+  ".............,**.........ssssswwwwwwwwwwwwwsssss*...,,.,....",
+  ".,..*..............,......sssssssssssssssssssss.....,.......",
+  ".............,......*.,......sssssssssssssss................",
+  ".,.,..........*........*.....,...,sssss........,.*......*...",
+  ".....,.,....,.**.............,..,.........,..............,..",
+  ",..........*,.......*............................,..........",
+  ".*......................................,....,........,.....",
+  ",.*...,.............*.......................................",
+  ".*.,......*.....,......,...*..*....,......,...*.............",
+  "....,.........*..,.........,................................"
  ],
  "objects": [
   {
@@ -2505,72 +2517,6 @@
   {
    "kind": "prop",
    "type": "tree_pine",
-   "x": 57,
-   "y": 20
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
-   "x": 58,
-   "y": 20
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
-   "x": 59,
-   "y": 20
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 58,
-   "y": 21
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
-   "x": 59,
-   "y": 21
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
-   "x": 58,
-   "y": 22
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 59,
-   "y": 22
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 58,
-   "y": 23
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 59,
-   "y": 23
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
-   "x": 58,
-   "y": 24
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
-   "x": 59,
-   "y": 24
-  },
-  {
-   "kind": "prop",
-   "type": "tree_pine",
    "x": 58,
    "y": 25
   },
@@ -2588,19 +2534,19 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 1,
    "y": 26
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 57,
    "y": 26
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 58,
    "y": 26
   },
@@ -2636,7 +2582,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 59,
    "y": 27
   },
@@ -2648,7 +2594,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 1,
    "y": 28
   },
@@ -2690,7 +2636,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 58,
    "y": 29
   },
@@ -2702,7 +2648,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 0,
    "y": 30
   },
@@ -2714,7 +2660,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 57,
    "y": 30
   },
@@ -2726,7 +2672,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 30
   },
@@ -2738,7 +2684,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 1,
    "y": 31
   },
@@ -2756,7 +2702,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 31
   },
@@ -2774,7 +2720,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 2,
    "y": 32
   },
@@ -2786,7 +2732,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 58,
    "y": 32
   },
@@ -2810,19 +2756,19 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 2,
    "y": 33
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 58,
    "y": 33
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 59,
    "y": 33
   },
@@ -2840,7 +2786,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 2,
    "y": 34
   },
@@ -2852,13 +2798,13 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 34
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 0,
    "y": 35
   },
@@ -2876,31 +2822,31 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 57,
    "y": 35
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 58,
    "y": 35
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 35
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 0,
    "y": 36
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 1,
    "y": 36
   },
@@ -2924,7 +2870,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 36
   },
@@ -2936,13 +2882,13 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 1,
    "y": 37
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 2,
    "y": 37
   },
@@ -2966,7 +2912,7 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 0,
    "y": 38
   },
@@ -2984,25 +2930,25 @@
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 57,
    "y": 38
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 58,
    "y": 38
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 38
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 0,
    "y": 39
   },
@@ -3026,13 +2972,13 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 39
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 0,
    "y": 40
   },
@@ -3056,19 +3002,19 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 40
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 0,
    "y": 41
   },
   {
    "kind": "prop",
-   "type": "tree_oak",
+   "type": "tree_pine",
    "x": 1,
    "y": 41
   },
@@ -3080,123 +3026,63 @@
   },
   {
    "kind": "prop",
-   "type": "tree_pine",
+   "type": "tree_oak",
    "x": 59,
    "y": 41
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 27,
-   "y": 9
+   "x": 47,
+   "y": 34
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 24,
-   "y": 33
+   "x": 31,
+   "y": 36
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 18,
-   "y": 16
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 18,
-   "y": 27
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 37,
-   "y": 7
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 48,
-   "y": 33
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 24,
-   "y": 11
+   "x": 22,
+   "y": 12
   },
   {
    "kind": "prop",
    "type": "reeds",
    "x": 36,
-   "y": 36
+   "y": 7
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 52,
-   "y": 30
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 55,
-   "y": 26
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 30,
-   "y": 36
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 54,
-   "y": 22
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 53,
-   "y": 16
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 32,
-   "y": 8
+   "x": 28,
+   "y": 35
   },
   {
    "kind": "prop",
    "type": "reeds",
    "x": 35,
-   "y": 8
+   "y": 36
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 27,
-   "y": 35
-  },
-  {
-   "kind": "prop",
-   "type": "reeds",
-   "x": 44,
+   "x": 26,
    "y": 9
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 45,
-   "y": 35
+   "x": 55,
+   "y": 19
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 21,
-   "y": 13
+   "x": 20,
+   "y": 30
   },
   {
    "kind": "prop",
@@ -3207,307 +3093,367 @@
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 55,
-   "y": 18
+   "x": 19,
+   "y": 15
   },
   {
    "kind": "prop",
    "type": "reeds",
-   "x": 34,
-   "y": 36
-  },
-  {
-   "kind": "prop",
-   "type": "bush",
-   "x": 18,
+   "x": 24,
    "y": 11
   },
   {
    "kind": "prop",
-   "type": "tree_fruit",
+   "type": "reeds",
+   "x": 38,
+   "y": 7
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
    "x": 53,
-   "y": 40
+   "y": 16
   },
   {
    "kind": "prop",
-   "type": "rock",
-   "x": 47,
-   "y": 4
+   "type": "reeds",
+   "x": 52,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 32,
+   "y": 8
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 51,
+   "y": 13
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 55,
+   "y": 25
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 19,
+   "y": 28
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 18,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 44,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "reeds",
+   "x": 28,
+   "y": 9
   },
   {
    "kind": "prop",
    "type": "tree_oak",
-   "x": 7,
-   "y": 10
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 7,
-   "y": 4
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 12,
+   "x": 6,
    "y": 31
   },
   {
    "kind": "prop",
-   "type": "bush",
-   "x": 50,
-   "y": 36
-  },
-  {
-   "kind": "prop",
-   "type": "bush",
-   "x": 20,
+   "type": "tree_oak",
+   "x": 16,
    "y": 35
   },
   {
    "kind": "prop",
    "type": "tree_oak",
-   "x": 4,
-   "y": 7
+   "x": 47,
+   "y": 36
   },
   {
    "kind": "prop",
    "type": "rock",
-   "x": 55,
+   "x": 51,
+   "y": 37
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 43,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 33,
+   "y": 40
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 20,
    "y": 12
   },
   {
    "kind": "prop",
    "type": "rock",
-   "x": 10,
+   "x": 55,
+   "y": 35
+  },
+  {
+   "kind": "prop",
+   "type": "tree_fruit",
+   "x": 48,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_fruit",
+   "x": 51,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_fruit",
+   "x": 11,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 4,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 53,
+   "y": 12
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 18,
+   "y": 34
+  },
+  {
+   "kind": "prop",
+   "type": "tree_fruit",
+   "x": 54,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "bush",
+   "x": 35,
+   "y": 38
+  },
+  {
+   "kind": "prop",
+   "type": "tree_oak",
+   "x": 8,
+   "y": 30
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 31,
+   "y": 5
+  },
+  {
+   "kind": "prop",
+   "type": "tree_fruit",
+   "x": 8,
    "y": 37
   },
   {
    "kind": "prop",
    "type": "tree_oak",
-   "x": 10,
-   "y": 31
-  },
-  {
-   "kind": "prop",
-   "type": "tree_fruit",
-   "x": 55,
-   "y": 28
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 14,
-   "y": 15
+   "x": 22,
+   "y": 5
   },
   {
    "kind": "prop",
    "type": "rock",
-   "x": 21,
+   "x": 44,
+   "y": 39
+  },
+  {
+   "kind": "prop",
+   "type": "rock",
+   "x": 11,
    "y": 8
   },
   {
    "kind": "prop",
-   "type": "tree_fruit",
-   "x": 46,
-   "y": 39
-  },
-  {
-   "kind": "prop",
-   "type": "bush",
-   "x": 33,
-   "y": 3
+   "type": "rock",
+   "x": 4,
+   "y": 32
   },
   {
    "kind": "prop",
    "type": "rock",
-   "x": 20,
-   "y": 39
-  },
-  {
-   "kind": "prop",
-   "type": "tree_oak",
-   "x": 23,
-   "y": 37
-  },
-  {
-   "kind": "prop",
-   "type": "rock",
-   "x": 24,
-   "y": 9
-  },
-  {
-   "kind": "prop",
-   "type": "bush",
-   "x": 47,
-   "y": 35
-  },
-  {
-   "kind": "prop",
-   "type": "tree_fruit",
-   "x": 10,
-   "y": 7
-  },
-  {
-   "kind": "prop",
-   "type": "bush",
-   "x": 53,
-   "y": 35
-  },
-  {
-   "kind": "prop",
-   "type": "tree_fruit",
-   "x": 27,
-   "y": 37
+   "x": 35,
+   "y": 40
   }
  ],
  "nodes": [
   {
    "id": "n0",
    "type": "rock_copper",
-   "x": 21,
+   "x": 19,
    "y": 6,
    "solid": true
   },
   {
    "id": "n1",
-   "type": "rock_copper",
-   "x": 52,
-   "y": 7,
+   "type": "rock_stone",
+   "x": 11,
+   "y": 5,
    "solid": true
   },
   {
    "id": "n2",
    "type": "rock_stone",
    "x": 13,
-   "y": 4,
+   "y": 5,
    "solid": true
   },
   {
    "id": "n3",
-   "type": "rock_copper",
-   "x": 9,
-   "y": 4,
+   "type": "rock_stone",
+   "x": 54,
+   "y": 7,
    "solid": true
   },
   {
    "id": "n4",
-   "type": "rock_copper",
-   "x": 39,
-   "y": 4,
+   "type": "rock_stone",
+   "x": 48,
+   "y": 8,
    "solid": true
   },
   {
    "id": "n5",
    "type": "rock_iron",
-   "x": 55,
-   "y": 5,
+   "x": 36,
+   "y": 4,
    "solid": true
   },
   {
    "id": "n6",
-   "type": "rock_stone",
-   "x": 43,
-   "y": 3,
+   "type": "rock_copper",
+   "x": 24,
+   "y": 8,
    "solid": true
   },
   {
    "id": "n7",
    "type": "plant_herb",
-   "x": 35,
-   "y": 5,
+   "x": 6,
+   "y": 35,
    "solid": false
   },
   {
    "id": "n8",
-   "type": "plant_herb",
-   "x": 5,
-   "y": 36,
-   "solid": false
+   "type": "tree_softwood",
+   "x": 13,
+   "y": 7,
+   "solid": true
   },
   {
    "id": "n9",
-   "type": "plant_fiber",
-   "x": 15,
-   "y": 33,
-   "solid": false
+   "type": "tree_softwood",
+   "x": 53,
+   "y": 36,
+   "solid": true
   },
   {
    "id": "n10",
-   "type": "plant_fiber",
-   "x": 43,
-   "y": 7,
-   "solid": false
+   "type": "plant_berry",
+   "x": 17,
+   "y": 13,
+   "solid": true
   },
   {
    "id": "n11",
    "type": "plant_berry",
-   "x": 55,
-   "y": 31,
+   "x": 42,
+   "y": 7,
    "solid": true
   },
   {
    "id": "n12",
-   "type": "tree_softwood",
-   "x": 15,
-   "y": 8,
-   "solid": true
+   "type": "plant_fiber",
+   "x": 14,
+   "y": 11,
+   "solid": false
   },
   {
    "id": "n13",
-   "type": "plant_fiber",
-   "x": 44,
-   "y": 39,
-   "solid": false
+   "type": "plant_berry",
+   "x": 27,
+   "y": 6,
+   "solid": true
   },
   {
    "id": "n14",
-   "type": "plant_fiber",
-   "x": 52,
-   "y": 12,
-   "solid": false
+   "type": "tree_softwood",
+   "x": 24,
+   "y": 4,
+   "solid": true
   },
   {
    "id": "n15",
    "type": "plant_fiber",
-   "x": 18,
-   "y": 30,
+   "x": 54,
+   "y": 33,
    "solid": false
   },
   {
    "id": "n16",
-   "type": "plant_fiber",
-   "x": 25,
-   "y": 5,
+   "type": "plant_herb",
+   "x": 20,
+   "y": 10,
    "solid": false
   },
   {
    "id": "n17",
-   "type": "plant_fiber",
-   "x": 53,
-   "y": 38,
+   "type": "plant_herb",
+   "x": 49,
+   "y": 33,
    "solid": false
   },
   {
    "id": "n18",
-   "type": "plant_berry",
-   "x": 15,
-   "y": 37,
-   "solid": true
+   "type": "plant_herb",
+   "x": 12,
+   "y": 15,
+   "solid": false
   },
   {
    "id": "n19",
-   "type": "plant_berry",
-   "x": 13,
-   "y": 9,
-   "solid": true
+   "type": "plant_fiber",
+   "x": 52,
+   "y": 5,
+   "solid": false
   },
   {
    "id": "n20",
-   "type": "plant_berry",
-   "x": 50,
-   "y": 10,
-   "solid": true
+   "type": "plant_herb",
+   "x": 19,
+   "y": 38,
+   "solid": false
   }
  ]
 }

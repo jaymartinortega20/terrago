@@ -44,6 +44,10 @@ import irondeepEntranceJson from '../data/maps/irondeep_entrance.json';
 import whisperwoodJson from '../data/maps/whisperwood.json';
 import frostpineJson from '../data/maps/frostpine_peaks.json';
 import mirefenJson from '../data/maps/mirefen_swamp.json';
+import dusthavenJson from '../data/maps/dusthaven_desert.json';
+import emberRidgeJson from '../data/maps/ember_ridge.json';
+import ruinsJson from '../data/maps/ancient_ruins.json';
+import dragonspireJson from '../data/maps/dragonspire.json';
 import dungeonsJson from '../data/dungeons.json';
 import achievementsJson from '../data/achievements.json';
 import animalsJson from '../data/animals.json';
@@ -166,6 +170,10 @@ export const MAPS: Readonly<Record<string, MapDef>> = {
   irondeep_entrance: irondeepEntranceJson as MapDef,
   frostpine_peaks: frostpineJson as MapDef,
   mirefen_swamp: mirefenJson as MapDef,
+  dusthaven_desert: dusthavenJson as MapDef,
+  ember_ridge: emberRidgeJson as MapDef,
+  ancient_ruins: ruinsJson as MapDef,
+  dragonspire: dragonspireJson as MapDef,
 };
 
 const itemIndex = new Map(ITEMS.map((i) => [i.id, i]));
@@ -412,6 +420,10 @@ const WAYSTONE_FEES: Record<string, number> = {
   irondeep_entrance: 45,
   frostpine_peaks: 120,
   mirefen_swamp: 160,
+  dusthaven_desert: 220,
+  ember_ridge: 300,
+  ancient_ruins: 400,
+  dragonspire: 500,
 };
 
 let waystoneCache: Waystone[] | null = null;

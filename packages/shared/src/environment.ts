@@ -38,13 +38,15 @@ export type Weather = (typeof WEATHERS)[number];
 /** Weather changes every 12 real minutes. */
 export const WEATHER_BLOCK_MS = 12 * 60_000;
 
-type Region = 'valley' | 'peaks' | 'mire';
+type Region = 'valley' | 'peaks' | 'mire' | 'desert' | 'ash';
 
 /** Which weather region a map theme belongs to; indoor maps have none. */
 export function weatherRegion(theme: string | undefined): Region | null {
-  if (!theme || theme === 'cave' || theme === 'ruins' || theme === 'volcano') return null;
+  if (!theme || theme === 'cave') return null;
   if (theme === 'snow' || theme === 'peak') return 'peaks';
   if (theme === 'swamp') return 'mire';
+  if (theme === 'desert') return 'desert';
+  if (theme === 'volcano') return 'ash';
   return 'valley';
 }
 
@@ -60,6 +62,18 @@ const TABLES: Record<Region, Record<Season, Partial<Record<Weather, number>>>> =
     summer: { clear: 5, cloudy: 3, snow: 1, fog: 1 },
     autumn: { clear: 2, cloudy: 3, snow: 4, fog: 2 },
     winter: { clear: 1, cloudy: 2, snow: 6, fog: 2 },
+  },
+  desert: {
+    spring: { clear: 7, cloudy: 2, fog: 1 },
+    summer: { clear: 9, fog: 1 },
+    autumn: { clear: 6, cloudy: 2, fog: 2 },
+    winter: { clear: 5, cloudy: 3, rain: 1, fog: 1 },
+  },
+  ash: {
+    spring: { clear: 3, cloudy: 4, fog: 3 },
+    summer: { clear: 4, cloudy: 3, fog: 3 },
+    autumn: { clear: 3, cloudy: 4, fog: 3, storm: 1 },
+    winter: { clear: 3, cloudy: 4, fog: 2, storm: 1 },
   },
   mire: {
     spring: { cloudy: 3, rain: 4, fog: 4, storm: 1 },

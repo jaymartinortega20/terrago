@@ -499,7 +499,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
             if (r.monster.def.boss && (r.gold || r.items.length)) {
               // Boss loot once per day per character (XP always).
               const day = new Date().toISOString().slice(0, 10);
-              const fresh = await d.pool.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [r.player.id, `boss:${r.monster.def.id}:${day}`]);
+              const fresh = await d.pool.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [r.player.id, `boss:${r.monster.def.id}:${r.difficulty && r.difficulty !== 'normal' ? `${r.difficulty}:` : ''}${day}`]);
               if (!fresh.rowCount) {
                 r.items = [];
                 r.gold = Math.round(r.gold * 0.1);

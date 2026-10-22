@@ -454,7 +454,7 @@ export function generateDungeon(d: DungeonDef): MapDef {
     ],
     instanced: true,
     dungeon: d.id,
-    theme: d.lava ? 'volcano' : 'ruins',
+    theme: 'cave', // indoors: no weather, dim light
     levels: d.levels,
     respawn: d.exit,
     spawns,

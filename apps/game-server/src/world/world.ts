@@ -618,6 +618,14 @@ export class World {
     return map.portals.find((pt) => tx >= pt.x && tx < pt.x + pt.w && ty >= pt.y && ty < pt.y + pt.h);
   }
 
+  /** Walk through a dungeon gate (used by the gate's difficulty window). */
+  async enterDungeon(p: Player, mapId: string): Promise<void> {
+    const target = getMap(mapId);
+    if (!target?.dungeon) return;
+    const portal = target.portals[0]!;
+    await this.usePortal(p, { ...portal, to: mapId });
+  }
+
   private async usePortal(p: Player, portal: PortalDef): Promise<void> {
     const target = getMap(portal.to);
     if (!target) return;

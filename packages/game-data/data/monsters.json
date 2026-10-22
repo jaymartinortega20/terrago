@@ -1235,5 +1235,788 @@
     "dmg": 1.4
    }
   ]
+ },
+ {
+  "id": "sand_scorpion",
+  "name": "Sand Scorpion",
+  "hpMult": 1.5,
+  "atkMult": 1.45,
+  "defMult": 1.4,
+  "speed": 70,
+  "aggro": 6,
+  "range": 1.4,
+  "cooldownMs": 1300,
+  "xpMult": 1.9,
+  "gold": [
+   18,
+   36
+  ],
+  "drops": [
+   {
+    "itemId": "sand_crystal",
+    "chance": 0.3,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "gold_ore",
+    "chance": 0.25,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "spider",
+   "color": "#d8a04a",
+   "size": 1.25
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "dust_bandit",
+  "name": "Dust Bandit",
+  "hpMult": 1.4,
+  "atkMult": 1.5,
+  "defMult": 1.3,
+  "speed": 72,
+  "aggro": 7,
+  "range": 1.4,
+  "cooldownMs": 1250,
+  "xpMult": 2.0,
+  "gold": [
+   25,
+   50
+  ],
+  "drops": [
+   {
+    "itemId": "goblin_trinket",
+    "chance": 0.3,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "sand_crystal",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "goblin",
+   "color": "#c9a06a",
+   "size": 1.15
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "sand_golem",
+  "name": "Sand Golem",
+  "hpMult": 2.6,
+  "atkMult": 1.5,
+  "defMult": 2.0,
+  "speed": 42,
+  "aggro": 4,
+  "range": 1.5,
+  "cooldownMs": 2000,
+  "xpMult": 2.4,
+  "gold": [
+   30,
+   60
+  ],
+  "drops": [
+   {
+    "itemId": "sand_crystal",
+    "chance": 0.5,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "golem_core",
+    "chance": 0.08,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#d8c08a",
+   "size": 1.55
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "magma_hound",
+  "name": "Magma Hound",
+  "hpMult": 1.5,
+  "atkMult": 1.55,
+  "defMult": 1.3,
+  "speed": 95,
+  "aggro": 7,
+  "range": 1.3,
+  "cooldownMs": 1100,
+  "xpMult": 2.1,
+  "gold": [
+   30,
+   60
+  ],
+  "drops": [
+   {
+    "itemId": "ember_core",
+    "chance": 0.08,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "coal",
+    "chance": 0.5,
+    "min": 1,
+    "max": 3
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#d8502a",
+   "size": 1.25
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "ember_elemental",
+  "name": "Ember Elemental",
+  "hpMult": 1.3,
+  "atkMult": 1.7,
+  "defMult": 1.2,
+  "speed": 55,
+  "aggro": 8,
+  "range": 5,
+  "cooldownMs": 1800,
+  "xpMult": 2.2,
+  "gold": [
+   35,
+   70
+  ],
+  "drops": [
+   {
+    "itemId": "ember_core",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "obsidian_ore",
+    "chance": 0.2,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "mage",
+   "color": "#e0702a",
+   "size": 1.1
+  },
+  "respawnMs": 50000,
+  "magic": true
+ },
+ {
+  "id": "obsidian_golem",
+  "name": "Obsidian Golem",
+  "hpMult": 2.8,
+  "atkMult": 1.6,
+  "defMult": 2.3,
+  "speed": 40,
+  "aggro": 4,
+  "range": 1.5,
+  "cooldownMs": 2100,
+  "xpMult": 2.8,
+  "gold": [
+   45,
+   90
+  ],
+  "drops": [
+   {
+    "itemId": "obsidian_ore",
+    "chance": 0.6,
+    "min": 1,
+    "max": 3
+   },
+   {
+    "itemId": "golem_core",
+    "chance": 0.12,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#3a3048",
+   "size": 1.65
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "ruin_sentinel",
+  "name": "Ruin Sentinel",
+  "hpMult": 2.8,
+  "atkMult": 1.6,
+  "defMult": 2.4,
+  "speed": 44,
+  "aggro": 5,
+  "range": 1.6,
+  "cooldownMs": 2000,
+  "xpMult": 3.0,
+  "gold": [
+   60,
+   110
+  ],
+  "drops": [
+   {
+    "itemId": "ancient_relic",
+    "chance": 0.12,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "star_metal_ore",
+    "chance": 0.15,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#9a948a",
+   "size": 1.6
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "cursed_knight",
+  "name": "Cursed Knight",
+  "hpMult": 1.9,
+  "atkMult": 1.7,
+  "defMult": 1.8,
+  "speed": 62,
+  "aggro": 7,
+  "range": 1.5,
+  "cooldownMs": 1400,
+  "xpMult": 2.8,
+  "gold": [
+   50,
+   100
+  ],
+  "drops": [
+   {
+    "itemId": "ancient_relic",
+    "chance": 0.08,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "dark_essence",
+    "chance": 0.2,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "skeleton",
+   "color": "#7a5aa0",
+   "size": 1.3
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "wraith",
+  "name": "Wraith",
+  "hpMult": 1.3,
+  "atkMult": 1.8,
+  "defMult": 1.2,
+  "speed": 70,
+  "aggro": 8,
+  "range": 5,
+  "cooldownMs": 1700,
+  "xpMult": 2.7,
+  "gold": [
+   50,
+   95
+  ],
+  "drops": [
+   {
+    "itemId": "dark_essence",
+    "chance": 0.3,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "ancient_relic",
+    "chance": 0.06,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "mage",
+   "color": "#c8c8d8",
+   "size": 1.1
+  },
+  "respawnMs": 50000,
+  "magic": true
+ },
+ {
+  "id": "young_drake",
+  "name": "Young Drake",
+  "hpMult": 2.0,
+  "atkMult": 1.75,
+  "defMult": 1.8,
+  "speed": 90,
+  "aggro": 7,
+  "range": 1.5,
+  "cooldownMs": 1200,
+  "xpMult": 3.2,
+  "gold": [
+   80,
+   140
+  ],
+  "drops": [
+   {
+    "itemId": "drake_scale",
+    "chance": 0.12,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "dragonstone",
+    "chance": 0.08,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#a83a2a",
+   "size": 1.45
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "dragon_knight",
+  "name": "Dragon Knight",
+  "hpMult": 2.4,
+  "atkMult": 1.85,
+  "defMult": 2.2,
+  "speed": 64,
+  "aggro": 7,
+  "range": 1.6,
+  "cooldownMs": 1400,
+  "xpMult": 3.5,
+  "gold": [
+   100,
+   180
+  ],
+  "drops": [
+   {
+    "itemId": "drake_scale",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "star_metal_ore",
+    "chance": 0.3,
+    "min": 1,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "orc",
+   "color": "#3a2a4a",
+   "size": 1.45
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "elder_drake",
+  "name": "Elder Drake",
+  "hpMult": 3.4,
+  "atkMult": 1.95,
+  "defMult": 2.4,
+  "speed": 80,
+  "aggro": 8,
+  "range": 2.0,
+  "cooldownMs": 1600,
+  "xpMult": 4.2,
+  "gold": [
+   140,
+   260
+  ],
+  "drops": [
+   {
+    "itemId": "drake_scale",
+    "chance": 0.3,
+    "min": 1,
+    "max": 2
+   },
+   {
+    "itemId": "dragonstone",
+    "chance": 0.2,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#7a1a1a",
+   "size": 1.85
+  },
+  "respawnMs": 50000
+ },
+ {
+  "id": "stoneheart_golem",
+  "name": "Stoneheart Golem",
+  "hpMult": 60,
+  "atkMult": 1.9,
+  "defMult": 2.6,
+  "speed": 36,
+  "aggro": 8,
+  "range": 2.2,
+  "cooldownMs": 2200,
+  "xpMult": 40,
+  "gold": [
+   2000,
+   4000
+  ],
+  "drops": [
+   {
+    "itemId": "stoneheart_aegis",
+    "chance": 0.06,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "golem_heart",
+    "chance": 0.06,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "ancient_relic",
+    "chance": 1,
+    "min": 2,
+    "max": 4
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1,
+    "min": 6,
+    "max": 10
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 1,
+    "min": 2,
+    "max": 3
+   }
+  ],
+  "art": {
+   "shape": "golem",
+   "color": "#6a6460",
+   "size": 3.0
+  },
+  "respawnMs": 3600000,
+  "boss": true,
+  "abilities": [
+   {
+    "id": "rockfall",
+    "name": "Rockfall",
+    "kind": "slam",
+    "everyMs": 6000,
+    "windupMs": 1600,
+    "radius": 3.0,
+    "dmgMult": 2.4
+   },
+   {
+    "id": "quake",
+    "name": "Quake",
+    "kind": "nova",
+    "everyMs": 12000,
+    "windupMs": 2200,
+    "radius": 6,
+    "dmgMult": 1.7
+   },
+   {
+    "id": "stone_skin",
+    "name": "Stone Skin",
+    "kind": "harden",
+    "everyMs": 30000,
+    "durationMs": 9000,
+    "taken": 0.25,
+    "belowHp": 0.6
+   },
+   {
+    "id": "shards",
+    "name": "Shards of the Mountain",
+    "kind": "summon",
+    "atHp": [
+     0.75,
+     0.5,
+     0.25
+    ],
+    "monster": "ruin_sentinel",
+    "count": 4,
+    "level": 72
+   },
+   {
+    "id": "crumble",
+    "name": "Last Stand",
+    "kind": "enrage",
+    "atHp": [
+     0.15
+    ],
+    "dmg": 1.6
+   }
+  ]
+ },
+ {
+  "id": "ancient_wyvern",
+  "name": "Ancient Wyvern",
+  "hpMult": 120,
+  "atkMult": 2.1,
+  "defMult": 2.8,
+  "speed": 70,
+  "aggro": 9,
+  "range": 3.0,
+  "cooldownMs": 2000,
+  "xpMult": 70,
+  "gold": [
+   6000,
+   12000
+  ],
+  "drops": [
+   {
+    "itemId": "wyvernbane_sword",
+    "chance": 0.03,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "wyvernbane_bow",
+    "chance": 0.03,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "wyvernbane_staff",
+    "chance": 0.03,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "wyvernbane_mace",
+    "chance": 0.03,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "wyvernbane_dagger",
+    "chance": 0.03,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "wyvern_whelp",
+    "chance": 0.02,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "wyvern_scale",
+    "chance": 1,
+    "min": 2,
+    "max": 4
+   },
+   {
+    "itemId": "dragonstone",
+    "chance": 1,
+    "min": 3,
+    "max": 6
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1,
+    "min": 10,
+    "max": 16
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 1,
+    "min": 3,
+    "max": 5
+   }
+  ],
+  "art": {
+   "shape": "wolf",
+   "color": "#4a7a3a",
+   "size": 3.4
+  },
+  "respawnMs": 7200000,
+  "boss": true,
+  "abilities": [
+   {
+    "id": "fire_breath",
+    "name": "Fire Breath",
+    "kind": "slam",
+    "everyMs": 5000,
+    "windupMs": 1400,
+    "radius": 3.5,
+    "dmgMult": 2.6
+   },
+   {
+    "id": "tail_sweep",
+    "name": "Tail Sweep",
+    "kind": "nova",
+    "everyMs": 9000,
+    "windupMs": 1600,
+    "radius": 4.5,
+    "dmgMult": 2.0
+   },
+   {
+    "id": "skyward",
+    "name": "Takes to the Sky",
+    "kind": "harden",
+    "everyMs": 25000,
+    "durationMs": 7000,
+    "taken": 0.1,
+    "belowHp": 0.7
+   },
+   {
+    "id": "brood",
+    "name": "Call the Brood",
+    "kind": "summon",
+    "atHp": [
+     0.8,
+     0.6,
+     0.4,
+     0.2
+    ],
+    "monster": "young_drake",
+    "count": 4,
+    "level": 88
+   },
+   {
+    "id": "inferno",
+    "name": "Inferno",
+    "kind": "enrage",
+    "atHp": [
+     0.2
+    ],
+    "dmg": 1.7
+   }
+  ]
+ },
+ {
+  "id": "sanctum_lich",
+  "name": "The Drowned Lich",
+  "hpMult": 14,
+  "atkMult": 1.8,
+  "defMult": 1.8,
+  "speed": 50,
+  "aggro": 7,
+  "range": 5,
+  "cooldownMs": 1900,
+  "xpMult": 22,
+  "gold": [
+   800,
+   1500
+  ],
+  "drops": [
+   {
+    "itemId": "sanctum_scepter",
+    "chance": 0.1,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "drowned_seal",
+    "chance": 0.12,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "ancient_relic",
+    "chance": 1,
+    "min": 2,
+    "max": 3
+   },
+   {
+    "itemId": "enhancement_stone",
+    "chance": 1,
+    "min": 4,
+    "max": 7
+   },
+   {
+    "itemId": "dungeon_key",
+    "chance": 1,
+    "min": 2,
+    "max": 2
+   }
+  ],
+  "art": {
+   "shape": "mage",
+   "color": "#5a3a8a",
+   "size": 2.2
+  },
+  "respawnMs": 600000,
+  "magic": true,
+  "boss": true,
+  "abilities": [
+   {
+    "id": "drown",
+    "name": "Drowning Tide",
+    "kind": "nova",
+    "everyMs": 11000,
+    "windupMs": 2000,
+    "radius": 4,
+    "dmgMult": 1.9
+   },
+   {
+    "id": "hex",
+    "name": "Grave Hex",
+    "kind": "slam",
+    "everyMs": 6500,
+    "windupMs": 1400,
+    "radius": 2.4,
+    "dmgMult": 2.2
+   },
+   {
+    "id": "ward",
+    "name": "Bone Ward",
+    "kind": "harden",
+    "everyMs": 28000,
+    "durationMs": 8000,
+    "taken": 0.3,
+    "belowHp": 0.5
+   },
+   {
+    "id": "risen",
+    "name": "The Drowned Rise",
+    "kind": "summon",
+    "atHp": [
+     0.7,
+     0.35
+    ],
+    "monster": "cursed_knight",
+    "count": 3,
+    "level": 74
+   },
+   {
+    "id": "despair",
+    "name": "Despair",
+    "kind": "enrage",
+    "atHp": [
+     0.2
+    ],
+    "dmg": 1.5
+   }
+  ]
  }
 ]

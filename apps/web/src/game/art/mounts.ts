@@ -24,6 +24,16 @@ function frame(kind: string, color: string, f: number): PixelBuffer {
     b.vline(x + pose[i]!, legY, 21, dark);
     b.set(x + pose[i]!, 21, '#2a2030');
   });
+  if (kind === 'wyvern') {
+    // Wings (flap between frames), a long tail and a horned head.
+    const wing = shade(color, 0.25);
+    for (let i = 0; i < 9; i++) {
+      const y = f ? 4 - Math.floor(i / 3) : 1 + Math.floor(i / 2);
+      b.hline(9 + i, 15 + Math.floor(i / 2), Math.max(0, y - (f ? 0 : 1)), wing);
+      b.vline(9 + i, Math.max(0, y), 7, wing);
+    }
+    b.hline(0, 5, 12, color).set(0, 11, dark).set(23, 0, '#d6c79f').set(26, 0, '#d6c79f');
+  }
   // saddle
   if (kind !== 'wolf') b.rect(11, 5, 7, 3, '#7a3a2a').hline(11, 17, 8, '#5a2a1e');
   else b.rect(11, 6, 7, 2, '#5a4670');

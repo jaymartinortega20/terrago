@@ -29,6 +29,7 @@ import type {
   ShopView,
   WorldObject,
 } from './types';
+import type { DifficultyId } from './combat';
 
 /**
  * Socket protocol between the TerraGo client and the authoritative game server.
@@ -242,6 +243,7 @@ export interface ClientToServerEvents {
   'animals:add': (slot: number, ack: Ack<AnimalState[]>) => void;
   'animals:feed': (ack: Ack<AnimalState[]>) => void;
   'animals:collect': (ack: Ack<AnimalState[]>) => void;
+  'dungeon:enter': (req: { dungeonId: string; difficulty: DifficultyId }, ack: Ack<{ message: string }>) => void;
   'spec:choose': (req: { skill: string; spec: string }, ack: Ack<{ message: string }>) => void;
   'journal:get': (ack: Ack<JournalView>) => void;
   'daily:login': (ack: Ack<{ message: string }>) => void;

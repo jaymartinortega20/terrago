@@ -5041,5 +5041,329 @@
   "consumable": {
    "energy": 60
   }
+ },
+ {
+  "id": "sand_crystal",
+  "name": "Sand Crystal",
+  "description": "Glassy shards grown in the dunes. Alchemists grind them.",
+  "icon": "gem:f2d86a",
+  "category": "material",
+  "rarity": "uncommon",
+  "stackSize": 99,
+  "vendorValue": 45,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "ember_core",
+  "name": "Ember Core",
+  "description": "A coal that never stops glowing.",
+  "icon": "essence:e0602a",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 90,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "ancient_relic",
+  "name": "Ancient Relic",
+  "description": "A carved token from a forgotten empire. Collectors pay well.",
+  "icon": "gem:b6a4ff",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 140,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "drake_scale",
+  "name": "Drake Scale",
+  "description": "Hard as steel, light as leather.",
+  "icon": "scale:a83a2a",
+  "category": "material",
+  "rarity": "rare",
+  "stackSize": 99,
+  "vendorValue": 180,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "wyvern_scale",
+  "name": "Wyvern Scale",
+  "description": "Shimmering, heat-proof \u2014 the rarest hide in the world.",
+  "icon": "scale:5a8a3a",
+  "category": "material",
+  "rarity": "epic",
+  "stackSize": 99,
+  "vendorValue": 900,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null
+ },
+ {
+  "id": "stoneheart_aegis",
+  "name": "Stoneheart Aegis",
+  "description": "Carved from the Golem's own chest. Blows simply stop.",
+  "icon": "weapon:shield:7",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 3000,
+  "levelRequirement": 72,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 990,
+  "equip": {
+   "slot": "offhand",
+   "weapon": "shield",
+   "stats": {
+    "def": 38,
+    "mdef": 28,
+    "hp": 88
+   },
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "golem_heart",
+  "name": "Heart of Stone",
+  "description": "It still beats, very slowly.",
+  "icon": "armor:necklace:5",
+  "category": "armor",
+  "rarity": "legendary",
+  "stackSize": 1,
+  "vendorValue": 2500,
+  "levelRequirement": 72,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": null,
+  "equip": {
+   "slot": "necklace",
+   "stats": {
+    "hp": 192,
+    "vit": 10
+   }
+  }
+ },
+ {
+  "id": "wyvernbane_sword",
+  "name": "Wyvernbane Sword",
+  "description": "Forged from a fallen Ancient Wyvern. The finest weapon in TerraGo.",
+  "icon": "weapon:sword:7",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 8000,
+  "levelRequirement": 90,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "sword",
+   "stats": {
+    "atk": 157
+   },
+   "speedMs": 900,
+   "range": 1.5,
+   "classes": [
+    "warrior"
+   ]
+  }
+ },
+ {
+  "id": "wyvernbane_bow",
+  "name": "Wyvernbane Bow",
+  "description": "Forged from a fallen Ancient Wyvern. The finest weapon in TerraGo.",
+  "icon": "weapon:bow:7",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 8000,
+  "levelRequirement": 90,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "bow",
+   "stats": {
+    "atk": 146,
+    "agi": 9
+   },
+   "speedMs": 1100,
+   "range": 6,
+   "classes": [
+    "ranger"
+   ]
+  }
+ },
+ {
+  "id": "wyvernbane_staff",
+  "name": "Wyvernbane Staff",
+  "description": "Forged from a fallen Ancient Wyvern. The finest weapon in TerraGo.",
+  "icon": "weapon:staff:7",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 8000,
+  "levelRequirement": 90,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 167,
+    "int": 9,
+    "mp": 94
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "wyvernbane_mace",
+  "name": "Wyvernbane Mace",
+  "description": "Forged from a fallen Ancient Wyvern. The finest weapon in TerraGo.",
+  "icon": "weapon:mace:7",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 8000,
+  "levelRequirement": 90,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "mace",
+   "stats": {
+    "matk": 147,
+    "atk": 31,
+    "mp": 76
+   },
+   "speedMs": 1050,
+   "range": 1.6,
+   "magic": true,
+   "classes": [
+    "priest"
+   ]
+  }
+ },
+ {
+  "id": "wyvernbane_dagger",
+  "name": "Wyvernbane Dagger",
+  "description": "Forged from a fallen Ancient Wyvern. The finest weapon in TerraGo.",
+  "icon": "weapon:dagger:7",
+  "category": "weapon",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 8000,
+  "levelRequirement": 90,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 1040,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "dagger",
+   "stats": {
+    "atk": 136,
+    "crit": 12
+   },
+   "speedMs": 650,
+   "range": 1.3,
+   "classes": [
+    "rogue"
+   ]
+  }
+ },
+ {
+  "id": "wyvern_whelp",
+  "name": "Wyvern Whelp",
+  "description": "A young wyvern that chose you. The fastest mount in the world.",
+  "icon": "mount:wyvern:5a8a3a",
+  "category": "mount",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 5000,
+  "levelRequirement": 80,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.9,
+   "color": "#5a8a3a",
+   "kind": "wyvern"
+  }
+ },
+ {
+  "id": "sanctum_scepter",
+  "name": "Sanctum Scepter",
+  "description": "The drowned lich bound storms into it.",
+  "icon": "weapon:staff:6",
+  "category": "weapon",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 2400,
+  "levelRequirement": 74,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": 920,
+  "equip": {
+   "slot": "mainhand",
+   "weapon": "staff",
+   "stats": {
+    "matk": 131,
+    "int": 8,
+    "mp": 78
+   },
+   "speedMs": 1200,
+   "range": 5,
+   "magic": true,
+   "classes": [
+    "mage"
+   ]
+  }
+ },
+ {
+  "id": "drowned_seal",
+  "name": "Drowned Seal",
+  "description": "Cold, heavy, and humming with old magic.",
+  "icon": "armor:ring:5",
+  "category": "armor",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 2200,
+  "levelRequirement": 74,
+  "tradable": true,
+  "bind": "equip",
+  "maxDurability": null,
+  "equip": {
+   "slot": "ring",
+   "stats": {
+    "crit": 8,
+    "luk": 8
+   }
+  }
  }
 ]

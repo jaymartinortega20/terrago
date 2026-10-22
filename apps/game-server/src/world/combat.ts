@@ -6,6 +6,7 @@ import {
   TILE_SIZE,
   WEAKNESS,
   WEAKNESS_MS,
+  difficultyOf,
   effectMult,
   monsterStats,
   rollHit,
@@ -93,6 +94,8 @@ export class Monster {
 }
 
 export interface KillReward {
+  /** Dungeon difficulty the kill happened on. */
+  difficulty?: string;
   player: Player;
   xp: number;
   gold: number;
@@ -146,14 +149,17 @@ export class Combat {
   ) {}
 
   spawnMonsters(rt: MapRuntime): void {
+    const diff = rt.def.dungeon ? difficultyOf(rt.owner?.id) : null;
     for (const sp of rt.def.spawns ?? []) {
       const def = getMonster(sp.monster);
       if (!def) continue;
       for (let i = 0; i < sp.count; i++) {
         const pos = randomTileIn(rt, sp.area, this.rand);
         if (!pos) continue;
-        const level = sp.level[0] + Math.floor(this.rand() * (sp.level[1] - sp.level[0] + 1));
-        const m = new Monster(`m${++this.seq}`, def, level, monsterStats(def, level), pos.x, pos.y, sp);
+        const level = Math.min(100, sp.level[0] + Math.floor(this.rand() * (sp.level[1] - sp.level[0] + 1)) + (diff?.levels ?? 0));
+        const base = monsterStats(def, level);
+        const stats = diff ? { ...base, maxHp: Math.round(base.maxHp * diff.hp), atk: Math.round(base.atk * diff.atk), xp: Math.round(base.xp * (1 + (diff.lootRolls - 1) * 0.25)) } : base;
+        const m = new Monster(`m${++this.seq}`, def, level, stats, pos.x, pos.y, sp);
         rt.monsters.set(m.id, m);
       }
     }
@@ -536,10 +542,14 @@ export class Combat {
     // Bosses give everyone their own loot roll; other monsters reward the top damage dealer.
     const looters = m.def.boss ? rewards : [rewards.find((r) => r.player === top.p)!];
     const [g0, g1] = m.def.gold;
+    // Harder dungeon modes roll the loot table more than once.
+    const rolls = rt.def.dungeon ? difficultyOf(rt.owner?.id).lootRolls : 1;
     for (const loot of looters) {
-      loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08));
-      for (const d of m.def.drops) if (this.rand() < d.chance) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
+      loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08) * rolls);
+      for (let k = 0; k < rolls; k++)
+        for (const d of m.def.drops) if (this.rand() < d.chance) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
     }
+    if (rt.def.dungeon) for (const r of rewards) r.difficulty = difficultyOf(rt.owner?.id).id;
     this.hooks.onKill?.(rewards);
   }
 
@@ -591,6 +601,15 @@ export class Combat {
         if (a.kind === 'summon') this.summonAdds(rt, m, a);
         if (a.kind === 'enrage') m.enraged = a.dmg ?? 1.5;
         this.hooks.announce?.(rt, a.kind === 'enrage' ? `${m.def.name} flies into a rage!` : `${m.def.name}: ${a.name}!`);
+      }
+      if (a.kind === 'harden' && a.everyMs) {
+        if (frac > (a.belowHp ?? 1)) continue;
+        const nextH = m.abilityAt.get(a.id) ?? 0;
+        if (now < nextH) continue;
+        m.abilityAt.set(a.id, now + a.everyMs);
+        m.effects.push({ id: a.id, name: a.name, until: now + (a.durationMs ?? 8000), mods: { taken: a.taken ?? 0.3 } });
+        this.hooks.announce?.(rt, `${m.def.name}: ${a.name}! Damage barely scratches it — survive until it fades.`);
+        continue;
       }
       if (!a.everyMs || (a.kind !== 'slam' && a.kind !== 'nova')) continue;
       const next = m.abilityAt.get(a.id);

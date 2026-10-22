@@ -362,7 +362,7 @@ function dungeonGate(m: MapBuilder, id: string, ground: string): PortalDef {
   m.prop('dungeon_gate', x, y);
   m.prop('torch', x - 1, y + 1);
   m.prop('torch', x + 3, y + 1);
-  m.prop('sign', x + 4, y + 2, `${d.name}. Recommended level ${d.levels[0]}–${d.levels[1]}. Bring friends: your party shares one dungeon.`);
+  m.prop('sign', x + 4, y + 2, `${d.name}. Recommended level ${d.levels[0]}–${d.levels[1]}. Click the gate to pick Normal, Hard, Nightmare or Mythic. Your party shares one run.`);
   const spawn = generateDungeon(d).spawn;
   return { id: `gate_${id}`, x, y: y + 2, w: 3, h: 1, to: DUNGEON_PREFIX + id, toX: spawn.x, toY: spawn.y, toDir: 'right', label: d.name };
 }
@@ -448,7 +448,8 @@ function crystalLake(): MapDef {
   m.prop('tent', 9, 25);
   m.reserve(8, 24, 7, 5);
   waystone(m, 7, 15, '.');
-  m.forestBorder(r, 2, 3, [{ side: 'w', from: 20, to: 24 }]);
+  m.rect(54, 21, 6, 3, '=', true); // east road to Dusthaven Desert
+  m.forestBorder(r, 2, 3, [{ side: 'w', from: 20, to: 24 }, { side: 'e', from: 20, to: 24 }]);
   m.scatterProps(r, ['reeds', 'reeds', 'reeds'], 22, undefined, 's');
   m.scatterGround(r, 0.06, ',');
   m.scatterGround(r, 0.04, '*');
@@ -461,7 +462,10 @@ function crystalLake(): MapDef {
     safeZone: false,
     music: 'lake',
     spawn: { x: 2, y: 22, dir: 'right' },
-    portals: [{ id: 'cl_west', x: 0, y: 20, w: 1, h: 4, to: 'greenhaven', toX: 62, toY: 22, toDir: 'left', label: 'Greenhaven' }],
+    portals: [
+      { id: 'cl_west', x: 0, y: 20, w: 1, h: 4, to: 'greenhaven', toX: 62, toY: 22, toDir: 'left', label: 'Greenhaven' },
+      { id: 'cl_east', x: 59, y: 21, w: 1, h: 3, to: 'dusthaven_desert', toX: 2, toY: 23, toDir: 'right', label: 'Dusthaven Desert' },
+    ],
     theme: 'lake',
     fishing: 'lake',
     levels: [5, 25],
@@ -632,7 +636,187 @@ function mirefen(): MapDef {
   });
 }
 
-for (const map of [greenhaven(), sunfield(), homestead(), whisperwood(), crystalLake(), irondeepEntrance(), frostpine(), mirefen()]) {
+/** Ragged cliff edges for wild regions. */
+function cliffs(m: MapBuilder, salt: number) {
+  for (let y = 0; y < m.height; y++)
+    for (let x = 0; x < m.width; x++) {
+      const edge = Math.min(x, m.width - 1 - x, y, m.height - 1 - y);
+      if (edge < 2 + Math.floor((Math.sin(x * 0.45 + salt) + Math.sin(y * 0.6 + salt * 2)) * 1.1 + 1)) m.grid[y]![x] = '#';
+    }
+}
+
+/** A camp: cleared ground, tent, campfire, and a reserved spot for the region's NPC. */
+function camp(m: MapBuilder, x: number, y: number, ground: string, sign: string) {
+  m.rect(x, y, 9, 6, ground, true);
+  m.prop('tent', x + 1, y);
+  m.prop('campfire', x + 5, y + 2);
+  m.prop('sign', x + 7, y + 5, sign);
+}
+
+/** East of Crystal Lake: dunes, a dry oasis, bandit camps. Lv 38-50. */
+function dusthaven(): MapDef {
+  const m = new MapBuilder(64, 48, 's');
+  const r = rng(38383);
+  cliffs(m, 1);
+  m.scatterGround(r, 0.25, 'h', 's');
+  m.rect(0, 22, 64, 3, '=', true); // caravan road
+  camp(m, 6, 15, '=', 'Dusthaven Desert. Scorpions in the dunes, bandits on the ridges, golems in the deep sand.');
+  waystone(m, 18, 16, '=');
+  // Oasis
+  m.rect(30, 6, 7, 4, '~', true);
+  m.rect(29, 5, 9, 1, '.', true);
+  m.rect(29, 10, 9, 1, '.', true);
+  // Bandit ruins
+  m.rect(40, 9, 12, 8, 'k', true);
+  for (const [x, y] of [[40, 9], [51, 9], [40, 16], [51, 16]] as const) m.prop('ruin_pillar', x, y);
+  m.scatterNodes(r, [{ type: 'rock_gold', solid: true, weight: 3 }, { type: 'rock_mithril', solid: true, weight: 2 }, { type: 'rock_silver', solid: true, weight: 2 }], 16, undefined, 'sh');
+  m.scatterProps(r, ['cactus', 'cactus', 'rock', 'bones', 'tree_dead'], 70, undefined, 'sh');
+  return m.toMap({
+    id: 'dusthaven_desert',
+    name: 'Dusthaven Desert',
+    safeZone: false,
+    music: 'desert',
+    spawn: { x: 2, y: 23, dir: 'right' },
+    portals: [
+      { id: 'dd_west', x: 0, y: 22, w: 1, h: 3, to: 'crystal_lake', toX: 57, toY: 22, toDir: 'left', label: 'Crystal Lake' },
+      { id: 'dd_east', x: 63, y: 22, w: 1, h: 3, to: 'ember_ridge', toX: 2, toY: 23, toDir: 'right', label: 'Ember Ridge' },
+    ],
+    theme: 'desert',
+    levels: [38, 50],
+    respawn: { mapId: 'dusthaven_desert', x: 11, y: 20 },
+    spawns: [
+      { monster: 'sand_scorpion', level: [38, 42], count: 8, area: { x: 18, y: 26, w: 26, h: 16 } },
+      { monster: 'dust_bandit', level: [41, 45], count: 7, area: { x: 38, y: 6, w: 18, h: 13 } },
+      { monster: 'sand_golem', level: [45, 50], count: 5, area: { x: 46, y: 27, w: 14, h: 15 } },
+    ],
+  });
+}
+
+/** Volcanic ridge with old dwarf forges. Lv 50-65. */
+function emberRidge(): MapDef {
+  const m = new MapBuilder(64, 48, 'a');
+  const r = rng(50505);
+  cliffs(m, 3);
+  for (let i = 0; i < 9; i++) {
+    const x = 16 + Math.floor(r() * 40);
+    const y = 4 + Math.floor(r() * 38);
+    if (Math.abs(y - 23) < 4 || (x > 26 && x < 36)) continue;
+    m.rect(x, y, 2 + Math.floor(r() * 3), 2 + Math.floor(r() * 2), 'L', true);
+  }
+  m.rect(0, 22, 34, 3, '=', true); // road from the desert
+  m.rect(30, 0, 4, 25, '=', true); // north pass to the ruins
+  camp(m, 6, 15, ':', 'Ember Ridge. Hounds and fire spirits on the slopes; obsidian golems by the old forges.');
+  waystone(m, 18, 16, ':');
+  m.rect(42, 8, 10, 7, ':', true);
+  m.prop('furnace', 43, 9);
+  m.prop('anvil', 47, 9);
+  m.scatterNodes(r, [{ type: 'rock_obsidian', solid: true, weight: 3 }, { type: 'rock_mithril', solid: true, weight: 2 }, { type: 'rock_coal', solid: true, weight: 2 }], 16, undefined, 'a');
+  m.scatterProps(r, ['rock', 'stalagmite', 'tree_dead', 'bones'], 50, undefined, 'a');
+  return m.toMap({
+    id: 'ember_ridge',
+    name: 'Ember Ridge',
+    safeZone: false,
+    music: 'volcano',
+    spawn: { x: 2, y: 23, dir: 'right' },
+    portals: [
+      { id: 'er_west', x: 0, y: 22, w: 1, h: 3, to: 'dusthaven_desert', toX: 61, toY: 23, toDir: 'left', label: 'Dusthaven Desert' },
+      { id: 'er_north', x: 30, y: 0, w: 4, h: 1, to: 'ancient_ruins', toX: 31, toY: 45, toDir: 'up', label: 'Ancient Ruins' },
+    ],
+    theme: 'volcano',
+    levels: [50, 65],
+    respawn: { mapId: 'ember_ridge', x: 11, y: 20 },
+    spawns: [
+      { monster: 'magma_hound', level: [50, 55], count: 8, area: { x: 14, y: 27, w: 28, h: 15 } },
+      { monster: 'ember_elemental', level: [54, 59], count: 6, area: { x: 38, y: 26, w: 20, h: 16 } },
+      { monster: 'obsidian_golem', level: [59, 65], count: 5, area: { x: 38, y: 4, w: 20, h: 16 } },
+    ],
+  });
+}
+
+/** The ruins of an ancient empire; the Stoneheart Golem's court; the Sunken Sanctum. Lv 65-80. */
+function ancientRuins(): MapDef {
+  const m = new MapBuilder(64, 48, 'k');
+  const r = rng(65656);
+  cliffs(m, 5);
+  m.rect(30, 24, 4, 24, '=', true); // road up from Ember Ridge
+  m.rect(30, 20, 34, 3, '=', true); // east road to the Dragonspire
+  camp(m, 26, 39, '=', 'Ancient Ruins. Sentinels still guard the halls. The Stoneheart Golem sleeps in the central court.');
+  waystone(m, 37, 40, '=');
+  // Central court (world boss)
+  m.rect(20, 5, 20, 13, ':', true);
+  for (const [x, y] of [[20, 5], [39, 5], [20, 17], [39, 17], [29, 5]] as const) m.prop('ruin_pillar', x, y);
+  m.prop('sign', 28, 18, 'The Stoneheart Court. Recommended: 8–15 players of level 70+.');
+  const sanctum = dungeonGate(m, 'sunken_sanctum', 'k');
+  m.scatterNodes(r, [{ type: 'rock_starmetal', solid: true, weight: 2 }, { type: 'rock_obsidian', solid: true, weight: 2 }, { type: 'rock_crystal', solid: true, weight: 2 }], 14, undefined, 'k');
+  m.scatterProps(r, ['ruin_pillar', 'ruin_pillar', 'bones', 'rock', 'tree_dead'], 60, undefined, 'k');
+  return m.toMap({
+    id: 'ancient_ruins',
+    name: 'Ancient Ruins',
+    safeZone: false,
+    music: 'ruins',
+    spawn: { x: 31, y: 45, dir: 'up' },
+    portals: [
+      { id: 'ar_south', x: 30, y: 47, w: 4, h: 1, to: 'ember_ridge', toX: 31, toY: 2, toDir: 'down', label: 'Ember Ridge' },
+      { id: 'ar_east', x: 63, y: 20, w: 1, h: 3, to: 'dragonspire', toX: 2, toY: 23, toDir: 'right', label: 'Dragonspire' },
+      sanctum,
+    ],
+    theme: 'ruins',
+    levels: [65, 80],
+    respawn: { mapId: 'ancient_ruins', x: 31, y: 37 },
+    spawns: [
+      { monster: 'cursed_knight', level: [65, 70], count: 8, area: { x: 6, y: 8, w: 12, h: 30 } },
+      { monster: 'wraith', level: [68, 73], count: 6, area: { x: 42, y: 26, w: 16, h: 16 } },
+      { monster: 'ruin_sentinel', level: [72, 78], count: 6, area: { x: 42, y: 4, w: 16, h: 14 } },
+      { monster: 'stoneheart_golem', level: [78, 78], count: 1, area: { x: 28, y: 9, w: 4, h: 4 } },
+    ],
+  });
+}
+
+/** The roof of the world: drakes, dragon knights, and the Ancient Wyvern. Lv 80-100. */
+function dragonspire(): MapDef {
+  const m = new MapBuilder(64, 48, 'n');
+  const r = rng(80808);
+  cliffs(m, 7);
+  // Scorched patches around old dragon fire.
+  for (let i = 0; i < 10; i++) {
+    const cx = 8 + Math.floor(r() * 48);
+    const cy = 6 + Math.floor(r() * 36);
+    for (let y = cy - 2; y <= cy + 2; y++) for (let x = cx - 3; x <= cx + 3; x++) if (m.tile(x, y) === 'n' && (x - cx) ** 2 / 9 + (y - cy) ** 2 / 4 < 1) m.grid[y]![x] = 'a';
+  }
+  m.rect(0, 22, 30, 3, '=', true);
+  m.rect(28, 6, 3, 19, '=', true);
+  camp(m, 6, 15, '=', 'Dragonspire. Drakes on the slopes, knights on the bridges — and the Ancient Wyvern at the summit.');
+  waystone(m, 18, 16, '=');
+  // Summit (world boss)
+  m.rect(36, 2, 24, 12, ':', true);
+  m.prop('sign', 34, 13, 'The Summit. The Ancient Wyvern. Recommended: 15–25 players of level 90+.');
+  for (let i = 0; i < 6; i++) {
+    const x = 34 + Math.floor(r() * 24);
+    const y = 20 + Math.floor(r() * 20);
+    m.rect(x, y, 2, 2, 'L', true);
+  }
+  m.scatterNodes(r, [{ type: 'rock_dragonstone', solid: true, weight: 2 }, { type: 'rock_starmetal', solid: true, weight: 2 }], 12, undefined, 'na');
+  m.scatterProps(r, ['tree_snow', 'rock', 'bones', 'tree_dead'], 60, undefined, 'na');
+  return m.toMap({
+    id: 'dragonspire',
+    name: 'Dragonspire',
+    safeZone: false,
+    music: 'dragon',
+    spawn: { x: 2, y: 23, dir: 'right' },
+    portals: [{ id: 'ds_west', x: 0, y: 22, w: 1, h: 3, to: 'ancient_ruins', toX: 61, toY: 21, toDir: 'left', label: 'Ancient Ruins' }],
+    theme: 'peak',
+    levels: [80, 100],
+    respawn: { mapId: 'dragonspire', x: 11, y: 20 },
+    spawns: [
+      { monster: 'young_drake', level: [80, 86], count: 9, area: { x: 12, y: 27, w: 24, h: 15 } },
+      { monster: 'dragon_knight', level: [86, 92], count: 6, area: { x: 36, y: 24, w: 22, h: 18 } },
+      { monster: 'elder_drake', level: [92, 97], count: 4, area: { x: 6, y: 4, w: 18, h: 10 } },
+      { monster: 'ancient_wyvern', level: [98, 98], count: 1, area: { x: 46, y: 5, w: 5, h: 4 } },
+    ],
+  });
+}
+
+for (const map of [greenhaven(), sunfield(), homestead(), whisperwood(), crystalLake(), irondeepEntrance(), frostpine(), mirefen(), dusthaven(), emberRidge(), ancientRuins(), dragonspire()]) {
   const errors = validateMapDef(map);
   if (errors.length) {
     console.error(errors.join('\n'));

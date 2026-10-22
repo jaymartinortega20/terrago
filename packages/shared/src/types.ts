@@ -185,7 +185,7 @@ export interface ItemDef {
   /** Wearable: slot and stat bonuses. */
   equip?: EquipDef;
   /** Rideable: speed multiplier and look. */
-  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' };
+  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' };
 }
 
 export type ToolKind = 'hoe' | 'can' | 'pickaxe' | 'axe' | 'rod' | 'sickle';

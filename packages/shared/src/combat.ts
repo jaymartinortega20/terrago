@@ -175,7 +175,7 @@ export interface MonsterDef {
 export interface BossAbility {
   id: string;
   name: string;
-  kind: 'slam' | 'nova' | 'summon' | 'enrage';
+  kind: 'slam' | 'nova' | 'summon' | 'enrage' | 'harden';
   everyMs?: number;
   windupMs?: number;
   /** Tiles. */
@@ -188,6 +188,24 @@ export interface BossAbility {
   level?: number;
   /** Enrage damage multiplier. */
   dmg?: number;
+  /** Harden: damage taken multiplier and how long it lasts; only below this HP fraction. */
+  taken?: number;
+  durationMs?: number;
+  belowHp?: number;
+}
+
+/** Dungeon difficulty modes: stronger monsters, extra loot rolls. */
+export const DIFFICULTIES = [
+  { id: 'normal', name: 'Normal', levels: 0, hp: 1, atk: 1, lootRolls: 1, minLevel: 0 },
+  { id: 'hard', name: 'Hard', levels: 8, hp: 1.6, atk: 1.25, lootRolls: 2, minLevel: 0 },
+  { id: 'nightmare', name: 'Nightmare', levels: 18, hp: 2.6, atk: 1.6, lootRolls: 3, minLevel: 30 },
+  { id: 'mythic', name: 'Mythic', levels: 30, hp: 4, atk: 2, lootRolls: 4, minLevel: 50 },
+] as const;
+export type DifficultyId = (typeof DIFFICULTIES)[number]['id'];
+
+export function difficultyOf(ownerId: string | undefined | null) {
+  const id = ownerId?.split('~')[1];
+  return DIFFICULTIES.find((d) => d.id === id) ?? DIFFICULTIES[0];
 }
 
 export interface MonsterStats {

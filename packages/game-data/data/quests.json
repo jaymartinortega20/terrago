@@ -572,5 +572,261 @@
     }
    ]
   }
+ },
+ {
+  "id": "q_desert",
+  "name": "Sand and Stings",
+  "giver": "hunter_moss",
+  "turnIn": "caravan_zara",
+  "requires": "q_mire",
+  "description": "East of Crystal Lake the land turns to sand. Level 38+ recommended.",
+  "intro": [
+   "You've cleaned up the mire. Ever seen a desert?",
+   "Past Crystal Lake, east. Caravan Master Zara could use a blade like yours."
+  ],
+  "outro": [
+   "Six scorpions and four bandits. The caravans will roll again!",
+   "When you want real heat, head east to Ember Ridge."
+  ],
+  "steps": [
+   {
+    "text": "Cross Crystal Lake to Dusthaven Desert (east shore)",
+    "type": "visit",
+    "target": "dusthaven_desert",
+    "count": 1,
+    "where": {
+     "map": "crystal_lake",
+     "x": 58,
+     "y": 22
+    }
+   },
+   {
+    "text": "Defeat 6 Sand Scorpions",
+    "type": "kill",
+    "target": "sand_scorpion",
+    "count": 6,
+    "where": {
+     "map": "dusthaven_desert",
+     "x": 30,
+     "y": 32
+    }
+   },
+   {
+    "text": "Defeat 4 Dust Bandits",
+    "type": "kill",
+    "target": "dust_bandit",
+    "count": 4,
+    "where": {
+     "map": "dusthaven_desert",
+     "x": 42,
+     "y": 14
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 4000,
+   "xp": 40000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 8
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_ridge",
+  "name": "The Burning Ridge",
+  "giver": "caravan_zara",
+  "turnIn": "forgewarden_hal",
+  "requires": "q_desert",
+  "description": "Beyond the desert, the mountains smoke. Level 50+ recommended.",
+  "intro": [
+   "Smoke on the eastern horizon \u2014 that's Ember Ridge.",
+   "Forgewarden Hal keeps the old forges there. Tell him Zara sent you."
+  ],
+  "outro": [
+   "Hounds and golems both. You're tougher than the obsidian.",
+   "North of here lie the Ancient Ruins. Elowen will want to meet you."
+  ],
+  "steps": [
+   {
+    "text": "Travel east to Ember Ridge",
+    "type": "visit",
+    "target": "ember_ridge",
+    "count": 1,
+    "where": {
+     "map": "dusthaven_desert",
+     "x": 62,
+     "y": 23
+    }
+   },
+   {
+    "text": "Defeat 8 Magma Hounds",
+    "type": "kill",
+    "target": "magma_hound",
+    "count": 8,
+    "where": {
+     "map": "ember_ridge",
+     "x": 30,
+     "y": 30
+    }
+   },
+   {
+    "text": "Defeat 3 Obsidian Golems",
+    "type": "kill",
+    "target": "obsidian_golem",
+    "count": 3,
+    "where": {
+     "map": "ember_ridge",
+     "x": 46,
+     "y": 14
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 7000,
+   "xp": 90000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 10
+    },
+    {
+     "itemId": "ember_core",
+     "quantity": 2
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_ruins",
+  "name": "Echoes of an Empire",
+  "giver": "forgewarden_hal",
+  "turnIn": "archivist_elowen",
+  "requires": "q_ridge",
+  "description": "North of Ember Ridge: the ruins of an ancient empire. Level 65+ recommended.",
+  "intro": [
+   "Take the north pass. The ruins are older than the mountain, some say.",
+   "Archivist Elowen studies them. She'll need someone to keep the sentinels busy."
+  ],
+  "outro": [
+   "You fought back the knights and sentinels. The archive is safe \u2014 for now.",
+   "If you gather an army, the Stoneheart Golem waits in the central court."
+  ],
+  "steps": [
+   {
+    "text": "Climb the north pass to the Ancient Ruins",
+    "type": "visit",
+    "target": "ancient_ruins",
+    "count": 1,
+    "where": {
+     "map": "ember_ridge",
+     "x": 31,
+     "y": 1
+    }
+   },
+   {
+    "text": "Defeat 8 Cursed Knights",
+    "type": "kill",
+    "target": "cursed_knight",
+    "count": 8,
+    "where": {
+     "map": "ancient_ruins",
+     "x": 16,
+     "y": 16
+    }
+   },
+   {
+    "text": "Defeat 4 Ruin Sentinels",
+    "type": "kill",
+    "target": "ruin_sentinel",
+    "count": 4,
+    "where": {
+     "map": "ancient_ruins",
+     "x": 46,
+     "y": 14
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 12000,
+   "xp": 180000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 12
+    },
+    {
+     "itemId": "ancient_relic",
+     "quantity": 2
+    }
+   ]
+  }
+ },
+ {
+  "id": "q_dragonspire",
+  "name": "The Dragon Road",
+  "giver": "archivist_elowen",
+  "turnIn": "hunter_kade",
+  "requires": "q_ruins",
+  "description": "East of the ruins, the Dragonspire. The end of the map \u2014 and of easy days. Level 80+ recommended.",
+  "intro": [
+   "The empire fell to dragons, the records say. They're still there \u2014 east, on the Dragonspire.",
+   "Find Kade, the dragon hunter. He's mad, and he's right."
+  ],
+  "outro": [
+   "Elder drakes don't fall to just anyone. You're a legend.",
+   "The Ancient Wyvern is all that's left. Gather twenty friends. I'll be watching."
+  ],
+  "steps": [
+   {
+    "text": "Cross into the Dragonspire",
+    "type": "visit",
+    "target": "dragonspire",
+    "count": 1,
+    "where": {
+     "map": "ancient_ruins",
+     "x": 62,
+     "y": 21
+    }
+   },
+   {
+    "text": "Defeat 10 Young Drakes",
+    "type": "kill",
+    "target": "young_drake",
+    "count": 10,
+    "where": {
+     "map": "dragonspire",
+     "x": 26,
+     "y": 30
+    }
+   },
+   {
+    "text": "Defeat 3 Elder Drakes",
+    "type": "kill",
+    "target": "elder_drake",
+    "count": 3,
+    "where": {
+     "map": "dragonspire",
+     "x": 46,
+     "y": 12
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 25000,
+   "xp": 400000,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 20
+    },
+    {
+     "itemId": "drake_scale",
+     "quantity": 4
+    }
+   ]
+  }
  }
 ]
