@@ -357,6 +357,7 @@ function FxSection() {
       <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Graphics">
         {(
           [
+            ['ultra', 'Ultra'],
             ['hd', 'HD-2D'],
             ['lite', 'Lite'],
             ['classic', 'Classic'],
@@ -367,7 +368,7 @@ function FxSection() {
           </button>
         ))}
       </div>
-      <p className="mt-1 text-xs text-wood-dark/70">HD-2D adds sun shadows, light bloom, sunbeams and a soft focus blur. Lite keeps shadows and colour. Classic is plain pixels for slow devices.</p>
+      <p className="mt-1 text-xs text-wood-dark/70">HD-2D: sun shadows, richer colour, sunbeams and depth haze — runs on integrated graphics. Ultra adds glow bloom and a focus blur (needs a gaming GPU). Lite: shadows only. Classic: plain pixels. The game steps down by itself if it gets slow.</p>
       <h3 className="mt-4 font-bold">Attack effects</h3>
       <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Effect amount">
         {(['full', 'light', 'off'] as FxLevel[]).map((l) => (

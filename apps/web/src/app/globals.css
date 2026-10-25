@@ -325,3 +325,4 @@ img.pixel {
 .hud-bar > span { display: block; height: 100%; border-radius: 9999px; transition: width 0.25s; }
 
 }
+@keyframes feed-in { from { opacity: 0; transform: translateX(12px); } }

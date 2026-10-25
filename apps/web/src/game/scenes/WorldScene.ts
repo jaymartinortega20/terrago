@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { QUESTS, getCrop, getItem, getJob, getMap, getMonster, getNode, getQuest, getSkillDef } from '@terrago/game-data';
 import { SPELL, SpellFx, type SpellColors } from '../fx/SpellFx';
-import { Atmosphere, applyCameraLook, shadowCanvas, type GraphicsMode } from '../fx/hd2d';
+import { Atmosphere, GRAPHICS_ORDER, applyCameraLook, bakeGround, type GraphicsMode } from '../fx/hd2d';
 import { itemIcon } from '../art/world';
 import { audio, trackFor } from '../audio';
 import { CombatFx, FIRE_PAL, HOLY_PAL, ICE_PAL, MAGIC_PAL, MONSTER_PAL, POISON_PAL, paletteFor, type WeaponType } from '../fx/CombatFx';
-import { fxSettings, onFxSettings, type FxSettings } from '../fx/settings';
+import { fxSettings, onFxSettings, setFxSettings, type FxSettings } from '../fx/settings';
 import { monsterSheet } from '../art/monsters';
 import { mountSheet } from '../art/mounts';
 import {
@@ -38,6 +38,7 @@ import { emoteIcon } from '../art/emotes';
 import { wingCanvas } from '../art/wings';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
+import { pushNotice } from '../store';
 import type { GameClient, RemoteMonster, RemotePlayer } from '../net/client';
 
 const DIR_ROW: Record<Direction, number> = { down: 0, left: 1, right: 2, up: 3 };
@@ -101,6 +102,9 @@ const HAWK_PAL = { core: 0xe8c890, glow: 0x8a5a2a, spark: 0xffffff };
 export class WorldScene extends Phaser.Scene {
   private client!: GameClient;
   private mapLayer: Phaser.GameObjects.GameObject[] = [];
+  /** Buildings, trees and props: hidden while off screen so they cost nothing to draw. */
+  private statics: Phaser.GameObjects.Image[] = [];
+  private nextCullAt = 0;
   private local: Avatar | null = null;
   private remotes = new Map<string, Avatar>();
   private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number; shadow?: Phaser.GameObjects.Image }>();
@@ -134,7 +138,7 @@ export class WorldScene extends Phaser.Scene {
   private fx!: CombatFx;
   private spell!: SpellFx;
   private gfx: GraphicsMode = 'hd';
-  private castShadows: Phaser.GameObjects.Image[] = [];
+  private groundImage: Phaser.GameObjects.Image | null = null;
   private atmos!: Atmosphere;
   private outdoors = true;
 
@@ -149,7 +153,10 @@ export class WorldScene extends Phaser.Scene {
       if (st.graphics === this.gfx) return;
       this.gfx = st.graphics;
       applyCameraLook(this.cameras.main, this.gfx, this.game.renderer as never);
-      for (const sh of this.castShadows) sh.setVisible(this.gfx !== 'classic');
+      this.applyGround();
+      if (this.gfx === 'hd' || this.gfx === 'ultra') {
+        if (this.outdoors) this.atmos.build();
+      } else this.atmos.destroy();
     });
     this.events.once('shutdown', offGfx);
     const kb = this.input.keyboard!;
@@ -404,25 +411,18 @@ export class WorldScene extends Phaser.Scene {
     this.shadowDraws.push({ src: this.textures.get(key).getSourceImage() as HTMLCanvasElement, left, by, blur });
   }
 
-  /** All the map's shadows on one canvas: a single cheap image instead of hundreds. */
-  private bakeShadows(mapId: string, W: number, H: number): void {
-    const key = `hd2d:shadows:${mapId}`;
-    if (this.textures.exists(key)) this.textures.remove(key);
-    const c = document.createElement('canvas');
-    c.width = W;
-    c.height = H;
-    const g = c.getContext('2d')!;
-    const cache = new Map<HTMLCanvasElement, HTMLCanvasElement>();
-    for (const d of this.shadowDraws) {
-      let sh = cache.get(d.src);
-      if (!sh) cache.set(d.src, (sh = shadowCanvas(d.src, d.blur)));
-      g.drawImage(sh, Math.round(d.left - d.blur * 2), Math.round(d.by + d.blur * 4 - sh.height));
-    }
-    this.shadowDraws = [];
-    this.textures.addCanvas(key, c);
-    const img = this.add.image(0, 0, key).setOrigin(0, 0).setDepth(-5).setAlpha(0.3).setVisible(this.gfx !== 'classic');
-    this.castShadows = [img];
-    this.mapLayer.push(img);
+  /** Swap the ground texture for the current graphics mode (shadows + grade baked in, or plain). */
+  private applyGround(): void {
+    const map = this.client.map;
+    if (!map || !this.groundImage) return;
+    const plainKey = `ground:${map.id}`;
+    const plain = this.textures.get(plainKey).getSourceImage() as HTMLCanvasElement;
+    const want = this.gfx === 'classic' ? plainKey : `ground:${map.id}:${this.gfx === 'lite' ? 'lite' : 'hd'}`;
+    if (!this.textures.exists(want)) this.textures.addCanvas(want, bakeGround(plain, this.shadowDraws, this.gfx !== 'lite'));
+    const old = this.groundImage.texture.key;
+    this.groundImage.setTexture(want);
+    // Keep GPU memory low: only the plain ground and the one in use stay loaded.
+    if (old !== want && old !== plainKey) this.textures.remove(old);
   }
 
   /** A soft dark blob under feet (characters and monsters). */
@@ -481,12 +481,15 @@ export class WorldScene extends Phaser.Scene {
       this.glows.push(g);
       this.mapLayer.push(g);
     }
+    for (const k of this.textures.getTextureKeys()) if (k.startsWith('ground:') && k.split(':').length === 3) this.textures.remove(k);
     const ground = this.add.image(0, 0, this.canvasTexture(`ground:${map.id}`, () => renderGround(map))).setOrigin(0, 0).setDepth(-10);
     this.mapLayer.push(ground);
-    this.castShadows = [];
+    this.groundImage = ground;
+    this.statics = [];
+    this.nextCullAt = 0;
     this.shadowDraws = [];
     this.outdoors = !indoor;
-    if (this.outdoors) this.atmos.build();
+    if (this.outdoors && (this.gfx === 'hd' || this.gfx === 'ultra')) this.atmos.build();
     else this.atmos.destroy();
 
     for (const o of map.objects) {
@@ -495,7 +498,9 @@ export class WorldScene extends Phaser.Scene {
         const key = this.canvasTexture(`bld:${map.id}:${o.id}`, () => art.canvas);
         const bx = o.x * TILE_SIZE;
         const by = (o.y + o.h) * TILE_SIZE;
-        this.mapLayer.push(this.add.image(bx, by, key).setOrigin(0, 1).setDepth(by));
+        const bimg = this.add.image(bx, by, key).setOrigin(0, 1).setDepth(by);
+        this.mapLayer.push(bimg);
+        this.statics.push(bimg);
         this.castShadow(key, bx, by, 3);
         // Night: windows light up, lanterns and torches glow, chimneys smoke.
         for (const wdw of art.windows) {
@@ -523,7 +528,9 @@ export class WorldScene extends Phaser.Scene {
         const cx = (o.x + art.footW / 2) * TILE_SIZE;
         const by = (o.y + art.footH) * TILE_SIZE;
         const depth = o.type === 'teleport_pad' || o.type === 'flower_bed' ? 0 : by;
-        this.mapLayer.push(this.add.image(cx, by, key).setOrigin(0.5, 1).setDepth(depth));
+        const pimg = this.add.image(cx, by, key).setOrigin(0.5, 1).setDepth(depth);
+        this.mapLayer.push(pimg);
+        this.statics.push(pimg);
         if (depth !== 0 && !FLAT_PROPS.has(o.type)) this.castShadow(key, cx - art.canvas.width / 2, by, 2);
         if (o.text) {
           const label = this.add
@@ -545,7 +552,7 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
-    this.bakeShadows(map.id, W, H);
+    this.applyGround();
     for (const id of [...this.objectViews.keys()]) this.destroyObjectView(id);
     for (const o of this.client.objects.values()) this.syncObject(o);
 
@@ -1673,16 +1680,58 @@ export class WorldScene extends Phaser.Scene {
     for (const w of this.windowGlows) w.setFillStyle(0xffc060, lit * (0.9 + Math.sin(time / 600 + w.x) * 0.06));
     // Sun shadows fade at night; sunbeams and dust only in daylight outdoors (HD-2D).
     const day = Math.max(0, Math.min(1, 1 - dark / 0.55));
-    const shadowAlpha = 0.08 + 0.26 * day;
-    for (const sh of this.castShadows) sh.setAlpha(shadowAlpha);
     const dt = this.lastLightAt ? time - this.lastLightAt : 16;
     this.lastLightAt = time;
-    this.atmos?.update(time, dt, day, this.gfx !== 'hd' || !this.outdoors);
+    this.atmos?.update(time, dt, day, (this.gfx !== 'hd' && this.gfx !== 'ultra') || !this.outdoors);
+    this.watchFps(time, dt);
   }
   private lastLightAt = 0;
+  private fpsWindow = { start: 0, frames: 0, slow: 0 };
+
+  /**
+   * Low-end PCs: if the game runs under ~40 FPS for a while, step the graphics
+   * down one level (Ultra → HD-2D → Lite → Classic) and say so.
+   */
+  private watchFps(time: number, dt: number): void {
+    const w = this.fpsWindow;
+    if (!w.start) w.start = time + 8000; // let the map settle first
+    if (time < w.start) return;
+    w.frames++;
+    if (time - w.start < 5000) return;
+    const fps = (w.frames * 1000) / (time - w.start);
+    w.start = time;
+    w.frames = 0;
+    if (document.hidden || dt > 1000) return;
+    w.slow = fps < 40 ? w.slow + 1 : 0;
+    if (w.slow < 2) return;
+    w.slow = 0;
+    const next = GRAPHICS_ORDER[GRAPHICS_ORDER.indexOf(this.gfx) + 1];
+    if (!next) return;
+    setFxSettings({ graphics: next });
+    const label = { ultra: 'Ultra', hd: 'HD-2D', lite: 'Lite', classic: 'Classic' }[next];
+    pushNotice(this.client.ui, 'info', `Graphics lowered to ${label} for smoother play (Settings → Graphics).`, 5000);
+  }
+
+  /** Hide static map art outside the camera (checked 5× a second, with a margin). */
+  private cullStatics(time: number): void {
+    if (time < this.nextCullAt) return;
+    this.nextCullAt = time + 200;
+    const v = this.cameras.main.worldView;
+    const m = 96;
+    const x0 = v.x - m;
+    const x1 = v.right + m;
+    const y0 = v.y - m;
+    const y1 = v.bottom + m;
+    for (const o of this.statics) {
+      const left = o.x - o.displayWidth * o.originX;
+      const top = o.y - o.displayHeight * o.originY;
+      o.setVisible(left < x1 && left + o.displayWidth > x0 && top < y1 && top + o.displayHeight > y0);
+    }
+  }
 
   override update(time: number): void {
     const client = this.client;
+    this.cullStatics(time);
     this.updateLighting(time);
     this.updateSmoke(time);
     this.updateSound(time);

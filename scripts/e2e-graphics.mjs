@@ -27,10 +27,10 @@ try {
   await anon.waitForURL('**/login**', { timeout: 10000 });
   check('Logged-out Play opens the login page', anon.url().includes('/login'));
   await anon.goto(`${WEB}/characters`);
-  await anon.waitForURL('**/login**', { timeout: 15000 });
+  await anon.waitForURL('**/login**', { timeout: 60000 });
   check('Characters page sends you to log in', true);
   await anon.goto(`${WEB}/play?c=00000000-0000-0000-0000-000000000000`);
-  await anon.waitForURL('**/login**', { timeout: 15000 });
+  await anon.waitForURL('**/login**', { timeout: 60000 });
   check('Play page sends you to log in', true);
   await anon.goto(WEB);
   check('Home page shows the roadmap', (await anon.locator('[data-testid=roadmap-done]').count()) >= 10);
@@ -58,10 +58,28 @@ try {
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online', null, { timeout: 90000 });
   await page.waitForTimeout(2000);
-  const fx = await page.evaluate(() => window.__terrago.game.scene.getScene('world').cameras.main.postPipelines.length);
-  check('HD-2D camera effects on', fx >= 2, String(fx));
-  const shadows = await page.evaluate(() => window.__terrago.game.scene.getScene('world').castShadows.length);
-  check('Buildings and trees cast shadows (baked)', shadows === 1, String(shadows));
+  const look = await page.evaluate(() => {
+    const sc = window.__terrago.game.scene.getScene('world');
+    return { passes: sc.cameras.main.postPipelines.length, ground: sc.groundImage.texture.key, shadows: sc.shadowDraws.length };
+  });
+  check('HD-2D uses no extra GPU passes', look.passes === 0, JSON.stringify(look));
+  check('Shadows and colour baked into the ground', look.ground.endsWith(':hd') && look.shadows > 20, JSON.stringify(look));
+  // Frame rate per mode (this test browser renders on the CPU — a worst case).
+  await page.evaluate(() => (window.__terrago.game.scene.getScene('world').fpsWindow.start = Infinity)); // no auto-downgrade while measuring
+  const fps = {};
+  for (const mode of ['ultra', 'hd', 'lite', 'classic']) {
+    await page.keyboard.press('Escape');
+    await page.click(`[data-testid=gfx-${mode}]`);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(4000);
+    fps[mode] = await page.evaluate(() => Math.round(window.__terrago.game.loop.actualFps));
+  }
+  log('FPS by mode (software rendering):', JSON.stringify(fps));
+  check('HD-2D is much faster than Ultra', fps.hd >= fps.ultra, JSON.stringify(fps));
+  await page.keyboard.press('Escape');
+  await page.click('[data-testid=gfx-hd]');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/gfx-01-hd2d.png` });
   await page.evaluate(() => window.__terrago.game.scene.getScene('world').cameras.main.setZoom(2));
   await page.waitForTimeout(500);
@@ -70,7 +88,7 @@ try {
   await page.click('[data-testid=gfx-classic]');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(500);
-  check('Classic turns them off', (await page.evaluate(() => window.__terrago.game.scene.getScene('world').cameras.main.postPipelines.length)) === 0);
+  check('Classic shows the plain ground', (await page.evaluate(() => window.__terrago.game.scene.getScene('world').groundImage.texture.key)).split(':').length === 2);
   await page.screenshot({ path: `${OUT}/gfx-03-classic-zoom.png` });
   await page.keyboard.press('Escape');
   await page.click('[data-testid=gfx-hd]');

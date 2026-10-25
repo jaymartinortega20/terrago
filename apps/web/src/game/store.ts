@@ -52,6 +52,8 @@ export interface UiState {
   chat: ChatMessage[];
   dialogue: DialogueResult | null;
   notices: Notice[];
+  /** Small side feed for routine rewards. */
+  feed: Notice[];
   panel: Panel;
   chatFocused: boolean;
   /** Emote picker open. */
@@ -126,6 +128,7 @@ export const initialUi: UiState = {
   chat: [],
   dialogue: null,
   notices: [],
+  feed: [],
   panel: null,
   chatFocused: false,
   emoteMenu: false,
@@ -170,8 +173,21 @@ export const initialUi: UiState = {
 };
 
 let noticeId = 0;
+/**
+ * Routine rewards (kills, loot, gathering, daily-task progress) go to a small
+ * feed at the side so they never cover the fight; everything else (errors,
+ * level-ups, warnings) shows in the centre, at most two at a time.
+ */
+const FEED = /defeated:|^\+\d|bag is full|loot was left|harvested|you caught|picked up|daily task done|gathered|mined|chopped|pet exp|reached level \d+!.*growth/i;
+
 export function pushNotice(store: Store<UiState>, kind: Notice['kind'], text: string, ms = 3500): void {
   const id = ++noticeId;
-  store.set((s) => ({ notices: [...s.notices.slice(-3), { id, kind, text }] }));
-  setTimeout(() => store.set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })), ms);
+  if (kind !== 'error' && FEED.test(text)) {
+    store.set((s) => ({ feed: [...s.feed.slice(-4), { id, kind, text }] }));
+    setTimeout(() => store.set((s) => ({ feed: s.feed.filter((n) => n.id !== id) })), 4500);
+    return;
+  }
+  // The same message again just restarts its timer instead of stacking.
+  store.set((s) => ({ notices: [...s.notices.filter((n) => n.text !== text).slice(-1), { id, kind, text }] }));
+  setTimeout(() => store.set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })), Math.min(ms, 3000));
 }

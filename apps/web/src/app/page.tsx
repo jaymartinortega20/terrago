@@ -49,7 +49,7 @@ const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 
   { v: '1.0–1.1', name: 'Launch & endgame', text: 'Music and sound, phone controls, professions, bank, stalls, world events, level 100.', state: 'done' },
   { v: '2.0', name: 'The great revision', text: 'Four classes and eight second jobs, the six-map world, gem upgrades, wings, combat pets and the Pyraxis raid.', state: 'done' },
   { v: '2.1', name: 'Mounts, pets & HUD', text: 'Stable with 3D preview, mount gear, pet levels and loyalty, the ornate HUD and spell effects.', state: 'done' },
-  { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: real shadows, light bloom, tilt-shift focus and colour grading.', state: 'now' },
+  { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: sun shadows, richer colour, sunbeams and depth haze — tuned to run on low-end PCs, with an Ultra mode for gaming GPUs.', state: 'now' },
   { v: '2.3', name: 'Polish & balance', text: 'Carry weight from STR, boss and levelling balance from real play, glass menus everywhere.', state: 'next' },
   { v: '3.0', name: 'Full 3D', text: 'Low-poly floating islands, 3D chibi characters and visible gear.', state: 'later' },
 ];

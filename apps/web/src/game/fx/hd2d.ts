@@ -7,7 +7,16 @@ import Phaser from 'phaser';
  * a gentle colour grade. Everything is decoration on top of the 2D world.
  */
 
-export type GraphicsMode = 'hd' | 'lite' | 'classic';
+/**
+ * ultra   — HD-2D plus GPU post-processing (bloom, tilt-shift focus): strong PCs only.
+ * hd      — HD-2D without extra GPU passes: baked sun shadows, colour grade,
+ *           sunbeams, depth haze. Runs on integrated graphics.
+ * lite    — baked shadows only.
+ * classic — plain pixels.
+ */
+export type GraphicsMode = 'ultra' | 'hd' | 'lite' | 'classic';
+
+export const GRAPHICS_ORDER: GraphicsMode[] = ['ultra', 'hd', 'lite', 'classic'];
 
 /** How far shadows lean (per pixel of height) and how flat they are. */
 const SKEW = 0.55;
@@ -42,16 +51,29 @@ export function shadowCanvas(src: CanvasImageSource & { width: number; height: n
 export function applyCameraLook(cam: Phaser.Cameras.Scene2D.Camera, mode: GraphicsMode, renderer: { type: number }): void {
   if (renderer.type !== Phaser.WEBGL || !cam.postFX) return;
   cam.postFX.clear();
-  if (mode === 'classic') return;
-  const grade = cam.postFX.addColorMatrix();
-  grade.saturate(0.12);
-  grade.contrast(0.06, true);
-  if (mode === 'hd') {
-    cam.postFX.addBloom(0xffffff, 1, 1, 0.7, 0.38, 2);
-    cam.postFX.addTiltShift(0.85, 1, 0.3, 0.55, 0.55, 0.38);
-  } else {
-    cam.postFX.addBloom(0xffffff, 1, 1, 0.8, 0.4, 2);
+  // Only Ultra pays for full-screen shader passes; the other modes bake their look into textures.
+  if (mode !== 'ultra') return;
+  cam.postFX.addBloom(0xffffff, 1, 1, 0.7, 0.38, 2);
+  cam.postFX.addTiltShift(0.85, 1, 0.3, 0.55, 0.55, 0.38);
+}
+
+/** Ground with the map's shadows painted in and a gentle colour grade — one texture, zero runtime cost. */
+export function bakeGround(ground: HTMLCanvasElement, shadows: { src: HTMLCanvasElement; left: number; by: number; blur: number }[], grade: boolean): HTMLCanvasElement {
+  const c = document.createElement('canvas');
+  c.width = ground.width;
+  c.height = ground.height;
+  const g = c.getContext('2d')!;
+  if (grade && 'filter' in g) g.filter = 'saturate(1.12) contrast(1.05)';
+  g.drawImage(ground, 0, 0);
+  g.filter = 'none';
+  g.globalAlpha = 0.3;
+  const cache = new Map<HTMLCanvasElement, HTMLCanvasElement>();
+  for (const d of shadows) {
+    let sh = cache.get(d.src);
+    if (!sh) cache.set(d.src, (sh = shadowCanvas(d.src, d.blur)));
+    g.drawImage(sh, Math.round(d.left - d.blur * 2), Math.round(d.by + d.blur * 4 - sh.height));
   }
+  return c;
 }
 
 /** Soft sunbeams and drifting dust, fixed to the screen (outdoors, daytime). */
@@ -103,7 +125,7 @@ export class Atmosphere {
         .setAlpha(0);
       this.beams.push(b);
     }
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 16; i++) {
       const o = this.scene.add
         .rectangle(Math.random() * cam.width, Math.random() * cam.height, 2, 2, 0xfff2c8, 0.6)
         .setScrollFactor(0)

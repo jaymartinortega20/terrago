@@ -87,6 +87,14 @@ try {
   const n = await showOff(page);
 
   check('Monsters nearby for the effects', n >= 1, String(n));
+  await page.evaluate(() => {
+    const fire = (n) => window.__terrago.client.socket.listeners('notice').forEach((f) => f(n));
+    fire({ kind: 'success', text: 'Green Slime defeated: +2 XP, +2 Gold' });
+    fire({ kind: 'info', text: '📅 Daily task done: Defeat 10 monsters! Claim it in your Journal (L).' });
+    fire({ kind: 'success', text: 'Green Slime defeated: +2 XP, +2 Gold, 2× Slime Gel, 1× Minor Health Potion' });
+    fire({ kind: 'info', text: 'Your bag is full — loot was left on the ground.' });
+  });
+  check('Rewards go to the side feed, not the middle', (await page.locator('[data-testid=loot-feed] > div').count()) === 4);
   await page.screenshot({ path: `${OUT}/hud-02-desktop-spells.png` });
   await page.waitForTimeout(260);
   await page.screenshot({ path: `${OUT}/hud-03-desktop-spells-late.png` });

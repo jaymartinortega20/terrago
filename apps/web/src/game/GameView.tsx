@@ -1,5 +1,6 @@
 'use client';
 
+import { fxSettings, onFxSettings } from './fx/settings';
 import { HudIcon } from './ui/HudIcons';
 import { StablePanel } from './ui/StableUi';
 import { PetPanel } from './ui/PetUi';
@@ -99,6 +100,7 @@ export default function GameView({
   return (
     <div className="fixed inset-0 overflow-hidden bg-night no-select">
       <div ref={host} className="absolute inset-0" data-testid="game-canvas" />
+      <DepthHaze />
       {client && <WeatherLayer client={client} />}
       {client && <Overlay client={client} touch={touch} onExit={onExit} badge={badge} />}
     </div>
@@ -276,18 +278,19 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         </div>
       )}
 
-      {/* Notices */}
-      <div className="absolute top-32 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1">
+      {/* Notices: important ones centre-top, small; routine rewards in a side feed. */}
+      <div className="absolute top-28 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1">
         {notices.map((n) => (
           <div
             key={n.id}
-            className={`px-panel-dark px-3 py-1 text-sm font-bold ${n.kind === 'error' ? 'text-[#ff8a7a]' : n.kind === 'success' ? 'text-leaf' : 'text-gold'}`}
+            className={`hud-pill max-w-[80vw] px-3 py-1 text-xs font-bold ${n.kind === 'error' ? 'text-[#ff8a7a]' : n.kind === 'success' ? 'text-leaf' : 'text-gold'}`}
             role="status"
           >
             {n.text}
           </div>
         ))}
       </div>
+      <LootFeed client={client} touch={touch} />
 
       {/* Bottom: dialogue, hotbar, chat */}
       <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 sm:bottom-20">
@@ -372,5 +375,42 @@ function DesktopCombatOrbs({ client }: { client: GameClient }) {
         <span className="orb-key">F</span>
       </button>
     </div>
+  );
+}
+
+/** Kill rewards and loot scroll by quietly at the side, then fade. */
+function LootFeed({ client, touch }: { client: GameClient; touch: boolean }) {
+  const feed = useStore(client.ui, (s) => s.feed);
+  if (!feed.length) return null;
+  return (
+    <div className={`absolute flex flex-col gap-0.5 ${touch ? 'bottom-[54px] left-1/2 max-w-[46vw] -translate-x-1/2 items-center' : 'right-3 bottom-[76px] max-w-[340px] items-end'}`} data-testid="loot-feed" role="log" aria-live="polite">
+      {feed.map((n, i) => (
+        <div
+          key={n.id}
+          className="rounded-md bg-night/60 px-2 py-0.5 text-right text-[11px] leading-tight text-parchment/90"
+          style={{ opacity: 0.55 + (0.45 * (i + 1)) / feed.length, animation: 'feed-in 0.2s ease-out' }}
+        >
+          {n.text.replace(/ defeated:/, ':')}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * HD-2D depth haze: a pale sky haze along the top of the screen and a darker
+ * band along the bottom, like the soft focus of a diorama. Plain CSS gradients:
+ * free on any graphics chip.
+ */
+function DepthHaze() {
+  const [mode, setMode] = useState(() => fxSettings().graphics);
+  useEffect(() => onFxSettings((st) => setMode(st.graphics)), []);
+  if (mode !== 'hd' && mode !== 'ultra') return null;
+  return (
+    <div
+      className="pointer-events-none absolute inset-0"
+      style={{ background: 'linear-gradient(180deg, rgba(196,222,255,0.16) 0%, rgba(196,222,255,0) 20%, rgba(0,0,0,0) 80%, rgba(8,10,28,0.22) 100%)' }}
+      aria-hidden
+    />
   );
 }
