@@ -1,5 +1,5 @@
 import { BALANCE, getItem, getShop } from '@terrago/game-data';
-import { addItem, removeFromSlot, type ShopView } from '@terrago/shared';
+import { addItem, removeFromSlot, type ShopView, type Slots } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
 import { changeGold, logItemMovement } from './ledger';
@@ -86,6 +86,48 @@ export async function sellToShop(
     const { after } = await changeGold(tx, characterId, total, 'npc_sale', { type: 'shop', id: npcId });
     void gold;
     return { message: `Sold ${qty}× ${def.name} for ${total} Gold.`, inventory: toState(capacity, after, res.slots) };
+  });
+}
+
+/** "Junk": common loot the shop buys (materials, fish, crops), not on your hotbar (slots 1–9). */
+export function junkSlots(slots: Slots, npcId: string): { slot: number; itemId: string; quantity: number; value: number }[] {
+  const shop = getShop(npcId);
+  if (!shop) return [];
+  const out: { slot: number; itemId: string; quantity: number; value: number }[] = [];
+  slots.forEach((s, slot) => {
+    if (!s || slot < 9) return;
+    const def = getItem(s.itemId);
+    if (!def || def.rarity !== 'common' || !['material', 'fish', 'crop'].includes(def.category) || !shop.buys.includes(def.category)) return;
+    const unit = sellPrice(s.itemId, s.quality, s.durability);
+    if (unit > 0) out.push({ slot, itemId: s.itemId, quantity: s.quantity, value: unit * s.quantity });
+  });
+  return out;
+}
+
+export async function junkQuote(pool: Pool, characterId: string, npcId: string) {
+  const { slots } = await loadSlots(pool, characterId);
+  const items = junkSlots(slots, npcId);
+  return { items, total: items.reduce((n, i) => n + i.value, 0) };
+}
+
+/** Sell all junk in one go. */
+export async function sellJunk(pool: Pool, characterId: string, npcId: string): Promise<{ message: string; inventory: ReturnType<typeof toState> }> {
+  return withTransaction(pool, async (tx) => {
+    const { gold } = await lockCharacter(tx, characterId);
+    const { capacity, slots } = await loadSlots(tx, characterId);
+    const items = junkSlots(slots, npcId);
+    if (!items.length) throw new GameError('Nothing to sell: no common loot outside your hotbar.');
+    const next = slots.map((x) => (x ? { ...x } : null));
+    let total = 0;
+    for (const it of items) {
+      next[it.slot] = null;
+      total += it.value;
+      await logItemMovement(tx, { itemId: it.itemId, quantity: it.quantity, from: characterId, reason: 'npc_sale', ref: { type: 'shop', id: npcId } });
+    }
+    await writeSlots(tx, characterId, next, items.map((i) => i.slot));
+    const { after } = await changeGold(tx, characterId, total, 'npc_sale', { type: 'shop', id: npcId });
+    void gold;
+    return { message: `Sold ${items.reduce((n, i) => n + i.quantity, 0)} junk items for ${total.toLocaleString()} Gold.`, inventory: toState(capacity, after, next) };
   });
 }
 

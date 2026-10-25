@@ -978,6 +978,14 @@ export class GameClient {
     }
   }
 
+  junkQuote(): Promise<{ items: { slot: number; itemId: string; quantity: number; value: number }[]; total: number }> {
+    return this.request('shop:junkQuote', this.ui.get().serviceNpc);
+  }
+  async sellJunk(): Promise<void> {
+    const r = await this.run<{ message: string }>('shop:sellJunk', this.ui.get().serviceNpc);
+    if (r) audio.sfx('coin');
+  }
+
   async discard(slot: number, quantity: number): Promise<void> {
     try {
       const inventory = await this.request<import('@terrago/shared').InventoryState>('inventory:discard', { slot, quantity });

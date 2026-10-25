@@ -117,6 +117,9 @@ export interface SelfState {
   slowUntil?: number;
   /** Saddle, barding and trail on your mounts. */
   mountLook?: import('./companions').MountLook;
+  /** Bag weight and how much you can carry. */
+  load?: number;
+  carry?: number;
 }
 
 /** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */
@@ -239,6 +242,8 @@ export interface ItemDef {
   pet?: { kind: string; color: string; perk: 'gold' | 'fish' | 'xp' | 'regen' | 'dragon' };
   /** Rideable: speed multiplier and look. */
   mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' | 'boar' | 'hovergear'; perk?: import('./companions').MountPerkId; glow?: string };
+  /** Carry weight per item (defaults by category). */
+  weight?: number;
   /** Bag Expansion: slots it adds. */
   bagSlots?: number;
   /** Food for pets: EXP and loyalty. */

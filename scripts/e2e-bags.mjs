@@ -51,6 +51,21 @@ try {
   await page.waitForTimeout(600);
   const left = await db.query(`SELECT count(*)::int AS n FROM inventory_items WHERE character_id=$1 AND container='bag' AND slot=3`, [id]);
   check('Deleted', left.rows[0].n === 0);
+  check('Weight shown', (await page.locator('[data-testid=bag-weight]').count()) === 1);
+  await page.click('[data-testid=inventory-panel] button[aria-label=Close]');
+  check('Minimap on desktop', (await page.locator('[data-testid=minimap]').count()) === 1);
+  await page.screenshot({ path: `${OUT}/bags-03-minimap.png` });
+  // Rebind Inventory from I to B... then press it.
+  await page.keyboard.press('Escape');
+  await page.locator('[data-testid=keybinds]').waitFor();
+  await page.click('[data-testid=key-pets]');
+  await page.keyboard.press('KeyO');
+  check('Rebinding swaps clashing keys', (await page.locator('[data-testid=key-pets]').innerText()) === 'O' && (await page.locator('[data-testid=key-friends]').innerText()) === 'U');
+  await page.screenshot({ path: `${OUT}/bags-04-keys.png` });
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('KeyO');
+  await page.locator('[data-testid=pet-panel]').waitFor({ timeout: 3000 });
+  check('New key opens Pets', true);
   check('No page errors', errors.length === 0, errors.join(' | '));
   log('ALL BAG CHECKS PASSED');
 } catch (e) {

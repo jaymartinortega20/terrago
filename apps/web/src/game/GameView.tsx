@@ -1,5 +1,7 @@
 'use client';
 
+import { actionForKey } from './keybinds';
+import { Minimap } from './ui/Minimap';
 import { fxSettings, onFxSettings } from './fx/settings';
 import { HudIcon } from './ui/HudIcons';
 import { StablePanel } from './ui/StableUi';
@@ -142,27 +144,16 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         if (ui.get().dialogue) return;
         ui.set((s) => ({ panel: s.panel ? null : 'settings' }));
       } else if (ui.get().dialogue) return;
-      else if (k === 'i' || k === 'b') open('inventory');
-      else if (k === 'c') open('character');
-      else if (k === 'm') open('map');
-      else if (k === 'k') open('skills');
-      else if (k === 'f') client.attackKey();
+      else if (k === 'b') open('inventory');
       else if (k === 'z' && e.shiftKey) open('stable');
-      else if (k === 'z') client.toggleMount();
-      else if (k === 'u') open('pets');
-      else if (k === 'y') ui.set((s) => ({ emoteMenu: !s.emoteMenu }));
-      else if (k === 'j') open('quests');
-      else if (k === 'p') open('market');
-      else if (k === 'o') open('friends');
-      else if (k === 'l') open('journal');
-      else if (k === 'n') open('crafting');
-      else if (k === 'g') open('guild');
-      else if (k === 'q') client.useSkill(0);
-      else if (k === 'r') client.useSkill(1);
-      else if (k === 't') client.useSkill(2);
-      else if (k === 'x') client.useSkill(3);
-      else if (k === 'v') client.useSkill(4);
-      else if (k === 'h') client.useSkill(5);
+      else if (actionForKey(k)) {
+        const act = actionForKey(k)!;
+        if (act === 'attack') client.attackKey();
+        else if (act === 'mount') client.toggleMount();
+        else if (act === 'emotes') ui.set((s) => ({ emoteMenu: !s.emoteMenu }));
+        else if (act.startsWith('skill')) client.useSkill(Number(act.slice(5)) - 1);
+        else open(act as Panel);
+      }
       else if (k === 'tab') {
         e.preventDefault();
         const ids = [...client.monsters.values()].sort((a, b) => Math.hypot(a.x - client.pos.x, a.y - client.pos.y) - Math.hypot(b.x - client.pos.x, b.y - client.pos.y)).map((m) => m.info.id);
@@ -191,6 +182,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         <Hud client={client} compact={touch} />
         <EffectsBar client={client} />
         <PartyFrame client={client} />
+        {!touch && <Minimap client={client} onOpen={() => open('map')} />}
       </div>
       <div className="absolute top-2 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">
         <BossBar client={client} />

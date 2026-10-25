@@ -35,7 +35,7 @@ import { clearPests, clearPlot, farmUpgradeView, fertilize, harvest, loadFarm, p
 import type { toState } from '../services/inventory';
 import { getNpc, npcOffers } from '../services/npcs';
 import type { ProgressDelta } from '../services/progress';
-import { buyFromShop, repairAll, repairCost, sellToShop, shopView } from '../services/shops';
+import { buyFromShop, junkQuote, repairAll, repairCost, sellJunk, sellToShop, shopView } from '../services/shops';
 import { craft as craftRecipe, rollDrops, swingAtNode } from '../services/gathering';
 import { cast } from './fishing';
 import { cancelTrade } from './trade';
@@ -110,6 +110,7 @@ export function pushInventory(world: World, p: Player, inv: Inventory | null): v
   p.rec.gold = inv.gold;
   if (inv.equipment) world.setEquipment(p, inv.equipment);
   p.conn?.send('inventory:update', full);
+  world.recomputeSpeed(p);
 }
 
 /** Choose or change a profession specialization. */
@@ -217,6 +218,26 @@ function wateringArea(def: MapDef, tx: number, ty: number, tier: number, dir: Pl
     for (let k = 0; k < 3; k++) tiles.push([tx + sx! * k, ty + sy! * k]);
   } else tiles.push([tx, ty]);
   return tiles.map(([x, y]) => index.get(`${x},${y}`)).filter((i): i is number => i !== undefined);
+}
+
+/** Walking over your own loot picks it up (if it fits). */
+export function autoPickup(deps: GameplayDeps, p: Player, drop: DropObject): void {
+  void p
+    .serial(async () => {
+      const rt = deps.world.runtimeOf(p);
+      if (!rt.objects.has(drop.id)) return;
+      const inv = await pickUp(deps.pool, p.id, drop.itemId, drop.quantity, drop.quality);
+      deps.world.removeObject(rt, drop.id);
+      pushInventory(deps.world, p, inv);
+      p.conn?.send('notice', { kind: 'success', text: `Picked up ${drop.quantity}× ${getItem(drop.itemId)?.name}.` });
+    })
+    .catch(() => {
+      // Bag still full: leave it on the ground and try again later.
+      setTimeout(() => p.pickingUp.delete(drop.id), 5000);
+    })
+    .finally(() => {
+      if (!deps.world.runtimeOf(p).objects.has(drop.id)) p.pickingUp.delete(drop.id);
+    });
 }
 
 export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<ActResult> {
@@ -400,6 +421,16 @@ export const npcServices = {
   shopGet(deps: GameplayDeps, p: Player, npcId: unknown) {
     const npc = npcService(deps.world, p, npcId, 'shop');
     return shopView(npc.id);
+  },
+  junkQuote(deps: GameplayDeps, p: Player, npcId: unknown) {
+    const npc = npcService(deps.world, p, npcId, 'shop');
+    return junkQuote(deps.pool, p.id, npc.id);
+  },
+  async sellJunk(deps: GameplayDeps, p: Player, npcId: unknown) {
+    const npc = npcService(deps.world, p, npcId, 'shop');
+    const res = await sellJunk(deps.pool, p.id, npc.id);
+    pushInventory(deps.world, p, res.inventory);
+    return { message: res.message };
   },
   async shopBuy(deps: GameplayDeps, p: Player, req: unknown) {
     const r = (req ?? {}) as { npcId?: unknown; itemId?: unknown; quantity?: unknown };

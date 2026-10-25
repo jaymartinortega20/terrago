@@ -284,6 +284,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
         const inv = await discardItem(pool, p.id, r.slot, r.quantity);
         const full = { ...inv, equipment: world.inventoryCache.get(p.id)?.equipment ?? [] };
         world.inventoryCache.set(p.id, full);
+        world.recomputeSpeed(p);
         return full;
       }),
     );
@@ -321,6 +322,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
             const r = await expandBag(pool, p.id, slot as number);
             world.inventoryCache.set(p.id, { ...r.inventory, equipment: world.inventoryCache.get(p.id)?.equipment ?? [] });
             p.conn?.send('inventory:update', world.inventoryCache.get(p.id)!);
+            world.recomputeSpeed(p);
             return { inventory: world.inventoryCache.get(p.id)!, message: r.message };
           }
           if (inv && getItem(inv.itemId)?.petFood) {
@@ -367,6 +369,8 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('shop:get', (npcId, ack) => serial(ack, () => npcServices.shopGet(g, p, npcId)));
     socket.on('shop:buy', (req, ack) => serial(ack, () => npcServices.shopBuy(g, p, req)));
     socket.on('shop:sell', (req, ack) => serial(ack, () => npcServices.shopSell(g, p, req)));
+    socket.on('shop:junkQuote', (npcId, ack) => serial(ack, () => npcServices.junkQuote(g, p, npcId)));
+    socket.on('shop:sellJunk', (npcId, ack) => serial(ack, () => npcServices.sellJunk(g, p, npcId)));
     socket.on('farm:info', (npcId, ack) => serial(ack, () => npcServices.farmInfo(g, p, npcId)));
     socket.on('farm:upgrade', (npcId, ack) => serial(ack, () => npcServices.farmUpgrade(g, p, npcId)));
     socket.on('repair:quote', (npcId, ack) => serial(ack, () => npcServices.repairQuote(g, p, npcId)));

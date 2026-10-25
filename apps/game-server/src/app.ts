@@ -1,3 +1,4 @@
+import { autoPickup } from './net/gameplay';
 import { onMounted } from './net/companions';
 import { createServer, type Server as HttpServer } from 'node:http';
 import { performance } from 'node:perf_hooks';
@@ -71,6 +72,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     onMapEnter: (p) => void onMapEntered({ pool, world, log }, p).catch((err) => log.error('map_enter_hook_failed', { err })),
     combat: combatHooks((): GameplayDeps => ({ pool, world, log })),
     onMounted: (p) => onMounted({ pool, world, log }, p),
+    autoPickup: (p, d) => autoPickup({ pool, world, log }, p, d),
   });
   hooks.level = (p) => track({ pool, world, log }, p, 'level', p.rec.level, 'max');
   const bots = new AntiBot(world, pool, security);

@@ -25,6 +25,7 @@ export function ShopPanel({ client, onClose }: { client: GameClient; onClose: ()
   const [tab, setTab] = useState<'buy' | 'sell'>('buy');
   const [qty, setQty] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
+  const [junk, setJunk] = useState<{ items: { slot: number; itemId: string; quantity: number; value: number }[]; total: number } | null>(null);
   if (!shop || !inv) return null;
 
   const act = async (fn: () => Promise<unknown>) => {
@@ -46,8 +47,47 @@ export function ShopPanel({ client, onClose }: { client: GameClient; onClose: ()
         <button className={`px-btn small ${tab === 'sell' ? 'green' : 'ghost'}`} onClick={() => setTab('sell')} data-testid="shop-tab-sell">
           Sell
         </button>
+        {shop.buys.some((c) => ['material', 'fish', 'crop'].includes(c)) && (
+          <button className="px-btn small ghost" onClick={() => void client.junkQuote().then(setJunk)} title="Sell common loot (materials, fish, crops) not on your hotbar" data-testid="sell-junk">
+            🧺 Sell junk
+          </button>
+        )}
         <span className="ml-auto text-sm font-bold text-gold-dark">◉ {inv.gold.toLocaleString()}</span>
       </div>
+      {junk && (
+        <div className="mb-2 border-2 border-wood-dark/40 bg-parchment-2 p-2 text-sm" data-testid="junk-confirm">
+          {junk.items.length === 0 ? (
+            <p>No junk to sell — common loot on your hotbar (slots 1–9) is kept.</p>
+          ) : (
+            <>
+              <p className="font-bold">
+                Sell {junk.items.reduce((n, i) => n + i.quantity, 0)} items for {junk.total.toLocaleString()} Gold?
+              </p>
+              <p className="text-xs text-wood-dark/80">{junk.items.map((i) => `${i.quantity}× ${getItem(i.itemId)?.name}`).join(', ')}</p>
+            </>
+          )}
+          <div className="mt-2 flex gap-2">
+            {junk.items.length > 0 && (
+              <button
+                className="px-btn green small"
+                disabled={busy}
+                onClick={() =>
+                  void act(async () => {
+                    await client.sellJunk();
+                    setJunk(null);
+                  })
+                }
+                data-testid="sell-junk-yes"
+              >
+                Sell all
+              </button>
+            )}
+            <button className="px-btn ghost small" onClick={() => setJunk(null)}>
+              {junk.items.length ? 'Cancel' : 'OK'}
+            </button>
+          </div>
+        </div>
+      )}
       {tab === 'buy' && (
         <ul className="space-y-1">
           {shop.sells.map((e) => {

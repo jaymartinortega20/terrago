@@ -1,5 +1,6 @@
 'use client';
 
+import { ACTIONS, RESERVED, keyFor, keyLabel, onKeysChanged, resetKeys, setKey, type ActionId } from '../keybinds';
 import { useEffect, useMemo, useState } from 'react';
 import { CLASSES, getItem, getJob, getMap, skillsForJob } from '@terrago/game-data';
 import { BASE_OUTFIT_COUNT, JOB_LEVEL, OUTFITS, QUALITIES, TILE_SIZE } from '@terrago/shared';
@@ -51,6 +52,7 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
           Sort &amp; stack
         </button>
       </p>
+      <WeightBar client={client} />
       {inv.capacity < 250 && <p className="text-[11px] text-wood-dark/70">Need room? Merchant Mira sells Bag Expansions (+10 slots, up to 250).</p>}
       {moving && <p className="mt-1 text-xs font-bold text-leaf-dark">Choose a slot to move the item to…</p>}
       {sel && def && (
@@ -465,6 +467,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       </label>
       <p className="mt-1 text-xs text-wood-dark/70">Music and sounds start after your first click or key press. Levels are saved in this browser.</p>
       <FxSection />
+      <ControlsSection />
       <h3 className="mt-4 font-bold">Connection</h3>
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
       <h3 className="mt-4 font-bold">Controls</h3>
@@ -498,3 +501,64 @@ export const MENU: { id: Exclude<Panel, null> | string; label: string; key: stri
   { id: 'friends', label: 'Friends', key: 'O' },
   { id: 'settings', label: 'Settings', key: 'Esc' },
 ];
+
+/** Bag weight against what your STR lets you carry. */
+function WeightBar({ client }: { client: GameClient }) {
+  const load = useStore(client.ui, (s) => s.self?.load ?? 0);
+  const carry = useStore(client.ui, (s) => s.self?.carry ?? 0);
+  if (!carry) return null;
+  const k = load / carry;
+  const color = k > 1.5 ? '#c0392b' : k > 1 ? '#e8a03a' : '#5fa04a';
+  return (
+    <div className="mt-1 text-[11px]" data-testid="bag-weight" title="Heavier than your limit: you walk slower. More STR carries more.">
+      <div className="flex">
+        <span className="font-bold">Weight</span>
+        <span className="ml-auto">
+          {load} / {carry}
+          {k > 1 && <span className="ml-1 font-bold" style={{ color }}>{k > 1.5 ? '— very slow!' : '— slowed'}</span>}
+        </span>
+      </div>
+      <div className="mt-0.5 h-1.5 overflow-hidden border border-ink bg-night/30">
+        <div className="h-full" style={{ width: `${Math.min(100, k * 100)}%`, background: color }} />
+      </div>
+    </div>
+  );
+}
+
+/** Rebind action keys: click a key, then press the new one. */
+function ControlsSection() {
+  const [, bump] = useState(0);
+  const [wait, setWait] = useState<ActionId | null>(null);
+  useEffect(() => onKeysChanged(() => bump((n) => n + 1)), []);
+  useEffect(() => {
+    if (!wait) return;
+    const onKey = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const k = e.key.toLowerCase();
+      if (k !== 'escape' && !RESERVED.has(k) && k.length === 1) setKey(wait, k);
+      setWait(null);
+    };
+    window.addEventListener('keydown', onKey, { capture: true });
+    return () => window.removeEventListener('keydown', onKey, { capture: true });
+  }, [wait]);
+  return (
+    <>
+      <h3 className="mt-4 font-bold">Controls</h3>
+      <p className="text-xs text-wood-dark/70">Click a key, then press the new one. Move with WASD or arrows; E to talk / use.</p>
+      <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-sm" data-testid="keybinds">
+        {ACTIONS.map((a) => (
+          <div key={a.id} className="flex items-center">
+            <span className="truncate">{a.label}</span>
+            <button className={`px-btn small ml-auto min-w-[2.5rem] ${wait === a.id ? 'green' : 'ghost'}`} onClick={() => setWait(a.id)} data-testid={`key-${a.id}`}>
+              {wait === a.id ? '…' : keyLabel(keyFor(a.id))}
+            </button>
+          </div>
+        ))}
+      </div>
+      <button className="px-btn ghost small mt-2" onClick={resetKeys}>
+        Reset keys
+      </button>
+    </>
+  );
+}

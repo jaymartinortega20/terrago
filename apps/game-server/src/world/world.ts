@@ -34,6 +34,9 @@ import {
   DISMOUNT_PENALTY_MS,
   DISMOUNT_PENALTY_MULT,
   terrainMult,
+  bagWeight,
+  carryLimit,
+  weightSpeed,
   EMOTES,
   type EmoteId,
 } from '@terrago/shared';
@@ -82,6 +85,8 @@ export interface WorldDeps {
   onMapEnter?: (player: Player) => void;
   /** A player finished getting on a mount. */
   onMounted?: (player: Player) => void;
+  /** A player walked next to loot that's theirs: pick it up. */
+  autoPickup?: (player: Player, drop: import('@terrago/shared').DropObject) => void;
   /** Async side effects of combat (rewards, death penalty, durability). */
   combat?: CombatHooks;
   rand?: () => number;
@@ -199,6 +204,15 @@ export class World {
     if (p.slowUntil > this.now()) speed *= DISMOUNT_PENALTY_MULT;
     const swift = p.petState && p.petState.id === p.companionId() ? (p.petState.growth.speed ?? 0) : 0;
     speed *= 1 + swift * 0.02;
+    // Carry weight: a heavy bag slows you down (STR carries more).
+    const load = bagWeight(this.inventoryCache.get(p.id)?.slots ?? [], getItem);
+    const carry = carryLimit(p.profile.stats.strength);
+    speed *= weightSpeed(load, carry);
+    if (load !== p.sentLoad || carry !== p.sentCarry) {
+      p.sentLoad = load;
+      p.sentCarry = carry;
+      p.conn?.send('self:update', { load, carry });
+    }
     speed = Math.round(speed * 1000) / 1000;
     if (speed === p.speed) return;
     p.speed = speed;
@@ -291,6 +305,7 @@ export class World {
     p.rec.hp = Math.min(p.rec.hp, p.profile.maxHp);
     p.rec.mp = Math.min(p.rec.mp, p.profile.maxMp);
     p.conn?.send('self:update', { stats: p.profile.stats, derived: p.profile.derived, maxHp: p.profile.maxHp, maxMp: p.profile.maxMp, hp: p.rec.hp, mp: p.rec.mp });
+    this.recomputeSpeed(p);
   }
 
   // ---------------------------------------------------------------------------
@@ -708,6 +723,17 @@ export class World {
         p.y = next.y;
         p.dirty = true;
         p.lastMovedAt = now;
+        if (now >= p.nextPickupCheck) {
+          p.nextPickupCheck = now + 300;
+          for (const o of rt.objects.values()) {
+            if (o.kind !== 'drop' || o.ownerId !== p.id || p.pickingUp.has(o.id)) continue;
+            const c = tileCenter(o.x, o.y);
+            if (Math.hypot(c.x - p.x, c.y - p.y) <= TILE_SIZE * 1.6) {
+              p.pickingUp.add(o.id);
+              this.deps.autoPickup?.(p, o);
+            }
+          }
+        }
         rt.spatial.update(p);
         const portal = this.portalAt(rt.def, p.x, p.y);
         if (portal) {

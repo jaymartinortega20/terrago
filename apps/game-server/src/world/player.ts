@@ -68,6 +68,12 @@ export class Player {
   speed = 1;
   /** Getting on a mount (finishes at `until`). */
   mountChannel: { id: string; until: number } | null = null;
+  /** Auto-pickup of your own loot when you walk over it. */
+  nextPickupCheck = 0;
+  pickingUp = new Set<string>();
+  /** Bag weight last sent to the client. */
+  sentLoad = -1;
+  sentCarry = -1;
   /** Slowed after a hit knocked them off their mount. */
   slowUntil = 0;
   /** Mount picked in the stable, and its saddle/barding/trail. */

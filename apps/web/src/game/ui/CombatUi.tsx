@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { SKILL_KEYS, getClass, getItem, skillsFor } from '@terrago/game-data';
+import { getClass, getItem, skillsFor } from '@terrago/game-data';
 
 export const RESOURCE_LABEL = { mana: 'Mana', rage: 'Rage', energy: 'Energy' } as const;
 export const RESOURCE_COLOR = { mana: '#4a7fd6', rage: '#c0392b', energy: '#e6c229' } as const;
@@ -9,6 +9,7 @@ import { EQUIP_SLOTS, ENHANCE_SAFE_LEVEL, MAX_ENHANCE, enhanceChance, enhanceCos
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
+import { keyFor, keyLabel, type ActionId } from '../keybinds';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
 import { Window } from './Window';
 
@@ -98,7 +99,7 @@ export function SkillOrb({ client, index, size = 48, showKey = true }: { client:
   const short = self.mp < sk.mp;
   return (
     <button
-      title={`${sk.name} (${SKILL_KEYS[index]}) — ${sk.description} ${sk.mp} ${res}`}
+      title={`${sk.name} (${keyLabel(keyFor(`skill${index + 1}` as ActionId))}) — ${sk.description} ${sk.mp} ${res}`}
       onClick={() => client.useSkill(index)}
       className={`orb pointer-events-auto ${cd > 0 || locked ? 'orb-dark' : ''} ${locked ? 'orb-disabled' : ''}`}
       style={{ width: size, height: size }}
@@ -106,7 +107,7 @@ export function SkillOrb({ client, index, size = 48, showKey = true }: { client:
       data-testid={`skill-${index}`}
     >
       <PixelIcon icon={sk.icon} size={Math.round(size * 0.62)} />
-      {showKey && <span className="orb-key">{SKILL_KEYS[index]}</span>}
+      {showKey && <span className="orb-key">{keyLabel(keyFor(`skill${index + 1}` as ActionId))}</span>}
       {pct > 0 && <span className="orb-cd" style={{ ['--p' as string]: `${pct}%` }} />}
       {cd > 0 && <span className="orb-num" style={{ fontSize: size * 0.34 }}>{cd < 1000 ? (cd / 1000).toFixed(1) : Math.ceil(cd / 1000)}</span>}
       {locked && <span className="orb-num bottom-0 text-[10px]">L{sk.level}</span>}
