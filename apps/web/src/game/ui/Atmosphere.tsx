@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { currentEvent, formatDuration, nextEvent, WEATHER_ICON, WEATHER_LABEL, clockText, seasonAt, seasonEndsAt, weatherAt, weatherRegion, type Weather } from '@terrago/shared';
+import { getMap } from '@terrago/game-data';
+import { currentEvent, currentWorldBoss, formatDuration, nextEvent, nextWorldBoss, WEATHER_ICON, WEATHER_LABEL, clockText, seasonAt, seasonEndsAt, weatherAt, weatherRegion, type Weather } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 
@@ -84,5 +85,30 @@ export function EventBadge({ client }: { client: GameClient }) {
     <div className="px-panel-dark pointer-events-auto px-2 py-0.5 text-xs font-bold text-gold" title={ev.def.description} data-testid="event-now">
       🎉 {ev.def.name} · {formatDuration(ev.end - now)} left
     </div>
+  );
+}
+
+/** The world boss that's up now (with a Go button), or when the next one comes. */
+export function WorldBossBadge({ client }: { client: GameClient }) {
+  const now = useNow(client, 5000);
+  const wb = currentWorldBoss(now);
+  if (!wb) {
+    const n = nextWorldBoss(now);
+    return (
+      <div className="px-panel-dark pointer-events-auto px-2 py-0.5 text-[11px] text-parchment/70" title={`Appears in ${getMap(n.def.map)?.name}`} data-testid="worldboss-next">
+        👑 {n.def.name} in {formatDuration(n.start - now)}
+      </div>
+    );
+  }
+  const where = { map: wb.def.map, x: wb.def.area.x + Math.floor(wb.def.area.w / 2), y: wb.def.area.y + Math.floor(wb.def.area.h / 2), label: wb.def.name };
+  return (
+    <button
+      className="px-panel-dark pointer-events-auto px-2 py-0.5 text-left text-xs font-bold text-[#ff9a6a]"
+      onClick={() => client.autoWalkTo(where)}
+      title="Walk there"
+      data-testid="worldboss-now"
+    >
+      👑 {wb.def.name} · {getMap(wb.def.map)?.name} · {formatDuration(wb.end - now)} left <span className="text-gold">Go ▶</span>
+    </button>
   );
 }

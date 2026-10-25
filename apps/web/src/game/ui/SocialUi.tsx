@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getItem, getMap } from '@terrago/game-data';
-import { PARTY_MAX, type GuildRank } from '@terrago/shared';
+import { PARTY_ACTIVITIES, PARTY_MAX, type GuildQuestsView, type GuildRank, type PartyListing } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { Window } from './Window';
@@ -83,10 +83,30 @@ export function InvitePopups({ client }: { client: GameClient }) {
 export function FriendsPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const fv = useStore(client.ui, (s) => s.friends);
   const [name, setName] = useState('');
+  const [tab, setTab] = useState<'friends' | 'finder'>('friends');
   useEffect(() => void client.loadFriends(), [client]);
   const online = fv?.friends.filter((f) => f.online).length ?? 0;
+  const tabs = (
+    <div className="mb-2 flex gap-1">
+      <button className={`px-btn small ${tab === 'friends' ? 'green' : 'ghost'}`} onClick={() => setTab('friends')}>
+        Friends
+      </button>
+      <button className={`px-btn small ${tab === 'finder' ? 'green' : 'ghost'}`} onClick={() => setTab('finder')} data-testid="tab-party-finder">
+        Party finder
+      </button>
+    </div>
+  );
+  if (tab === 'finder') {
+    return (
+      <Window title="Party finder" onClose={onClose} testId="friends-panel">
+        {tabs}
+        <PartyFinder client={client} />
+      </Window>
+    );
+  }
   return (
     <Window title="Friends" onClose={onClose} testId="friends-panel">
+      {tabs}
       <form
         className="mb-2 flex gap-1"
         onSubmit={async (e) => {
@@ -283,6 +303,7 @@ export function GuildPanel({ client, onClose }: { client: GameClient; onClose: (
           </li>
         ))}
       </ul>
+      <GuildQuests client={client} />
       <button
         className="px-btn ghost small mt-3"
         onClick={() => {
@@ -384,6 +405,125 @@ export function ProfileWindow({ client }: { client: GameClient }) {
           </form>
         )}
       </Window>
+    </div>
+  );
+}
+
+/** Find a group: open posts you can join with one click, and your own post. */
+function PartyFinder({ client }: { client: GameClient }) {
+  const level = useStore(client.ui, (s) => s.self?.level ?? 1);
+  const party = useStore(client.ui, (s) => s.party);
+  const me = useStore(client.ui, (s) => s.self?.characterId);
+  const [data, setData] = useState<{ listings: PartyListing[]; mine: PartyListing | null } | null>(null);
+  const [activity, setActivity] = useState<string>(PARTY_ACTIVITIES[0]);
+  const [note, setNote] = useState('');
+  const [minLevel, setMinLevel] = useState(1);
+  const load = () => client.partyListings().then(setData, () => {});
+  useEffect(() => {
+    void load();
+    const t = setInterval(load, 8000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client]);
+  const leading = !party || party.leaderId === me;
+  return (
+    <div data-testid="party-finder">
+      {data?.mine ? (
+        <div className="mb-2 border-2 border-leaf/60 bg-parchment-2/60 p-1.5 text-sm">
+          <b>Your post:</b> {data.mine.activity}
+          {data.mine.note ? ` — ${data.mine.note}` : ''} · {data.mine.members}/{PARTY_MAX}
+          <button className="px-btn ghost small ml-2" onClick={() => void client.partyUnpost().then(load)} data-testid="party-unpost">
+            Take down
+          </button>
+        </div>
+      ) : leading ? (
+        <form
+          className="mb-2 flex flex-wrap items-center gap-1 text-sm"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (await client.partyPost(activity, note, minLevel)) void load();
+          }}
+        >
+          <select value={activity} onChange={(e) => setActivity(e.target.value)} className="border-2 border-ink bg-parchment px-1" data-testid="party-activity">
+            {PARTY_ACTIVITIES.map((a) => (
+              <option key={a}>{a}</option>
+            ))}
+          </select>
+          <input value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.stopPropagation()} maxLength={80} placeholder="Note (e.g. need a healer)" className="min-w-0 flex-1 border-2 border-ink bg-parchment px-1" />
+          <label className="text-xs">
+            Lv
+            <input type="number" min={1} max={100} value={minLevel} onChange={(e) => setMinLevel(Math.max(1, Math.min(100, Math.floor(Number(e.target.value) || 1))))} onKeyDown={(e) => e.stopPropagation()} className="ml-1 w-12 border-2 border-ink bg-parchment px-1" />+
+          </label>
+          <button className="px-btn green small" data-testid="party-post">
+            Post
+          </button>
+        </form>
+      ) : (
+        <p className="mb-2 text-xs text-wood-dark/70">Only your party leader can post.</p>
+      )}
+      <ul className="space-y-1" data-testid="party-listings">
+        {data && !data.listings.length && <li className="text-sm text-wood-dark/70">No open parties right now. Post one and others can join you.</li>}
+        {data?.listings.map((l) => (
+          <li key={l.leaderId} className="flex items-center gap-1.5 border-2 border-ink/20 px-1.5 py-1 text-sm">
+            <span className="min-w-0 flex-1">
+              <b>{l.activity}</b> · {l.leaderName} Lv{l.level} {CLASS_NAME[l.classId] ?? ''}
+              <span className="block truncate text-xs text-wood-dark/70">
+                {l.members}/{PARTY_MAX} · {mapName(l.mapId)}
+                {l.minLevel > 1 ? ` · Lv${l.minLevel}+` : ''}
+                {l.note ? ` · ${l.note}` : ''}
+              </span>
+            </span>
+            <button className="px-btn green small" disabled={!!party || level < l.minLevel} onClick={() => void client.partyJoin(l.leaderId).then(load)} data-testid={`party-join-${l.leaderName}`}>
+              Join
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** This week's shared guild goals. */
+function GuildQuests({ client }: { client: GameClient }) {
+  const [v, setV] = useState<GuildQuestsView | null>(null);
+  useEffect(() => {
+    client.guildQuests().then(setV, () => {});
+  }, [client]);
+  if (!v) return null;
+  const days = Math.max(0, Math.ceil((v.resetsAt - Date.now()) / 86_400_000));
+  return (
+    <div className="mt-3" data-testid="guild-quests">
+      <h3 className="font-bold">Weekly guild quests</h3>
+      <p className="text-xs text-wood-dark/70">Everyone's play counts. New goals in {days} day{days === 1 ? '' : 's'}. Help out to earn a share.</p>
+      <ul className="mt-1 space-y-1.5">
+        {v.quests.map((q) => (
+          <li key={q.id} className="border-2 border-ink/20 px-1.5 py-1 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="flex-1 font-bold">
+                {q.completed ? '✓ ' : ''}
+                {q.text}
+              </span>
+              <span className="text-xs">
+                {q.progress.toLocaleString()}/{q.goal.toLocaleString()}
+              </span>
+            </div>
+            <div className="mt-0.5 h-2 overflow-hidden rounded bg-parchment-3">
+              <div className="h-full bg-leaf" style={{ width: `${(100 * q.progress) / q.goal}%` }} />
+            </div>
+            <div className="mt-0.5 flex items-center gap-2 text-xs text-wood-dark/80">
+              <span className="flex-1">
+                You: {q.mine.toLocaleString()} · Reward ◉ {q.reward.gold.toLocaleString()} + {q.reward.xp.toLocaleString()} XP
+              </span>
+              {q.completed && q.mine > 0 && !q.claimed && (
+                <button className="px-btn gold-btn small" onClick={async () => setV((await client.guildQuestClaim(q.id)) ?? v)} data-testid={`guild-claim-${q.id}`}>
+                  Collect
+                </button>
+              )}
+              {q.claimed && <span className="font-bold text-leaf-dark">Collected</span>}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

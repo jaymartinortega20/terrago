@@ -21,3 +21,4 @@ export * from './companions';
 export * from './weight';
 export * from './affixes';
 export * from './pathfind';
+export * from './worldBoss';

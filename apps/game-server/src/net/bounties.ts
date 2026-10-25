@@ -5,6 +5,8 @@ import { GameError, withTransaction } from '../db';
 import { grantKillRewards } from '../services/equipment';
 import type { Player } from '../world/player';
 import { applyDelta, npcService, pushInventory, type GameplayDeps } from './gameplay';
+import { guildQuestEvent } from './guildQuests';
+import { queue } from './journal';
 
 /**
  * Bounty board: three hunting contracts a day (Easy / Normal / Hard), picked
@@ -155,6 +157,7 @@ export const bounties = {
     applyDelta(deps.world, p, res.delta);
     const rt = deps.world.runtimeOf(p);
     for (const o of res.overflow) deps.world.addDrop(rt, p.x, p.y, o.itemId, o.quantity, p.id);
+    queue(deps, p, () => guildQuestEvent(deps, p, 'bounty', 1));
     return { board: await board(deps, p), message: `Bounty complete: +${reward.gold.toLocaleString()} Gold, +${reward.xp.toLocaleString()} XP` };
   },
 };

@@ -4,7 +4,7 @@ import { createServer, type Server as HttpServer } from 'node:http';
 import { performance } from 'node:perf_hooks';
 import { runMigrations } from '@terrago/database';
 import { BALANCE, validateGameData } from '@terrago/game-data';
-import { SIM, setEventOverride, setWeatherOverride } from '@terrago/shared';
+import { SIM, setEventOverride, setWeatherOverride, setWorldBossOverride } from '@terrago/shared';
 import { TicketStore } from './auth/tickets';
 import type { Config } from './config';
 import { createPool, type Pool } from './db';
@@ -44,6 +44,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
 
   setWeatherOverride(config.weatherOverride ?? null);
   setEventOverride(config.events);
+  if (config.events === 'off') setWorldBossOverride('off');
   const pool = createPool(config.databaseUrl, config.dbPoolMax);
   pool.on('error', (err) => log.error('db_pool_error', { err }));
   if (config.migrateOnStart) {

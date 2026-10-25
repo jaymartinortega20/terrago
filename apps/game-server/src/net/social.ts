@@ -13,6 +13,9 @@ import {
   type PartyView,
   type PlayerProfile,
   EMOTES,
+  PARTY_ACTIVITIES,
+  type PartyActivity,
+  type PartyListing,
 } from '@terrago/shared';
 import { GameError } from '../db';
 import * as db from '../services/social';
@@ -148,6 +151,81 @@ export function partyKick(deps: GameplayDeps, p: Player, id: unknown): null {
   system(q, 'You were removed from the party.');
   return null;
 }
+
+// ---------------------------------------------------------------------------
+// Party finder: "looking for members" posts anyone can join directly
+// ---------------------------------------------------------------------------
+
+const listings = new Map<string, { activity: PartyActivity; note: string; minLevel: number; createdAt: number }>();
+const LISTING_MS = 60 * 60_000;
+
+function listingFor(deps: GameplayDeps, leaderId: string): PartyListing | null {
+  const l = listings.get(leaderId);
+  const p = deps.world.players.get(leaderId);
+  // Stale posts disappear: poster gone, no longer leading, party full, or an hour old.
+  if (!l || !p?.conn || (p.party && p.party.leaderId !== p.id) || (p.party?.members.length ?? 1) >= PARTY_MAX || Date.now() - l.createdAt > LISTING_MS) {
+    listings.delete(leaderId);
+    return null;
+  }
+  return {
+    leaderId,
+    leaderName: p.name,
+    classId: p.rec.classId,
+    level: p.rec.level,
+    activity: l.activity,
+    note: l.note,
+    minLevel: l.minLevel,
+    members: p.party?.members.length ?? 1,
+    mapId: p.mapId,
+    createdAt: l.createdAt,
+  };
+}
+
+export const partyFinder = {
+  list(deps: GameplayDeps, p: Player): { listings: PartyListing[]; mine: PartyListing | null } {
+    const all = [...listings.keys()].map((id) => listingFor(deps, id)).filter((x): x is PartyListing => !!x);
+    // Ones you can join first, then by how close the leader's level is to yours.
+    all.sort((a, b) => Number(b.minLevel <= p.rec.level) - Number(a.minLevel <= p.rec.level) || Math.abs(a.level - p.rec.level) - Math.abs(b.level - p.rec.level));
+    return { listings: all.filter((l) => l.leaderId !== p.id).slice(0, 40), mine: all.find((l) => l.leaderId === p.id) ?? null };
+  },
+  post(deps: GameplayDeps, p: Player, req: unknown): { message: string } {
+    const r = (req ?? {}) as { activity?: unknown; note?: unknown; minLevel?: unknown };
+    const activity = PARTY_ACTIVITIES.find((a) => a === r.activity);
+    if (!activity) throw new GameError('Pick what you want to do.');
+    if (p.party && p.party.leaderId !== p.id) throw new GameError('Only the party leader can post.');
+    if ((p.party?.members.length ?? 1) >= PARTY_MAX) throw new GameError('Your party is already full.');
+    const note = maskProfanity(sanitizeChatText(r.note ?? '', 80) ?? '');
+    const minLevel = Number.isInteger(r.minLevel) ? Math.max(1, Math.min(100, r.minLevel as number)) : 1;
+    listings.set(p.id, { activity, note, minLevel, createdAt: Date.now() });
+    return { message: 'Posted on the party finder. Players can join you directly.' };
+  },
+  unpost(p: Player): null {
+    listings.delete(p.id);
+    return null;
+  },
+  join(deps: GameplayDeps, p: Player, leaderId: unknown): { message: string } {
+    if (typeof leaderId !== 'string') throw new GameError('That party is gone.');
+    const l = listingFor(deps, leaderId);
+    const leader = deps.world.players.get(leaderId);
+    if (!l || !leader || leader === p) throw new GameError('That party is gone.');
+    if (p.party) throw new GameError('Leave your current party first.');
+    if (p.rec.level < l.minLevel) throw new GameError(`They're looking for level ${l.minLevel}+.`);
+    if (leader.blocked.get(p.id) === 'block') throw new GameError('That party is gone.');
+    let party = leader.party;
+    if (!party) {
+      party = { id: randomUUID(), leaderId: leader.id, members: [leader] };
+      leader.party = party;
+      parties.add(party);
+      ensurePartyTimer();
+    }
+    party.members.push(p);
+    p.party = party;
+    for (const m of party.members) system(m, `${p.name} joined the party (party finder).`);
+    pushParty(party);
+    if (party.members.length >= PARTY_MAX) listings.delete(leader.id);
+    return { message: `You joined ${leader.name}'s party.` };
+  },
+};
 
 // ---------------------------------------------------------------------------
 // Invites (party, friend, guild)
@@ -530,6 +608,7 @@ export async function onJoin(deps: GameplayDeps, p: Player, fresh: boolean): Pro
 /** Leaving the world for good: leave the party, tell friends. */
 export function onLeave(deps: GameplayDeps, p: Player): void {
   p.stall = null;
+  listings.delete(p.id);
   if (p.party) removeFromParty(p, `${p.name} went offline and left the party.`);
   for (const id of p.friendIds) {
     const q = deps.world.players.get(id);

@@ -187,6 +187,8 @@ export interface MonsterDef {
   art: { shape: string; color: string; size: number };
   respawnMs: number;
   boss?: boolean;
+  /** A world boss: scheduled, server-wide, rewards everyone who fought it. */
+  worldBoss?: boolean;
   /** Boss mechanics. */
   abilities?: BossAbility[];
   /**

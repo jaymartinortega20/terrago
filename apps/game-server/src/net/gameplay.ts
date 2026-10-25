@@ -28,6 +28,7 @@ import {
   weatherAt,
   eventMult,
   affixText,
+  worldBossBonus,
 } from '@terrago/shared';
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
@@ -529,7 +530,19 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
   return {
     partyOf,
     onKill: (rewards) => {
+      const wb = rewards[0]?.monster.def.worldBoss ? rewards[0].monster : null;
+      if (wb) {
+        const top = [...new Map(rewards.map((r) => [r.player.id, r])).values()].sort((a, b) => (a.dmgRank ?? 99) - (b.dmgRank ?? 99)).slice(0, 3);
+        deps().world.announce(`⚔ ${wb.def.name} has fallen! Top damage: ${top.map((r, i) => `${i + 1}. ${r.player.name} (${Math.round((r.dmgShare ?? 0) * 100)}%)`).join('  ')}`);
+        deps().log.info('world_boss_killed', { boss: wb.def.id, fighters: rewards.length });
+      }
       for (const r of rewards) {
+        if (wb) {
+          // Everyone who fought gets their loot; the top three get a little more.
+          const bonus = worldBossBonus(r.dmgRank ?? 99, wb.level);
+          r.gold += bonus.gold;
+          r.items.push(...bonus.items);
+        }
         const d = deps();
         const rt = d.world.runtimeOf(r.player);
         void r.player
@@ -550,7 +563,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
             if (r.monster.def.boss) progressEvent(d, r.player, 'boss', r.monster.def.id);
             // Remember every boss a character helped defeat (e.g. Gnarlfang unlocks the Job Trainer).
             if (r.monster.def.boss) await d.pool.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [r.player.id, `slain:${r.monster.def.id}`]);
-            if (r.monster.def.boss && (r.gold || r.items.length)) {
+            if (r.monster.def.boss && !r.monster.def.worldBoss && (r.gold || r.items.length)) {
               // Boss loot once per day per character (XP always).
               const day = new Date().toISOString().slice(0, 10);
               const fresh = await d.pool.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [r.player.id, `boss:${r.monster.def.id}:${r.difficulty && r.difficulty !== 'normal' ? `${r.difficulty}:` : ''}${day}`]);

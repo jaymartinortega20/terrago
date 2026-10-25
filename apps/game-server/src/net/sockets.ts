@@ -31,6 +31,7 @@ import { loadCompanions, pets, stable, syncCompanion, toggleMount } from './comp
 import * as social from './social';
 import * as journal from './journal';
 import { bounties } from './bounties';
+import { claimGuildQuest, guildQuestsView } from './guildQuests';
 import * as eco from './economy';
 import { antibot } from '../security/antibot';
 import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
@@ -428,6 +429,12 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('daily:task', (id, ack) => serial(ack, () => journal.claimTask(g, p, id)));
     socket.on('leaderboard:get', (id, ack) => respond(ack, () => journal.leaderboard(g, p, id)));
     socket.on('party:invite', (id, ack) => respond(ack, () => social.partyInvite(g, p, id)));
+    socket.on('party:listings', (ack) => respond(ack, () => social.partyFinder.list(g, p)));
+    socket.on('party:post', (req, ack) => respond(ack, () => social.partyFinder.post(g, p, req)));
+    socket.on('party:unpost', (ack) => respond(ack, () => social.partyFinder.unpost(p)));
+    socket.on('party:join', (id, ack) => respond(ack, () => social.partyFinder.join(g, p, id)));
+    socket.on('guild:quests', (ack) => respond(ack, () => guildQuestsView(g, p)));
+    socket.on('guild:questClaim', (id, ack) => serial(ack, () => claimGuildQuest(g, p, id)));
     socket.on('party:leave', (ack) => respond(ack, () => social.partyLeave(p)));
     socket.on('party:kick', (id, ack) => respond(ack, () => social.partyKick(g, p, id)));
     socket.on('invite:respond', (req, ack) => serial(ack, () => social.respondInvite(g, p, req)));

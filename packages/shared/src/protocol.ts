@@ -1,4 +1,6 @@
 import type {
+  GuildQuestsView,
+  PartyListing,
   BountyBoard,
   ChatMessage,
   DialogueResult,
@@ -242,6 +244,12 @@ export interface ClientToServerEvents {
   'trade:confirm': (ack: Ack<{ message: string } | null>) => void;
   'trade:cancel': () => void;
   'party:invite': (playerId: string, ack: Ack<{ message: string }>) => void;
+  'party:listings': (ack: Ack<{ listings: PartyListing[]; mine: PartyListing | null }>) => void;
+  'party:post': (req: { activity: string; note?: string; minLevel?: number }, ack: Ack<{ message: string }>) => void;
+  'party:unpost': (ack: Ack<null>) => void;
+  'party:join': (leaderId: string, ack: Ack<{ message: string }>) => void;
+  'guild:quests': (ack: Ack<GuildQuestsView>) => void;
+  'guild:questClaim': (questId: string, ack: Ack<{ view: GuildQuestsView; message: string }>) => void;
   'party:leave': (ack: Ack<null>) => void;
   'party:kick': (playerId: string, ack: Ack<null>) => void;
   'invite:respond': (req: { kind: InviteKind; fromId: string; accept: boolean }, ack: Ack<{ message: string } | null>) => void;

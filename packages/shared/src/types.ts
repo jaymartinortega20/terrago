@@ -490,6 +490,25 @@ export interface PartyView {
   members: PartyMember[];
 }
 
+export const PARTY_ACTIVITIES = ['Leveling', 'Questing', 'Bounties', 'Dungeon', 'World boss', 'Raid', 'Farming & gathering'] as const;
+export type PartyActivity = (typeof PARTY_ACTIVITIES)[number];
+
+/** A "looking for members" post on the party finder. */
+export interface PartyListing {
+  /** The poster (party leader). */
+  leaderId: string;
+  leaderName: string;
+  classId: string;
+  level: number;
+  activity: PartyActivity;
+  note: string;
+  /** Level range wanted. */
+  minLevel: number;
+  members: number;
+  mapId: string;
+  createdAt: number;
+}
+
 export interface FriendEntry {
   id: string;
   name: string;
@@ -711,4 +730,61 @@ export interface BountyBoard {
   bounties: BountyView[];
   /** When a fresh set is posted (UTC midnight). */
   resetsAt: number;
+}
+
+// ---------------------------------------------------------------------------
+// Guild quests
+// ---------------------------------------------------------------------------
+
+export type GuildQuestEvent = 'kill' | 'gather' | 'fish' | 'harvest' | 'craft' | 'boss' | 'bounty';
+
+export interface GuildQuestDef {
+  id: string;
+  text: string;
+  event: GuildQuestEvent;
+  goal: number;
+}
+
+/** Weekly goals the whole guild works on together. Three are picked per guild each week. */
+export const GUILD_QUESTS: GuildQuestDef[] = [
+  { id: 'gq_hunt', text: 'Defeat 1,500 monsters', event: 'kill', goal: 1500 },
+  { id: 'gq_gather', text: 'Gather 800 ore, wood and herbs', event: 'gather', goal: 800 },
+  { id: 'gq_fish', text: 'Catch 300 fish', event: 'fish', goal: 300 },
+  { id: 'gq_harvest', text: 'Harvest 600 crops', event: 'harvest', goal: 600 },
+  { id: 'gq_craft', text: 'Craft 250 items', event: 'craft', goal: 250 },
+  { id: 'gq_boss', text: 'Defeat 15 bosses', event: 'boss', goal: 15 },
+  { id: 'gq_bounty', text: 'Hand in 30 bounties', event: 'bounty', goal: 30 },
+];
+
+/** Gold added to the guild treasury when a guild quest is completed. */
+export const GUILD_QUEST_TREASURY = 5000;
+
+export interface GuildQuestView {
+  id: string;
+  text: string;
+  goal: number;
+  progress: number;
+  completed: boolean;
+  /** How much you helped, and whether you've collected your share. */
+  mine: number;
+  claimed: boolean;
+  reward: { gold: number; xp: number };
+}
+
+export interface GuildQuestsView {
+  week: string;
+  resetsAt: number;
+  quests: GuildQuestView[];
+}
+
+/** Monday (UTC) of the week `now` falls in, as YYYY-MM-DD. */
+export function guildWeek(now: number): string {
+  const d = new Date(now);
+  const day = (d.getUTCDay() + 6) % 7; // Monday = 0
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - day)).toISOString().slice(0, 10);
+}
+
+/** Each helper's reward for a completed guild quest. */
+export function guildQuestReward(level: number): { gold: number; xp: number } {
+  return { gold: 300 + level * 40, xp: Math.round(level * level * 6 + 400) };
 }

@@ -640,6 +640,50 @@ export class GameClient {
     return this.ui.get().self?.speed ?? 1;
   }
 
+  partyListings(): Promise<{ listings: import('@terrago/shared').PartyListing[]; mine: import('@terrago/shared').PartyListing | null }> {
+    return this.request('party:listings');
+  }
+
+  /** Party finder / guild quest actions: show the result as a notice; true on success. */
+  private async tryAct(event: string, ...args: unknown[]): Promise<boolean> {
+    try {
+      const r = await this.request<{ message?: string } | null>(event, ...args);
+      if (r?.message) pushNotice(this.ui, 'success', r.message, 2500);
+      return true;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return false;
+    }
+  }
+
+  partyPost(activity: string, note: string, minLevel: number): Promise<boolean> {
+    return this.tryAct('party:post', { activity, note, minLevel });
+  }
+
+  partyUnpost(): Promise<boolean> {
+    return this.tryAct('party:unpost');
+  }
+
+  partyJoin(leaderId: string): Promise<boolean> {
+    return this.tryAct('party:join', leaderId);
+  }
+
+  guildQuests(): Promise<import('@terrago/shared').GuildQuestsView> {
+    return this.request('guild:quests');
+  }
+
+  async guildQuestClaim(id: string): Promise<import('@terrago/shared').GuildQuestsView | null> {
+    try {
+      const r = await this.request<{ view: import('@terrago/shared').GuildQuestsView; message: string }>('guild:questClaim', id);
+      audio.sfx('achievement');
+      pushNotice(this.ui, 'success', r.message, 3000);
+      return r.view;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
+  }
+
   bountyBoard(npcId: string): Promise<import('@terrago/shared').BountyBoard> {
     return this.request('bounty:board', npcId);
   }

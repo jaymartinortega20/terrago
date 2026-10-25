@@ -11,6 +11,7 @@ import {
 } from '@terrago/shared';
 import { GameError, withTransaction } from '../db';
 import { grantKillRewards } from '../services/equipment';
+import { guildQuestEvent } from './guildQuests';
 import type { Player } from '../world/player';
 import { applyDelta, pushInventory, type GameplayDeps } from './gameplay';
 
@@ -23,7 +24,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 const chains = new WeakMap<Player, Promise<unknown>>();
 
 /** Run per-player progress work in order, off the hot path. */
-function queue(deps: GameplayDeps, p: Player, work: () => Promise<void>): void {
+export function queue(deps: GameplayDeps, p: Player, work: () => Promise<void>): void {
   const next = (chains.get(p) ?? Promise.resolve()).then(work, work).catch((err) => deps.log.error('progress_failed', { err }));
   chains.set(p, next);
 }
@@ -77,6 +78,7 @@ export function progressEvent(deps: GameplayDeps, p: Player, type: QuestStepType
   const key = counter[type];
   if (key) track(deps, p, key, n);
   if (type === 'visit' && target?.startsWith('dg_')) track(deps, p, 'dungeon_runs');
+  if (p.guild && (type === 'kill' || type === 'gather' || type === 'fish' || type === 'harvest' || type === 'craft' || type === 'boss')) queue(deps, p, () => guildQuestEvent(deps, p, type, n));
   const tasks = tasksFor(p.id, p.rec.level).filter((t) => t.event === type && (!t.target || t.target === target));
   if (!tasks.length) return;
   queue(deps, p, async () => {

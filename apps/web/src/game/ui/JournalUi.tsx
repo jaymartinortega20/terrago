@@ -6,7 +6,7 @@ import { LEADERBOARDS, LOGIN_REWARDS, dailyTaskReward, formatDuration, type Lead
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { Window } from './Window';
-import { EventBadge } from './Atmosphere';
+import { EventBadge, WorldBossBadge } from './Atmosphere';
 
 const BOARD_LABEL: Record<LeaderboardId, string> = {
   level: 'Level',
@@ -59,6 +59,7 @@ export function JournalPanel({ client, onClose }: { client: GameClient; onClose:
           </div>
           <div className="mt-2">
             <EventBadge client={client} />
+            <WorldBossBadge client={client} />
           </div>
           <p className="mt-3 font-bold">Today&apos;s tasks</p>
           <p className="text-xs text-wood-dark/70">

@@ -125,6 +125,9 @@ export interface KillReward {
   gold: number;
   items: { itemId: string; quantity: number }[];
   monster: Monster;
+  /** World bosses: place in the damage ranking and share of the damage. */
+  dmgRank?: number;
+  dmgShare?: number;
 }
 
 export interface CombatHooks {
@@ -740,6 +743,15 @@ export class Combat {
       }
     }
     if (rt.def.dungeon) for (const r of rewards) r.difficulty = difficultyOf(rt.owner?.id).id;
+    if (m.def.worldBoss) {
+      // Rank everyone by their own damage (for the bonus and the server-wide shout-out).
+      const ranked = [...contributors].sort((a, b) => b.d - a.d);
+      for (const r of rewards) {
+        const i = ranked.findIndex((c) => c.p === r.player);
+        r.dmgRank = i >= 0 ? i + 1 : ranked.length + 1;
+        r.dmgShare = i >= 0 ? ranked[i]!.d / total : 0;
+      }
+    }
     this.hooks.onKill?.(rewards);
   }
 
