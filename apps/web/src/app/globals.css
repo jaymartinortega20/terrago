@@ -219,3 +219,109 @@ img.pixel {
 .mounted-pulse {
   animation: mounted-pulse 1.6s ease-in-out infinite;
 }
+
+@layer components {
+/* ---------------------------------------------------------------------------
+   Ornate HUD: round gold-rimmed buttons with a teal glass core and gem studs.
+   --------------------------------------------------------------------------- */
+.orb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: #fff;
+  background: radial-gradient(circle at 35% 28%, #4fe0e6 0%, #167a88 38%, #0a3a48 70%, #052028 100%);
+  box-shadow:
+    0 0 0 2px #2a1a08,
+    0 0 0 4px #e8c060,
+    0 0 0 6px #7a4e18,
+    0 0 0 7px #2a1a08,
+    inset 0 -6px 14px rgba(0, 0, 0, 0.55),
+    inset 0 4px 8px rgba(255, 255, 255, 0.18),
+    0 6px 14px rgba(0, 0, 0, 0.6);
+  transition: transform 0.08s, filter 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.orb:hover { filter: brightness(1.12); }
+.orb:active { transform: scale(0.93); }
+.orb.studs::before,
+.orb.studs::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #8ff6ff, #1aa8c0);
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 1.5px #2a1a08, 0 0 6px #6ff0ff;
+  pointer-events: none;
+}
+.orb.studs::before { top: -8px; }
+.orb.studs::after { bottom: -8px; }
+.orb-dark { background: radial-gradient(circle at 35% 28%, #3a5a78 0%, #1a2c44 45%, #0a1424 100%); }
+.orb-red { background: radial-gradient(circle at 35% 28%, #ff8a6a 0%, #a8302a 45%, #4a0e10 100%); }
+.orb-gold { background: radial-gradient(circle at 35% 28%, #fff1a8 0%, #d9a030 45%, #5a3a08 100%); }
+.orb-on { box-shadow: 0 0 0 2px #2a1a08, 0 0 0 4px #ffd56a, 0 0 0 6px #7a4e18, 0 0 22px 6px rgba(80, 230, 255, 0.7), inset 0 -6px 14px rgba(0, 0, 0, 0.55); }
+.orb-disabled { filter: grayscale(0.8) brightness(0.6); }
+.orb svg, .orb img { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6)); }
+.orb-key {
+  position: absolute;
+  top: -10px;
+  left: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #10161e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px #e8c060;
+  z-index: 2;
+  pointer-events: none;
+}
+.orb-cd {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: conic-gradient(rgba(0, 0, 0, 0.7) var(--p), rgba(0, 0, 0, 0) 0);
+  pointer-events: none;
+}
+.orb-num {
+  position: absolute;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 2px 0 #000, 0 0 4px #000, 0 0 4px #000;
+  pointer-events: none;
+}
+.orb-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 2px 0 #000, 0 0 4px #000;
+  pointer-events: none;
+}
+.hud-pill {
+  background: rgba(8, 14, 22, 0.8);
+  border-radius: 12px;
+  color: #e8f4ff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.hud-bar {
+  height: 7px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+.hud-bar > span { display: block; height: 100%; border-radius: 9999px; transition: width 0.25s; }
+
+}

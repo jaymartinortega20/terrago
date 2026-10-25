@@ -1,5 +1,6 @@
 'use client';
 
+import { HudIcon } from './ui/HudIcons';
 import { StablePanel } from './ui/StableUi';
 import { PetPanel } from './ui/PetUi';
 import Phaser from 'phaser';
@@ -181,6 +182,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
 
   return (
     <div className="pointer-events-none absolute inset-0 text-parchment">
+      {/* A soft vignette frames the scene (decoration only). */}
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(2,8,16,0.35) 85%, rgba(2,6,12,0.6) 100%)' }} aria-hidden />
       {/* Top-left: status */}
       <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
         <Hud client={client} compact={touch} />
@@ -194,7 +197,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
 
       {/* Top-right: location + menu */}
       <div className="absolute top-2 right-2 z-30 flex flex-col items-end gap-2">
-        <div className={`px-panel-dark pointer-events-auto px-3 py-1 text-right text-xs ${touch ? "max-w-[44vw] truncate px-2" : ""}`} data-testid="location">
+        <div className={`hud-pill pointer-events-auto px-3 py-1 text-right text-xs ${touch ? "max-w-[44vw] truncate px-2" : ""}`} data-testid="location">
           <span className="font-bold text-gold">{mapName}</span>
           {!touch && (
             <span className="ml-2 text-parchment/70">
@@ -207,12 +210,12 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         </div>
         {!touch && <EventBadge client={client} />}
         {touch && (
-          <button className="px-btn ghost small pointer-events-auto" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} data-testid="menu-toggle">
-            ☰ Menu
+          <button className="orb studs pointer-events-auto h-11 w-11" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} aria-label="Menu" data-testid="menu-toggle">
+            <HudIcon name="menu" size={22} />
           </button>
         )}
         <nav
-          className={`pointer-events-auto flex justify-end gap-1 ${touch ? (menuOpen ? 'max-w-[45vw] flex-wrap' : 'hidden') : 'max-w-[60vw] flex-wrap'}`}
+          className={`pointer-events-auto flex justify-end gap-x-3.5 gap-y-4 pt-1.5 pr-1.5 ${touch ? (menuOpen ? 'max-w-[56vw] flex-wrap' : 'hidden') : 'max-w-[64vw] flex-wrap'}`}
           aria-label="Game menu"
         >
           {MENU.filter((m) => !touch || !m.version).map((m) => (
@@ -220,16 +223,15 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
               key={m.id}
               disabled={!!m.version}
               title={m.version ? `${m.label} — arrives in ${m.version}` : `${m.label} (${m.key})`}
+              aria-label={m.label}
               onClick={() => {
                 open(m.id as Panel);
                 setMenuOpen(false);
               }}
-              className={`border-2 border-ink px-1.5 py-0.5 text-[11px] font-bold ${
-                m.version ? 'cursor-not-allowed bg-night-2/80 text-parchment/35' : panel === m.id ? 'bg-gold text-ink' : 'bg-night-3/90 text-parchment hover:bg-wood'
-              }`}
+              className={`orb pointer-events-auto ${touch ? 'h-10 w-10' : 'h-11 w-11'} ${m.version ? 'orb-disabled' : panel === m.id ? 'orb-on' : ''}`}
               data-testid={`menu-${m.id}`}
             >
-              {m.label}
+              <HudIcon name={m.id} size={touch ? 20 : 22} />
             </button>
           ))}
         </nav>
@@ -299,7 +301,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         )}
       </div>
       <div
-        className={`px-panel-dark pointer-events-auto absolute left-1/2 flex -translate-x-1/2 gap-1 p-1 ${touch ? 'bottom-2 max-[560px]:hidden' : 'bottom-2'}`}
+        className={`hud-pill pointer-events-auto absolute left-1/2 flex -translate-x-1/2 gap-1 p-1 ${touch ? 'bottom-2 max-[560px]:hidden' : 'bottom-2'}`}
         data-testid="hotbar"
       >
         {Array.from({ length: touch ? 5 : 9 }, (_, i) => (
@@ -307,11 +309,12 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         ))}
       </div>
       {!touch && (
-        <div className="absolute bottom-2 left-1/2 ml-[214px]">
+        <div className="absolute right-3 bottom-2 flex items-end gap-2.5">
           <SkillBar client={client} />
+          <DesktopCombatOrbs client={client} />
         </div>
       )}
-      <div className={`absolute left-2 ${touch ? 'top-[82px]' : 'bottom-2'}`}>
+      <div className={`absolute left-2 ${touch ? 'top-[112px]' : 'bottom-2'}`}>
         <ChatBox client={client} compact={touch} />
         <EmoteMenu client={client} />
       </div>
@@ -349,6 +352,25 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Desktop: AUTO toggle and the attack button next to the skill bar. */
+function DesktopCombatOrbs({ client }: { client: GameClient }) {
+  const auto = useStore(client.ui, (s) => s.autoHunt);
+  return (
+    <div className="pointer-events-auto flex items-end gap-3 pb-1">
+      <button className={`orb studs h-11 w-11 ${auto ? 'orb-on' : 'orb-dark'}`} onClick={() => client.setAutoHunt(!auto)} title="AUTO: keep fighting monsters in reach" aria-label="Auto attack" aria-pressed={auto} data-testid="auto-button">
+        <HudIcon name="auto" size={22} />
+        <span className="orb-label -bottom-[16px] text-[9px]" style={{ color: auto ? '#8ff6ff' : '#fff' }}>
+          AUTO
+        </span>
+      </button>
+      <button className="orb orb-red studs h-14 w-14" onClick={() => client.attackKey()} title="Attack (F)" aria-label="Attack" data-testid="attack-button">
+        <HudIcon name="attack" size={30} />
+        <span className="orb-key">F</span>
+      </button>
     </div>
   );
 }

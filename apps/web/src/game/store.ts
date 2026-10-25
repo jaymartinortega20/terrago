@@ -111,6 +111,8 @@ export interface UiState {
   fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
   /** Your active companion's growth and health. */
   pet: import('@terrago/shared').PetView | null;
+  /** AUTO: keep fighting whatever monster is in reach. */
+  autoHunt: boolean;
 }
 
 export const initialUi: UiState = {
@@ -139,6 +141,7 @@ export const initialUi: UiState = {
   station: null,
   fishing: null,
   pet: null,
+  autoHunt: false,
   targetId: null,
   autoAttack: false,
   effects: [],

@@ -800,7 +800,15 @@ export class GameClient {
 
   /** Auto-attack while engaged and in range (the server checks everything again). */
   private combatStep(): void {
-    const ui = this.ui.get();
+    let ui = this.ui.get();
+    // AUTO: pick the nearest monster within reach when idle.
+    if (ui.autoHunt && !(ui.autoAttack && ui.targetId && this.monsters.has(ui.targetId)) && (ui.self?.hp ?? 0) > 0) {
+      const m = this.nearestMonster(Math.max(3, this.weaponRange() + 1.5));
+      if (m) {
+        this.setTarget(m.info.id, true);
+        ui = this.ui.get();
+      }
+    }
     if (!ui.autoAttack || !ui.targetId || this.attackInFlight) return;
     const m = this.monsters.get(ui.targetId) ?? (ui.duel?.id === ui.targetId ? this.remotes.get(ui.targetId) : undefined);
     if (!m) return this.setTarget(null);
@@ -818,6 +826,11 @@ export class GameClient {
         if (/No target|No fighting/.test(res.error)) this.setTarget(null);
       }
     });
+  }
+
+  setAutoHunt(on: boolean): void {
+    this.ui.set({ autoHunt: on });
+    pushNotice(this.ui, 'info', on ? 'AUTO on: fighting monsters in reach.' : 'AUTO off.', 1500);
   }
 
   weaponRange(): number {

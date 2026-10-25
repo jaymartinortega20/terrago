@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { QUESTS, getCrop, getItem, getJob, getMap, getMonster, getNode, getQuest } from '@terrago/game-data';
+import { QUESTS, getCrop, getItem, getJob, getMap, getMonster, getNode, getQuest, getSkillDef } from '@terrago/game-data';
+import { SPELL, SpellFx, type SpellColors } from '../fx/SpellFx';
 import { itemIcon } from '../art/world';
 import { audio, trackFor } from '../audio';
 import { CombatFx, FIRE_PAL, HOLY_PAL, ICE_PAL, MAGIC_PAL, MONSTER_PAL, POISON_PAL, paletteFor, type WeaponType } from '../fx/CombatFx';
@@ -126,9 +127,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private fx!: CombatFx;
+  private spell!: SpellFx;
 
   create(): void {
     this.fx = new CombatFx(this, LABEL_DEPTH - 8); // above the night overlay, below names
+    this.spell = new SpellFx(this, LABEL_DEPTH - 8, LABEL_FONT);
     const kb = this.input.keyboard!;
     // No key capture: chat inputs must still receive W/A/S/D and Space.
     kb.disableGlobalCapture();
@@ -839,6 +842,7 @@ export class WorldScene extends Phaser.Scene {
       if (e.k === 'death') continue;
       try {
         this.attackFx(e, opts);
+        this.spellFxFor(e, opts);
       } catch (err) {
         // Effects are decoration; never let them break the game.
         console.warn('[fx]', err);
@@ -846,15 +850,15 @@ export class WorldScene extends Phaser.Scene {
       if (e.k === 'cast') continue;
       const mine = e.t === me;
       if (opts.numbers) {
-        const text = e.k === 'miss' ? 'miss' : e.k === 'heal' ? `+${e.a}` : `${e.a}`;
-        const color = e.k === 'heal' ? '#7cf06a' : e.k === 'miss' ? '#c8c8c8' : mine ? '#ff6a5a' : e.k === 'crit' ? '#ffb02e' : e.k === 'dot' ? '#b6f06a' : '#ffffff';
-        const size = e.k === 'crit' ? '18px' : '14px';
-        const t = this.add
-          .text(pos.x + (Math.random() * 16 - 8), pos.y - pos.h - 4, e.k === 'crit' ? `${text}!` : text, { fontFamily: LABEL_FONT, fontSize: size, color, stroke: '#2a2030', strokeThickness: 4 })
-          .setOrigin(0.5, 1)
-          .setResolution(2)
-          .setDepth(LABEL_DEPTH + 30);
-        this.tweens.add({ targets: t, y: t.y - 26, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => t.destroy() });
+        const pet = e.sk === 'pet' || e.sk === 'hawk';
+        const kind =
+          e.k === 'miss' ? 'miss'
+          : e.k === 'heal' ? 'heal'
+          : e.k === 'dot' ? 'dot'
+          : mine ? 'taken'
+          : e.s === me ? (e.k === 'crit' ? 'crit' : 'hit')
+          : 'other';
+        this.spell.number(e.t, pos, e.a, kind, { pet });
       }
       const mv = this.monsterViews.get(e.t);
       if (mv && (e.k === 'hit' || e.k === 'crit' || e.k === 'dot')) {
@@ -886,6 +890,96 @@ export class WorldScene extends Phaser.Scene {
 
   /** Hide the in-hand weapon while the swing copy is on screen. */
   private swinging = new Map<string, number>();
+
+  /** Spell colours per skill. */
+  private static SKILL_COLOR: Record<string, SpellColors> = {
+    fireball: SPELL.fire, meteor: SPELL.fire, power_strike: SPELL.fire, war_cry: SPELL.blood, bloodlust: SPELL.blood, cleave: SPELL.blood, whirlwind: SPELL.blood,
+    frost_nova: SPELL.frost, arcane_shield: SPELL.arcane, chain_lightning: SPELL.storm,
+    smite: SPELL.holy, holy_light: SPELL.holy, judgment: SPELL.holy, holy_strike: SPELL.holy, blessing: SPELL.holy, sanctuary: SPELL.holy, divine_shield: SPELL.holy, purge: SPELL.holy, heal: SPELL.nature,
+    life_drain: SPELL.shadow, curse: SPELL.shadow,
+    aimed_shot: SPELL.arcane, piercing_arrow: SPELL.arcane, volley: SPELL.nature, arrow_storm: SPELL.nature, hunters_mark: SPELL.fire, poison_blade: SPELL.nature, backstab: SPELL.shadow,
+    falcon_strike: SPELL.storm, blind_blitz: SPELL.storm, hunters_eye: SPELL.storm,
+  };
+
+  /**
+   * The flashy layer on top of the basic attack effects: skill-name callouts,
+   * rune circles under casters, lightning, meteors, pillars of light, splashes.
+   */
+  private spellFxFor(e: CombatEvent, opts: FxSettings): void {
+    if (opts.level === 'off' || e.k === 'dot' || e.k === 'death') return;
+    const full = opts.level === 'full';
+    const sp = this.spell;
+    const from = this.entityPos(e.s);
+    const to = this.entityPos(e.t) ?? from;
+    if (!to) return;
+    const chest = (s: { x: number; y: number; h: number }) => ({ x: s.x, y: s.y - s.h * 0.5 });
+    const sk = e.sk && e.sk !== 'pet' && e.sk !== 'hawk' && e.sk !== 'petguard' ? getSkillDef(e.sk) : undefined;
+    if (!sk) {
+      // Plain staff / wand bolts from players land in a swirling splash.
+      if (from && e.k !== 'miss' && e.k !== 'heal' && full) {
+        const w = this.weaponOf(e.s);
+        if (w && (w.type === 'staff' || w.type === 'wand')) this.time.delayedCall(240, () => sp.vortex(chest(to), e.k === 'crit' ? SPELL.frost : SPELL.arcane, e.k === 'crit' ? 1.3 : 0.8));
+      }
+      return;
+    }
+    const c = WorldScene.SKILL_COLOR[sk.id] ?? (sk.magic ? SPELL.arcane : SPELL.blood);
+    if (from && (e.k === 'cast' || sk.kind === 'attack' || sk.kind === 'heal' || sk.kind === 'debuff')) sp.callout(e.s, from, `${sk.name}!`, c);
+    const T = TILE_SIZE;
+    if (e.k === 'cast') {
+      if (!from) return;
+      switch (sk.id) {
+        case 'frost_nova':
+          return sp.iceSpikes(from, 2.2 * T);
+        case 'meteor':
+          sp.magicCircle(from, c, 30, 700);
+          return sp.meteor(to, 2.2 * T);
+        case 'cleave':
+          return sp.bigSlash(from, c, 2 * T * 0.75);
+        case 'war_cry':
+        case 'bloodlust':
+          sp.magicCircle(from, c, 34, 800);
+          return sp.shockwave(from, c, 2 * T);
+        case 'purge':
+          sp.magicCircle(from, c, 2.2 * T, 800);
+          return sp.shockwave(from, c, 2.2 * T);
+        case 'sanctuary':
+          sp.magicCircle(from, c, 2 * T, 1100);
+          return sp.pillar(from, c, 30);
+        case 'curse':
+          sp.magicCircle(from, c, 26, 600);
+          return sp.hex(to, c);
+        case 'life_drain':
+          return sp.drain(chest(from), chest(to), c);
+        case 'arrow_storm':
+        case 'volley':
+          return sp.magicCircle(to, c, sk.radius ? sk.radius * T : 2 * T, 700);
+        default:
+          if (sk.magic || sk.kind === 'buff') sp.magicCircle(from, c, 30, 800);
+          return;
+      }
+    }
+    if (e.k === 'miss') return;
+    if (from && sk.magic && (sk.kind === 'attack' || sk.kind === 'heal')) sp.magicCircle(from, c, 26, 600);
+    switch (sk.id) {
+      case 'chain_lightning':
+        if (from) sp.lightning(chest(from), chest(to), c, full ? 4 : 1);
+        return;
+      case 'smite':
+      case 'holy_light':
+        return void this.time.delayedCall(80, () => sp.pillar(to, c));
+      case 'judgment':
+      case 'holy_strike':
+        sp.pillar(to, c, 18);
+        return sp.shockwave(to, c, 40);
+      case 'fireball':
+        return void this.time.delayedCall(260, () => sp.vortex(chest(to), c, e.k === 'crit' ? 1.3 : 1));
+      case 'power_strike':
+      case 'piercing_arrow':
+        return sp.shockwave(to, c, e.k === 'crit' ? 50 : 36);
+      case 'heal':
+        return sp.shockwave(to, c, 30);
+    }
+  }
 
   private attackFx(e: CombatEvent, opts: FxSettings): void {
     if (opts.level === 'off') return;

@@ -70,48 +70,61 @@ export function EffectsBar({ client }: { client: GameClient }) {
   const live = effects.filter((e) => e.until > now);
   if (!live.length) return null;
   return (
-    <div className="flex gap-1" data-testid="effects">
-      {live.map((e) => (
-        <span key={e.id} className={`border-2 border-ink px-1 text-[10px] font-bold ${e.id === 'weakness' || e.id === 'poison' ? 'bg-[#6a2a2a] text-[#ffb0a0]' : 'bg-night-3 text-gold'}`}>
-          {e.name} {Math.ceil((e.until - now) / 1000)}s
-        </span>
-      ))}
+    <div className="flex flex-wrap gap-1.5 pl-1" data-testid="effects">
+      {live.map((e) => {
+        const bad = e.id === 'weakness' || e.id === 'poison' || e.id.includes('slow') || e.id.includes('curse');
+        return (
+          <span key={e.id} className="hud-pill flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold" style={{ boxShadow: `0 0 0 1.5px ${bad ? '#ff6a5a' : '#e8c060'}`, color: bad ? '#ffb0a0' : '#ffe9a8' }}>
+            {e.name} {Math.ceil((e.until - now) / 1000)}s
+          </span>
+        );
+      })}
     </div>
   );
 }
 
-export function SkillBar({ client, compact }: { client: GameClient; compact?: boolean }) {
+/** One round skill button: icon, hotkey badge, cooldown sweep and seconds left. */
+export function SkillOrb({ client, index, size = 48, showKey = true }: { client: GameClient; index: number; size?: number; showKey?: boolean }) {
   const self = useStore(client.ui, (s) => s.self);
   const cooldowns = useStore(client.ui, (s) => s.cooldowns);
-  useTick(200);
   if (!self) return null;
-  const skills = skillsFor(self.classId, self.job);
-  const keys = SKILL_KEYS;
+  const sk = skillsFor(self.classId, self.job)[index];
+  if (!sk) return null;
   const res = RESOURCE_LABEL[getClass(self.classId).resource];
   const now = client.serverNow();
+  const cd = Math.max(0, (cooldowns[sk.id] ?? 0) - now);
+  const pct = cd > 0 && sk.cooldownMs ? Math.min(100, (cd / sk.cooldownMs) * 100) : 0;
+  const locked = self.level < sk.level;
+  const short = self.mp < sk.mp;
   return (
-    <div className={`pointer-events-auto flex ${compact ? 'flex-col' : 'px-panel-dark p-1'} gap-1`} data-testid="skill-bar">
-      {skills.map((sk, i) => {
-        const cd = Math.max(0, (cooldowns[sk.id] ?? 0) - now);
-        const locked = self.level < sk.level;
-        const size = compact ? 42 : 40;
-        return (
-          <button
-            key={sk.id}
-            title={`${sk.name} (${keys[i]}) — ${sk.description} ${sk.mp} ${res}`}
-            onClick={() => client.useSkill(i)}
-            className={`relative flex items-center justify-center border-3 border-ink bg-night ${compact ? 'rounded-full' : ''} ${locked ? 'opacity-40' : ''}`}
-            style={{ width: size, height: size, borderWidth: 3 }}
-            aria-label={sk.name}
-            data-testid={`skill-${i}`}
-          >
-            <PixelIcon icon={sk.icon} size={size - 14} />
-            {cd > 0 && <span className="absolute inset-0 flex items-center justify-center bg-night/70 text-xs font-bold text-parchment">{Math.ceil(cd / 1000)}</span>}
-            {!compact && <span className="absolute top-0 left-0.5 text-[9px] text-parchment/60">{keys[i]}</span>}
-            {locked && <span className="absolute right-0 bottom-0 text-[9px] text-parchment/80">L{sk.level}</span>}
-          </button>
-        );
-      })}
+    <button
+      title={`${sk.name} (${SKILL_KEYS[index]}) — ${sk.description} ${sk.mp} ${res}`}
+      onClick={() => client.useSkill(index)}
+      className={`orb pointer-events-auto ${cd > 0 || locked ? 'orb-dark' : ''} ${locked ? 'orb-disabled' : ''}`}
+      style={{ width: size, height: size }}
+      aria-label={sk.name}
+      data-testid={`skill-${index}`}
+    >
+      <PixelIcon icon={sk.icon} size={Math.round(size * 0.62)} />
+      {showKey && <span className="orb-key">{SKILL_KEYS[index]}</span>}
+      {pct > 0 && <span className="orb-cd" style={{ ['--p' as string]: `${pct}%` }} />}
+      {cd > 0 && <span className="orb-num" style={{ fontSize: size * 0.34 }}>{cd < 1000 ? (cd / 1000).toFixed(1) : Math.ceil(cd / 1000)}</span>}
+      {locked && <span className="orb-num bottom-0 text-[10px]">L{sk.level}</span>}
+      {!locked && short && cd <= 0 && <span className="absolute inset-0 rounded-full bg-[#1a2a6a]/45" />}
+    </button>
+  );
+}
+
+export function SkillBar({ client }: { client: GameClient }) {
+  const self = useStore(client.ui, (s) => s.self);
+  useTick(150);
+  if (!self) return null;
+  const skills = skillsFor(self.classId, self.job);
+  return (
+    <div className="pointer-events-auto flex gap-2.5 px-1 pt-3 pb-1" data-testid="skill-bar">
+      {skills.map((sk, i) => (
+        <SkillOrb key={sk.id} client={client} index={i} size={42} />
+      ))}
     </div>
   );
 }

@@ -41,7 +41,9 @@ try {
   await page.locator('[data-testid=character-card]').first().waitFor();
   const id = (await db.query('SELECT id FROM characters WHERE name=$1', [name])).rows[0].id;
   await db.query('UPDATE characters SET level = 40 WHERE id = $1', [id]);
-  await db.query('UPDATE characters SET map_id=$2,pos_x=$3,pos_y=$4 WHERE id=$1', [id, 'greenhaven', 38 * 32 + 16, 14 * 32 + 16]);
+  // Next to Master Aldric in the grove; Gnarlfang already beaten (the job gate).
+  await db.query('UPDATE characters SET map_id=$2,pos_x=$3,pos_y=$4 WHERE id=$1', [id, 'sunfield_plains', 31 * 32 + 16, 95 * 32 + 16]);
+  await db.query(`INSERT INTO character_flags (character_id, flag) VALUES ($1, 'slain:fields_warden') ON CONFLICT DO NOTHING`, [id]);
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online');
   await page.waitForTimeout(800);
