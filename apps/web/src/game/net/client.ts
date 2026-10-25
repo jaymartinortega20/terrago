@@ -1,6 +1,9 @@
 import { io, type Socket } from 'socket.io-client';
 import { DUNGEONS, NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, skillsFor } from '@terrago/game-data';
 import {
+  findPath,
+  inputToward,
+  nextPortal,
   CHAT,
   CODE_DIR,
   INTERACT_RANGE,
@@ -637,6 +640,34 @@ export class GameClient {
     return this.ui.get().self?.speed ?? 1;
   }
 
+  bountyBoard(npcId: string): Promise<import('@terrago/shared').BountyBoard> {
+    return this.request('bounty:board', npcId);
+  }
+
+  async acceptBounty(npcId: string, idx: number): Promise<import('@terrago/shared').BountyBoard | null> {
+    try {
+      const b = await this.request<import('@terrago/shared').BountyBoard>('bounty:accept', { npcId, idx });
+      audio.sfx('open');
+      pushNotice(this.ui, 'success', 'Bounty accepted. Happy hunting!', 2000);
+      return b;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
+  }
+
+  async claimBounty(npcId: string, idx: number): Promise<import('@terrago/shared').BountyBoard | null> {
+    try {
+      const r = await this.request<{ board: import('@terrago/shared').BountyBoard; message: string }>('bounty:claim', { npcId, idx });
+      audio.sfx('achievement');
+      pushNotice(this.ui, 'success', r.message, 3000);
+      return r.board;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
+  }
+
   async acceptQuest(npcId: string, questId: string): Promise<void> {
     try {
       await this.request('quest:accept', { npcId, questId });
@@ -660,11 +691,14 @@ export class GameClient {
 
   /** Where the tracked quest wants you to go next: { map, x, y } in tiles, or null. */
   questTarget(): { map: string; x: number; y: number; label: string } | null {
-    const quests = this.ui.get().quests.filter((q) => !q.done);
-    const q = quests[0];
+    const ui = this.ui.get();
+    if (ui.autoWalk) return ui.autoWalk;
+    const quests = ui.quests.filter((q) => !q.done);
+    // The tracked quest, else the main story, else any side quest.
+    const q = quests.find((x) => x.id === ui.trackedQuest) ?? quests.find((x) => !getQuest(x.id)?.chain) ?? quests[0];
     if (!q) {
       // Nothing active: point at whoever offers the next quest.
-      const offer = questsAvailable(QUESTS, this.ui.get().quests)[0];
+      const offer = questsAvailable(QUESTS, ui.quests, ui.self?.level ?? 1)[0];
       const npc = offer ? NPCS.find((n) => n.id === offer.giver) : undefined;
       return npc ? { map: npc.mapId, x: npc.x, y: npc.y, label: npc.name } : null;
     }
@@ -680,6 +714,109 @@ export class GameClient {
       if (npc) return { map: npc.mapId, x: npc.x, y: npc.y, label: npc.name };
     }
     return st.where ? { ...st.where, label: '' } : null;
+  }
+
+  /** Where a quest step wants you (null if it has no place). */
+  questPlace(questId: string): { map: string; x: number; y: number; label: string } | null {
+    const q = this.ui.get().quests.find((x) => x.id === questId);
+    const def = getQuest(questId);
+    if (!q || !def) return null;
+    const npcAt = (id: string) => {
+      const n = NPCS.find((x) => x.id === id);
+      return n ? { map: n.mapId, x: n.x, y: n.y, label: n.name } : null;
+    };
+    if (q.step >= def.steps.length) return npcAt(def.turnIn);
+    const st = def.steps[q.step]!;
+    if (st.type === 'talk' && st.target) return npcAt(st.target);
+    return st.where ? { ...st.where, label: st.text } : null;
+  }
+
+  // --- Auto-walk ---------------------------------------------------------------
+
+  private walkPath: { x: number; y: number }[] | null = null;
+  private walkMap: string | null = null;
+  private walkStuck = { x: 0, y: 0, n: 0, retries: 0 };
+
+  /** Walk by yourself to a place (any map). Any arrow key / joystick input takes over. */
+  autoWalkTo(target: { map: string; x: number; y: number; label: string }): void {
+    if (this.ui.get().self && this.ui.get().mapId === target.map) {
+      const t = { x: Math.floor(this.pos.x / TILE_SIZE), y: Math.floor(this.pos.y / TILE_SIZE) };
+      if (Math.hypot(t.x - target.x, t.y - target.y) <= 2) return pushNotice(this.ui, 'info', "You're already there.", 1500);
+    }
+    this.walkPath = null;
+    this.walkStuck = { x: 0, y: 0, n: 0, retries: 0 };
+    this.ui.set({ autoWalk: target });
+    pushNotice(this.ui, 'info', `Walking to ${target.label || getMap(target.map)?.name || 'your goal'}… (move to stop)`, 2000);
+  }
+
+  stopAutoWalk(msg?: string): void {
+    if (!this.ui.get().autoWalk) return;
+    this.walkPath = null;
+    this.ui.set({ autoWalk: null });
+    if (msg) pushNotice(this.ui, 'info', msg, 2000);
+  }
+
+  /** The input auto-walk wants this step (null when not walking). */
+  autoWalkInput(): MoveInput | null {
+    const goal = this.ui.get().autoWalk;
+    const mapId = this.ui.get().mapId;
+    if (!goal || !this.grid || !mapId) return null;
+    if (this.ui.get().dialogue || (this.ui.get().self?.hp ?? 1) <= 0) return null;
+    const here = { x: Math.floor(this.pos.x / TILE_SIZE), y: Math.floor(this.pos.y / TILE_SIZE) };
+    if (this.walkMap !== mapId) {
+      this.walkMap = mapId;
+      this.walkPath = null;
+    }
+    if (!this.walkPath) {
+      let to: { x: number; y: number };
+      let near = 1;
+      if (goal.map === mapId) to = goal;
+      else {
+        const via = nextPortal(mapId, goal.map, getMap);
+        if (!via) {
+          this.stopAutoWalk("Can't find a way there from here.");
+          return null;
+        }
+        to = via;
+        near = 0;
+      }
+      this.walkPath = findPath(this.grid, here, to, near);
+      if (!this.walkPath) {
+        this.stopAutoWalk("Can't find a path there.");
+        return null;
+      }
+      if (!this.walkPath.length && goal.map === mapId) {
+        this.stopAutoWalk(`Arrived${goal.label ? `: ${goal.label}` : ''}.`);
+        return null;
+      }
+    }
+    // Drop waypoints we've reached.
+    while (this.walkPath.length) {
+      const w = this.walkPath[0]!;
+      const c = { x: (w.x + 0.5) * TILE_SIZE, y: (w.y + 0.5) * TILE_SIZE + 6 };
+      if (Math.abs(c.x - this.pos.x) <= 4 && Math.abs(c.y - this.pos.y) <= 4) this.walkPath.shift();
+      else break;
+    }
+    if (!this.walkPath.length) {
+      if (goal.map === mapId) this.stopAutoWalk(`Arrived${goal.label ? `: ${goal.label}` : ''}.`);
+      else this.walkPath = null; // on a portal: the server moves us; replan on the new map
+      return null;
+    }
+    // Stuck (a monster in the way, a corner): replan, then give up.
+    const s = this.walkStuck;
+    if (Math.abs(this.pos.x - s.x) < 0.5 && Math.abs(this.pos.y - s.y) < 0.5) {
+      if (++s.n > 20) {
+        s.n = 0;
+        this.walkPath = null;
+        if (++s.retries > 4) this.stopAutoWalk('Something is blocking the way.');
+        return null;
+      }
+    } else {
+      s.x = this.pos.x;
+      s.y = this.pos.y;
+      s.n = 0;
+    }
+    return inputToward(this.pos, this.walkPath[0]!, TILE_SIZE);
   }
 
   private achievementQueue: NonNullable<import('../store').UiState['achievementToast']>[] = [];

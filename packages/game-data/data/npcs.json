@@ -282,6 +282,9 @@
    [
     "Trust is the rarest currency in TerraGo. Spend it carefully."
    ]
+  ],
+  "services": [
+   "bounty"
   ]
  },
  {
@@ -352,7 +355,9 @@
     "Seen the giant? You'd know if you had."
    ]
   ],
-  "services": []
+  "services": [
+   "bounty"
+  ]
  },
  {
   "id": "banker_orrin",
@@ -420,7 +425,9 @@
     "Obsidian? The golems are made of it. Help yourself."
    ]
   ],
-  "services": []
+  "services": [
+   "bounty"
+  ]
  },
  {
   "id": "hunter_kade",
@@ -454,7 +461,9 @@
     "If you hear wings, run."
    ]
   ],
-  "services": []
+  "services": [
+   "bounty"
+  ]
  },
  {
   "id": "job_master_aldric",
@@ -489,6 +498,78 @@
   ],
   "services": [
    "job"
+  ]
+ },
+ {
+  "id": "ranger_wren",
+  "name": "Ranger Wren",
+  "title": "Whispering Fields",
+  "mapId": "sunfield_plains",
+  "x": 26,
+  "y": 24,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "a",
+   "skinTone": 1,
+   "hairStyle": 3,
+   "hairColor": 2,
+   "eyeColor": 3,
+   "outfit": 2
+  },
+  "accessory": "hood",
+  "firstMeeting": {
+   "lines": [
+    "Easy there \u2014 you're the new settler? Wren. I keep the Fields road safe, mostly.",
+    "Rats in the barns, boars in the fields, goblins in the east and worse to the south.",
+    "If you want honest work, I always have some. And check the bounty board when you're stronger."
+   ]
+  },
+  "greetings": [
+   [
+    "The road's quiet today. Let's keep it that way."
+   ],
+   [
+    "Heard the Warden stirring down south. Stay sharp."
+   ]
+  ],
+  "services": [
+   "bounty"
+  ]
+ },
+ {
+  "id": "flamewarden_ysolde",
+  "name": "Flamewarden Ysolde",
+  "title": "The Infernal Caldera",
+  "mapId": "infernal_caldera",
+  "x": 20,
+  "y": 33,
+  "dir": "right",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 3,
+   "hairStyle": 5,
+   "hairColor": 0,
+   "eyeColor": 4,
+   "outfit": 6
+  },
+  "accessory": "helmet",
+  "firstMeeting": {
+   "lines": [
+    "You climbed all the way up here? Then you're either brave or lost.",
+    "I watch the Caldera for the Guild. The imps multiply, the hounds hunt in packs and the Titan sleeps in the heart of it all.",
+    "Help me keep the fire in its cage."
+   ]
+  },
+  "greetings": [
+   [
+    "The ground's hot enough to cook on. Don't."
+   ],
+   [
+    "The Titan stirs. Can you feel it?"
+   ]
+  ],
+  "services": [
+   "bounty"
   ]
  }
 ]

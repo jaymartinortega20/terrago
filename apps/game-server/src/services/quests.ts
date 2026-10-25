@@ -91,8 +91,8 @@ function npcName(id: string): string {
 }
 
 /** Offers and hand-ins an NPC has for this character right now. */
-export function npcQuestActions(npcId: string, states: QuestState[]): { offers: string[]; turnIns: string[] } {
-  const offers = questsAvailable(QUESTS, states).filter((q) => q.giver === npcId).map((q) => q.id);
+export function npcQuestActions(npcId: string, states: QuestState[], level = Infinity): { offers: string[]; turnIns: string[] } {
+  const offers = questsAvailable(QUESTS, states, level).filter((q) => q.giver === npcId).map((q) => q.id);
   const turnIns = states.filter((s) => {
     const d = getQuest(s.id);
     return d && d.turnIn === npcId && questReady(s, d);
@@ -100,9 +100,10 @@ export function npcQuestActions(npcId: string, states: QuestState[]): { offers: 
   return { offers, turnIns };
 }
 
-export async function acceptQuest(pool: Pool, characterId: string, questId: string, states: QuestState[]): Promise<QuestState[]> {
+export async function acceptQuest(pool: Pool, characterId: string, questId: string, states: QuestState[], level = Infinity): Promise<QuestState[]> {
   const def = getQuest(questId);
-  if (!def || !questsAvailable(QUESTS, states).some((q) => q.id === questId)) throw new GameError("That quest isn't available.");
+  if (def?.minLevel && level < def.minLevel) throw new GameError(`Come back at level ${def.minLevel}.`);
+  if (!def || !questsAvailable(QUESTS, states, level).some((q) => q.id === questId)) throw new GameError("That quest isn't available.");
   const ins = await pool.query('INSERT INTO quest_progress (character_id, quest_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING quest_id', [characterId, questId]);
   if (!ins.rowCount) throw new GameError('You already have that quest.');
   return [...states, { id: questId, step: 0, count: 0, done: false }];

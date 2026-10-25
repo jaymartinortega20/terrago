@@ -1,4 +1,5 @@
 import type {
+  BountyBoard,
   ChatMessage,
   DialogueResult,
   Direction,
@@ -278,6 +279,9 @@ export interface ClientToServerEvents {
   'daily:task': (taskId: string, ack: Ack<{ message: string }>) => void;
   'leaderboard:get': (id: LeaderboardId, ack: Ack<{ rows: LeaderboardRow[]; me: LeaderboardRow | null }>) => void;
   'quest:accept': (req: { npcId: string; questId: string }, ack: Ack<null>) => void;
+  'bounty:board': (npcId: string, ack: Ack<BountyBoard>) => void;
+  'bounty:accept': (req: { npcId: string; idx: number }, ack: Ack<BountyBoard>) => void;
+  'bounty:claim': (req: { npcId: string; idx: number }, ack: Ack<{ board: BountyBoard; message: string }>) => void;
   'quest:complete': (req: { npcId: string; questId: string }, ack: Ack<{ gold: number; xp: number; items: { itemId: string; quantity: number }[] }>) => void;
   'lift:floors': (npcId: string, ack: Ack<{ floors: number[] }>) => void;
   'lift:go': (req: { npcId: string; floor: number }, ack: Ack<{ message: string }>) => void;

@@ -19,6 +19,7 @@ const ACTION_LABELS: Record<DialogueActionId, string> = {
   enhance: 'Upgrade my gear',
   quest_offer: 'Quest',
   quest_complete: 'Complete quest',
+  bounty: 'Bounty board',
 };
 
 function actionFor(id: DialogueActionId): DialogueAction {

@@ -95,7 +95,7 @@ export function DialogueBox({ client }: { client: GameClient }) {
                   if (a.id === 'quest_offer' && a.questId) client.ui.set({ questOffer: { questId: a.questId, npcId } });
                   else if (a.id === 'quest_complete' && a.questId) void client.completeQuest(npcId, a.questId);
                   else if (a.id === 'shop') void client.openShop(npcId);
-                  else client.ui.set({ serviceNpc: npcId, panel: a.id === 'farm_upgrade' ? 'farm' : a.id === 'lift' ? 'lift' : a.id === 'bank' ? 'bank' : a.id === 'job' ? 'job' : a.id === 'enhance' ? 'enhance' : 'repair' });
+                  else client.ui.set({ serviceNpc: npcId, panel: a.id === 'farm_upgrade' ? 'farm' : a.id === 'lift' ? 'lift' : a.id === 'bank' ? 'bank' : a.id === 'job' ? 'job' : a.id === 'enhance' ? 'enhance' : a.id === 'bounty' ? 'bounty' : 'repair' });
                 }}
               >
                 {a.label}

@@ -29,7 +29,7 @@ import { JournalPanel, ProgressToasts } from './ui/JournalUi';
 import { AnimalsPanel, BankPanel, DungeonPanel, StallBrowseWindow, StallSetupPanel, TravelPanel } from './ui/EconomyUi';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
 import { MarketPanel, SocialPopups, TradeWindow } from './ui/TradeUi';
-import { QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
+import { BountyPanel, QuestOfferWindow, QuestRewardWindow, QuestTracker, QuestsPanel } from './ui/QuestUi';
 
 declare global {
   interface Window {
@@ -248,6 +248,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'animals' && <AnimalsPanel client={client} onClose={() => open(null)} />}
           {panel === 'bank' && <BankPanel client={client} onClose={() => open(null)} />}
           {panel === 'job' && <JobPanel client={client} onClose={() => open(null)} />}
+          {panel === 'bounty' && <BountyPanel client={client} onClose={() => open(null)} />}
           {panel === 'travel' && <TravelPanel client={client} onClose={() => open(null)} />}
           {panel === 'stall' && <StallSetupPanel client={client} onClose={() => open(null)} />}
           {panel === 'crafting' && <RecipeBook client={client} onClose={() => open(null)} />}

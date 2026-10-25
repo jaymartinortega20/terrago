@@ -47,6 +47,7 @@ import { progressEvent, track } from './journal';
 import { antibot } from '../security/antibot';
 import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
+import { bountyKill } from './bounties';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
 import { getNpc as findNpc } from '../services/npcs';
 import { buyListing, cancelListing, createListing, myListings, searchMarket } from '../services/market';
@@ -411,7 +412,7 @@ export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void>
 // NPC services
 // ---------------------------------------------------------------------------
 
-export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job' | 'enhance') {
+export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job' | 'enhance' | 'bounty') {
   const npc = getNpc(npcId);
   if (!npc || !npcOffers(npc, service)) throw new GameError("They can't help with that.");
   if (!world.npcInRange(p, npc)) throw new GameError("You're too far away.");
@@ -534,6 +535,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
         void r.player
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
+            bountyKill(d, r.player, r.monster.def.id);
             r.xp = Math.round(r.xp * eventMult('xp', Date.now()) * settings().xpRate);
             // Newcomer boost: early levels come quickly (×3 under level 10, ×2 under 20).
             const lvl = r.player.rec.level;
@@ -639,7 +641,7 @@ export async function startQuests(deps: GameplayDeps, p: Player): Promise<void> 
 
 /** Quest actions to add to an NPC's dialogue (offers and hand-ins). */
 export function questDialogueActions(p: Player, npcId: string): import('@terrago/shared').DialogueAction[] {
-  const { offers, turnIns } = npcQuestActions(npcId, p.quests);
+  const { offers, turnIns } = npcQuestActions(npcId, p.quests, p.rec.level);
   return [
     ...turnIns.map((id) => ({ id: 'quest_complete' as const, label: `Complete: ${getQuestName(id)}`, questId: id })),
     ...offers.map((id) => ({ id: 'quest_offer' as const, label: `Quest: ${getQuestName(id)}`, questId: id })),
@@ -664,7 +666,7 @@ export const questServices = {
     const npc = questNpc(deps, p, r.npcId);
     const def = QUESTS_BY_ID.get(String(r.questId));
     if (!def || def.giver !== npc.id) throw new GameError("They don't have that quest.");
-    p.quests = await acceptQuest(deps.pool, p.id, def.id, p.quests);
+    p.quests = await acceptQuest(deps.pool, p.id, def.id, p.quests, p.rec.level);
     p.conn?.send('quests', p.quests);
     // Being somewhere already counts (e.g. a "visit" step for where you stand).
     questEvent(deps, p, 'visit', p.mapId);

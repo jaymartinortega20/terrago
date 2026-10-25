@@ -705,7 +705,7 @@ export class WorldScene extends Phaser.Scene {
   /** "!" = quest to pick up, "?" = ready to hand in (grey while still in progress). */
   private refreshQuestMarkers(): void {
     const quests = this.client.ui.get().quests;
-    const offers = new Set(questsAvailable(QUESTS, quests).map((q) => q.giver));
+    const offers = new Set(questsAvailable(QUESTS, quests, this.client.ui.get().self?.level ?? 1).map((q) => q.giver));
     const ready = new Set<string>();
     const pending = new Set<string>();
     for (const q of quests) {
@@ -1758,7 +1758,11 @@ export class WorldScene extends Phaser.Scene {
     this.acc += Math.min(delta, 300);
     let steps = 0;
     while (this.acc >= 50 && steps < 8) {
-      client.step(this.readInput());
+      const manual = this.readInput();
+      if (manual.dx || manual.dy) {
+        client.stopAutoWalk();
+        client.step(manual);
+      } else client.step(client.autoWalkInput() ?? manual);
       this.acc -= 50;
       steps++;
     }

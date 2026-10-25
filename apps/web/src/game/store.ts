@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -115,6 +115,10 @@ export interface UiState {
   pet: import('@terrago/shared').PetView | null;
   /** AUTO: keep fighting whatever monster is in reach. */
   autoHunt: boolean;
+  /** Walking itself to a quest/bounty target. */
+  autoWalk: { map: string; x: number; y: number; label: string } | null;
+  /** Quest the tracker and guide arrow follow (null = the main story). */
+  trackedQuest: string | null;
 }
 
 export const initialUi: UiState = {
@@ -145,6 +149,8 @@ export const initialUi: UiState = {
   fishing: null,
   pet: null,
   autoHunt: false,
+  autoWalk: null,
+  trackedQuest: null,
   targetId: null,
   autoAttack: false,
   effects: [],

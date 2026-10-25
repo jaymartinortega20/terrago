@@ -30,6 +30,7 @@ import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDia
 import { loadCompanions, pets, stable, syncCompanion, toggleMount } from './companions';
 import * as social from './social';
 import * as journal from './journal';
+import { bounties } from './bounties';
 import * as eco from './economy';
 import { antibot } from '../security/antibot';
 import { cancelTrade, confirmTrade, lockTrade, requestTrade, respondTrade, setOffer } from './trade';
@@ -445,6 +446,9 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('guild:treasury', (req, ack) => serial(ack, () => social.guild.treasury(g, p, req)));
     socket.on('guild:motd', (text, ack) => serial(ack, () => social.guild.motd(g, p, text)));
     socket.on('quest:accept', (req, ack) => serial(ack, () => questServices.accept(g, p, req)));
+    socket.on('bounty:board', (npcId, ack) => respond(ack, () => bounties.get(g, p, npcId)));
+    socket.on('bounty:accept', (req, ack) => serial(ack, () => bounties.accept(g, p, req)));
+    socket.on('bounty:claim', (req, ack) => serial(ack, () => bounties.claim(g, p, req)));
     socket.on('quest:complete', (req, ack) => serial(ack, () => questServices.complete(g, p, req)));
     socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));
     socket.on('enhance', (req, ack) => serial(ack, () => gear.enhance(g, p, req)));

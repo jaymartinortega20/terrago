@@ -325,7 +325,7 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job' | 'enhance';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job' | 'enhance' | 'bounty';
 
 export interface DialogueAction {
   id: DialogueActionId;
@@ -384,6 +384,10 @@ export interface QuestDef {
   turnIn: string;
   /** Quest that must be finished first. */
   requires?: string;
+  /** Character level needed to be offered it. */
+  minLevel?: number;
+  /** Side-story it belongs to ("Sunfield Stories"); the main story has none. */
+  chain?: string;
   intro: string[];
   outro: string[];
   steps: QuestStep[];
@@ -405,10 +409,10 @@ export function questReady(q: QuestState, def: QuestDef): boolean {
 }
 
 /** Quests the character can pick up now (prerequisites done, not started). */
-export function questsAvailable(all: readonly QuestDef[], states: QuestState[]): QuestDef[] {
+export function questsAvailable(all: readonly QuestDef[], states: QuestState[], level = Infinity): QuestDef[] {
   const done = new Set(states.filter((s) => s.done).map((s) => s.id));
   const started = new Set(states.map((s) => s.id));
-  return all.filter((q) => !started.has(q.id) && (!q.requires || done.has(q.requires)));
+  return all.filter((q) => !started.has(q.id) && (!q.requires || done.has(q.requires)) && (q.minLevel ?? 1) <= level);
 }
 
 // ---------------------------------------------------------------------------
@@ -679,4 +683,32 @@ export interface AnimalState {
 export function animalReady(a: { fedUntil: number; collectedAt: number }, def: AnimalDef, now: number): number {
   const fedTime = Math.max(0, Math.min(now, a.fedUntil) - a.collectedAt);
   return Math.min(ANIMAL_PRODUCT_CAP, Math.floor(fedTime / def.everyMs));
+}
+
+// ---------------------------------------------------------------------------
+// Bounty board
+// ---------------------------------------------------------------------------
+
+export type BountyTier = 'Easy' | 'Normal' | 'Hard';
+
+/** One daily hunting contract: defeat `count` of a monster. */
+export interface BountyView {
+  idx: number;
+  tier: BountyTier;
+  monsterId: string;
+  monsterName: string;
+  /** Where they live (for the map and auto-walk). */
+  where: { map: string; x: number; y: number };
+  level: number;
+  count: number;
+  progress: number;
+  accepted: boolean;
+  claimed: boolean;
+  reward: { gold: number; xp: number; items: { itemId: string; quantity: number }[] };
+}
+
+export interface BountyBoard {
+  bounties: BountyView[];
+  /** When a fresh set is posted (UTC midnight). */
+  resetsAt: number;
 }

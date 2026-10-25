@@ -107,7 +107,7 @@ describe('mounts', () => {
   });
 
   test('Glacial Depths slows everyone except an Ice Walker mount', async () => {
-    const { a, p } = await setup({ map: 'glacial_depths', tx: 30, ty: 30, level: 60, items: [['brown_pony', 1], ['war_wolf', 1]] });
+    const { a, p } = await setup({ map: 'glacial_depths', tx: 31, ty: 44, level: 60, items: [['brown_pony', 1], ['war_wolf', 1]] });
     assert.equal(p.speed, 0.8, 'on foot on the ice');
     await ack(a.socket, 'mount:choose', 'brown_pony');
     await ack(a.socket, 'mount:toggle');

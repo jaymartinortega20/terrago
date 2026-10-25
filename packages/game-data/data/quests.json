@@ -585,5 +585,839 @@
     }
    ]
   }
+ },
+ {
+  "id": "q_sf_rats",
+  "name": "Pantry Raiders",
+  "giver": "ranger_wren",
+  "turnIn": "ranger_wren",
+  "chain": "Whispering Fields Stories",
+  "minLevel": 2,
+  "description": "Rats are eating the farmers' grain stores east of the road.",
+  "intro": [
+   "The barns east of the road are crawling with rats.",
+   "Clear out eight of them and the farmers will sleep easier."
+  ],
+  "outro": [
+   "Good riddance. The farmers asked me to pass this on."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 8 Field Rats (east of the road)",
+    "type": "kill",
+    "target": "field_rat",
+    "count": 8,
+    "where": {
+     "map": "sunfield_plains",
+     "x": 46,
+     "y": 30
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 220,
+   "xp": 380,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 1
+    },
+    {
+     "itemId": "minor_health_potion",
+     "quantity": 3
+    }
+   ]
+  },
+  "requires": "q_pony"
+ },
+ {
+  "id": "q_sf_boars",
+  "name": "Trampled Fields",
+  "giver": "ranger_wren",
+  "turnIn": "farmer_rowan",
+  "chain": "Whispering Fields Stories",
+  "minLevel": 5,
+  "description": "Wild boars keep trampling Farmer Rowan's neighbours' crops.",
+  "intro": [
+   "Boars! Big ones, west of the road. They flatten a field in a night.",
+   "Drive off six, then let Farmer Rowan know it's safe."
+  ],
+  "outro": [
+   "Wren sent you? Bless you \u2014 my seedlings might survive the week."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 6 Wild Boars (west fields)",
+    "type": "kill",
+    "target": "wild_boar",
+    "count": 6,
+    "where": {
+     "map": "sunfield_plains",
+     "x": 17,
+     "y": 34
+    }
+   },
+   {
+    "text": "Tell Farmer Rowan the fields are safe",
+    "type": "talk",
+    "target": "farmer_rowan",
+    "count": 1,
+    "where": {
+     "map": "greenhaven",
+     "x": 12,
+     "y": 34
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 330,
+   "xp": 480,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 1
+    },
+    {
+     "itemId": "minor_health_potion",
+     "quantity": 3
+    }
+   ]
+  },
+  "requires": "q_sf_rats"
+ },
+ {
+  "id": "q_sf_orcs",
+  "name": "Orc Raiders",
+  "giver": "ranger_wren",
+  "turnIn": "ranger_wren",
+  "chain": "Whispering Fields Stories",
+  "minLevel": 16,
+  "description": "An orc warband has made camp in the south-west of the Fields.",
+  "intro": [
+   "Orcs are camped in the south-west. They've been raiding the caravans.",
+   "Break their warband: ten should do it."
+  ],
+  "outro": [
+   "Ha! They'll think twice before raiding my road again."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Orcs (south-west camp)",
+    "type": "kill",
+    "target": "orc",
+    "count": 10,
+    "where": {
+     "map": "sunfield_plains",
+     "x": 14,
+     "y": 63
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 1045,
+   "xp": 2105,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 2
+    }
+   ]
+  },
+  "requires": "q_sf_boars"
+ },
+ {
+  "id": "q_sf_spiders",
+  "name": "Webs in the East",
+  "giver": "ranger_wren",
+  "turnIn": "ranger_wren",
+  "chain": "Whispering Fields Stories",
+  "minLevel": 26,
+  "description": "Giant spiders are spinning webs across the eastern trails.",
+  "intro": [
+   "Travellers keep vanishing on the east trail. Webs everywhere.",
+   "Burn out the nest \u2014 ten giant spiders."
+  ],
+  "outro": [
+   "You came back without a single bite? Impressive."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Giant Spiders (east trail)",
+    "type": "kill",
+    "target": "giant_spider",
+    "count": 10,
+    "where": {
+     "map": "sunfield_plains",
+     "x": 45,
+     "y": 62
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 1650,
+   "xp": 4800,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 2
+    }
+   ]
+  },
+  "requires": "q_sf_orcs"
+ },
+ {
+  "id": "q_sf_bones",
+  "name": "The Restless Dead",
+  "giver": "ranger_wren",
+  "turnIn": "guildmaster_kael",
+  "chain": "Whispering Fields Stories",
+  "minLevel": 32,
+  "description": "Skeletons are rising near the Warden's grounds. The Guild should hear of it.",
+  "intro": [
+   "Bones are walking near the southern ruins. That's never a good sign.",
+   "Put twelve back in the ground, then report to Guildmaster Kael."
+  ],
+  "outro": [
+   "Skeletons, by the Warden's grounds? Then the old magic is waking. Well done."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 12 Skeletons (southern ruins)",
+    "type": "kill",
+    "target": "skeleton",
+    "count": 12,
+    "where": {
+     "map": "sunfield_plains",
+     "x": 45,
+     "y": 75
+    }
+   },
+   {
+    "text": "Report to Guildmaster Kael in Oakhaven",
+    "type": "talk",
+    "target": "guildmaster_kael",
+    "count": 1,
+    "where": {
+     "map": "greenhaven",
+     "x": 42,
+     "y": 12
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 1980,
+   "xp": 6780,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 3
+    }
+   ]
+  },
+  "requires": "q_sf_spiders"
+ },
+ {
+  "id": "q_cr_bandits",
+  "name": "Dust and Daggers",
+  "giver": "forgewarden_hal",
+  "turnIn": "forgewarden_hal",
+  "chain": "Crags Chronicle",
+  "minLevel": 48,
+  "description": "Dust bandits are robbing the ore carts that feed Hal's forge.",
+  "intro": [
+   "Bandits have been hitting my ore carts on the ridge.",
+   "Ten of them, and the rest will scatter."
+  ],
+  "outro": [
+   "The carts are rolling again. Here \u2014 your cut."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Dust Bandits",
+    "type": "kill",
+    "target": "dust_bandit",
+    "count": 10,
+    "where": {
+     "map": "desolate_crags",
+     "x": 31,
+     "y": 15
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 2860,
+   "xp": 13820,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 3
+    }
+   ]
+  },
+  "requires": "q_warden"
+ },
+ {
+  "id": "q_cr_shamans",
+  "name": "Stone That Heals",
+  "giver": "forgewarden_hal",
+  "turnIn": "forgewarden_hal",
+  "chain": "Crags Chronicle",
+  "minLevel": 52,
+  "description": "Crag Shamans keep the elementals mended. Break their circle and bring Hal iron.",
+  "intro": [
+   "Ever notice the elementals won't stay down? Shamans, mending them.",
+   "Take out six shamans \u2014 and bring me ten Iron Ore while you're out there."
+  ],
+  "outro": [
+   "Good ore, and good work. The forge thanks you."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 6 Crag Shamans",
+    "type": "kill",
+    "target": "crag_shaman",
+    "count": 6,
+    "where": {
+     "map": "desolate_crags",
+     "x": 31,
+     "y": 15
+    }
+   },
+   {
+    "text": "Mine 10 Iron Ore",
+    "type": "gather",
+    "target": "iron_ore",
+    "count": 10,
+    "where": {
+     "map": "desolate_crags",
+     "x": 43,
+     "y": 16
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 3080,
+   "xp": 15980,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 3
+    }
+   ]
+  },
+  "requires": "q_cr_bandits"
+ },
+ {
+  "id": "q_cr_golems",
+  "name": "Living Rock",
+  "giver": "forgewarden_hal",
+  "turnIn": "forgewarden_hal",
+  "chain": "Crags Chronicle",
+  "minLevel": 56,
+  "description": "Rock Golems have blocked the north pass.",
+  "intro": [
+   "The north pass is clogged with golems. The giants' ancient guards, some say.",
+   "Smash eight of them so the scouts can get through."
+  ],
+  "outro": [
+   "The pass is open. The scouts are already on their way to the Depths."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 8 Rock Golems",
+    "type": "kill",
+    "target": "rock_golem",
+    "count": 8,
+    "where": {
+     "map": "desolate_crags",
+     "x": 47,
+     "y": 21
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 3300,
+   "xp": 18300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 4
+    }
+   ]
+  },
+  "requires": "q_cr_shamans"
+ },
+ {
+  "id": "q_cr_knights",
+  "name": "The Cursed Watch",
+  "giver": "forgewarden_hal",
+  "turnIn": "forgewarden_hal",
+  "chain": "Crags Chronicle",
+  "minLevel": 64,
+  "description": "Wraiths and Cursed Knights haunt the old ruins at the top of the Crags.",
+  "intro": [
+   "The old watch at the top of the Crags still keeps its post. Dead men, cursed armour.",
+   "Lay eight wraiths and eight knights to rest."
+  ],
+  "outro": [
+   "Quiet up there at last. You've earned a forgewarden's respect."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 8 Wraiths",
+    "type": "kill",
+    "target": "wraith",
+    "count": 8,
+    "where": {
+     "map": "desolate_crags",
+     "x": 47,
+     "y": 26
+    }
+   },
+   {
+    "text": "Defeat 8 Cursed Knights",
+    "type": "kill",
+    "target": "cursed_knight",
+    "count": 8,
+    "where": {
+     "map": "desolate_crags",
+     "x": 49,
+     "y": 9
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 3740,
+   "xp": 23420,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 5
+    }
+   ]
+  },
+  "requires": "q_cr_golems"
+ },
+ {
+  "id": "q_gl_wolves",
+  "name": "Pack on the Slopes",
+  "giver": "scout_bjorna",
+  "turnIn": "scout_bjorna",
+  "chain": "Tales of the Depths",
+  "minLevel": 72,
+  "description": "Snow wolves are hunting the Guild's scouts on the lower slopes.",
+  "intro": [
+   "The snow wolves have my scouts pinned. They charge fast \u2014 watch for it.",
+   "Ten wolves, and my people can move again."
+  ],
+  "outro": [
+   "They're safe. I owe you one \u2014 no, I owe you several."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Snow Wolves",
+    "type": "kill",
+    "target": "snow_wolf",
+    "count": 10,
+    "where": {
+     "map": "glacial_depths",
+     "x": 16,
+     "y": 19
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 4125,
+   "xp": 28425,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 4
+    }
+   ]
+  },
+  "requires": "q_crags"
+ },
+ {
+  "id": "q_gl_priestess",
+  "name": "The Frozen Choir",
+  "giver": "scout_bjorna",
+  "turnIn": "scout_bjorna",
+  "chain": "Tales of the Depths",
+  "minLevel": 82,
+  "description": "Frost Priestesses keep the Depths' creatures alive. Silence them.",
+  "intro": [
+   "Hear that singing? Frost Priestesses. Every song mends something you just broke.",
+   "Silence six of them."
+  ],
+  "outro": [
+   "The singing's stopped. Eerie, but better."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 6 Frost Priestesses",
+    "type": "kill",
+    "target": "frost_priestess",
+    "count": 6,
+    "where": {
+     "map": "glacial_depths",
+     "x": 43,
+     "y": 25
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 4675,
+   "xp": 36425,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 5
+    }
+   ]
+  },
+  "requires": "q_gl_wolves"
+ },
+ {
+  "id": "q_gl_yeti",
+  "name": "Yeti Country",
+  "giver": "scout_bjorna",
+  "turnIn": "scout_bjorna",
+  "chain": "Tales of the Depths",
+  "minLevel": 86,
+  "description": "Yetis by the frozen lake are smashing the scouts' camps.",
+  "intro": [
+   "Yetis have wrecked three of our camps by the lake.",
+   "Eight of them should teach the rest some manners."
+  ],
+  "outro": [
+   "Not bad for a lowlander."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 8 Frost Yetis",
+    "type": "kill",
+    "target": "frost_yeti",
+    "count": 8,
+    "where": {
+     "map": "glacial_depths",
+     "x": 48,
+     "y": 12
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 4895,
+   "xp": 39905,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 5
+    }
+   ]
+  },
+  "requires": "q_gl_priestess"
+ },
+ {
+  "id": "q_gl_warlock",
+  "name": "Ice and Iron",
+  "giver": "scout_bjorna",
+  "turnIn": "scout_bjorna",
+  "chain": "Tales of the Depths",
+  "minLevel": 88,
+  "description": "Glacier Warlocks summon wisps to guard the Frost Giant's brutes.",
+  "intro": [
+   "Warlocks call wisps out of the ice. Kill the warlock and the wisps go with it.",
+   "Five warlocks \u2014 then six of the giant's brutes."
+  ],
+  "outro": [
+   "The giant's guard is broken. He'll be lonely in his cave now."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 5 Glacier Warlocks",
+    "type": "kill",
+    "target": "glacier_warlock",
+    "count": 5,
+    "where": {
+     "map": "glacial_depths",
+     "x": 48,
+     "y": 12
+    }
+   },
+   {
+    "text": "Defeat 6 Frost Giant Brutes",
+    "type": "kill",
+    "target": "frost_giant_brute",
+    "count": 6,
+    "where": {
+     "map": "glacial_depths",
+     "x": 48,
+     "y": 12
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5170,
+   "xp": 44480,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 6
+    }
+   ]
+  },
+  "requires": "q_gl_yeti"
+ },
+ {
+  "id": "q_ds_priests",
+  "name": "Fire Faith",
+  "giver": "hunter_kade",
+  "turnIn": "hunter_kade",
+  "chain": "Dragon's Peak Saga",
+  "minLevel": 100,
+  "description": "Dragon Priests heal the drakes as fast as Kade can wound them.",
+  "intro": [
+   "Every drake I hurt, a priest patches up. Infuriating.",
+   "Six priests, then we hunt properly."
+  ],
+  "outro": [
+   "Now we're hunting."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 6 Dragon Priests",
+    "type": "kill",
+    "target": "dragon_priest",
+    "count": 6,
+    "where": {
+     "map": "dragonspire",
+     "x": 46,
+     "y": 39
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5500,
+   "xp": 50300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 6
+    }
+   ]
+  },
+  "requires": "q_depths"
+ },
+ {
+  "id": "q_ds_brood",
+  "name": "The Brood",
+  "giver": "hunter_kade",
+  "turnIn": "hunter_kade",
+  "chain": "Dragon's Peak Saga",
+  "minLevel": 100,
+  "description": "Drake Broodmothers hatch wyrms faster than the Peak can hold them.",
+  "intro": [
+   "Broodmothers. Each one calls hatchlings \u2014 and hatchlings explode.",
+   "Four broodmothers. Keep moving."
+  ],
+  "outro": [
+   "The brood's thinning. You're good at this."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 4 Drake Broodmothers",
+    "type": "kill",
+    "target": "drake_broodmother",
+    "count": 4,
+    "where": {
+     "map": "dragonspire",
+     "x": 47,
+     "y": 8
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5500,
+   "xp": 50300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 7
+    }
+   ]
+  },
+  "requires": "q_ds_priests"
+ },
+ {
+  "id": "q_ds_knights",
+  "name": "Knights of the Spire",
+  "giver": "hunter_kade",
+  "turnIn": "hunter_kade",
+  "chain": "Dragon's Peak Saga",
+  "minLevel": 100,
+  "description": "Dragon Knights guard the way to the summit, led by their champions.",
+  "intro": [
+   "The Dragon Knights swore themselves to the old wyrm. Ten of them, and three champions.",
+   "Then the summit's yours."
+  ],
+  "outro": [
+   "The Spire's yours, hunter. The Guild will sing about this."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Dragon Knights",
+    "type": "kill",
+    "target": "dragon_knight",
+    "count": 10,
+    "where": {
+     "map": "dragonspire",
+     "x": 46,
+     "y": 39
+    }
+   },
+   {
+    "text": "Defeat 3 Drake Champions",
+    "type": "kill",
+    "target": "drake_champion",
+    "count": 3,
+    "where": {
+     "map": "dragonspire",
+     "x": 22,
+     "y": 35
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5500,
+   "xp": 50300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 8
+    }
+   ]
+  },
+  "requires": "q_ds_brood"
+ },
+ {
+  "id": "q_ic_imps",
+  "name": "Imp Infestation",
+  "giver": "flamewarden_ysolde",
+  "turnIn": "flamewarden_ysolde",
+  "chain": "Embers of the Caldera",
+  "minLevel": 100,
+  "description": "Fire imps are swarming out of the Caldera's vents.",
+  "intro": [
+   "Imps. Dozens. They pour out of every vent.",
+   "Twelve should keep them busy for a day."
+  ],
+  "outro": [
+   "Fewer squeaking, at least."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 12 Fire Imps",
+    "type": "kill",
+    "target": "fire_imp",
+    "count": 12,
+    "where": {
+     "map": "infernal_caldera",
+     "x": 24,
+     "y": 26
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5500,
+   "xp": 50300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 6
+    }
+   ]
+  },
+  "requires": "q_peak"
+ },
+ {
+  "id": "q_ic_hounds",
+  "name": "Hounds of Magma",
+  "giver": "flamewarden_ysolde",
+  "turnIn": "flamewarden_ysolde",
+  "chain": "Embers of the Caldera",
+  "minLevel": 100,
+  "description": "Magma Hounds hunt in packs around the Titan's lair.",
+  "intro": [
+   "The hounds circle the lair. They charge \u2014 don't stand in a line.",
+   "Ten hounds."
+  ],
+  "outro": [
+   "Good. The Titan's pets are fewer."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Magma Hounds",
+    "type": "kill",
+    "target": "magma_hound",
+    "count": 10,
+    "where": {
+     "map": "infernal_caldera",
+     "x": 24,
+     "y": 26
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5500,
+   "xp": 50300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 7
+    }
+   ]
+  },
+  "requires": "q_ic_imps"
+ },
+ {
+  "id": "q_ic_embers",
+  "name": "Living Flame",
+  "giver": "flamewarden_ysolde",
+  "turnIn": "flamewarden_ysolde",
+  "chain": "Embers of the Caldera",
+  "minLevel": 100,
+  "description": "Ember Elementals feed the Titan's fire. Put them out.",
+  "intro": [
+   "Every elemental is a piece of the Titan's fire walking around.",
+   "Put out ten, and his flame burns lower."
+  ],
+  "outro": [
+   "The fire's in its cage again. Thank you, champion."
+  ],
+  "steps": [
+   {
+    "text": "Defeat 10 Ember Elementals",
+    "type": "kill",
+    "target": "ember_elemental",
+    "count": 10,
+    "where": {
+     "map": "infernal_caldera",
+     "x": 24,
+     "y": 16
+    }
+   }
+  ],
+  "rewards": {
+   "gold": 5500,
+   "xp": 50300,
+   "items": [
+    {
+     "itemId": "enhancement_stone",
+     "quantity": 10
+    }
+   ]
+  },
+  "requires": "q_ic_hounds"
  }
 ]

@@ -1,6 +1,8 @@
 'use client';
 
-import { NPCS, getItem, getQuest } from '@terrago/game-data';
+import { useEffect, useState } from 'react';
+import { NPCS, getItem, getMap, getQuest } from '@terrago/game-data';
+import type { BountyBoard } from '@terrago/shared';
 import { CharacterPreview } from '@/components/CharacterPreview';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
@@ -10,6 +12,8 @@ import { Window } from './Window';
 /** Always-on tracker: what to do next. */
 export function QuestTracker({ client, compact }: { client: GameClient; compact?: boolean }) {
   const quests = useStore(client.ui, (s) => s.quests);
+  const tracked = useStore(client.ui, (s) => s.trackedQuest);
+  const walking = useStore(client.ui, (s) => s.autoWalk);
   const active = quests.filter((q) => !q.done);
   if (!active.length) {
     // A brand-new player gets one clear first goal.
@@ -27,33 +31,51 @@ export function QuestTracker({ client, compact }: { client: GameClient; compact?
       </div>
     );
   }
+  // Tracked quest first, then the main story, then side stories.
+  const order = [...active].sort((a, b) => rank(a.id) - rank(b.id));
+  function rank(id: string) {
+    if (id === tracked) return 0;
+    return getQuest(id)?.chain ? 2 : 1;
+  }
   return (
     <div className={`hud-pill pointer-events-auto ${compact ? 'w-48' : 'w-64'} px-2.5 py-1.5`} data-testid="quest-tracker">
-      {active.slice(0, 2).map((q) => {
+      {order.slice(0, 2).map((q) => {
         const def = getQuest(q.id);
         if (!def) return null;
         const st = def.steps[q.step];
-        if (!st) {
-          return (
-            <button key={q.id} className="block text-left text-xs" onClick={() => client.ui.set({ panel: 'quests' })}>
-              <p className="font-bold text-gold">? {def.name}</p>
-              <p className="leading-snug text-leaf">Done! Return to {NPCS.find((n) => n.id === def.turnIn)?.name}.</p>
-            </button>
-          );
-        }
+        const place = client.questPlace(q.id);
+        const going = !!walking && !!place && walking.map === place.map && walking.x === place.x && walking.y === place.y;
         return (
-          <button key={q.id} className="block text-left text-xs" onClick={() => client.ui.set({ panel: 'quests' })}>
-            <p className="font-bold text-gold">! {def.name}</p>
-            <p className="leading-snug text-parchment">
-              {st.text}
-              {st.count > 1 && (
-                <span className="text-leaf">
-                  {' '}
-                  ({q.count}/{st.count})
-                </span>
+          <div key={q.id} className="flex items-start gap-1.5">
+            <button className="block min-w-0 flex-1 text-left text-xs" onClick={() => client.ui.set({ panel: 'quests' })}>
+              <p className="truncate font-bold text-gold">
+                {st ? '!' : '?'} {def.name}
+              </p>
+              {st ? (
+                <p className="leading-snug text-parchment">
+                  {st.text}
+                  {st.count > 1 && (
+                    <span className="text-leaf">
+                      {' '}
+                      ({q.count}/{st.count})
+                    </span>
+                  )}
+                </p>
+              ) : (
+                <p className="leading-snug text-leaf">Done! Return to {NPCS.find((n) => n.id === def.turnIn)?.name}.</p>
               )}
-            </p>
-          </button>
+            </button>
+            {place && (
+              <button
+                className="mt-0.5 shrink-0 rounded border border-gold/60 px-1 text-[10px] font-bold text-gold"
+                onClick={() => (going ? client.stopAutoWalk('Stopped.') : client.autoWalkTo(place))}
+                title={going ? 'Stop walking' : 'Walk there by yourself'}
+                data-testid={`quest-go-${q.id}`}
+              >
+                {going ? '■' : 'Go ▶'}
+              </button>
+            )}
+          </div>
         );
       })}
     </div>
@@ -62,6 +84,7 @@ export function QuestTracker({ client, compact }: { client: GameClient; compact?
 
 export function QuestsPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const quests = useStore(client.ui, (s) => s.quests);
+  const tracked = useStore(client.ui, (s) => s.trackedQuest);
   return (
     <Window title="Quests" onClose={onClose} testId="quests-panel">
       <ul className="space-y-2">
@@ -71,10 +94,29 @@ export function QuestsPanel({ client, onClose }: { client: GameClient; onClose: 
           const r = def.rewards;
           return (
             <li key={q.id} className={`border-2 border-parchment-3 bg-parchment-2 p-2 text-sm ${q.done ? 'opacity-60' : ''}`}>
-              <p className="font-bold">
-                {q.done ? '✓ ' : ''}
-                {def.name}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="flex-1 font-bold">
+                  {q.done ? '✓ ' : ''}
+                  {def.name}
+                  {def.chain && <span className="ml-1 text-[10px] font-normal text-wood-dark/80">· {def.chain}</span>}
+                </p>
+                {!q.done && (
+                  <button className="px-btn ghost small" onClick={() => client.ui.set({ trackedQuest: q.id })} disabled={tracked === q.id} data-testid={`quest-track-${q.id}`}>
+                    {tracked === q.id ? 'Tracked' : 'Track'}
+                  </button>
+                )}
+                {!q.done && client.questPlace(q.id) && (
+                  <button
+                    className="px-btn green small"
+                    onClick={() => {
+                      client.ui.set({ trackedQuest: q.id, panel: null });
+                      client.autoWalkTo(client.questPlace(q.id)!);
+                    }}
+                  >
+                    Go ▶
+                  </button>
+                )}
+              </div>
               <p className="text-xs text-wood-dark">{def.description}</p>
               <ol className="mt-1 list-decimal pl-5 text-xs">
                 {def.steps.map((st, i) => (
@@ -190,5 +232,87 @@ export function QuestRewardWindow({ client }: { client: GameClient }) {
         </button>
       </section>
     </div>
+  );
+}
+
+const TIER_COLOR: Record<string, string> = { Easy: '#5fa04a', Normal: '#4a7fd6', Hard: '#c0402a' };
+
+/** Bounty board: three daily hunts. Accept, hunt, hand in at any board. */
+export function BountyPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
+  const npcId = useStore(client.ui, (s) => s.serviceNpc);
+  const [board, setBoard] = useState<BountyBoard | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    if (!npcId) return;
+    client.bountyBoard(npcId).then(setBoard, (e: Error) => setErr(e.message));
+  }, [client, npcId]);
+  const hours = board ? Math.max(0, Math.ceil((board.resetsAt - Date.now()) / 3_600_000)) : 0;
+  return (
+    <Window title="Bounty Board" onClose={onClose} testId="bounty-panel">
+      {err && <p className="text-sm text-berry">{err}</p>}
+      {!board && !err && <p className="text-sm">Reading the notices…</p>}
+      {board && (
+        <>
+          <p className="mb-2 text-xs text-wood-dark">Three hunts a day, picked for your level. New notices in about {hours}h. Hand them in at any bounty board.</p>
+          <ul className="space-y-2">
+            {board.bounties.map((b) => {
+              const done = b.progress >= b.count;
+              return (
+                <li key={b.idx} className={`border-2 border-parchment-3 bg-parchment-2 p-2 text-sm ${b.claimed ? 'opacity-60' : ''}`} data-testid={`bounty-${b.idx}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded px-1.5 text-[10px] font-bold text-white" style={{ background: TIER_COLOR[b.tier] }}>
+                      {b.tier}
+                    </span>
+                    <p className="flex-1 font-bold">
+                      Defeat {b.count} {b.monsterName}
+                      <span className="ml-1 text-[11px] font-normal text-wood-dark">
+                        Lv {b.level} · {getMap(b.where.map)?.name}
+                      </span>
+                    </p>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-wood-dark">
+                    Reward: {b.reward.gold.toLocaleString()} Gold, {b.reward.xp.toLocaleString()} XP
+                    {b.reward.items.map((i) => `, ${i.quantity}× ${getItem(i.itemId)?.name}`).join('')}
+                  </p>
+                  {b.accepted && !b.claimed && (
+                    <div className="mt-1 h-2 overflow-hidden rounded bg-parchment-3">
+                      <div className="h-full bg-leaf" style={{ width: `${(100 * b.progress) / b.count}%` }} />
+                    </div>
+                  )}
+                  <div className="mt-1.5 flex justify-end gap-2">
+                    {b.claimed ? (
+                      <span className="text-xs font-bold text-leaf-dark">✓ Handed in</span>
+                    ) : !b.accepted ? (
+                      <button className="px-btn green small" onClick={async () => npcId && setBoard((await client.acceptBounty(npcId, b.idx)) ?? board)} data-testid={`bounty-accept-${b.idx}`}>
+                        Accept
+                      </button>
+                    ) : done ? (
+                      <button className="px-btn gold-btn small" onClick={async () => npcId && setBoard((await client.claimBounty(npcId, b.idx)) ?? board)} data-testid={`bounty-claim-${b.idx}`}>
+                        Hand in
+                      </button>
+                    ) : (
+                      <>
+                        <span className="self-center text-xs">
+                          {b.progress}/{b.count}
+                        </span>
+                        <button
+                          className="px-btn ghost small"
+                          onClick={() => {
+                            onClose();
+                            client.autoWalkTo({ ...b.where, label: `${b.monsterName} hunting grounds` });
+                          }}
+                        >
+                          Go ▶
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </Window>
   );
 }

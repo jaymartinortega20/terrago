@@ -71,6 +71,8 @@ export class Player {
   /** Auto-pickup of your own loot when you walk over it. */
   nextPickupCheck = 0;
   pickingUp = new Set<string>();
+  /** Monsters with an accepted, unfinished bounty today (loaded lazily). */
+  bountyTargets: { day: string; ids: Set<string> } | null = null;
   /** Bag weight last sent to the client. */
   sentLoad = -1;
   sentCarry = -1;
