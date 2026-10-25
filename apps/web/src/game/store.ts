@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | 'arena' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -119,6 +119,8 @@ export interface UiState {
   autoWalk: { map: string; x: number; y: number; label: string } | null;
   /** Quest the tracker and guide arrow follow (null = the main story). */
   trackedQuest: string | null;
+  /** Arena match found (countdown/fight) or its result, for the banner. */
+  arena: import('@terrago/shared').ArenaEvent | null;
 }
 
 export const initialUi: UiState = {
@@ -151,6 +153,7 @@ export const initialUi: UiState = {
   autoHunt: false,
   autoWalk: null,
   trackedQuest: null,
+  arena: null,
   targetId: null,
   autoAttack: false,
   effects: [],

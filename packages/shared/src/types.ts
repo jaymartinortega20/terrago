@@ -619,7 +619,7 @@ export interface JournalView {
   resetsAt: number;
 }
 
-export const LEADERBOARDS = ['level', 'wealth', 'achievements', 'boss_kills', 'farming', 'fishing', 'mining', 'woodcutting'] as const;
+export const LEADERBOARDS = ['level', 'arena', 'wealth', 'achievements', 'boss_kills', 'farming', 'fishing', 'mining', 'woodcutting'] as const;
 export type LeaderboardId = (typeof LEADERBOARDS)[number];
 
 export interface LeaderboardRow {
@@ -797,3 +797,52 @@ export interface FoodBuff {
   durationMs: number;
   mods: { dmg?: number; taken?: number; eva?: number; regen?: number; xp?: number };
 }
+
+// ---------------------------------------------------------------------------
+// Ranked arena
+// ---------------------------------------------------------------------------
+
+export const ARENA_MIN_LEVEL = 15;
+export const ARENA_START_RATING = 1000;
+
+/** Monthly seasons ("2026-10"). */
+export function arenaSeason(now: number): string {
+  return new Date(now).toISOString().slice(0, 7);
+}
+
+export const ARENA_TIERS = [
+  { name: 'Bronze', min: 0, color: '#c08a5a' },
+  { name: 'Silver', min: 1100, color: '#c0c8d8' },
+  { name: 'Gold', min: 1250, color: '#f2c14e' },
+  { name: 'Platinum', min: 1400, color: '#7ad8c8' },
+  { name: 'Diamond', min: 1600, color: '#8ac8ff' },
+  { name: 'Champion', min: 1800, color: '#ff7ab8' },
+] as const;
+
+export function arenaTier(rating: number) {
+  let t: (typeof ARENA_TIERS)[number] = ARENA_TIERS[0];
+  for (const x of ARENA_TIERS) if (rating >= x.min) t = x;
+  return t;
+}
+
+/** Elo: rating change for the winner (the loser loses the same). */
+export function arenaDelta(winner: number, loser: number, k = 32): number {
+  const expected = 1 / (1 + Math.pow(10, (loser - winner) / 400));
+  return Math.max(1, Math.round(k * (1 - expected)));
+}
+
+export interface ArenaView {
+  season: string;
+  rating: number;
+  wins: number;
+  losses: number;
+  queued: boolean;
+  queuedSince: number | null;
+  inMatch: boolean;
+  top: { name: string; classId: string; level: number; rating: number; wins: number; losses: number }[];
+}
+
+/** Server → client: match found, started, finished. */
+export type ArenaEvent =
+  | { kind: 'found'; foe: { name: string; level: number; classId: string; rating: number }; startsAt: number; until: number }
+  | { kind: 'result'; won: boolean | null; delta: number; rating: number; gold: number };

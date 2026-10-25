@@ -1,4 +1,6 @@
 import type {
+  ArenaEvent,
+  ArenaView,
   GuildQuestsView,
   PartyListing,
   BountyBoard,
@@ -154,6 +156,7 @@ export interface ServerToClientEvents {
   /** Someone nearby worked a tile (farming, mining, chopping...) — for their tool animation. */
   'entity:act': (e: { id: string; tx: number; ty: number; tool: string | null }) => void;
   'quests': (quests: QuestState[]) => void;
+  'arena': (ev: ArenaEvent) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
   'invite': (invite: InvitePayload) => void;
   /** You unlocked an achievement. */
@@ -250,6 +253,9 @@ export interface ClientToServerEvents {
   'party:unpost': (ack: Ack<null>) => void;
   'party:join': (leaderId: string, ack: Ack<{ message: string }>) => void;
   'guild:quests': (ack: Ack<GuildQuestsView>) => void;
+  'arena:get': (ack: Ack<ArenaView>) => void;
+  'arena:queue': (ack: Ack<ArenaView>) => void;
+  'arena:leave': (ack: Ack<ArenaView>) => void;
   'guild:questClaim': (questId: string, ack: Ack<{ view: GuildQuestsView; message: string }>) => void;
   'party:leave': (ack: Ack<null>) => void;
   'party:kick': (playerId: string, ack: Ack<null>) => void;

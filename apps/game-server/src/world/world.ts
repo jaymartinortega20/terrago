@@ -86,6 +86,8 @@ export interface WorldDeps {
   onMapEnter?: (player: Player) => void;
   /** A player finished getting on a mount. */
   onMounted?: (player: Player) => void;
+  /** A duel finished (winner null = draw). The arena rates its matches here. */
+  onDuelEnd?: (a: Player, b: Player, winner: Player | null) => void;
   /** A player walked next to loot that's theirs: pick it up. */
   autoPickup?: (player: Player, drop: import('@terrago/shared').DropObject) => void;
   /** Async side effects of combat (rewards, death penalty, durability). */
@@ -237,13 +239,23 @@ export class World {
 
   // --- Duels -------------------------------------------------------------------
 
-  private endDuel(a: Player, b: Player, text: string): void {
+  private endDuel(a: Player, b: Player, text: string, winner: Player | null): void {
     a.duel = null;
     b.duel = null;
     for (const q of [a, b]) {
       q.conn?.send('duel', { with: null });
       this.system(q, text);
     }
+    this.deps.onDuelEnd?.(a, b, winner);
+  }
+
+  /** Start a duel between two players (also used by the arena). */
+  startDuel(p: Player, q: Player, ms: number): void {
+    const until = this.now() + ms;
+    p.duel = { with: q, until };
+    q.duel = { with: p, until };
+    p.conn?.send('duel', { with: { id: q.id, name: q.name }, until });
+    q.conn?.send('duel', { with: { id: p.id, name: p.name }, until });
   }
 
   duelCommand(p: Player, cmd: string, arg: string): string {
@@ -253,6 +265,7 @@ export class World {
       if (!q || q === p) return 'Who? Type /duel followed by a player name.';
       if (q.mapId !== p.mapId || Math.hypot(q.x - p.x, q.y - p.y) > 12 * TILE_SIZE) return `${q.name} needs to be nearby.`;
       if (p.duel || q.duel) return 'Someone is already in a duel.';
+      if (p.arena || q.arena) return 'Someone is busy with the arena.';
       if (q.blocked.get(p.id) === 'block') return `${q.name} isn't accepting duels.`;
       q.duelInvite = { from: p, until: now + 30_000 };
       this.system(q, `${p.name} challenges you to a duel! Type /accept to fight (nobody dies — first to 1 HP loses).`);
@@ -263,18 +276,14 @@ export class World {
       p.duelInvite = null;
       if (!inv || inv.until < now || !this.players.has(inv.from.id) || inv.from.duel || p.duel) return 'No duel challenge to accept.';
       const q = inv.from;
-      const until = now + 180_000;
-      p.duel = { with: q, until };
-      q.duel = { with: p, until };
-      p.conn?.send('duel', { with: { id: q.id, name: q.name }, until });
-      q.conn?.send('duel', { with: { id: p.id, name: p.name }, until });
+      this.startDuel(p, q, 180_000);
       this.system(q, `${p.name} accepted your duel. Fight!`);
       return `Duel with ${q.name} — fight! (F to attack; click them to target)`;
     }
     if (cmd === 'forfeit') {
       if (!p.duel) return "You're not in a duel.";
       const q = p.duel.with;
-      this.endDuel(p, q, `${p.name} forfeits. ${q.name} wins the duel!`);
+      this.endDuel(p, q, `${p.name} forfeits. ${q.name} wins the duel!`, q);
       return '';
     }
     return '';
@@ -282,11 +291,11 @@ export class World {
 
   duelWon(winner: Player, loser: Player): void {
     if (winner.duel?.with !== loser) return;
-    this.endDuel(winner, loser, `${winner.name} wins the duel against ${loser.name}!`);
+    this.endDuel(winner, loser, `${winner.name} wins the duel against ${loser.name}!`, winner);
   }
 
   private expireDuels(now: number): void {
-    for (const p of this.players.values()) if (p.duel && p.duel.until < now) this.endDuel(p, p.duel.with, 'The duel ended in a draw (time).');
+    for (const p of this.players.values()) if (p.duel && p.duel.until < now) this.endDuel(p, p.duel.with, 'The duel ended in a draw (time).', null);
   }
 
   /** Worn equipment changed: recompute stats and tell the client. */
@@ -579,7 +588,7 @@ export class World {
       tickRate: SIM.tickRate,
       snapshotRate: SIM.tickRate / SIM.snapshotEveryTicks,
       self,
-      map: { id: rt.def.id, name: rt.owner && !rt.def.dungeon ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
+      map: { id: rt.def.id, name: rt.owner && !rt.def.dungeon && !rt.def.arena ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
       position: { x: p.x, y: p.y, dir: p.dir },
       npcs: rt.npcs.map(toNpcPublic),
       inventory,
@@ -618,7 +627,7 @@ export class World {
     if (this.players.get(p.id) !== p) return;
     if (p.graceTimer) clearTimeout(p.graceTimer);
     p.graceTimer = null;
-    if (p.duel) this.endDuel(p, p.duel.with, `${p.name} left. The duel is over.`);
+    if (p.duel) this.endDuel(p, p.duel.with, `${p.name} left. The duel is over.`, p.duel.with);
     this.players.delete(p.id);
     this.inventoryCache.delete(p.id);
     this.removeFromMap(p);

@@ -46,6 +46,7 @@ import dragonspireJson from '../data/maps/dragonspire.json';
 import cragsJson from '../data/maps/desolate_crags.json';
 import depthsJson from '../data/maps/glacial_depths.json';
 import calderaJson from '../data/maps/infernal_caldera.json';
+import arenaJson from '../data/maps/arena.json';
 import dungeonsJson from '../data/dungeons.json';
 import achievementsJson from '../data/achievements.json';
 import animalsJson from '../data/animals.json';
@@ -189,6 +190,7 @@ export const MAPS: Readonly<Record<string, MapDef>> = {
   glacial_depths: depthsJson as MapDef,
   dragonspire: dragonspireJson as MapDef,
   infernal_caldera: calderaJson as MapDef,
+  arena: arenaJson as MapDef,
 };
 
 const itemIndex = new Map(ITEMS.map((i) => [i.id, i]));

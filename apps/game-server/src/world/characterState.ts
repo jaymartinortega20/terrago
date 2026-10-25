@@ -77,9 +77,11 @@ export function unspentStatPoints(rec: CharacterRecord): number {
  */
 export function sanitizePosition(rec: CharacterRecord): CharacterRecord {
   let map = getMap(rec.mapId);
-  if (!map) {
+  // Nobody stays in an arena between sessions.
+  if (!map || map.arena) {
     map = getMap(BALANCE.character.startingMap)!;
     rec.mapId = map.id;
+    rec.x = NaN; // go to the town spawn
   }
   const grid = collisionGridFor(map);
   if (!Number.isFinite(rec.x) || !Number.isFinite(rec.y) || grid.bodyBlocked(rec.x, rec.y)) {

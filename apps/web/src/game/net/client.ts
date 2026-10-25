@@ -290,6 +290,11 @@ export class GameClient {
     });
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
     socket.on('pet:update', (pet) => this.ui.set({ pet }));
+    socket.on('arena', (ev) => {
+      this.ui.set({ arena: ev, ...(ev.kind === 'found' ? { panel: null, autoWalk: null } : {}) });
+      audio.sfx(ev.kind === 'found' ? 'open' : ev.won ? 'achievement' : 'click');
+      if (ev.kind === 'result') setTimeout(() => this.ui.get().arena === ev && this.ui.set({ arena: null }), 6000);
+    });
     socket.on('pet:hp', (h) => this.ui.set((s) => ({ pet: s.pet ? { ...s.pet, ...h } : s.pet })));
     socket.on('inventory:update', (inventory) => this.ui.set((s) => ({ inventory: { ...inventory, equipment: inventory.equipment ?? s.inventory?.equipment ?? [] } })));
     socket.on('notice', (n) => {
@@ -638,6 +643,19 @@ export class GameClient {
 
   speed(): number {
     return this.ui.get().self?.speed ?? 1;
+  }
+
+  arenaGet(): Promise<import('@terrago/shared').ArenaView> {
+    return this.request('arena:get');
+  }
+
+  async arenaQueue(join: boolean): Promise<import('@terrago/shared').ArenaView | null> {
+    try {
+      return await this.request<import('@terrago/shared').ArenaView>(join ? 'arena:queue' : 'arena:leave');
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
   }
 
   partyListings(): Promise<{ listings: import('@terrago/shared').PartyListing[]; mine: import('@terrago/shared').PartyListing | null }> {

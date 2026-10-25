@@ -16,6 +16,7 @@ import { attachSockets, type GameIo } from './net/sockets';
 import { SecurityEvents } from './security/events';
 import { savePositions } from './services/characters';
 import { chatCommand, onLeave as socialLeave } from './net/social';
+import { arenaOnLeave, onArenaDuelEnd, startArena } from './net/arena';
 import { track } from './net/journal';
 import { startEventDirector } from './net/events';
 import { AntiBot, setAntiBot } from './security/antibot';
@@ -61,7 +62,11 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     savePositions: (s) => savePositions(pool, s),
     onChat: (e) => chatLog.add(e),
     onCommand: (p, cmd, rest) => chatCommand({ pool, world, log }, p, cmd, rest),
-    onLeave: (p) => socialLeave({ pool, world, log }, p),
+    onLeave: (p) => {
+      arenaOnLeave({ pool, world, log }, p);
+      socialLeave({ pool, world, log }, p);
+    },
+    onDuelEnd: (a, b, winner) => onArenaDuelEnd({ pool, world, log }, a, b, winner),
     dungeonOwner: (p) => {
       const leader = p.party ? world.players.get(p.party.leaderId) : undefined;
       const who = leader?.conn ? leader : p;
@@ -120,6 +125,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   const rainTimer = setInterval(() => void rainTick({ pool, world, log }).catch((err) => log.error('rain_tick_failed', { err })), 60_000);
   rainTimer.unref();
   const stopEvents = startEventDirector({ pool, world, log });
+  const stopArena = startArena({ pool, world, log });
 
   await new Promise<void>((resolve) => http.listen(config.port, config.host, resolve));
   const addr = http.address();
@@ -144,6 +150,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
         clearInterval(rainTimer);
         bots.stop();
         stopEvents();
+        stopArena();
         await world.shutdown();
         io.close();
         await chatLog.close();

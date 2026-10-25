@@ -85,6 +85,8 @@ export class Player {
   mountLook: import('@terrago/shared').MountLook = {};
   /** The active companion's growth (loaded from character_pets) and live health. */
   petState: PetState | null = null;
+  /** In a ranked arena match: the opponent and where to go back to. */
+  arena: { foe: Player; back: { mapId: string; x: number; y: number; owner: { id: string; name: string } | null }; done: boolean } | null = null;
   /** The active pet's evolution stage (shown to others). */
   petStage = 1;
   // --- Social ---------------------------------------------------------------

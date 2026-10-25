@@ -4,7 +4,7 @@ import { PixelIcon } from '@/components/PixelIcon';
 import { SiteHeader } from '@/components/SiteHeader';
 import { PlayLink, WakeServer } from '@/components/PlayLink';
 
-const VERSION = '2.2';
+const VERSION = '2.3';
 
 const FEATURES = [
   {
@@ -32,8 +32,15 @@ const FEATURES = [
     id: 'companions',
     title: 'Mounts & Pets',
     icon: 'mount:stag:dfe6ff',
-    status: 'New in 2.1',
-    body: 'Ride horses, wolves, a wyvern or the Celestial Stag, each with speed and terrain perks, and dress them with saddles, barding and trails. Pets fight beside you, level up to 100, earn loyalty and learn new skills.',
+    status: 'Live',
+    body: 'Ride horses, wolves, a wyvern or the Celestial Stag, each with speed and terrain perks, and dress them with saddles, barding and trails. Pets fight beside you, level up to 100, earn loyalty, learn new skills and evolve twice into Grown and Mythic forms.',
+  },
+  {
+    id: 'adventure',
+    title: 'World Bosses & Arena',
+    icon: 'scale:a83a2a',
+    status: 'New in 2.3',
+    body: 'Every three hours a world boss appears and the whole server fights it. Climb the ranked 1v1 arena each season, find a group in the party finder, take daily bounties and story quests on every map, and chase gear with random bonus stats and set bonuses.',
   },
 ] as const;
 
@@ -49,8 +56,9 @@ const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 
   { v: '1.0–1.1', name: 'Launch & endgame', text: 'Music and sound, phone controls, professions, bank, stalls, world events, level 100.', state: 'done' },
   { v: '2.0', name: 'The great revision', text: 'Four classes and eight second jobs, the six-map world, gem upgrades, wings, combat pets and the Pyraxis raid.', state: 'done' },
   { v: '2.1', name: 'Mounts, pets & HUD', text: 'Stable with 3D preview, mount gear, pet levels and loyalty, the ornate HUD and spell effects.', state: 'done' },
-  { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: sun shadows, richer colour, sunbeams and depth haze — tuned to run on low-end PCs, with an Ultra mode for gaming GPUs.', state: 'now' },
-  { v: '2.3', name: 'Polish & balance', text: 'Carry weight from STR, boss and levelling balance from real play, glass menus everywhere.', state: 'next' },
+  { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: sun shadows, richer colour, sunbeams and depth haze — tuned to run on low-end PCs, with an Ultra mode for gaming GPUs.', state: 'done' },
+  { v: '2.3', name: 'Adventure update', text: '50-slot bags that stack, a faster first hour, minimap and auto-pickup, Elites and new late-map monsters, random gear stats and sets, story chains, bounties and auto-walk, world bosses, party finder, guild quests, food buffs, pet evolution and the ranked arena.', state: 'now' },
+  { v: '2.4', name: 'Polish & balance', text: 'Boss and levelling balance from real play, more arena seasons and rewards, glass menus everywhere.', state: 'next' },
   { v: '3.0', name: 'Full 3D', text: 'Low-poly floating islands, 3D chibi characters and visible gear.', state: 'later' },
 ];
 
@@ -69,7 +77,7 @@ const FAQ = [
   },
   {
     q: 'What can I do right now?',
-    a: 'Almost everything: pick one of four classes and a second job at 40, explore six maps from Oakhaven to the Infernal Caldera, farm, fish, mine, craft, trade, join a guild, ride mounts, raise pets, run dungeons and raid Pyraxis. TerraGo is in open alpha (v2.2), so expect balance changes.',
+    a: 'Almost everything: pick one of four classes and a second job at 40, explore six maps from Oakhaven to the Infernal Caldera, farm, fish, mine, craft, trade, join a guild, ride mounts, raise and evolve pets, fight world bosses, climb the ranked arena, run dungeons and raid Pyraxis. TerraGo is in open alpha (v2.3), so expect balance changes.',
   },
   {
     q: 'Is my progress saved?',

@@ -6,6 +6,7 @@ import { fxSettings, onFxSettings } from './fx/settings';
 import { HudIcon } from './ui/HudIcons';
 import { StablePanel } from './ui/StableUi';
 import { PetPanel } from './ui/PetUi';
+import { ArenaBanner, ArenaPanel } from './ui/ArenaUi';
 import Phaser from 'phaser';
 import { useEffect, useRef, useState } from 'react';
 import { getItem } from '@terrago/game-data';
@@ -144,6 +145,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
         if (ui.get().dialogue) return;
         ui.set((s) => ({ panel: s.panel ? null : 'settings' }));
       } else if (ui.get().dialogue) return;
+      else if (k === 'b' && e.shiftKey) open('arena');
       else if (k === 'b') open('inventory');
       else if (k === 'z' && e.shiftKey) open('stable');
       else if (actionForKey(k)) {
@@ -260,6 +262,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'enhance' && <EnhancePanel client={client} onClose={() => open(null)} />}
           {panel === 'stable' && <StablePanel client={client} onClose={() => open(null)} />}
           {panel === 'pets' && <PetPanel client={client} onClose={() => open(null)} />}
+          {panel === 'arena' && <ArenaPanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
           )}
@@ -321,6 +324,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <QuestRewardWindow client={client} />
       <SocialPopups client={client} />
       <ProgressToasts client={client} openJournal={() => open('journal')} touch={touch} />
+      <ArenaBanner client={client} />
       <TradeWindow client={client} />
       <ProfileWindow client={client} />
       <StallBrowseWindow client={client} />

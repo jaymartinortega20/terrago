@@ -30,6 +30,7 @@ import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDia
 import { loadCompanions, pets, stable, syncCompanion, toggleMount } from './companions';
 import * as social from './social';
 import * as journal from './journal';
+import { arena } from './arena';
 import { bounties } from './bounties';
 import { claimGuildQuest, guildQuestsView } from './guildQuests';
 import * as eco from './economy';
@@ -439,6 +440,9 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('party:unpost', (ack) => respond(ack, () => social.partyFinder.unpost(p)));
     socket.on('party:join', (id, ack) => respond(ack, () => social.partyFinder.join(g, p, id)));
     socket.on('guild:quests', (ack) => respond(ack, () => guildQuestsView(g, p)));
+    socket.on('arena:get', (ack) => respond(ack, () => arena.get(g, p)));
+    socket.on('arena:queue', (ack) => serial(ack, () => arena.join(g, p)));
+    socket.on('arena:leave', (ack) => serial(ack, () => arena.leave(g, p)));
     socket.on('guild:questClaim', (id, ack) => serial(ack, () => claimGuildQuest(g, p, id)));
     socket.on('party:leave', (ack) => respond(ack, () => social.partyLeave(p)));
     socket.on('party:kick', (id, ack) => respond(ack, () => social.partyKick(g, p, id)));

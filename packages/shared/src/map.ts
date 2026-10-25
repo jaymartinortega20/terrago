@@ -166,6 +166,8 @@ export interface MapDef {
   portals: PortalDef[];
   /** Instanced maps exist once per owner (homesteads) instead of once for everyone. */
   instanced?: boolean;
+  /** The ranked arena: entered only through matchmaking, never saved as a position. */
+  arena?: boolean;
   /** Farm plot tile positions in unlock order (homesteads). */
   farmPlots?: [number, number][];
   /** Gatherable nodes (ore rocks, choppable trees, herbs...). */

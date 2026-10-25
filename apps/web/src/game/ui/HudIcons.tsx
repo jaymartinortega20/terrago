@@ -55,6 +55,12 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M7.5 17c0-3 2-5 4.5-5s4.5 2 4.5 5c0 2-2 2.5-4.5 2.5S7.5 19 7.5 17Z" fill="#fff" />
     </>
   ),
+  arena: (
+    <>
+      <path d="M5 4l9 9M19 4l-9 9" stroke="#dfe6f0" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M8 14l-3 3 2 2 3-3M16 14l3 3-2 2-3-3" fill="#c08a4a" stroke="#c08a4a" strokeWidth="1.6" />
+    </>
+  ),
   guild: (
     <>
       <path d="M5 3h14v9c0 5-4 8-7 9-3-1-7-4-7-9Z" fill="#3a6ad0" stroke="#fff" strokeWidth="1.2" />
