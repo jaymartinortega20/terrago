@@ -824,12 +824,14 @@ export class WorldScene extends Phaser.Scene {
       tex.add(1, 0, sheet.w * 2, 0, sheet.w * 2, sheet.h * 2);
       frameW = sheet.w * 2;
     } else frameW = this.textures.get(key).get(0).width;
-    const sprite = this.add.sprite(m.x, m.y + 2, key, 0).setOrigin(0.5, 1).setScale(md.size);
+    const elite = !!m.info.elite;
+    const sprite = this.add.sprite(m.x, m.y + 2, key, 0).setOrigin(0.5, 1).setScale(md.size * (elite ? 1.25 : 1));
+    if (elite) sprite.postFX?.addGlow(0xffb02e, 2, 0, false, 0.1, 8);
     const lvl = this.client.ui.get().self?.level ?? 1;
     const diff = m.info.level - lvl;
-    const color = diff >= 10 ? '#ff5a5a' : diff >= 5 ? '#ff9a3a' : diff >= 2 ? '#ffe48a' : diff <= -6 ? '#9a9a9a' : '#ffffff';
+    const color = elite ? '#ffb02e' : diff >= 10 ? '#ff5a5a' : diff >= 5 ? '#ff9a3a' : diff >= 2 ? '#ffe48a' : diff <= -6 ? '#9a9a9a' : '#ffffff';
     const label = this.add
-      .text(m.x, m.y - sprite.displayHeight - 8, `${m.info.name} · Lv ${m.info.level}`, { fontFamily: LABEL_FONT, fontSize: '11px', color, stroke: '#2a2030', strokeThickness: 3 })
+      .text(m.x, m.y - sprite.displayHeight - 8, `${elite ? '★ ' : ''}${m.info.name} · Lv ${m.info.level}`, { fontFamily: LABEL_FONT, fontSize: elite ? '12px' : '11px', fontStyle: elite ? 'bold' : 'normal', color, stroke: '#2a2030', strokeThickness: 3 })
       .setOrigin(0.5, 1)
       .setResolution(2)
       .setDepth(LABEL_DEPTH - 2);
@@ -997,6 +999,14 @@ export class WorldScene extends Phaser.Scene {
     const to = this.entityPos(e.t) ?? from;
     if (!to) return;
     const chest = (s: { x: number; y: number; h: number }) => ({ x: s.x, y: s.y - s.h * 0.5 });
+    // Monster abilities.
+    if (e.sk?.startsWith('monster_')) {
+      if (e.sk === 'monster_explode') return sp.explosion(to, 2 * TILE_SIZE, SPELL.fire);
+      if (e.sk === 'monster_summon' && from) return sp.magicCircle(from, SPELL.shadow, 34, 900);
+      if (e.sk === 'monster_charge' && from) return sp.shockwave(from, SPELL.blood, 24);
+      if (e.sk === 'monster_heal') return sp.shockwave(to, SPELL.nature, 20);
+      return;
+    }
     const sk = e.sk && e.sk !== 'pet' && e.sk !== 'hawk' && e.sk !== 'petguard' ? getSkillDef(e.sk) : undefined;
     if (!sk) {
       // Plain staff / wand bolts from players land in a swirling splash.

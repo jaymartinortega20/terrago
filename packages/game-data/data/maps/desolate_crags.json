@@ -51,7 +51,7 @@
     41,
     55
    ],
-   "count": 11,
+   "count": 8,
    "area": {
     "x": 5,
     "y": 4,
@@ -60,17 +60,101 @@
    }
   },
   {
+   "monster": "sand_scorpion",
+   "level": [
+    43,
+    52
+   ],
+   "count": 5,
+   "area": {
+    "x": 5,
+    "y": 20,
+    "w": 22,
+    "h": 14
+   }
+  },
+  {
+   "monster": "boulder_mite",
+   "level": [
+    45,
+    55
+   ],
+   "count": 4,
+   "area": {
+    "x": 5,
+    "y": 4,
+    "w": 22,
+    "h": 16
+   }
+  },
+  {
+   "monster": "dust_bandit",
+   "level": [
+    50,
+    60
+   ],
+   "count": 5,
+   "area": {
+    "x": 18,
+    "y": 8,
+    "w": 26,
+    "h": 14
+   }
+  },
+  {
+   "monster": "crag_shaman",
+   "level": [
+    52,
+    62
+   ],
+   "count": 3,
+   "area": {
+    "x": 18,
+    "y": 8,
+    "w": 26,
+    "h": 14
+   }
+  },
+  {
    "monster": "rock_golem",
    "level": [
     55,
     70
    ],
-   "count": 9,
+   "count": 7,
    "area": {
     "x": 36,
     "y": 4,
     "w": 22,
     "h": 34
+   }
+  },
+  {
+   "monster": "wraith",
+   "level": [
+    60,
+    68
+   ],
+   "count": 4,
+   "area": {
+    "x": 36,
+    "y": 14,
+    "w": 22,
+    "h": 24
+   }
+  },
+  {
+   "monster": "cursed_knight",
+   "level": [
+    64,
+    70
+   ],
+   "count": 3,
+   "area": {
+    "x": 40,
+    "y": 4,
+    "w": 18,
+    "h": 10
    }
   }
  ],

@@ -114,6 +114,48 @@
     "w": 10,
     "h": 4
    }
+  },
+  {
+   "monster": "dragon_priest",
+   "level": [
+    100,
+    100
+   ],
+   "count": 3,
+   "area": {
+    "x": 34,
+    "y": 34,
+    "w": 24,
+    "h": 10
+   }
+  },
+  {
+   "monster": "wyrm_hatchling",
+   "level": [
+    100,
+    100
+   ],
+   "count": 4,
+   "area": {
+    "x": 12,
+    "y": 27,
+    "w": 24,
+    "h": 15
+   }
+  },
+  {
+   "monster": "drake_broodmother",
+   "level": [
+    100,
+    100
+   ],
+   "count": 2,
+   "area": {
+    "x": 36,
+    "y": 3,
+    "w": 22,
+    "h": 10
+   }
   }
  ],
  "width": 64,

@@ -466,6 +466,9 @@ function dragonspire(): MapDef {
       { monster: 'elder_drake', level: [100, 100], count: 5, area: { x: 36, y: 3, w: 22, h: 10 } },
       { monster: 'drake_champion', level: [100, 100], count: 2, area: { x: 12, y: 30, w: 20, h: 10 } },
       { monster: 'dragon_knight_champion', level: [100, 100], count: 2, area: { x: 40, y: 24, w: 10, h: 4 } },
+      { monster: 'dragon_priest', level: [100, 100], count: 3, area: { x: 34, y: 34, w: 24, h: 10 } },
+      { monster: 'wyrm_hatchling', level: [100, 100], count: 4, area: { x: 12, y: 27, w: 24, h: 15 } },
+      { monster: 'drake_broodmother', level: [100, 100], count: 2, area: { x: 36, y: 3, w: 22, h: 10 } },
     ],
   });
 }
@@ -515,8 +518,14 @@ function desolateCrags(): MapDef {
     levels: [41, 70],
     respawn: { mapId: 'desolate_crags', x: 31, y: 40 },
     spawns: [
-      { monster: 'earth_elemental', level: [41, 55], count: 11, area: { x: 5, y: 4, w: 22, h: 30 } },
-      { monster: 'rock_golem', level: [55, 70], count: 9, area: { x: 36, y: 4, w: 22, h: 34 } },
+      { monster: 'earth_elemental', level: [41, 55], count: 8, area: { x: 5, y: 4, w: 22, h: 30 } },
+      { monster: 'sand_scorpion', level: [43, 52], count: 5, area: { x: 5, y: 20, w: 22, h: 14 } },
+      { monster: 'boulder_mite', level: [45, 55], count: 4, area: { x: 5, y: 4, w: 22, h: 16 } },
+      { monster: 'dust_bandit', level: [50, 60], count: 5, area: { x: 18, y: 8, w: 26, h: 14 } },
+      { monster: 'crag_shaman', level: [52, 62], count: 3, area: { x: 18, y: 8, w: 26, h: 14 } },
+      { monster: 'rock_golem', level: [55, 70], count: 7, area: { x: 36, y: 4, w: 22, h: 34 } },
+      { monster: 'wraith', level: [60, 68], count: 4, area: { x: 36, y: 14, w: 22, h: 24 } },
+      { monster: 'cursed_knight', level: [64, 70], count: 3, area: { x: 40, y: 4, w: 18, h: 10 } },
     ],
   });
 }
@@ -568,8 +577,14 @@ function glacialDepths(): MapDef {
     levels: [71, 99],
     respawn: { mapId: 'glacial_depths', x: 31, y: 40 },
     spawns: [
-      { monster: 'ice_specter', level: [71, 85], count: 10, area: { x: 5, y: 4, w: 22, h: 30 } },
-      { monster: 'frost_giant_brute', level: [85, 99], count: 9, area: { x: 36, y: 4, w: 24, h: 16 } },
+      { monster: 'ice_specter', level: [71, 82], count: 7, area: { x: 5, y: 4, w: 22, h: 30 } },
+      { monster: 'snow_wolf', level: [72, 80], count: 5, area: { x: 5, y: 4, w: 22, h: 30 } },
+      { monster: 'ice_wisp', level: [74, 84], count: 5, area: { x: 5, y: 14, w: 22, h: 20 } },
+      { monster: 'frost_mite', level: [78, 88], count: 4, area: { x: 18, y: 20, w: 26, h: 14 } },
+      { monster: 'frost_priestess', level: [82, 92], count: 3, area: { x: 30, y: 20, w: 26, h: 10 } },
+      { monster: 'frost_yeti', level: [86, 95], count: 5, area: { x: 36, y: 4, w: 24, h: 16 } },
+      { monster: 'glacier_warlock', level: [88, 96], count: 3, area: { x: 36, y: 4, w: 24, h: 16 } },
+      { monster: 'frost_giant_brute', level: [90, 99], count: 6, area: { x: 36, y: 4, w: 24, h: 16 } },
     ],
   });
 }
@@ -605,6 +620,8 @@ function infernalCaldera(): MapDef {
     spawns: [
       { monster: 'infernal_titan', level: [100, 100], count: 1, area: { x: 22, y: 13, w: 4, h: 4 } },
       { monster: 'ember_elemental', level: [96, 100], count: 6, area: { x: 15, y: 10, w: 18, h: 12 } },
+      { monster: 'magma_hound', level: [96, 100], count: 3, area: { x: 15, y: 22, w: 18, h: 8 } },
+      { monster: 'fire_imp', level: [96, 100], count: 3, area: { x: 15, y: 22, w: 18, h: 8 } },
     ],
   });
 }

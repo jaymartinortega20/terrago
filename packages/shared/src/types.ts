@@ -165,6 +165,8 @@ export interface PublicMonster {
   y: number;
   dir: Direction;
   boss?: boolean;
+  /** Rare tougher variant with better loot. */
+  elite?: boolean;
 }
 
 /** What other players can see about a player entity. */

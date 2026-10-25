@@ -73,12 +73,17 @@ export class Monster {
   casting: { ability: import('@terrago/shared').BossAbility; x: number; y: number; at: number } | null = null;
   enraged = 1;
   adds: Monster[] = [];
+  /** Rare elite variant (more HP and damage, better loot). */
+  elite = false;
+  /** Exploders: blowing up at this time. Chargers: dashing until. */
+  fuseAt = 0;
+  chargeUntil = 0;
 
   constructor(
     readonly id: string,
     readonly def: MonsterDef,
     readonly level: number,
-    readonly stats: MonsterStats,
+    public stats: MonsterStats,
     public x: number,
     public y: number,
     readonly spawn: SpawnDef,
@@ -99,7 +104,7 @@ export class Monster {
       kind: 'monster',
       id: this.id,
       monsterId: this.def.id,
-      name: this.def.name,
+      name: this.elite ? `Elite ${this.def.name}` : this.def.name,
       level: this.level,
       hp: this.hp,
       maxHp: this.stats.maxHp,
@@ -107,6 +112,7 @@ export class Monster {
       y: this.y,
       dir: this.dir,
       ...(this.def.boss ? { boss: true } : {}),
+      ...(this.elite ? { elite: true } : {}),
     };
   }
 }
@@ -182,9 +188,17 @@ export class Combat {
         const base = monsterStats(def, level);
         const stats = diff ? { ...base, maxHp: Math.round(base.maxHp * diff.hp), atk: Math.round(base.atk * diff.atk), xp: Math.round(base.xp * (1 + (diff.lootRolls - 1) * 0.25)) } : base;
         const m = new Monster(`m${++this.seq}`, def, level, stats, pos.x, pos.y, sp);
+        this.rollElite(rt, m, stats);
         rt.monsters.set(m.id, m);
       }
     }
+  }
+
+  /** 1 in 25 ordinary monsters (outside dungeons) spawns as an Elite: 3× HP, 1.5× damage, 4× EXP, extra loot. */
+  private rollElite(rt: MapRuntime, m: Monster, base: MonsterStats): void {
+    m.elite = !m.def.boss && !m.temp && !m.eventTag && !rt.def.dungeon && this.rand() < 0.04;
+    m.stats = m.elite ? { ...base, maxHp: base.maxHp * 3, atk: Math.round(base.atk * 1.5), xp: base.xp * 4 } : base;
+    m.hp = m.stats.maxHp;
   }
 
   private emit(rt: MapRuntime, e: CombatEvent): void {
@@ -220,11 +234,14 @@ export class Combat {
           m.x = pos.x;
           m.y = pos.y;
         }
-        m.hp = m.stats.maxHp;
+        this.rollElite(rt, m, monsterStats(m.def, m.level));
         m.state = 'idle';
         m.effects = [];
         m.damageBy.clear();
         m.targetId = null;
+        m.fuseAt = 0;
+        m.chargeUntil = 0;
+        if (!m.def.abilities) m.abilityAt.clear();
         this.resetBoss(rt, m);
       }
       return;
@@ -254,6 +271,7 @@ export class Combat {
         m.targetId = null;
       } else {
         if (m.def.abilities && this.bossTick(rt, m, target, now)) return;
+        if (m.def.behavior && this.behaviorTick(rt, m, target, now)) return;
         const d = dist(m.x, m.y, target.x, target.y);
         if (d <= m.def.range * TILE && (m.def.range <= 2 || rt.grid.lineOfSight(m.x, m.y - 8, target.x, target.y - 12))) {
           m.dir = facing(target.x - m.x, target.y - m.y);
@@ -261,7 +279,7 @@ export class Combat {
             m.nextAttackAt = now + m.def.cooldownMs;
             this.monsterAttack(rt, m, target, now);
           }
-        } else this.moveToward(rt, m, target.x, target.y, dtMs, now);
+        } else this.moveToward(rt, m, target.x, target.y, dtMs, now, m.chargeUntil > now ? 3.2 : 1);
         return;
       }
     }
@@ -662,7 +680,7 @@ export class Combat {
     m.state = 'dead';
     m.respawnAt = rt.def.dungeon ? Infinity : this.now() + m.def.respawnMs;
     m.casting = null;
-    if (m.def.boss) for (const a of m.adds) if (a.alive) this.killQuietly(rt, a);
+    if (m.def.boss || m.def.behavior === 'summoner') for (const a of m.adds) if (a.alive) this.killQuietly(rt, a);
     this.emit(rt, { s: m.id, t: m.id, a: 0, k: 'death' });
     const total = [...m.damageBy.values()].reduce((a, b) => a + b, 0);
     if (total <= 0) return;
@@ -704,11 +722,84 @@ export class Combat {
       loot.gold = Math.round((g0 + this.rand() * (g1 - g0)) * (1 + m.level * 0.08) * rolls);
       // LUK slightly raises drop chances (+0.2% of the base chance per point, at most +40%).
       const luck = 1 + Math.min(0.4, (loot.player.profile.stats.luck ?? 0) * 0.002);
-      for (let k = 0; k < rolls; k++)
+      const eliteRolls = m.elite ? 3 : 1;
+      for (let k = 0; k < rolls * eliteRolls; k++)
         for (const d of m.def.drops) if (this.rand() < d.chance * luck) loot.items.push({ itemId: d.itemId, quantity: d.min + Math.floor(this.rand() * (d.max - d.min + 1)) });
+      if (m.elite) {
+        loot.gold *= 3;
+        loot.items.push({ itemId: 'enhancement_stone', quantity: 1 + Math.floor(this.rand() * 2) });
+      }
     }
     if (rt.def.dungeon) for (const r of rewards) r.difficulty = difficultyOf(rt.owner?.id).id;
     this.hooks.onKill?.(rewards);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Monster behaviours
+  // ---------------------------------------------------------------------------
+
+  /** Healers, summoners, exploders and chargers. Returns true when it used its turn. */
+  private behaviorTick(rt: MapRuntime, m: Monster, target: Player, now: number): boolean {
+    const d = dist(m.x, m.y, target.x, target.y);
+    switch (m.def.behavior) {
+      case 'healer': {
+        if (now < (m.abilityAt.get('heal') ?? 0)) return false;
+        let best: Monster | null = null;
+        for (const o of rt.monsters.values()) {
+          if (!o.alive || o.hp >= o.stats.maxHp * 0.8 || dist(o.x, o.y, m.x, m.y) > 5 * TILE) continue;
+          if (!best || o.hp / o.stats.maxHp < best.hp / best.stats.maxHp) best = o;
+        }
+        if (!best) return false;
+        m.abilityAt.set('heal', now + 4000);
+        const amount = Math.round(best.stats.maxHp * 0.12);
+        best.hp = Math.min(best.stats.maxHp, best.hp + amount);
+        this.emit(rt, { s: m.id, t: best.id, a: amount, k: 'heal', sk: 'monster_heal' });
+        return true;
+      }
+      case 'summoner': {
+        const next = m.abilityAt.get('summon');
+        if (next === undefined) {
+          m.abilityAt.set('summon', now + 3000); // first call a few seconds into the fight
+          return false;
+        }
+        if (now < next) return false;
+        m.adds = m.adds.filter((a) => a.alive);
+        m.abilityAt.set('summon', now + 10_000);
+        if (m.adds.length >= 2 || !m.def.summon) return false;
+        this.summonAdds(rt, m, { id: 'summon', name: 'Summon', kind: 'summon', monster: m.def.summon, count: 2, level: Math.max(1, m.level - 4) });
+        this.emit(rt, { s: m.id, t: m.id, a: 0, k: 'cast', sk: 'monster_summon' });
+        return true;
+      }
+      case 'exploder': {
+        if (m.fuseAt) {
+          if (now < m.fuseAt) return true; // standing still, fizzing
+          m.fuseAt = 0;
+          const r = 2 * TILE;
+          this.emit(rt, { s: m.id, t: m.id, a: 0, k: 'cast', sk: 'monster_explode' });
+          for (const p of [...rt.players]) {
+            if (p.dead || dist(p.x, p.y, m.x, m.y) > r) continue;
+            this.damagePlayer(rt, p, Math.max(1, Math.round(m.stats.atk * 2.5 * effectMult(p.effects, 'taken', now))), m.id, 'crit');
+          }
+          if (m.alive) this.damageMonster(rt, m, m.hp, null, 'hit');
+          return true;
+        }
+        if (d <= 1.6 * TILE) {
+          m.fuseAt = now + 900;
+          this.hooks.telegraph?.(rt, { id: `fuse:${m.id}`, x: m.x, y: m.y, r: 2, ms: 900, name: `${m.def.name} is about to explode!` });
+          return true;
+        }
+        return false;
+      }
+      case 'charger': {
+        if (d > 3 * TILE && d < 7 * TILE && now >= (m.abilityAt.get('charge') ?? 0)) {
+          m.abilityAt.set('charge', now + 6000);
+          m.chargeUntil = now + 700;
+          this.emit(rt, { s: m.id, t: target.id, a: 0, k: 'cast', sk: 'monster_charge' });
+        }
+        return false;
+      }
+    }
+    return false;
   }
 
   // ---------------------------------------------------------------------------

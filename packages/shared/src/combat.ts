@@ -181,6 +181,12 @@ export interface MonsterDef {
   boss?: boolean;
   /** Boss mechanics. */
   abilities?: BossAbility[];
+  /**
+   * How it fights: healer (mends nearby monsters), summoner (calls `summon`
+   * minions), exploder (runs in and blows up), charger (dashes at you).
+   */
+  behavior?: 'healer' | 'summoner' | 'exploder' | 'charger';
+  summon?: string;
 }
 
 /**
