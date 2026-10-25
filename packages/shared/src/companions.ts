@@ -42,7 +42,7 @@ export interface MountStyleDef {
   slot: MountStyleSlot;
   name: string;
   color: string;
-  /** Gold at Stablemaster Hana; 0 = everyone has it. */
+  /** Gold at Stablemaster Hana; 0 = everyone has it; -1 = Gem Shop only. */
   price: number;
 }
 
@@ -59,6 +59,12 @@ export const MOUNT_STYLES: readonly MountStyleDef[] = [
   { id: 'trail_ember', slot: 'trail', name: 'Ember Trail', color: '#ff7a2a', price: 12000 },
   { id: 'trail_frost', slot: 'trail', name: 'Frost Trail', color: '#9ae0ff', price: 12000 },
   { id: 'trail_void', slot: 'trail', name: 'Void Trail', color: '#a050ff', price: 30000 },
+  // Gem Shop only
+  { id: 'saddle_starlight', slot: 'saddle', name: 'Starlight Saddle', color: '#9ab8ff', price: -1 },
+  { id: 'barding_dragonscale', slot: 'barding', name: 'Dragonscale Barding', color: '#c0302a', price: -1 },
+  { id: 'barding_gilded', slot: 'barding', name: 'Gilded Barding', color: '#ffd34a', price: -1 },
+  { id: 'trail_sakura', slot: 'trail', name: 'Sakura Trail', color: '#ff9ad0', price: -1 },
+  { id: 'trail_starfall', slot: 'trail', name: 'Starfall Trail', color: '#fff0ff', price: -1 },
 ];
 
 export const getMountStyle = (id: string | null | undefined) => (id ? MOUNT_STYLES.find((s) => s.id === id) : undefined);
