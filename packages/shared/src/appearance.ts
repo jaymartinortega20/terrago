@@ -50,6 +50,13 @@ export const OUTFITS: readonly OutfitPalette[] = [
   { name: 'Forest Warden', shirt: '#3c8a3a', shirtShade: '#2c6a2a', pants: '#5d4426', shoes: '#33291c', accent: '#d8b45a', robe: false, exclusive: true, extras: ['cape', 'bandana'] },
   { name: 'Infernal Warlord', shirt: '#2a1a1e', shirtShade: '#1a1014', pants: '#3a1a1a', shoes: '#140c0c', accent: '#ff5a2a', robe: false, exclusive: true, extras: ['cape', 'helmet'] },
   { name: 'Game Master', shirt: '#f4f0e6', shirtShade: '#cfc6b0', pants: '#cfc6b0', shoes: '#8a6420', accent: '#e8c24a', robe: true, exclusive: true, extras: ['cape', 'crown'] },
+  // --- Premium skins (Gem Shop) ---
+  { name: 'Celestial Regalia', shirt: '#f2f4ff', shirtShade: '#c8ccec', pants: '#c8ccec', shoes: '#8a9ad8', accent: '#9ab8ff', robe: true, exclusive: true, extras: ['cape', 'crown'] },
+  { name: 'Sakura Blossom', shirt: '#ff9ac8', shirtShade: '#e070a0', pants: '#ffffff', shoes: '#a84a6a', accent: '#ffe0ee', robe: true, exclusive: true, extras: ['hat'] },
+  { name: 'Shadow Ronin', shirt: '#1e1a26', shirtShade: '#141018', pants: '#2a1a3a', shoes: '#0c0a10', accent: '#c04aff', robe: false, exclusive: true, extras: ['hood', 'cape'] },
+  { name: 'Dragon Emperor', shirt: '#b0201a', shirtShade: '#7a1410', pants: '#2a1a14', shoes: '#140c0c', accent: '#ffd34a', robe: true, exclusive: true, extras: ['crown', 'cape'] },
+  { name: 'Frost Monarch', shirt: '#bfeaff', shirtShade: '#8ac8f0', pants: '#5fa0d0', shoes: '#2f4a6a', accent: '#ffffff', robe: false, exclusive: true, extras: ['crown', 'cape'] },
+  { name: 'Golden Paladin', shirt: '#ffd34a', shirtShade: '#c89a20', pants: '#e8e8f0', shoes: '#8a6420', accent: '#ffffff', robe: false, exclusive: true, extras: ['helmet', 'cape'] },
 ] as const;
 
 /** Outfits anyone can pick when creating a character (the rest are exclusive skins). */

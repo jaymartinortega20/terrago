@@ -18,3 +18,4 @@ export * from './environment';
 export * from './specializations';
 export * from './events';
 export * from './companions';
+export * from './premium';
