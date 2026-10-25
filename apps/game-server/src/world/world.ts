@@ -1,4 +1,4 @@
-import { BALANCE, getMap, getNode, npcsForMap, toNpcPublic, type NpcDef } from '@terrago/game-data';
+import { BALANCE, getItem, getMap, getNode, npcsForMap, toNpcPublic, type NpcDef } from '@terrago/game-data';
 import { settings } from '../services/serverConfig';
 import { GameError } from '../db';
 import {
@@ -31,6 +31,9 @@ import {
   type SnapshotEntity,
   type WorldObject,
   manualEvent,
+  DISMOUNT_PENALTY_MS,
+  DISMOUNT_PENALTY_MULT,
+  terrainMult,
   EMOTES,
   type EmoteId,
 } from '@terrago/shared';
@@ -77,6 +80,8 @@ export interface WorldDeps {
   dungeonOwner?: (player: Player) => { id: string; name: string };
   /** Called after a player arrives in a new map. */
   onMapEnter?: (player: Player) => void;
+  /** A player finished getting on a mount. */
+  onMounted?: (player: Player) => void;
   /** Async side effects of combat (rewards, death penalty, durability). */
   combat?: CombatHooks;
   rand?: () => number;
@@ -114,7 +119,18 @@ export class World {
       {
         ...deps.combat,
         onDuelEnd: (w, l) => this.duelWon(w, l),
-        dismount: (p) => this.setMount(p, null, 1),
+        dismount: (p) => {
+          this.cancelMountChannel(p, null);
+          this.setMount(p, null, 1);
+        },
+        knockedOff: (p) => {
+          this.cancelMountChannel(p, 'You were hit. Getting on your mount was interrupted.');
+          if (!p.mount) return;
+          p.slowUntil = this.now() + DISMOUNT_PENALTY_MS;
+          this.setMount(p, null, 1);
+          p.conn?.send('self:update', { slowUntil: p.slowUntil });
+          p.conn?.send('notice', { kind: 'error', text: 'A hit knocked you off your mount!' });
+        },
         respawn: (p) => {
           const rt = this.runtimeOf(p);
           // In a dungeon you get back up at its entrance, in the same instance.
@@ -135,7 +151,7 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance; job?: import('@terrago/shared').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance; job?: import('@terrago/shared').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null; mountLook?: import('@terrago/shared').MountLook | null }): void {
     if ('pet' in patch) p.conn?.send('self:update', { pet: patch.pet ?? null });
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
   }
@@ -162,13 +178,44 @@ export class World {
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:act', { id: p.id, tx, ty, tool });
   }
 
-  /** Get on (item id + speed) or off (null) a mount. */
-  setMount(p: Player, mount: string | null, speed: number, notify = true): void {
+  /** Get on (mount item id) or off (null) a mount. Speed comes from the mount, the ground and the pet. */
+  setMount(p: Player, mount: string | null, _speed = 1, notify = true): void {
     if (p.mount === mount) return;
     p.mount = mount;
-    p.speed = mount ? speed : 1;
+    this.recomputeSpeed(p, false);
     p.conn?.send('self:update', { mount: p.mount, speed: p.speed });
-    if (notify) this.broadcastLook(p, { mount: p.mount });
+    if (notify) this.broadcastLook(p, { mount: p.mount, mountLook: p.mount ? p.mountLook : null });
+  }
+
+  /**
+   * Movement speed: the mount's multiplier, slowed by icy or scorched ground
+   * (unless the mount has the perk), by a recent knock-off, and sped up by a
+   * pet's Swift Bond growth.
+   */
+  recomputeSpeed(p: Player, send = true): void {
+    const def = p.mount ? getItem(p.mount)?.mount : undefined;
+    let speed = def?.speed ?? 1;
+    speed *= terrainMult(p.mapId, def?.perk);
+    if (p.slowUntil > this.now()) speed *= DISMOUNT_PENALTY_MULT;
+    const swift = p.petState && p.petState.id === p.companionId() ? (p.petState.growth.speed ?? 0) : 0;
+    speed *= 1 + swift * 0.02;
+    speed = Math.round(speed * 1000) / 1000;
+    if (speed === p.speed) return;
+    p.speed = speed;
+    if (send) p.conn?.send('self:update', { speed });
+  }
+
+  /** Start getting on a mount: it takes a moment; moving or getting hit cancels it. */
+  startMountChannel(p: Player, mountId: string, ms: number): void {
+    p.mountChannel = { id: mountId, until: this.now() + ms };
+    p.conn?.send('self:update', { mountChannelUntil: p.mountChannel.until });
+  }
+
+  cancelMountChannel(p: Player, why: string | null): void {
+    if (!p.mountChannel) return;
+    p.mountChannel = null;
+    p.conn?.send('self:update', { mountChannelUntil: null });
+    if (why) p.conn?.send('notice', { kind: 'error', text: why });
   }
 
   // --- Duels -------------------------------------------------------------------
@@ -504,6 +551,8 @@ export class World {
       .map((c) => c.msg);
     // Mounts can't squeeze into mine tunnels.
     if (p.mount && rt.def.theme === 'cave') this.setMount(p, null, 1, false);
+    this.cancelMountChannel(p, null);
+    this.recomputeSpeed(p, false);
     const self = { ...buildSelfState(p.rec, now, p.profile), mount: p.mount, speed: p.speed };
     p.lastEnergySent = self.energy;
     p.conn?.send('world:enter', {
@@ -630,8 +679,22 @@ export class World {
       p.inputs = [];
       return;
     }
+    if (p.slowUntil && now >= p.slowUntil) {
+      p.slowUntil = 0;
+      this.recomputeSpeed(p);
+    }
+    if (p.mountChannel && now >= p.mountChannel.until) {
+      const id = p.mountChannel.id;
+      p.mountChannel = null;
+      p.conn?.send('self:update', { mountChannelUntil: null });
+      if (!p.dead) {
+        this.setMount(p, id);
+        this.deps.onMounted?.(p);
+      }
+    }
     while (p.inputs.length > 0 && p.budgetMs >= SIM.stepMs) {
       const [seq, dx, dy] = p.inputs.shift()!;
+      if (p.mountChannel && (dx !== 0 || dy !== 0)) this.cancelMountChannel(p, 'You moved. Getting on your mount was cancelled.');
       p.budgetMs -= SIM.stepMs;
       p.lastSeq = seq;
       const next = stepMovement({ x: p.x, y: p.y }, { dx, dy }, rt.grid, PLAYER_SPEED * p.speed, SIM.stepMs);

@@ -54,6 +54,8 @@ describe('guide quests, mounts, duels, line of sight', () => {
     assert.equal(early.ok, false, 'not finished yet');
     const ride = await ack(a.socket, 'mount:toggle');
     assert.equal(ride.ok, true, JSON.stringify(ride));
+    assert.equal(ride.data.channelMs, 500, 'getting on takes half a second');
+    await waitFor(() => p.mount === 'brown_pony', 3000);
     assert.equal(p.speed, 1.45);
     await waitFor(() => quests.find((q) => q.id === 'q_pony')?.step === 2);
     const gold0 = (await db.query('SELECT gold FROM characters WHERE id = $1', [A.character.id])).rows[0].gold;

@@ -25,6 +25,9 @@ import {
   darknessAt,
   weatherRegion,
   weatherAt,
+  MOUNT_CHANNEL_MS,
+  getMountStyle,
+  type MountLook,
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
 import { nodeArt } from '../art/nodes';
@@ -54,6 +57,10 @@ interface ObjectView {
 interface Avatar {
   mount?: Phaser.GameObjects.Sprite | null;
   mountId?: string | null;
+  /** Mount id + look the mount sprite was built for, and the trail colour. */
+  mountKey?: string | null;
+  trail?: string | null;
+  trailAt?: number;
   sprite: Phaser.GameObjects.Sprite;
   label: Phaser.GameObjects.Text;
   bubble: Phaser.GameObjects.Container | null;
@@ -241,7 +248,7 @@ export class WorldScene extends Phaser.Scene {
         const av = this.remotes.get(id);
         if (r && av) {
           av.sprite.setTexture(this.charTexture(r.info.appearance), av.sprite.frame.name);
-          this.setAvatarMount(av, r.info.mount);
+          this.setAvatarMount(av, r.info.mount, r.info.mountLook);
           av.label.setText(remoteLabel(r.info));
         }
       }),
@@ -295,22 +302,61 @@ export class WorldScene extends Phaser.Scene {
     return { sprite, label: text, bubble: null, bubbleTimer: null };
   }
 
-  /** Show (or hide) the mount under an avatar. */
-  private setAvatarMount(av: Avatar, mountId: string | null | undefined): void {
-    if ((av.mountId ?? null) === (mountId ?? null)) return;
+  /** Show (or hide) the mount under an avatar, wearing its saddle, barding and trail. */
+  private setAvatarMount(av: Avatar, mountId: string | null | undefined, look?: MountLook | null): void {
+    const want = mountId ? `${mountId}|${look?.saddle ?? ''}|${look?.barding ?? ''}|${look?.trail ?? ''}` : null;
+    if ((av.mountKey ?? null) === want) return;
+    const changedLook = !!av.mountKey && !!want && av.mountId === mountId;
     av.mount?.destroy();
     av.mount = null;
     av.mountId = mountId ?? null;
+    av.mountKey = want;
+    av.trail = null;
     const def = mountId ? getItem(mountId)?.mount : undefined;
     if (!def) return;
-    const key = `mount:${def.kind}:${def.color}`;
+    const saddle = getMountStyle(look?.saddle)?.color;
+    const barding = getMountStyle(look?.barding)?.color;
+    av.trail = getMountStyle(look?.trail)?.color ?? null;
+    const key = `mount:${def.kind}:${def.color}:${saddle ?? ''}:${barding ?? ''}`;
     if (!this.textures.exists(key)) {
-      const sh = mountSheet(def.kind, def.color);
+      const sh = mountSheet(def.kind, def.color, { saddle, barding });
       const tex = this.textures.addCanvas(key, sh.canvas)!;
       tex.add(0, 0, 0, 0, sh.w * 2, sh.h * 2);
       tex.add(1, 0, sh.w * 2, 0, sh.w * 2, sh.h * 2);
     }
     av.mount = this.add.sprite(av.sprite.x, av.sprite.y, key, 0).setOrigin(0.5, 1);
+    // A new saddle, barding or trail flashes so you notice the change.
+    if (changedLook) {
+      av.mount.setTintFill(0xffffff);
+      this.time.delayedCall(90, () => av.mount?.clearTint());
+      this.time.delayedCall(180, () => av.mount?.setTintFill(0xffffff));
+      this.time.delayedCall(270, () => av.mount?.clearTint());
+    }
+  }
+
+  /** Particles left behind a moving mount that wears a trail. */
+  private mountTrail(av: Avatar, x: number, y: number, now: number): void {
+    if (!av.trail || !av.mount || now - (av.trailAt ?? 0) < 55) return;
+    av.trailAt = now;
+    const c = Phaser.Display.Color.HexStringToColor(av.trail).color;
+    const dot = this.add.rectangle(x + (Math.random() * 20 - 10), y - 2 - Math.random() * 8, 3, 3, c).setDepth(y - 1).setBlendMode(Phaser.BlendModes.ADD);
+    this.tweens.add({ targets: dot, y: dot.y - 10 - Math.random() * 8, alpha: 0, scale: 0.4, duration: 600, onComplete: () => dot.destroy() });
+  }
+
+  /** The 0.5 s bar over your head while getting on a mount. */
+  private mountBar?: Phaser.GameObjects.Graphics;
+  private drawMountChannel(x: number, y: number): void {
+    const until = this.client.ui.get().self?.mountChannelUntil;
+    const left = until ? until - this.client.serverNow() : 0;
+    if (!until || left <= -150) {
+      this.mountBar?.setVisible(false);
+      return;
+    }
+    const g = (this.mountBar ??= this.add.graphics());
+    const k = Math.max(0, Math.min(1, 1 - left / MOUNT_CHANNEL_MS));
+    g.clear().setVisible(true).setDepth(LABEL_DEPTH + 40);
+    g.fillStyle(0x0b0d15, 0.85).fillRoundedRect(x - 21, y - 76, 42, 8, 3);
+    g.fillStyle(0xf2c14e, 1).fillRoundedRect(x - 19, y - 74, 38 * k, 4, 2);
   }
 
   private destroyAvatar(av: Avatar): void {
@@ -764,6 +810,10 @@ export class WorldScene extends Phaser.Scene {
     const me = this.client.ui.get().self?.characterId;
     const opts = fxSettings();
     for (const e of events) {
+      if (e.sk === 'petguard') {
+        this.petGuardHit(e.t, e.a);
+        continue;
+      }
       if (e.k === 'cast') {
         if (e.s === me) audio.sfx(['war_cry', 'evasion', 'hunters_mark', 'whirlwind', 'volley'].includes(e.sk ?? '') ? 'hit' : 'magic');
       } else if (e.s === me && e.t !== me) {
@@ -1083,7 +1133,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.client.map || this.remotes.has(r.info.id)) return;
     const av = this.makeAvatar(r.x, r.y, r.info.appearance, remoteLabel(r.info), '#ffffff');
     this.remotes.set(r.info.id, av);
-    this.setAvatarMount(av, r.info.mount);
+    this.setAvatarMount(av, r.info.mount, r.info.mountLook);
   }
 
   private removeRemote(id: string): void {
@@ -1171,6 +1221,7 @@ export class WorldScene extends Phaser.Scene {
     av.sprite.setRotation(dead ? (dir === 'left' ? -Math.PI / 2 : Math.PI / 2) : 0);
     av.sprite.setScale(1, (av.bowUntil ?? 0) > now ? 0.86 : 1);
     if (av.mount) av.mount.setPosition(rx, ry + 4).setFlipX(dir === 'left').setFrame(moving ? Math.floor(time / 110) % 2 : 0).setDepth(dir === 'up' ? y + 1 : y);
+    if (moving) this.mountTrail(av, rx, ry + 4, now);
     const sitDrop = col === FRAME_SIT ? 6 : 0;
     av.label.setPosition(rx, ry - 46 - lift + sitDrop);
     av.bubble?.setPosition(rx, ry - 62 - lift + sitDrop);
@@ -1226,6 +1277,21 @@ export class WorldScene extends Phaser.Scene {
   private pets = new Map<string, { item: string; sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
   /** Beastmasters' hawks, by owner. */
   private hawks = new Map<string, { sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
+
+  /** A pet took a hit for its owner: flash it and show the damage over it. */
+  private petGuardHit(ownerId: string, amount: number): void {
+    const c = this.pets.get(ownerId) ?? this.hawks.get(ownerId);
+    if (!c) return;
+    c.sprite.setTintFill(0xff9a8a);
+    this.time.delayedCall(110, () => c.sprite.clearTint());
+    if (!fxSettings().numbers) return;
+    const t = this.add
+      .text(c.sprite.x, c.sprite.y - c.sprite.displayHeight - 2, `🛡${amount}`, { fontFamily: LABEL_FONT, fontSize: '12px', color: '#9ad0ff', stroke: '#2a2030', strokeThickness: 4 })
+      .setOrigin(0.5, 1)
+      .setResolution(2)
+      .setDepth(LABEL_DEPTH + 30);
+    this.tweens.add({ targets: t, y: t.y - 20, alpha: 0, duration: 800, onComplete: () => t.destroy() });
+  }
 
   /** Send a companion (pet or hawk) diving at a target for a moment. */
   private companionStrike(ownerId: string, hawk: boolean, x: number, y: number): void {
@@ -1467,8 +1533,9 @@ export class WorldScene extends Phaser.Scene {
 
     const lx = client.prevPos.x + (client.pos.x - client.prevPos.x) * alpha + client.correction.x;
     const ly = client.prevPos.y + (client.pos.y - client.prevPos.y) * alpha + client.correction.y;
-    this.setAvatarMount(this.local, client.ui.get().self?.mount);
+    this.setAvatarMount(this.local, client.ui.get().self?.mount, client.ui.get().self?.mountLook);
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time, { sit: client.pose === 'sit', speed: client.speed() });
+    this.drawMountChannel(lx, ly);
     const fxo = fxSettings();
     const selfId = client.ui.get().self?.characterId;
     if (selfId) {

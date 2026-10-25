@@ -315,6 +315,14 @@
    {
     "itemId": "pet_cat",
     "price": 1500
+   },
+   {
+    "itemId": "pet_treat",
+    "price": 60
+   },
+   {
+    "itemId": "premium_pet_treat",
+    "price": 450
    }
   ],
   "buys": []

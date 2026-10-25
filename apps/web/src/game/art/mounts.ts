@@ -1,7 +1,31 @@
 import { OUTLINE, PixelBuffer, SHADOW, shade } from './pixel';
 
+/** Colours for the saddle and barding (armour plates). */
+export interface MountPaint {
+  saddle?: string;
+  barding?: string;
+}
+
+/** A gnome-built hover disc: a brass body on a glowing jet (no legs). */
+function hover(color: string, f: number, paint: MountPaint): PixelBuffer {
+  const b = new PixelBuffer(30, 22);
+  const dark = shade(color, -0.35);
+  b.ellipse(3, 8, 24, 7, color).shadeIf((x, y) => y > 11, dark);
+  b.hline(5, 24, 10, shade(color, 0.35));
+  for (const x of [7, 12, 17, 22]) b.set(x, 12, '#5ad0ff');
+  b.rect(12, 4, 6, 4, paint.barding ?? shade(color, -0.15)).set(18, 5, '#5ad0ff');
+  b.rect(11, 6, 8, 2, paint.saddle ?? '#5a4670');
+  // jets flicker between frames
+  const jet = f ? '#9ae8ff' : '#5ad0ff';
+  for (const x of [8, 21]) b.vline(x, 15, f ? 19 : 18, jet).vline(x + 1, 15, f ? 18 : 19, jet);
+  b.outline(OUTLINE);
+  for (let x = 6; x < 24; x++) b.under(x, 21, SHADOW);
+  return b;
+}
+
 /** Side-view mount sprites (2 frames), drawn under the rider. */
-function frame(kind: string, color: string, f: number): PixelBuffer {
+function frame(kind: string, color: string, f: number, paint: MountPaint = {}): PixelBuffer {
+  if (kind === 'hovergear') return hover(color, f, paint);
   const b = new PixelBuffer(30, 22);
   const dark = shade(color, -0.3);
   const legY = 15;
@@ -35,17 +59,25 @@ function frame(kind: string, color: string, f: number): PixelBuffer {
     }
     b.hline(0, 5, 12, color).set(0, 11, dark).set(23, 0, '#d6c79f').set(26, 0, '#d6c79f');
   }
+  // barding: armour plates over the body and a face plate
+  if (paint.barding) {
+    const plate = paint.barding;
+    b.hline(7, 22, 9, plate).hline(8, 21, 10, shade(plate, -0.2)).hline(9, 20, 12, plate);
+    for (const x of [9, 13, 17]) b.set(x, 11, shade(plate, 0.4));
+    b.set(23, 3, plate).set(24, 3, plate).set(25, 2, shade(plate, 0.4));
+  }
   // saddle
-  if (kind !== 'wolf') b.rect(11, 5, 7, 3, '#7a3a2a').hline(11, 17, 8, '#5a2a1e');
-  else b.rect(11, 6, 7, 2, '#5a4670');
+  const sad = paint.saddle ?? (kind === 'wolf' ? '#5a4670' : '#7a3a2a');
+  if (kind !== 'wolf') b.rect(11, 5, 7, 3, sad).hline(11, 17, 8, shade(sad, -0.3));
+  else b.rect(11, 6, 7, 2, sad);
   b.outline(OUTLINE);
   for (let x = 4; x < 26; x++) b.under(x, 21, SHADOW);
   return b;
 }
 
-export function mountSheet(kind: string, color: string): { canvas: HTMLCanvasElement; w: number; h: number } {
-  const a = frame(kind, color, 0);
-  const c = frame(kind, color, 1);
+export function mountSheet(kind: string, color: string, paint: MountPaint = {}): { canvas: HTMLCanvasElement; w: number; h: number } {
+  const a = frame(kind, color, 0, paint);
+  const c = frame(kind, color, 1, paint);
   const sheet = new PixelBuffer(a.w * 2, a.h);
   sheet.stamp(a, 0, 0);
   sheet.stamp(c, a.w, 0);

@@ -38,6 +38,7 @@ describe('combat companions and raid loot', () => {
     const p = server.world.players.get(A.character.id)!;
     const rt = server.world.runtimeOf(p);
     const m = [...rt.monsters.values()].find((x) => x.alive && x.def.id === 'green_slime')!;
+    m.hp = 5000; // keep it alive long enough for the pet to join in
     p.x = m.x;
     p.y = m.y + 20;
     rt.spatial.update(p);
@@ -50,6 +51,7 @@ describe('combat companions and raid loot', () => {
     p.rec.job = 'beastmaster';
     events.length = 0;
     const m2 = [...rt.monsters.values()].find((x) => x.alive && x !== m)!;
+    m2.hp = 5000;
     p.x = m2.x;
     p.y = m2.y + 20;
     rt.spatial.update(p);

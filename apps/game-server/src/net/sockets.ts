@@ -26,7 +26,8 @@ import type { CharacterRecord } from '../world/characterState';
 import type { Connection } from '../world/connection';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
-import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests, toggleMount } from './gameplay';
+import { act, chooseSpecialization, craftAt, gear, market, npcServices, questDialogueActions, questEvent, questServices, startQuests } from './gameplay';
+import { loadCompanions, pets, stable, syncCompanion, toggleMount } from './companions';
 import * as social from './social';
 import * as journal from './journal';
 import * as eco from './economy';
@@ -192,6 +193,8 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
           if (live) player.conn?.send('quests', player.quests);
           else await startQuests({ pool, world, log }, player);
           await social.onJoin({ pool, world, log }, player, !live);
+          if (!live) await loadCompanions({ pool, world, log }, player);
+          else if (player.petState) player.conn?.send('pet:update', (await pets.get({ pool, world, log }, player)).active);
           if (!live) journal.track({ pool, world, log }, player, 'level', player.rec.level, 'max');
           if (player.mount) player.conn?.send('self:update', { mount: player.mount, speed: player.speed });
           if (player.duel) player.conn?.send('duel', { with: { id: player.duel.with.id, name: player.duel.with.name }, until: player.duel.until });
@@ -293,8 +296,13 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
             await pool.query('UPDATE characters SET pet = $2 WHERE id = $1', [p.id, next]);
             p.pet = next;
             world.broadcastLook(p, { pet: next });
+            await syncCompanion(g, p);
             const name = getItem(inv.itemId)!.name;
             return { inventory: world.inventoryCache.get(p.id)!, message: next ? `${name} is following you.` : `${name} went home.` };
+          }
+          if (inv && getItem(inv.itemId)?.petFood) {
+            const fed = await pets.feed(g, p, { slot });
+            return { inventory: world.inventoryCache.get(p.id)!, message: fed.message };
           }
           if (inv && getItem(inv.itemId)?.unlock) {
             const u = await useUnlock(pool, p.id, p.rec.classId, slot as number);
@@ -346,6 +354,13 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('craft', (req, ack) => serial(ack, () => craftAt(g, p, req)));
     socket.on('equip', (req, ack) => serial(ack, () => gear.equip(g, p, req)));
     socket.on('mount:toggle', (ack) => respond(ack, () => toggleMount(g, p)));
+    socket.on('mount:stable', (ack) => respond(ack, () => stable.get(g, p)));
+    socket.on('mount:choose', (id, ack) => serial(ack, () => stable.choose(g, p, id)));
+    socket.on('mount:style', (req, ack) => serial(ack, () => stable.style(g, p, req)));
+    socket.on('mount:buyStyle', (req, ack) => serial(ack, () => stable.buyStyle(g, p, req)));
+    socket.on('pet:get', (ack) => serial(ack, () => pets.get(g, p)));
+    socket.on('pet:feed', (req, ack) => serial(ack, () => pets.feed(g, p, req)));
+    socket.on('pet:grow', (req, ack) => serial(ack, () => pets.grow(g, p, req)));
     socket.on('market:search', (q, ack) => respond(ack, () => market.search(g, p, q)));
     socket.on('market:mine', (ack) => respond(ack, () => market.mine(g, p)));
     socket.on('market:list', (req, ack) => serial(ack, () => market.list(g, p, req)));
@@ -373,7 +388,13 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('dungeon:enter', (req, ack) => serial(ack, () => eco.enterDungeon(g, p, req)));
     socket.on('spec:choose', (req, ack) => serial(ack, () => chooseSpecialization(g, p, req)));
     socket.on('stats:add', (req, ack) => serial(ack, () => addStatPoints(g, p, req)));
-    socket.on('job:advance', (req, ack) => serial(ack, () => advanceJob(g, p, req)));
+    socket.on('job:advance', (req, ack) =>
+      serial(ack, async () => {
+        const r = await advanceJob(g, p, req);
+        await syncCompanion(g, p);
+        return r;
+      }),
+    );
     socket.on('journal:get', (ack) => respond(ack, () => journal.journal(g, p)));
     socket.on('daily:login', (ack) => serial(ack, () => journal.claimLogin(g, p)));
     socket.on('daily:task', (id, ack) => serial(ack, () => journal.claimTask(g, p, id)));

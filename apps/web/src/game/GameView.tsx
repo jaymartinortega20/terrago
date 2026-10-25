@@ -1,5 +1,7 @@
 'use client';
 
+import { StablePanel } from './ui/StableUi';
+import { PetPanel } from './ui/PetUi';
 import Phaser from 'phaser';
 import { useEffect, useRef, useState } from 'react';
 import { getItem } from '@terrago/game-data';
@@ -142,7 +144,9 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       else if (k === 'm') open('map');
       else if (k === 'k') open('skills');
       else if (k === 'f') client.attackKey();
+      else if (k === 'z' && e.shiftKey) open('stable');
       else if (k === 'z') client.toggleMount();
+      else if (k === 'u') open('pets');
       else if (k === 'y') ui.set((s) => ({ emoteMenu: !s.emoteMenu }));
       else if (k === 'j') open('quests');
       else if (k === 'p') open('market');
@@ -256,6 +260,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'guild' && <GuildPanel client={client} onClose={() => open(null)} />}
           {panel === 'market' && <MarketPanel client={client} onClose={() => open(null)} />}
           {panel === 'enhance' && <EnhancePanel client={client} onClose={() => open(null)} />}
+          {panel === 'stable' && <StablePanel client={client} onClose={() => open(null)} />}
+          {panel === 'pets' && <PetPanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
           )}

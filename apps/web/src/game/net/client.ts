@@ -286,6 +286,8 @@ export class GameClient {
       this.emit('chat', m);
     });
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
+    socket.on('pet:update', (pet) => this.ui.set({ pet }));
+    socket.on('pet:hp', (h) => this.ui.set((s) => ({ pet: s.pet ? { ...s.pet, ...h } : s.pet })));
     socket.on('inventory:update', (inventory) => this.ui.set((s) => ({ inventory: { ...inventory, equipment: inventory.equipment ?? s.inventory?.equipment ?? [] } })));
     socket.on('notice', (n) => {
       pushNotice(this.ui, n.kind, n.text);
@@ -450,6 +452,8 @@ export class GameClient {
     }
     if (this.pending.length > 40) return; // server isn't acknowledging; don't run ahead
     if (this.ui.get().fishing) this.cancelFishing();
+    // Moving cancels getting on a mount (the server agrees).
+    if (this.ui.get().self?.mountChannelUntil) this.ui.set((st) => ({ self: st.self ? { ...st.self, mountChannelUntil: null } : st.self }));
     const cmd: MoveCommand = [++this.seq, input.dx, input.dy];
     this.pending.push(cmd);
     s.emit('move', cmd);
@@ -681,7 +685,34 @@ export class GameClient {
   toggleMount(): void {
     this.socket?.emit('mount:toggle', (res) => {
       if (!res.ok) pushNotice(this.ui, 'error', res.error, 2500);
+      else audio.sfx(res.data.channelMs ? 'open' : 'click');
     });
+  }
+
+  // --- Stable and pets ------------------------------------------------------------
+
+  stable(): Promise<import('@terrago/shared').StableState> {
+    return this.request('mount:stable');
+  }
+  async chooseMount(itemId: string): Promise<import('@terrago/shared').StableState | null> {
+    return this.run<import('@terrago/shared').StableState & { message?: string }>('mount:choose', itemId);
+  }
+  async mountStyle(slot: import('@terrago/shared').MountStyleSlot, id: string | null): Promise<import('@terrago/shared').StableState | null> {
+    return this.run<import('@terrago/shared').StableState & { message?: string }>('mount:style', { slot, id });
+  }
+  async buyMountStyle(id: string): Promise<import('@terrago/shared').StableState | null> {
+    const r = await this.run<import('@terrago/shared').StableState & { message?: string }>('mount:buyStyle', { id, npcId: 'stablemaster_hana' });
+    if (r) audio.sfx('coin');
+    return r;
+  }
+  async pets(): Promise<import('@terrago/shared').PetMenuState | null> {
+    return this.run<import('@terrago/shared').PetMenuState & { message?: string }>('pet:get');
+  }
+  async feedPet(slot: number): Promise<import('@terrago/shared').PetMenuState | null> {
+    return this.run<import('@terrago/shared').PetMenuState & { message?: string }>('pet:feed', { slot });
+  }
+  async growPet(trait: import('@terrago/shared').PetGrowthId): Promise<import('@terrago/shared').PetMenuState | null> {
+    return this.run<import('@terrago/shared').PetMenuState & { message?: string }>('pet:grow', { trait });
   }
 
   // --- Combat ------------------------------------------------------------------

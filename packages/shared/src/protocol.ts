@@ -145,7 +145,7 @@ export interface ServerToClientEvents {
   /** A boss is winding up an area attack: warn players (pixels, ms until impact). */
   'telegraph': (t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
   /** A visible player's look changed (mount, weapon). */
-  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('./types').Appearance; job?: import('./types').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null }) => void;
+  'entity:update': (id: string, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; pose?: 'sit' | null; appearance?: import('./types').Appearance; job?: import('./types').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null; mountLook?: import('./companions').MountLook | null }) => void;
   /** Someone nearby (or you) did an emote. */
   'emote': (e: { id: string; emote: import('./types').EmoteId }) => void;
   /** Someone nearby worked a tile (farming, mining, chopping...) — for their tool animation. */
@@ -172,6 +172,10 @@ export interface ServerToClientEvents {
   'snap': (snapshot: Snapshot) => void;
   'chat': (message: ChatMessage) => void;
   'self:update': (self: Partial<SelfState>) => void;
+  /** Your active pet's level, EXP, loyalty or health changed. */
+  'pet:update': (pet: import('./companions').PetView | null) => void;
+  /** Your pet's health in a fight. */
+  'pet:hp': (info: { hp: number; maxHp: number; koUntil: number }) => void;
   'inventory:update': (inventory: InventoryState) => void;
   'notice': (notice: NoticePayload) => void;
   /** Objects added or changed in the current map. */
@@ -213,7 +217,14 @@ export interface ClientToServerEvents {
   'equip': (req: { from: number }, ack: Ack<null>) => void;
   'unequip': (req: { slot: number }, ack: Ack<null>) => void;
   'enhance': (req: { equipSlot: number; npcId?: string }, ack: Ack<{ success: boolean; message: string }>) => void;
-  'mount:toggle': (ack: Ack<{ mount: string | null }>) => void;
+  'mount:toggle': (ack: Ack<{ mount: string | null; channelMs?: number }>) => void;
+  'mount:stable': (ack: Ack<StableState>) => void;
+  'mount:choose': (itemId: string, ack: Ack<StableState>) => void;
+  'mount:style': (req: { slot: import('./companions').MountStyleSlot; id: string | null }, ack: Ack<StableState>) => void;
+  'mount:buyStyle': (req: { id: string; npcId: string }, ack: Ack<StableState>) => void;
+  'pet:get': (ack: Ack<PetMenuState>) => void;
+  'pet:feed': (req: { slot: number }, ack: Ack<PetMenuState & { message: string }>) => void;
+  'pet:grow': (req: { trait: import('./companions').PetGrowthId }, ack: Ack<PetMenuState>) => void;
   'market:search': (q: MarketQuery, ack: Ack<{ listings: MarketListing[]; total: number }>) => void;
   'market:mine': (ack: Ack<{ listings: MarketListing[] }>) => void;
   'market:list': (req: { slot: number; quantity: number; unitPrice: number }, ack: Ack<{ message: string }>) => void;
@@ -274,4 +285,18 @@ export interface ClientToServerEvents {
 export interface SocketAuthPayload {
   characterId: string;
   protocol: number;
+}
+
+/** The stable: mounts in your bag, the one you ride, and your mount looks. */
+export interface StableState {
+  owned: string[];
+  chosen: string | null;
+  styles: string[];
+  look: import('./companions').MountLook;
+}
+
+/** The pet menu: your companions and their growth. */
+export interface PetMenuState {
+  active: import('./companions').PetView | null;
+  pets: import('./companions').PetView[];
 }

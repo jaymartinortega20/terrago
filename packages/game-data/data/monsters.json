@@ -2193,6 +2193,12 @@
     "chance": 0.03,
     "min": 1,
     "max": 1
+   },
+   {
+    "itemId": "mech_hovergear",
+    "chance": 0.004,
+    "min": 1,
+    "max": 1
    }
   ],
   "art": {
@@ -2432,6 +2438,12 @@
    {
     "itemId": "skin_infernal_warlord",
     "chance": 1.0,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "itemId": "celestial_stag",
+    "chance": 0.05,
     "min": 1,
     "max": 1
    }

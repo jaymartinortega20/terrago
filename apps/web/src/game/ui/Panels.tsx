@@ -428,6 +428,8 @@ export const MENU: { id: Exclude<Panel, null> | string; label: string; key: stri
   { id: 'journal', label: 'Journal', key: 'L' },
   { id: 'crafting', label: 'Crafting', key: 'N' },
   { id: 'market', label: 'Market', key: 'P' },
+  { id: 'stable', label: 'Stable', key: 'Shift+Z' },
+  { id: 'pets', label: 'Pets', key: 'U' },
   { id: 'guild', label: 'Guild', key: 'G' },
   { id: 'friends', label: 'Friends', key: 'O' },
   { id: 'settings', label: 'Settings', key: 'Esc' },

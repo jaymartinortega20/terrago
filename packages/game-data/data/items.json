@@ -4379,7 +4379,8 @@
   "mount": {
    "speed": 2.15,
    "color": "#8a8a92",
-   "kind": "wolf"
+   "kind": "wolf",
+   "perk": "ice_walker"
   }
  },
  {
@@ -5313,7 +5314,8 @@
   "mount": {
    "speed": 1.9,
    "color": "#5a8a3a",
-   "kind": "wyvern"
+   "kind": "wyvern",
+   "perk": "lava_strider"
   }
  },
  {
@@ -5778,6 +5780,84 @@
   "maxDurability": null,
   "unlock": {
    "skin": "Infernal Warlord"
+  }
+ },
+ {
+  "id": "mech_hovergear",
+  "name": "Mechanical Hover-Gear",
+  "description": "A humming gnome-built hover disc. Its jets don't care about lava.",
+  "icon": "mount:hovergear:c08a3a",
+  "category": "mount",
+  "rarity": "epic",
+  "stackSize": 1,
+  "vendorValue": 6000,
+  "levelRequirement": 35,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "mount": {
+   "speed": 1.75,
+   "color": "#c08a3a",
+   "kind": "hovergear",
+   "perk": "lava_strider",
+   "glow": "#5ad0ff"
+  }
+ },
+ {
+  "id": "celestial_stag",
+  "name": "Celestial Stag",
+  "description": "A stag of starlight that walks on ice and fire alike. Only Pyraxis guards one.",
+  "icon": "mount:stag:dfe6ff",
+  "category": "mount",
+  "rarity": "mythic",
+  "stackSize": 1,
+  "vendorValue": 20000,
+  "levelRequirement": 90,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "mount": {
+   "speed": 2.3,
+   "color": "#dfe6ff",
+   "kind": "stag",
+   "perk": "all_terrain",
+   "glow": "#9ab8ff"
+  }
+ },
+ {
+  "id": "pet_treat",
+  "name": "Pet Treat",
+  "description": "A crunchy snack. Feed it to your pet (Pet menu, or use it from the bag): +500 Pet EXP, +5 loyalty.",
+  "icon": "food:treat:d8a05a",
+  "category": "consumable",
+  "rarity": "common",
+  "stackSize": 50,
+  "vendorValue": 20,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "petFood": {
+   "xp": 500,
+   "loyalty": 5
+  }
+ },
+ {
+  "id": "premium_pet_treat",
+  "name": "Premium Pet Treat",
+  "description": "A gourmet feast for companions: +3000 Pet EXP, +12 loyalty.",
+  "icon": "food:treat:e8603a",
+  "category": "consumable",
+  "rarity": "rare",
+  "stackSize": 50,
+  "vendorValue": 150,
+  "levelRequirement": 1,
+  "tradable": true,
+  "bind": "none",
+  "maxDurability": null,
+  "petFood": {
+   "xp": 3000,
+   "loyalty": 12
   }
  }
 ]

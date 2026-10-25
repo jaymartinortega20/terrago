@@ -11,6 +11,25 @@ export function gearLook(equipment: { slot: number; itemId: string; enhance?: nu
   return { weaponGlow: at(0)?.enhance ?? 0, armorGlow: armor.length ? Math.max(...armor) : 0, back: at(8)?.itemId ?? null };
 }
 
+/** A companion's growth (saved) and its health in this session (not saved). */
+export interface PetState {
+  id: string;
+  kind: string;
+  level: number;
+  xp: number;
+  loyalty: number;
+  growth: import('@terrago/shared').PetGrowth;
+  kills: number;
+  hp: number;
+  koUntil: number;
+  attacks: number;
+  tauntUntil: number;
+  /** Not loaded from the database yet (defaults in use). */
+  stub?: boolean;
+  sentHp?: number;
+  sentAt?: number;
+}
+
 export class Player {
   readonly id: string;
   readonly userId: string;
@@ -47,6 +66,15 @@ export class Player {
   /** Mount being ridden (item id) and speed multiplier. */
   mount: string | null = null;
   speed = 1;
+  /** Getting on a mount (finishes at `until`). */
+  mountChannel: { id: string; until: number } | null = null;
+  /** Slowed after a hit knocked them off their mount. */
+  slowUntil = 0;
+  /** Mount picked in the stable, and its saddle/barding/trail. */
+  mountChoice: string | null = null;
+  mountLook: import('@terrago/shared').MountLook = {};
+  /** The active companion's growth (loaded from character_pets) and live health. */
+  petState: PetState | null = null;
   // --- Social ---------------------------------------------------------------
   party: import('../net/social').Party | null = null;
   /** People this player muted (chat hidden) or blocked (also no whispers/trades/invites). */
@@ -142,10 +170,16 @@ export class Player {
       guild: this.guild?.tag ?? null,
       shop: this.stall?.name ?? null,
       pet: this.pet,
+      mountLook: this.mount ? this.mountLook : null,
       pose: this.pose,
       job: this.rec.job ?? null,
       ...gearLook(this.rec.equipment ?? []),
     };
+  }
+
+  /** The companion fighting beside this player: a Beastmaster's hawk, else their pet. */
+  companionId(): string | null {
+    return this.rec.job === 'beastmaster' ? 'hawk' : this.pet;
   }
 
   /** Remember a line for moderation reports. */

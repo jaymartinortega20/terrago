@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -109,6 +109,8 @@ export interface UiState {
   chatDraft: string | null;
   /** Fishing in progress. */
   fishing: null | { id: string; x: number; y: number; phase: 'waiting' | 'bite' | 'reeling'; round: import('@terrago/shared').FishingRound | null };
+  /** Your active companion's growth and health. */
+  pet: import('@terrago/shared').PetView | null;
 }
 
 export const initialUi: UiState = {
@@ -136,6 +138,7 @@ export const initialUi: UiState = {
   plotMenu: null,
   station: null,
   fishing: null,
+  pet: null,
   targetId: null,
   autoAttack: false,
   effects: [],

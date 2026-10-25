@@ -111,6 +111,12 @@ export interface SelfState {
   job?: JobId | null;
   /** Unspent stat points. */
   statPoints?: number;
+  /** Getting on a mount: done at this time (ms since epoch), or null. */
+  mountChannelUntil?: number | null;
+  /** Slowed after being knocked off a mount, until (ms since epoch). */
+  slowUntil?: number;
+  /** Saddle, barding and trail on your mounts. */
+  mountLook?: import('./companions').MountLook;
 }
 
 /** A farm plot in a homestead. Crop growth is computed from timestamps on both sides. */
@@ -185,6 +191,8 @@ export interface PublicPlayer {
   weaponGlow?: number;
   armorGlow?: number;
   back?: string | null;
+  /** Saddle, barding and trail on the mount. */
+  mountLook?: import('./companions').MountLook | null;
 }
 
 /** Emotes players can do (chat /wave, or the emote menu). */
@@ -230,7 +238,9 @@ export interface ItemDef {
   /** Companion pet: look and small perk. */
   pet?: { kind: string; color: string; perk: 'gold' | 'fish' | 'xp' | 'regen' | 'dragon' };
   /** Rideable: speed multiplier and look. */
-  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' | 'boar' };
+  mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' | 'boar' | 'hovergear'; perk?: import('./companions').MountPerkId; glow?: string };
+  /** Food for pets: EXP and loyalty. */
+  petFood?: { xp: number; loyalty: number };
   /** Used from the bag: unlock an exclusive skin (by outfit name) or open a cache. */
   unlock?: { skin?: string; cache?: 'infernal' };
   /** Wings (back slot): their look. */

@@ -101,6 +101,15 @@ export function DialogueBox({ client }: { client: GameClient }) {
                 {a.label}
               </button>
             ))}
+          {last && shown >= text.length && dialogue.npcId === 'stablemaster_hana' && (
+            <button
+              className="px-btn small green"
+              data-testid="dialogue-action-stable"
+              onClick={() => client.ui.set({ dialogue: null, serviceNpc: 'stablemaster_hana', panel: 'stable' })}
+            >
+              Stable &amp; mount gear
+            </button>
+          )}
           <button className="px-btn small" onClick={advance} data-testid="dialogue-next">
             {shown < text.length ? '…' : last ? 'Farewell' : 'Next ▶'}
           </button>

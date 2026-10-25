@@ -17,3 +17,4 @@ export * from './combat';
 export * from './environment';
 export * from './specializations';
 export * from './events';
+export * from './companions';

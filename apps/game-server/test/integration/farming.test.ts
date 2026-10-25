@@ -104,7 +104,7 @@ describe('farming (v0.2 success test)', () => {
     assert.equal(back.crop?.cropId, 'carrot');
     assert.equal(cropStatus(back.crop!, getCrop('carrot')!, Date.now()).ready, true, 'grew while offline');
 
-    const selfUpdate = once<any>(a.socket, 'self:update');
+    const selfUpdate = new Promise<any>((resolve) => a.socket.on('self:update', (u: any) => u.skills && resolve(u)));
     const harvested = await ack(a.socket, 'act', { tx: 12, ty: 9 });
     assert.equal(harvested.ok, true, JSON.stringify(harvested));
     assert.match(harvested.data.message, /Harvested 1× .*Carrot/);

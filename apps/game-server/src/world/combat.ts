@@ -12,6 +12,11 @@ const COMPANIONS: Record<string, { mult: number; everyMs: number; crit?: number;
   hawk: { mult: 1.0, everyMs: 1600, crit: 10 },
 };
 import {
+  PET_LOYALTY_LOW,
+  PET_LOYALTY_SKILL,
+  PET_SKILL2_LEVEL,
+  archetypeOf,
+  petStats,
   OUT_OF_COMBAT_MS,
   PLAYER_BODY,
   SIM,
@@ -131,6 +136,10 @@ export interface CombatHooks {
   partyOf?: (p: Player) => Player[];
   /** Riding players get off when they fight. */
   dismount?: (p: Player) => void;
+  /** A hit lands on a rider (or someone getting on): knock them off and slow them. */
+  knockedOff?: (p: Player) => void;
+  /** The player's companion changed and its saved growth isn't loaded yet. */
+  loadCompanion?: (p: Player) => void;
   /** Tell everyone in a runtime something (boss shouts, telegraphs). */
   announce?: (rt: MapRuntime, text: string) => void;
   telegraph?: (rt: MapRuntime, t: { id: string; x: number; y: number; r: number; ms: number; name: string }) => void;
@@ -328,9 +337,50 @@ export class Combat {
     // LUK: perfect dodge (0.1% per point, up to 20%) ignores the hit entirely.
     const perfectDodge = Math.min(0.2, p.profile.stats.luck * 0.001);
     if (res.miss || this.rand() < perfectDodge) return this.emit(rt, { s: m.id, t: p.id, a: 0, k: 'miss' });
-    // A dog draws some of the attacks onto itself.
-    const guard = p.pet && getItem(p.pet)?.pet?.kind === 'dog' ? 0.85 : 1;
-    this.damagePlayer(rt, p, Math.round(res.damage * effectMult(p.effects, 'taken', now) * guard), m.id, res.crit ? 'crit' : 'hit');
+    const dmg = Math.round(res.damage * effectMult(p.effects, 'taken', now));
+    // The pet draws some attacks onto itself (aggro draw); tanks take them better.
+    if (this.petIntercept(rt, p, m, dmg, now)) return;
+    this.damagePlayer(rt, p, dmg, m.id, res.crit ? 'crit' : 'hit');
+  }
+
+  /** The active companion's state, created with defaults (and loaded in the background) when it changed. */
+  companion(p: Player): import('./player').PetState | null {
+    const id = p.companionId();
+    if (!id) return null;
+    if (p.petState?.id === id) return p.petState;
+    const kind = id === 'hawk' ? 'hawk' : (getItem(id)?.pet?.kind ?? 'dog');
+    p.petState = { id, kind, level: 1, xp: 0, loyalty: 50, growth: {}, kills: 0, hp: petStats(kind, 1).maxHp, koUntil: 0, attacks: 0, tauntUntil: 0, stub: true };
+    this.hooks.loadCompanion?.(p);
+    return p.petState;
+  }
+
+  /** Aggro draw: the pet may take a monster's hit instead of its owner. */
+  private petIntercept(rt: MapRuntime, p: Player, m: Monster, dmg: number, now: number): boolean {
+    const st = this.companion(p);
+    if (!st || st.koUntil > now) return false;
+    const stats = petStats(st.kind, st.level);
+    const chance = st.tauntUntil > now ? 100 : stats.aggro;
+    if (this.rand() * 100 >= chance) return false;
+    const taken = Math.max(1, Math.round(dmg * (archetypeOf(st.kind).role === 'tank' ? 0.6 : 1)));
+    st.hp = Math.max(0, st.hp - taken);
+    this.emit(rt, { s: m.id, t: p.id, a: taken, k: 'hit', sk: 'petguard' });
+    if (st.hp <= 0) {
+      st.koUntil = now + 20_000;
+      st.tauntUntil = 0;
+      p.conn?.send('notice', { kind: 'error', text: 'Your companion was knocked out! It will be back in 20 seconds.' });
+    }
+    this.sendPet(p, now, true);
+    return true;
+  }
+
+  /** Push the pet's health to its owner (throttled unless forced). */
+  private sendPet(p: Player, now: number, force = false): void {
+    const st = p.petState;
+    if (!st || !p.conn) return;
+    if (!force && (st.hp === st.sentHp || now - (st.sentAt ?? 0) < 500)) return;
+    st.sentHp = st.hp;
+    st.sentAt = now;
+    p.conn.send('pet:hp', { hp: st.hp, maxHp: petStats(st.kind, st.level).maxHp, koUntil: st.koUntil });
   }
 
   /**
@@ -339,25 +389,70 @@ export class Combat {
    * go to the owner. The slime pet heals instead of biting hard.
    */
   private companionTick(rt: MapRuntime, p: Player, now: number): void {
-    if (now < p.companionNextAt || rt.def.safeZone) return;
-    const hawk = p.rec.job === 'beastmaster';
-    const pet = p.pet ? getItem(p.pet)?.pet : undefined;
-    if (!hawk && !pet) return;
+    const st = this.companion(p);
+    if (!st) return;
+    const maxHp = petStats(st.kind, st.level).maxHp;
+    // Back on its feet after a knock-out; heals up out of combat.
+    if (st.koUntil && now >= st.koUntil) {
+      st.koUntil = 0;
+      st.hp = Math.max(st.hp, Math.round(maxHp * 0.5));
+      this.sendPet(p, now, true);
+    }
+    if (st.hp > maxHp) st.hp = maxHp;
+    if (now - p.lastCombatAt > OUT_OF_COMBAT_MS && st.hp < maxHp && !st.koUntil) {
+      st.hp = Math.min(maxHp, st.hp + Math.ceil(maxHp * 0.01));
+      this.sendPet(p, now);
+    }
+    if (now < p.companionNextAt || rt.def.safeZone || st.koUntil > now) return;
     if (now - p.lastCombatAt > 8000) return;
     const m = p.fightTarget ? rt.monsters.get(p.fightTarget) : undefined;
     if (!m?.alive || dist(p.x, p.y, m.x, m.y) > 7 * TILE) return;
-    const kind = hawk ? 'hawk' : pet!.kind;
-    const spec = COMPANIONS[kind] ?? COMPANIONS.dog!;
+    const hawk = st.kind === 'hawk';
+    const spec = COMPANIONS[st.kind] ?? COMPANIONS.dog!;
     p.companionNextAt = now + spec.everyMs;
-    const crit = this.rand() * 100 < 5 + (spec.crit ?? 0);
-    const base = (6 + p.rec.level * 1.6) * spec.mult * (crit ? 1.5 : 1) * (0.85 + this.rand() * 0.3);
+    st.attacks++;
+    // Skill tiers: tier 2 from pet level 20 (every 4th attack), tier 3 at loyalty 80+ (every 7th).
+    const tier = st.loyalty >= PET_LOYALTY_SKILL && st.attacks % 7 === 0 ? 3 : st.level >= PET_SKILL2_LEVEL && st.attacks % 4 === 0 ? 2 : 1;
+    const role = archetypeOf(st.kind).role;
+    let mult = 1;
+    let forceCrit = false;
+    if (tier === 2) {
+      if (st.kind === 'dog') st.tauntUntil = now + 3000;
+      else if (st.kind === 'slime') this.shieldOwner(p, 0.05, now);
+      else if (st.kind === 'fox' || hawk) forceCrit = true;
+      else mult = 2;
+    } else if (tier === 3) {
+      if (st.kind === 'dog') this.shieldOwner(p, 0.08, now);
+      else if (st.kind === 'cat') this.healOwner(rt, p, 0.06);
+      else if (st.kind === 'slime') this.healOwner(rt, p, 0.12);
+      else mult = 3;
+    }
+    const crit = forceCrit || this.rand() * 100 < 5 + (spec.crit ?? 0);
+    const atk = petStats(st.kind, st.level).atk;
+    const lowLoyalty = st.loyalty < PET_LOYALTY_LOW ? 0.5 : 1;
+    const base = (6 + atk * 1.6) * spec.mult * mult * lowLoyalty * (crit ? 1.5 : 1) * (0.85 + this.rand() * 0.3);
     const dmg = Math.max(1, Math.round(base * effectMult(m.effects, 'taken', now)));
-    this.damageMonster(rt, m, dmg, p, crit ? 'crit' : 'hit', hawk ? 'hawk' : 'pet');
-    if (spec.heal && !p.dead) {
-      const amount = Math.max(1, Math.round(p.profile.maxHp * 0.02));
+    this.damageMonster(rt, m, dmg, p, crit || tier > 1 ? 'crit' : 'hit', hawk ? 'hawk' : 'pet');
+    const leech = st.growth.leech ?? 0;
+    if (leech && !p.dead && p.rec.hp < p.profile.maxHp) {
+      const amount = Math.max(1, Math.round(dmg * leech * 0.04));
       p.rec.hp = Math.min(p.profile.maxHp, p.rec.hp + amount);
       this.emit(rt, { s: p.id, t: p.id, a: amount, k: 'heal', sk: 'pet' });
     }
+    if (spec.heal && !p.dead && role === 'support') this.healOwner(rt, p, 0.02);
+  }
+
+  private healOwner(rt: MapRuntime, p: Player, pct: number): void {
+    if (p.dead) return;
+    const amount = Math.max(1, Math.round(p.profile.maxHp * pct));
+    p.rec.hp = Math.min(p.profile.maxHp, p.rec.hp + amount);
+    this.emit(rt, { s: p.id, t: p.id, a: amount, k: 'heal', sk: 'pet' });
+  }
+
+  private shieldOwner(p: Player, pct: number, now: number): void {
+    const amount = Math.max(1, Math.round(p.profile.maxHp * pct));
+    p.effects = [...p.effects.filter((e) => e.id !== 'pet_shield'), { id: 'pet_shield', name: 'Pet Shield', until: now + 8000, mods: { shield: amount } }];
+    this.pushEffects(p);
   }
 
   damagePlayer(rt: MapRuntime, p: Player, amount: number, source: string, kind: CombatEvent['k']): void {
@@ -372,6 +467,7 @@ export class Combat {
         dmg -= absorbed;
       }
     }
+    if (dmg > 0 && (p.mount || p.mountChannel)) this.hooks.knockedOff?.(p);
     p.rec.hp = Math.max(0, p.rec.hp - dmg);
     this.emit(rt, { s: source, t: p.id, a: dmg, k: kind });
     if (++p.hitsTaken >= 12) {
@@ -452,7 +548,7 @@ export class Combat {
       level: p.rec.level,
       atk: (magic ? d.magicAttack : d.physicalAttack) * effectMult(p.effects, 'dmg', now),
       accuracy: d.accuracy,
-      critChance: d.criticalChance,
+      critChance: d.criticalChance + (p.petState && p.petState.id === p.companionId() ? (p.petState.growth.crit ?? 0) : 0),
       critDamage: d.criticalDamage,
     };
   }

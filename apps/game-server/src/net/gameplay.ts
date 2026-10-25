@@ -1,4 +1,5 @@
 import { BALANCE, QUESTS, getCrop, getItem, getMap, getNode, getRecipe, mineFloorId, mineFloorNumber, ladderRowsFor } from '@terrago/game-data';
+import { petOnDeath, petOnKill, syncCompanion } from './companions';
 import { unspentStatPoints } from '../world/characterState';
 import { settings } from '../services/serverConfig';
 import {
@@ -522,6 +523,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
               }
             }
             const res = await grantKillRewards(d.pool, r.player.id, { xp: r.xp, gold: r.gold, items: r.items, monster: r.monster.def.id });
+            await petOnKill(d, r.player, r.xp);
             pushInventory(d.world, r.player, res.inventory);
             applyDelta(d.world, r.player, res.delta);
             const parts = [`+${r.xp} XP`, r.gold ? `+${r.gold} Gold` : '', ...r.items.map((i) => `${i.quantity}× ${getItem(i.itemId)?.name}`)].filter(Boolean);
@@ -536,6 +538,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
       const d = deps();
       void p
         .serial(async () => {
+          await petOnDeath(d, p);
           const eq = await deathPenalty(d.pool, p.id);
           if (eq) {
             const inv = d.world.inventoryCache.get(p.id);
@@ -543,6 +546,10 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
           }
         })
         .catch((err) => d.log.error('death_penalty_failed', { err }));
+    },
+    loadCompanion: (p) => {
+      const d = deps();
+      void p.serial(() => syncCompanion(d, p)).catch((err) => d.log.error('pet_load_failed', { err }));
     },
     onWear: (p, slots) => {
       const d = deps();
@@ -591,28 +598,6 @@ export function questEvent(deps: GameplayDeps, p: Player, type: QuestStepType, t
 export async function startQuests(deps: GameplayDeps, p: Player): Promise<void> {
   p.quests = await loadQuests(deps.pool, p.id);
   p.conn?.send('quests', p.quests);
-}
-
-/** Z: ride the best mount you own, or get off. */
-export function toggleMount(deps: GameplayDeps, p: Player): { mount: string | null } {
-  const { world } = deps;
-  if (p.mount) {
-    world.setMount(p, null, 1);
-    return { mount: null };
-  }
-  if (p.dead) throw new GameError("You can't ride right now.");
-  if (world.runtimeOf(p).def.theme === 'cave') throw new GameError('Mounts refuse to go into the mine tunnels.');
-  if (Date.now() - p.lastCombatAt < 4000) throw new GameError("You can't mount up in the middle of a fight.");
-  let best: { id: string; speed: number } | null = null;
-  for (const s of world.inventoryCache.get(p.id)?.slots ?? []) {
-    const def = getItem(s.itemId);
-    if (!def?.mount || p.rec.level < def.levelRequirement) continue;
-    if (!best || def.mount.speed > best.speed) best = { id: def.id, speed: def.mount.speed };
-  }
-  if (!best) throw new GameError("You don't own a mount yet. Stablemaster Hana in Greenhaven can help.");
-  world.setMount(p, best.id, best.speed);
-  questEvent(deps, p, 'mount', null);
-  return { mount: best.id };
 }
 
 /** Quest actions to add to an NPC's dialogue (offers and hand-ins). */

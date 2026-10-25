@@ -1,3 +1,4 @@
+import { onMounted } from './net/companions';
 import { createServer, type Server as HttpServer } from 'node:http';
 import { performance } from 'node:perf_hooks';
 import { runMigrations } from '@terrago/database';
@@ -69,6 +70,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
     loadObjects: (def, owner) => loadMapObjects(pool, def, owner),
     onMapEnter: (p) => void onMapEntered({ pool, world, log }, p).catch((err) => log.error('map_enter_hook_failed', { err })),
     combat: combatHooks((): GameplayDeps => ({ pool, world, log })),
+    onMounted: (p) => onMounted({ pool, world, log }, p),
   });
   hooks.level = (p) => track({ pool, world, log }, p, 'level', p.rec.level, 'max');
   const bots = new AntiBot(world, pool, security);
