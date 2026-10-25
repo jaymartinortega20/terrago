@@ -4,6 +4,7 @@ import {
   emptySlots,
   moveItem,
   removeFromSlot,
+  sortSlots,
   toInventorySlots,
   type InventoryState,
   type Slots,
@@ -41,13 +42,13 @@ export async function loadSlots(tx: Tx | Pool, characterId: string, container: C
   const capacity = cap.rows[0]?.capacity ?? (container === 'equip' ? 9 : 0);
   const slots = emptySlots(capacity);
   const { rows } = await tx.query(
-    `SELECT slot, item_id, quantity, quality, durability, bound, enhance
+    `SELECT slot, item_id, quantity, quality, durability, bound, enhance, affixes
        FROM inventory_items WHERE character_id = $1 AND container = $2`,
     [characterId, container],
   );
   for (const r of rows) {
     if (r.slot < capacity) {
-      slots[r.slot] = { itemId: r.item_id, quantity: r.quantity, quality: r.quality, durability: r.durability, bound: r.bound, enhance: r.enhance };
+      slots[r.slot] = { itemId: r.item_id, quantity: r.quantity, quality: r.quality, durability: r.durability, bound: r.bound, enhance: r.enhance, ...(r.affixes?.length ? { affixes: r.affixes } : {}) };
     }
   }
   return { capacity, slots };
@@ -63,12 +64,12 @@ export async function writeSlots(tx: Tx, characterId: string, slots: Slots, chan
       await tx.query(`DELETE FROM inventory_items WHERE character_id = $1 AND container = $3 AND slot = $2`, [characterId, i, container]);
     } else {
       await tx.query(
-        `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, quality, durability, bound, enhance)
-         VALUES ($1, $9, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, quality, durability, bound, enhance, affixes)
+         VALUES ($1, $9, $2, $3, $4, $5, $6, $7, $8, $10)
          ON CONFLICT (character_id, container, slot)
          DO UPDATE SET item_id = EXCLUDED.item_id, quantity = EXCLUDED.quantity, quality = EXCLUDED.quality,
-                       durability = EXCLUDED.durability, bound = EXCLUDED.bound, enhance = EXCLUDED.enhance`,
-        [characterId, i, s.itemId, s.quantity, s.quality, s.durability, s.bound, s.enhance ?? 0, container],
+                       durability = EXCLUDED.durability, bound = EXCLUDED.bound, enhance = EXCLUDED.enhance, affixes = EXCLUDED.affixes`,
+        [characterId, i, s.itemId, s.quantity, s.quality, s.durability, s.bound, s.enhance ?? 0, container, s.affixes?.length ? JSON.stringify(s.affixes) : null],
       );
     }
   }
@@ -147,4 +148,57 @@ export async function consumeFromSlotTx(
   await writeSlots(tx, characterId, res.slots, [slot]);
   await logItemMovement(tx, { itemId: res.removed.itemId, quantity, quality: res.removed.quality, from: characterId, reason });
   return { capacity, slots: res.slots, removedItemId: res.removed.itemId };
+}
+
+/** Throw items away for good (logged). */
+export async function discardItem(pool: Pool, characterId: string, slot: unknown, quantity: unknown): Promise<InventoryState> {
+  if (!Number.isInteger(slot)) throw new GameError('Invalid slot.');
+  return withTransaction(pool, async (tx) => {
+    const { gold } = await lockCharacter(tx, characterId);
+    const { capacity, slots } = await loadSlots(tx, characterId);
+    const s = slots[slot as number];
+    if (!s) throw new GameError('That slot is empty.');
+    if (getItem(s.itemId)?.category === 'quest') throw new GameError("You can't throw away a quest item.");
+    const qty = Number.isInteger(quantity) && (quantity as number) > 0 ? Math.min(quantity as number, s.quantity) : s.quantity;
+    const res = removeFromSlot(slots, slot as number, qty);
+    if (!res.ok) throw new GameError(res.error);
+    await writeSlots(tx, characterId, res.slots, [slot as number]);
+    await logItemMovement(tx, { itemId: s.itemId, quantity: qty, quality: s.quality, from: characterId, reason: 'discard' });
+    return toState(capacity, gold, res.slots);
+  });
+}
+
+/** Merge identical items into stacks and tidy the bag by kind and rarity. */
+export async function sortBag(pool: Pool, characterId: string): Promise<InventoryState> {
+  return withTransaction(pool, async (tx) => {
+    const { gold } = await lockCharacter(tx, characterId);
+    const { capacity, slots } = await loadSlots(tx, characterId);
+    const sorted = sortSlots(slots, (id) => {
+      const d = getItem(id);
+      return d ? { stackSize: d.stackSize, category: d.category, rarity: d.rarity, name: d.name } : undefined;
+    });
+    // Rewrite every slot (items may have moved anywhere).
+    await tx.query(`DELETE FROM inventory_items WHERE character_id = $1 AND container = 'bag'`, [characterId]);
+    await writeSlots(tx, characterId, sorted, sorted.map((s, i) => (s ? i : -1)).filter((i) => i >= 0));
+    return toState(capacity, gold, sorted);
+  });
+}
+
+export const MAX_BAG = 250;
+
+/** Use a Bag Expansion: +10 slots, up to 250. */
+export async function expandBag(pool: Pool, characterId: string, slot: number): Promise<{ inventory: InventoryState; message: string }> {
+  return withTransaction(pool, async (tx) => {
+    const { gold } = await lockCharacter(tx, characterId);
+    const before = await loadSlots(tx, characterId);
+    const s = before.slots[slot];
+    const add = s ? (getItem(s.itemId)?.bagSlots ?? 0) : 0;
+    if (!s || !add) throw new GameError("That can't be used.");
+    if (before.capacity >= MAX_BAG) throw new GameError(`Your bag is already as big as it gets (${MAX_BAG} slots).`);
+    const res = await consumeFromSlotTx(tx, characterId, slot, 1, 'consume');
+    const capacity = Math.min(MAX_BAG, before.capacity + add);
+    await tx.query(`UPDATE inventories SET capacity = $2 WHERE character_id = $1 AND container = 'bag'`, [characterId, capacity]);
+    const slots = [...res.slots, ...emptySlots(capacity - res.slots.length)];
+    return { inventory: toState(capacity, gold, slots), message: `🎒 Your bag now holds ${capacity} slots.` };
+  });
 }

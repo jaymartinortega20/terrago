@@ -194,6 +194,8 @@ export interface ClientToServerEvents {
   'inventory:get': (ack: Ack<InventoryState>) => void;
   'inventory:move': (req: { from: number; to: number }, ack: Ack<InventoryState>) => void;
   'inventory:use': (req: { slot: number }, ack: Ack<{ inventory: InventoryState; message: string }>) => void;
+  'inventory:discard': (req: { slot: number; quantity?: number }, ack: Ack<InventoryState>) => void;
+  'inventory:sort': (ack: Ack<InventoryState>) => void;
   'portal:use': (portalId: string, ack: Ack<{ mapId: string }>) => void;
   'act': (req: ActRequest, ack: Ack<ActResult>) => void;
   'emote': (emote: string, ack: Ack<{ emote: string }>) => void;

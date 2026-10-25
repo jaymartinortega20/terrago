@@ -13,6 +13,8 @@ export interface SlotItem {
   durability: number | null;
   bound: boolean;
   enhance?: number;
+  /** Random bonus stats rolled when the item dropped (gear only). */
+  affixes?: import('./types').ItemAffix[] | null;
 }
 
 export type Slots = (SlotItem | null)[];
@@ -33,7 +35,7 @@ export function fromInventorySlots(list: InventorySlot[], capacity: number): Slo
   const slots = emptySlots(capacity);
   for (const s of list) {
     if (s.slot >= 0 && s.slot < capacity) {
-      slots[s.slot] = { itemId: s.itemId, quantity: s.quantity, quality: s.quality, durability: s.durability, bound: s.bound, ...(s.enhance ? { enhance: s.enhance } : {}) };
+      slots[s.slot] = { itemId: s.itemId, quantity: s.quantity, quality: s.quality, durability: s.durability, bound: s.bound, ...(s.enhance ? { enhance: s.enhance } : {}), ...(s.affixes?.length ? { affixes: s.affixes } : {}) };
     }
   }
   return slots;
@@ -47,17 +49,49 @@ export function toInventorySlots(slots: Slots): InventorySlot[] {
   return out;
 }
 
+/**
+ * Identical items share one slot: same item, quality, binding and condition.
+ * Gear stacks too while it's identical (same durability, not upgraded); a worn,
+ * damaged or upgraded piece keeps its own slot.
+ */
 export function canStackTogether(a: SlotItem, b: Omit<SlotItem, 'quantity'>, stackSize: number): boolean {
   return (
     stackSize > 1 &&
     a.itemId === b.itemId &&
     a.quality === b.quality &&
     a.bound === b.bound &&
-    a.durability === null &&
-    b.durability === null &&
+    a.durability === b.durability &&
     (a.enhance ?? 0) === 0 &&
-    (b.enhance ?? 0) === 0
+    (b.enhance ?? 0) === 0 &&
+    JSON.stringify(a.affixes ?? null) === JSON.stringify(b.affixes ?? null)
   );
+}
+
+/**
+ * Tidy a bag: merge identical items into full stacks, then order by kind and
+ * rarity. Returns every slot index (they may all move).
+ */
+export function sortSlots(slots: Slots, lookup: (itemId: string) => { stackSize: number; category: string; rarity: string; name: string } | undefined): Slots {
+  const RARITY = ['mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common'];
+  const CAT = ['weapon', 'armor', 'mount', 'tool', 'consumable', 'cosmetic', 'quest', 'fish', 'crop', 'seed', 'material', 'animal'];
+  let packed: Slots = [];
+  for (const s of slots) {
+    if (!s) continue;
+    const st = lookup(s.itemId)?.stackSize ?? 1;
+    const res = addItem(packed.concat([null]), { ...s, quantity: undefined } as unknown as Omit<SlotItem, 'quantity'>, s.quantity, st, false);
+    if (res.ok) packed = res.slots.filter((x): x is SlotItem => !!x);
+  }
+  const key = (s: SlotItem) => {
+    const d = lookup(s.itemId);
+    return [CAT.indexOf(d?.category ?? '') + 1 || 99, RARITY.indexOf(d?.rarity ?? '') + 1 || 99, d?.name ?? s.itemId, -(s.enhance ?? 0)] as const;
+  };
+  packed.sort((a, b) => {
+    const ka = key(a!);
+    const kb = key(b!);
+    for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i]! < kb[i]! ? -1 : 1;
+    return 0;
+  });
+  return [...packed, ...emptySlots(slots.length - packed.length)];
 }
 
 export function countItem(slots: Slots, itemId: string): number {

@@ -161,6 +161,10 @@
    {
     "itemId": "minor_mana_potion",
     "price": 35
+   },
+   {
+    "itemId": "bag_expansion",
+    "price": 5000
    }
   ],
   "buys": [

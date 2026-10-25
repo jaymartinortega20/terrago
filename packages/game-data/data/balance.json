@@ -13,7 +13,7 @@
   "character": {
     "startingGold": 25,
     "startingMap": "greenhaven",
-    "inventoryCapacity": 20,
+    "inventoryCapacity": 50,
     "starterItems": [
       {
         "itemId": "worn_hoe",

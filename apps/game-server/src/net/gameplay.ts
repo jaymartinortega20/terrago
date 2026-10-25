@@ -503,6 +503,10 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
             r.xp = Math.round(r.xp * eventMult('xp', Date.now()) * settings().xpRate);
+            // Newcomer boost: early levels come quickly (×3 under level 10, ×2 under 20).
+            const lvl = r.player.rec.level;
+            if (lvl < 10) r.xp *= 3;
+            else if (lvl < 20) r.xp *= 2;
             // Pet perks: small, never game-breaking.
             const perk = r.player.pet ? getItem(r.player.pet)?.pet?.perk : undefined;
             if (perk === 'xp') r.xp = Math.round(r.xp * 1.05);

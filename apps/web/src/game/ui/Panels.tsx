@@ -17,6 +17,7 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
   const inv = useStore(client.ui, (s) => s.inventory);
   const [selected, setSelected] = useState<number | null>(null);
   const [moving, setMoving] = useState(false);
+  const [trash, setTrash] = useState<{ slot: number; qty: number } | null>(null);
   if (!inv) return null;
   const bySlot = new Map(inv.slots.map((s) => [s.slot, s]));
   const sel = selected !== null ? bySlot.get(selected) : undefined;
@@ -33,18 +34,24 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
   };
 
   return (
-    <Window title="Inventory" onClose={onClose} testId="inventory-panel">
-      <div className="grid grid-cols-5 gap-1.5 justify-self-center">
-        {Array.from({ length: inv.capacity }, (_, i) => (
-          <ItemSlot key={i} slot={i} item={bySlot.get(i)} selected={selected === i} onClick={() => clickSlot(i)} />
-        ))}
+    <Window title="Inventory" onClose={onClose} testId="inventory-panel" wide>
+      <div className="max-h-[min(34dvh,300px)] overflow-y-auto pr-1">
+        <div className="grid grid-cols-8 gap-1">
+          {Array.from({ length: inv.capacity }, (_, i) => (
+            <ItemSlot key={i} slot={i} item={bySlot.get(i)} selected={selected === i} onClick={() => clickSlot(i)} size={42} />
+          ))}
+        </div>
       </div>
-      <p className="mt-2 text-sm">
+      <p className="mt-2 flex items-center text-sm">
         <span className="font-bold text-gold-dark">◉ {inv.gold.toLocaleString()} Gold</span>
-        <span className="ml-2 text-xs text-wood-dark/70">
-          {inv.slots.length}/{inv.capacity} slots used
+        <span className="ml-2 text-xs text-wood-dark/70" data-testid="bag-capacity">
+          {inv.slots.length}/{inv.capacity} slots
         </span>
+        <button className="px-btn ghost small ml-auto" onClick={() => void client.sortBag()} title="Merge identical items and tidy the bag" data-testid="sort-bag">
+          Sort &amp; stack
+        </button>
       </p>
+      {inv.capacity < 250 && <p className="text-[11px] text-wood-dark/70">Need room? Merchant Mira sells Bag Expansions (+10 slots, up to 250).</p>}
       {moving && <p className="mt-1 text-xs font-bold text-leaf-dark">Choose a slot to move the item to…</p>}
       {sel && def && (
         <div className="mt-3 border-t-2 border-parchment-3 pt-2" data-testid="item-details">
@@ -76,9 +83,9 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
             )}
           </ul>
           <div className="mt-2 flex gap-2">
-            {(def.consumable || def.unlock) && (
+            {(def.consumable || def.unlock || def.bagSlots || def.petFood) && (
               <button className="px-btn green small" onClick={() => client.useItem(sel.slot)} data-testid="use-item">
-                {def.unlock?.cache ? 'Open' : def.unlock?.skin ? 'Unlock skin' : 'Use'}
+                {def.unlock?.cache ? 'Open' : def.unlock?.skin ? 'Unlock skin' : def.petFood ? 'Feed pet' : 'Use'}
               </button>
             )}
             {def.pet && (
@@ -99,7 +106,48 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
                 Hold
               </button>
             )}
+            {def.category !== 'quest' && (
+              <button className="px-btn ghost small ml-auto text-berry" onClick={() => setTrash({ slot: sel.slot, qty: sel.quantity })} data-testid="discard-item">
+                🗑 Delete
+              </button>
+            )}
           </div>
+          {trash && trash.slot === sel.slot && (
+            <div className="mt-2 border-2 border-berry/50 bg-berry/10 p-2 text-sm" data-testid="discard-confirm">
+              <p className="font-bold">Throw away {def.name} for good?</p>
+              {sel.quantity > 1 && (
+                <label className="mt-1 flex items-center gap-2 text-xs">
+                  How many
+                  <input
+                    type="number"
+                    min={1}
+                    max={sel.quantity}
+                    value={trash.qty}
+                    onChange={(e) => setTrash({ slot: sel.slot, qty: Math.max(1, Math.min(sel.quantity, Math.floor(Number(e.target.value) || 1))) })}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    className="w-20 border-2 border-ink bg-parchment px-1"
+                  />
+                  of {sel.quantity}
+                </label>
+              )}
+              <div className="mt-2 flex gap-2">
+                <button
+                  className="px-btn small bg-berry text-parchment"
+                  onClick={() => {
+                    void client.discard(sel.slot, trash.qty);
+                    setTrash(null);
+                    if (trash.qty >= sel.quantity) setSelected(null);
+                  }}
+                  data-testid="discard-yes"
+                >
+                  Delete
+                </button>
+                <button className="px-btn ghost small" onClick={() => setTrash(null)}>
+                  Keep it
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <button className="px-btn ghost small mt-2" onClick={() => client.ui.set({ panel: 'stall' })} data-testid="open-stall-setup">

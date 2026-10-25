@@ -159,25 +159,27 @@ export function ProgressToasts({ client, openJournal, touch }: { client: GameCli
   const ann = useStore(client.ui, (s) => s.announcement);
   const ready = useStore(client.ui, (s) => s.dailyReady);
   const panel = useStore(client.ui, (s) => s.panel);
+  // New players: no daily-reward nudge until they've finished their first quest.
+  const settled = useStore(client.ui, (s) => (s.self?.level ?? 1) >= 3 || s.quests.some((q) => q.done));
   return (
-    <div className={`pointer-events-none absolute left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 ${touch ? 'top-[38%]' : 'top-36'}`}>
+    <div className={`pointer-events-none absolute left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 ${touch ? 'top-[30%]' : 'top-32'}`}>
       {ann && (
         <div className="px-panel max-w-[90vw] px-4 py-2 text-center font-bold text-wood-dark" role="alert" data-testid="announcement">
           📢 {ann}
         </div>
       )}
       {toast && (
-        <div className="px-panel animate-bounce px-4 py-2 text-center" data-testid="achievement-toast">
-          <div className="text-xs font-bold text-gold-dark">ACHIEVEMENT UNLOCKED</div>
-          <div className="text-lg font-bold">
+        <div className="hud-pill px-3 py-1 text-center" style={{ boxShadow: '0 0 0 2px #e8c060, 0 4px 12px rgba(0,0,0,0.4)', animation: 'feed-in 0.25s ease-out' }} data-testid="achievement-toast">
+          <span className="text-[10px] font-bold tracking-widest text-gold">ACHIEVEMENT </span>
+          <span className="text-sm font-bold">
             {toast.icon} {toast.name}
-          </div>
-          <div className="text-xs">+{toast.gold} Gold</div>
+          </span>
+          <span className="ml-1 text-[11px] text-gold">+{toast.gold}g</span>
         </div>
       )}
-      {ready && panel !== 'journal' && (
-        <button className="px-btn green small pointer-events-auto" onClick={openJournal} data-testid="daily-ready">
-          🎁 Daily reward ready!{touch ? '' : ' (L)'}
+      {ready && settled && panel !== 'journal' && (
+        <button className="hud-pill pointer-events-auto px-2.5 py-0.5 text-xs font-bold text-leaf" onClick={openJournal} data-testid="daily-ready">
+          🎁 Daily reward{touch ? '' : ' (L)'}
         </button>
       )}
     </div>

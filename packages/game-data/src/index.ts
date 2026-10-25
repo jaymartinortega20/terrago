@@ -323,7 +323,8 @@ export function validateGameData(): string[] {
   for (const i of ITEMS) {
     if (seen.has(i.id)) errors.push(`duplicate item ${i.id}`);
     seen.add(i.id);
-    if (i.maxDurability !== null && i.stackSize !== 1) errors.push(`item ${i.id} has durability but stacks`);
+    // Gear may stack while identical (it's worn one at a time); tools wear in the bag, so they never stack.
+    if (i.maxDurability !== null && i.stackSize !== 1 && !i.equip) errors.push(`item ${i.id} has durability but stacks`);
     if (i.stackSize < 1) errors.push(`item ${i.id} has invalid stack size`);
   }
   for (const id of CLASS_IDS) if (!classIndex.has(id)) errors.push(`missing class ${id}`);
@@ -363,7 +364,7 @@ export function validateGameData(): string[] {
   }
   for (const m of MONSTERS) for (const d of m.drops) if (!itemIndex.has(d.itemId)) errors.push(`monster ${m.id} drops unknown ${d.itemId}`);
   for (const c of CLASSES) if (itemIndex.get(c.starterWeapon)?.equip?.slot !== 'mainhand') errors.push(`class ${c.id} starter weapon ${c.starterWeapon} is not a weapon`);
-  for (const i of ITEMS) if (i.equip && i.stackSize !== 1) errors.push(`equipment ${i.id} must not stack`);
+    // Identical gear may stack in the bag; it is always worn one piece at a time.
   for (const id of allMapIds()) for (const sp of getMap(id)!.spawns ?? []) if (!monsterIndex.has(sp.monster)) errors.push(`${id} spawns unknown monster ${sp.monster}`);
   for (const n of NODES) {
     for (const d of n.drops) if (!itemIndex.has(d.itemId)) errors.push(`node ${n.id} drops unknown ${d.itemId}`);

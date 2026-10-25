@@ -16,7 +16,7 @@ import type { Metrics } from '../metrics';
 import type { SecurityEvents } from '../security/events';
 import { TokenBucket } from '../security/rateLimit';
 import { loadCharacter, useItem } from '../services/characters';
-import { getInventory, moveInventoryItem } from '../services/inventory';
+import { discardItem, expandBag, getInventory, moveInventoryItem, sortBag } from '../services/inventory';
 import { addStatPoints, advanceJob } from './jobs';
 import { useUnlock } from '../services/unlocks';
 import { ownedSkins, wearOutfit } from './wardrobe';
@@ -278,6 +278,23 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
       ),
     );
 
+    socket.on('inventory:discard', (req, ack) =>
+      serial(ack, async () => {
+        const r = (req ?? {}) as { slot?: unknown; quantity?: unknown };
+        const inv = await discardItem(pool, p.id, r.slot, r.quantity);
+        const full = { ...inv, equipment: world.inventoryCache.get(p.id)?.equipment ?? [] };
+        world.inventoryCache.set(p.id, full);
+        return full;
+      }),
+    );
+    socket.on('inventory:sort', (ack) =>
+      serial(ack, async () => {
+        const inv = await sortBag(pool, p.id);
+        const full = { ...inv, equipment: world.inventoryCache.get(p.id)?.equipment ?? [] };
+        world.inventoryCache.set(p.id, full);
+        return full;
+      }),
+    );
     socket.on('inventory:use', (req, ack) =>
       respond(ack, () =>
         p.serial(async () => {
@@ -299,6 +316,12 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
             await syncCompanion(g, p);
             const name = getItem(inv.itemId)!.name;
             return { inventory: world.inventoryCache.get(p.id)!, message: next ? `${name} is following you.` : `${name} went home.` };
+          }
+          if (inv && getItem(inv.itemId)?.bagSlots) {
+            const r = await expandBag(pool, p.id, slot as number);
+            world.inventoryCache.set(p.id, { ...r.inventory, equipment: world.inventoryCache.get(p.id)?.equipment ?? [] });
+            p.conn?.send('inventory:update', world.inventoryCache.get(p.id)!);
+            return { inventory: world.inventoryCache.get(p.id)!, message: r.message };
           }
           if (inv && getItem(inv.itemId)?.petFood) {
             const fed = await pets.feed(g, p, { slot });

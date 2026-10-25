@@ -246,9 +246,9 @@ export class GameClient {
     socket.on('invite', (inv) => this.ui.set((s) => ({ invites: [...s.invites.filter((x) => !(x.kind === inv.kind && x.fromId === inv.fromId)), inv].slice(-4) })));
     socket.on('party', (party) => this.ui.set({ party }));
     socket.on('achievement', (a) => {
-      audio.sfx('achievement');
-      this.ui.set({ achievementToast: a });
-      setTimeout(() => this.ui.get().achievementToast === a && this.ui.set({ achievementToast: null }), 5000);
+      // One at a time: several achievements at once queue up instead of piling on screen.
+      this.achievementQueue.push(a);
+      if (!this.ui.get().achievementToast) this.nextAchievement();
     });
     socket.on('event:manual', (ev) => setManualEvent(ev));
     socket.on('announce', (text) => {
@@ -682,6 +682,15 @@ export class GameClient {
     return st.where ? { ...st.where, label: '' } : null;
   }
 
+  private achievementQueue: NonNullable<import('../store').UiState['achievementToast']>[] = [];
+  private nextAchievement(): void {
+    const a = this.achievementQueue.shift();
+    if (!a) return void this.ui.set({ achievementToast: null });
+    audio.sfx('achievement');
+    this.ui.set({ achievementToast: a });
+    setTimeout(() => this.nextAchievement(), 3200);
+  }
+
   toggleMount(): void {
     this.socket?.emit('mount:toggle', (res) => {
       if (!res.ok) pushNotice(this.ui, 'error', res.error, 2500);
@@ -966,6 +975,25 @@ export class GameClient {
     } catch (e) {
       pushNotice(this.ui, 'error', (e as Error).message);
       return null;
+    }
+  }
+
+  async discard(slot: number, quantity: number): Promise<void> {
+    try {
+      const inventory = await this.request<import('@terrago/shared').InventoryState>('inventory:discard', { slot, quantity });
+      this.ui.set({ inventory });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  async sortBag(): Promise<void> {
+    try {
+      const inventory = await this.request<import('@terrago/shared').InventoryState>('inventory:sort');
+      this.ui.set({ inventory });
+      audio.sfx('click');
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
     }
   }
 

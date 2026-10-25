@@ -239,6 +239,8 @@ export interface ItemDef {
   pet?: { kind: string; color: string; perk: 'gold' | 'fish' | 'xp' | 'regen' | 'dragon' };
   /** Rideable: speed multiplier and look. */
   mount?: { speed: number; color: string; kind: 'horse' | 'stag' | 'wolf' | 'wyvern' | 'boar' | 'hovergear'; perk?: import('./companions').MountPerkId; glow?: string };
+  /** Bag Expansion: slots it adds. */
+  bagSlots?: number;
   /** Food for pets: EXP and loyalty. */
   petFood?: { xp: number; loyalty: number };
   /** Used from the bag: unlock an exclusive skin (by outfit name) or open a cache. */
@@ -259,6 +261,14 @@ export interface InventorySlot {
   bound: boolean;
   /** Enhancement level (+0..+10) for equipment. */
   enhance?: number;
+  /** Random bonus stats rolled on drop (gear). */
+  affixes?: ItemAffix[] | null;
+}
+
+/** A random bonus stat on a piece of gear ("+4% Critical"). */
+export interface ItemAffix {
+  stat: string;
+  value: number;
 }
 
 export interface InventoryState {

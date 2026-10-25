@@ -8,6 +8,7 @@ import {
   enhanceCost,
   removeItemById,
   type ClassId,
+  type SlotItem,
   type Slots,
 } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
@@ -38,12 +39,23 @@ export async function equip(pool: Pool, characterId: string, from: unknown, leve
       throw new GameError(`${def.name} is for ${def.equip.classes.map((c) => getClass(c).name).join('/')}s.`);
     }
     const target = EQUIP_SLOT_INDEX[def.equip.slot];
-    const bagSlots = bag.slots.map((s) => (s ? { ...s } : null));
+    let bagSlots: Slots = bag.slots.map((s) => (s ? { ...s } : null));
     const eqSlots = eq.slots.map((s) => (s ? { ...s } : null));
     const prev = eqSlots[target] ?? null;
-    eqSlots[target] = { ...item, bound: item.bound || def.bind === 'equip' };
-    bagSlots[from as number] = prev;
-    await writeSlots(tx, characterId, bagSlots, [from as number]);
+    // Wear one piece from the stack.
+    eqSlots[target] = { ...item, quantity: 1, bound: item.bound || def.bind === 'equip' };
+    const changed = new Set<number>([from as number]);
+    if (item.quantity > 1) {
+      bagSlots[from as number] = { ...item, quantity: item.quantity - 1 };
+      if (prev) {
+        const pdef = getItem(prev.itemId);
+        const res = addItem(bagSlots, { ...prev, quantity: undefined } as unknown as Omit<SlotItem, 'quantity'>, prev.quantity, pdef?.stackSize ?? 1);
+        if (!res.ok) throw new GameError('Make room in your bag first.');
+        bagSlots = res.slots;
+        res.changed.forEach((i) => changed.add(i));
+      }
+    } else bagSlots[from as number] = prev;
+    await writeSlots(tx, characterId, bagSlots, [...changed]);
     await writeSlots(tx, characterId, eqSlots, [target], 'equip');
     return toState(bag.capacity, gold, bagSlots, eqSlots);
   });
@@ -57,13 +69,12 @@ export async function unequip(pool: Pool, characterId: string, slot: unknown): P
     const eq = await loadSlots(tx, characterId, 'equip');
     const item = eq.slots[slot as number];
     if (!item) throw new GameError('Nothing is worn there.');
-    const free = bag.slots.findIndex((s) => s === null);
-    if (free < 0) throw new GameError('Your bag is full.');
-    const bagSlots = bag.slots.map((s) => (s ? { ...s } : null));
+    const res = addItem(bag.slots, { ...item, quantity: undefined } as unknown as Omit<SlotItem, 'quantity'>, item.quantity, getItem(item.itemId)?.stackSize ?? 1);
+    if (!res.ok) throw new GameError('Your bag is full.');
+    const bagSlots = res.slots;
     const eqSlots = eq.slots.map((s) => (s ? { ...s } : null));
-    bagSlots[free] = item;
     eqSlots[slot as number] = null;
-    await writeSlots(tx, characterId, bagSlots, [free]);
+    await writeSlots(tx, characterId, bagSlots, res.changed);
     await writeSlots(tx, characterId, eqSlots, [slot as number], 'equip');
     return toState(bag.capacity, gold, bagSlots, eqSlots);
   });

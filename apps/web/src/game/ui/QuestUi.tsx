@@ -12,15 +12,23 @@ export function QuestTracker({ client, compact }: { client: GameClient; compact?
   const quests = useStore(client.ui, (s) => s.quests);
   const active = quests.filter((q) => !q.done);
   if (!active.length) {
+    // A brand-new player gets one clear first goal.
+    const first = !quests.length;
     return (
-      <div className="px-panel-dark pointer-events-auto w-56 px-2 py-1.5 text-xs" data-testid="quest-tracker">
-        <p className="font-bold text-gold">! New quest available</p>
-        <p className="text-parchment">Follow the arrow and look for the yellow ! over someone's head.</p>
+      <div
+        className={`hud-pill pointer-events-auto ${compact ? 'w-48' : 'w-60'} px-2.5 py-1.5 text-xs`}
+        style={first ? { boxShadow: '0 0 0 2px #e8c060, 0 0 14px rgba(232,192,96,0.5)' } : undefined}
+        data-testid="quest-tracker"
+      >
+        <p className="font-bold text-gold">{first ? '★ Your first goal' : '! New quest available'}</p>
+        <p className="text-parchment">
+          {first ? 'Talk to Mayor Lina by the fountain — follow the gold arrow. She has a horse waiting for you.' : "Follow the arrow to the yellow ! over someone's head."}
+        </p>
       </div>
     );
   }
   return (
-    <div className={`px-panel-dark pointer-events-auto ${compact ? 'w-48' : 'w-64'} px-2 py-1.5`} data-testid="quest-tracker">
+    <div className={`hud-pill pointer-events-auto ${compact ? 'w-48' : 'w-64'} px-2.5 py-1.5`} data-testid="quest-tracker">
       {active.slice(0, 2).map((q) => {
         const def = getQuest(q.id);
         if (!def) return null;

@@ -42,7 +42,7 @@
   },
   "rewards": {
    "gold": 20,
-   "xp": 30
+   "xp": 150
   }
  },
  {
@@ -87,7 +87,7 @@
   ],
   "rewards": {
    "gold": 25,
-   "xp": 40,
+   "xp": 300,
    "items": [
     {
      "itemId": "carrot_seed",
@@ -142,7 +142,7 @@
   ],
   "rewards": {
    "gold": 30,
-   "xp": 50
+   "xp": 350
   }
  },
  {
@@ -176,7 +176,7 @@
   ],
   "rewards": {
    "gold": 25,
-   "xp": 50,
+   "xp": 350,
    "items": [
     {
      "itemId": "padded_head",
@@ -216,7 +216,7 @@
   ],
   "rewards": {
    "gold": 45,
-   "xp": 70,
+   "xp": 500,
    "items": [
     {
      "itemId": "minor_health_potion",
@@ -265,7 +265,7 @@
   ],
   "rewards": {
    "gold": 35,
-   "xp": 60
+   "xp": 500
   }
  },
  {
