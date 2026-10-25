@@ -1,5 +1,5 @@
 import { BALANCE, getItem } from '@terrago/game-data';
-import { addItem, removeFromSlot, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
+import { addItem, removeFromSlot, type SlotItem, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
 import { GameError, withTransaction, type Pool, type Tx } from '../db';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
 import { changeGold, logItemMovement } from './ledger';
@@ -27,6 +27,7 @@ function rowToListing(r: Record<string, any>, me?: string): MarketListing {
     quality: r.quality,
     enhance: r.enhance,
     durability: r.durability,
+    ...(r.affixes?.length ? { affixes: r.affixes } : {}),
     unitPrice: Number(r.unit_price),
     category: r.category,
     rarity: r.rarity,
@@ -100,9 +101,9 @@ export async function createListing(pool: Pool, sellerId: string, slot: unknown,
     if (!res.ok) throw new GameError(res.error);
     await writeSlots(tx, sellerId, res.slots, [slot as number]);
     const ins = await tx.query<{ id: number }>(
-      `INSERT INTO marketplace_listings (seller_id, item_id, quantity, quality, durability, enhance, unit_price, category, rarity, item_name, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, now() + make_interval(hours => $11)) RETURNING id`,
-      [sellerId, s.itemId, qty, s.quality, s.durability, s.enhance ?? 0, unitPrice, def.category, def.rarity, def.name, M().durationHours],
+      `INSERT INTO marketplace_listings (seller_id, item_id, quantity, quality, durability, enhance, unit_price, category, rarity, item_name, expires_at, affixes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, now() + make_interval(hours => $11), $12) RETURNING id`,
+      [sellerId, s.itemId, qty, s.quality, s.durability, s.enhance ?? 0, unitPrice, def.category, def.rarity, def.name, M().durationHours, s.affixes?.length ? JSON.stringify(s.affixes) : null],
     );
     await logItemMovement(tx, { itemId: s.itemId, quantity: qty, quality: s.quality, from: sellerId, reason: 'marketplace', ref: { type: 'listing', id: String(ins.rows[0]!.id) } });
     return { message: `Listed ${qty}× ${def.name} for ${total.toLocaleString()} Gold (fee ${fee}).`, inventory: toState(capacity, after, res.slots) };
@@ -126,7 +127,7 @@ export async function buyListing(pool: Pool, buyerId: string, listingId: unknown
     const tax = marketTax(total);
     const def = getItem(l.item_id)!;
     const { capacity, slots } = await loadSlots(tx, buyerId);
-    const res = addItem(slots, { itemId: l.item_id, quality: l.quality, durability: l.durability, bound: false, enhance: l.enhance }, l.quantity, def.stackSize);
+    const res = addItem(slots, { itemId: l.item_id, quality: l.quality, durability: l.durability, bound: false, enhance: l.enhance, ...(l.affixes?.length ? { affixes: l.affixes } : {}) }, l.quantity, def.stackSize);
     if (!res.ok) throw new GameError('Your bag is full.');
     const ref = { type: 'listing', id: String(l.id) };
     const buyerGold = (await changeGold(tx, buyerId, -total, 'marketplace_purchase', ref)).after;
@@ -161,7 +162,7 @@ export async function cancelListing(pool: Pool, sellerId: string, listingId: unk
     const { gold } = await lockCharacter(tx, sellerId);
     const def = getItem(l.item_id)!;
     const { capacity, slots } = await loadSlots(tx, sellerId);
-    const res = addItem(slots, { itemId: l.item_id, quality: l.quality, durability: l.durability, bound: false, enhance: l.enhance }, l.quantity, def.stackSize);
+    const res = addItem(slots, { itemId: l.item_id, quality: l.quality, durability: l.durability, bound: false, enhance: l.enhance, ...(l.affixes?.length ? { affixes: l.affixes } : {}) }, l.quantity, def.stackSize);
     if (!res.ok) throw new GameError('Make room in your bag first.');
     await writeSlots(tx, sellerId, res.slots, res.changed);
     const expired = new Date(l.expires_at).getTime() <= Date.now();
@@ -197,7 +198,7 @@ export async function executeTrade(pool: Pool, a: TradeOffer, b: TradeOffer): Pr
     const changedB = new Set<number>();
     const take = (from: typeof slotsA, offer: TradeOffer, changed: Set<number>) => {
       let cur = from;
-      const taken: { itemId: string; quantity: number; quality: number; durability: number | null; enhance: number }[] = [];
+      const taken: { itemId: string; quantity: number; quality: number; durability: number | null; enhance: number; affixes?: SlotItem['affixes'] }[] = [];
       for (const it of offer.items) {
         const s = cur[it.slot];
         if (!s || s.itemId !== it.itemId || s.quantity < it.quantity) throw new GameError('The trade changed — an item is no longer there.');
@@ -207,7 +208,7 @@ export async function executeTrade(pool: Pool, a: TradeOffer, b: TradeOffer): Pr
         if (!res.ok) throw new GameError(res.error);
         cur = res.slots;
         changed.add(it.slot);
-        taken.push({ itemId: s.itemId, quantity: it.quantity, quality: s.quality, durability: s.durability, enhance: s.enhance ?? 0 });
+        taken.push({ itemId: s.itemId, quantity: it.quantity, quality: s.quality, durability: s.durability, enhance: s.enhance ?? 0, affixes: s.affixes });
       }
       return { slots: cur, taken };
     };
@@ -215,7 +216,7 @@ export async function executeTrade(pool: Pool, a: TradeOffer, b: TradeOffer): Pr
       let cur = to;
       for (const it of items) {
         const def = getItem(it.itemId)!;
-        const res = addItem(cur, { itemId: it.itemId, quality: it.quality, durability: it.durability, bound: false, enhance: it.enhance }, it.quantity, def.stackSize);
+        const res = addItem(cur, { itemId: it.itemId, quality: it.quality, durability: it.durability, bound: false, enhance: it.enhance, ...(it.affixes?.length ? { affixes: it.affixes } : {}) }, it.quantity, def.stackSize);
         if (!res.ok) throw new GameError('Someone\'s bag is too full for this trade.');
         cur = res.slots;
         res.changed.forEach((i) => changed.add(i));

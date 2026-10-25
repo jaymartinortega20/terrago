@@ -3,7 +3,7 @@
 import { ACTIONS, RESERVED, keyFor, keyLabel, onKeysChanged, resetKeys, setKey, type ActionId } from '../keybinds';
 import { useEffect, useMemo, useState } from 'react';
 import { CLASSES, getItem, getJob, getMap, skillsForJob } from '@terrago/game-data';
-import { BASE_OUTFIT_COUNT, JOB_LEVEL, OUTFITS, QUALITIES, TILE_SIZE } from '@terrago/shared';
+import { BASE_OUTFIT_COUNT, JOB_LEVEL, OUTFITS, QUALITIES, TILE_SIZE, affixText, setOf } from '@terrago/shared';
 import { characterPreview } from '../art/characters';
 import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
@@ -12,7 +12,7 @@ import type { GameClient } from '../net/client';
 import { useStore, type Panel } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
 import { Window } from './Window';
-import { EquipmentGrid } from './CombatUi';
+import { EquipmentGrid, SetInfo } from './CombatUi';
 
 export function InventoryPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const inv = useStore(client.ui, (s) => s.inventory);
@@ -78,6 +78,12 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
                 {def.equip.range ? ` · range ${def.equip.range}` : ''}
               </li>
             )}
+            {sel.affixes?.map((a) => (
+              <li key={a.stat} className="font-bold" style={{ color: '#3f7fd0' }} data-testid="affix">
+                ✦ {affixText(a)}
+              </li>
+            ))}
+            {def.equip && setOf(def.id) && <SetInfo itemId={def.id} />}
             {sel.durability !== null && def.maxDurability && (
               <li>
                 Durability {sel.durability}/{def.maxDurability}

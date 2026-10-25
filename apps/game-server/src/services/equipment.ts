@@ -10,6 +10,8 @@ import {
   type ClassId,
   type SlotItem,
   type Slots,
+  rollAffixes,
+  type ItemAffix,
 } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
@@ -188,22 +190,35 @@ export async function enhance(pool: Pool, characterId: string, equipSlot: unknow
 export async function grantKillRewards(
   pool: Pool,
   characterId: string,
-  r: { xp: number; gold: number; items: { itemId: string; quantity: number }[]; monster: string },
+  r: { xp: number; gold: number; items: { itemId: string; quantity: number }[]; monster: string; elite?: boolean },
   reason: 'loot' | 'daily_reward' | 'achievement' | 'admin' = 'loot',
-): Promise<{ delta: ProgressDelta; inventory: Inv | null; overflow: { itemId: string; quantity: number }[] }> {
+): Promise<{ delta: ProgressDelta; inventory: Inv | null; overflow: { itemId: string; quantity: number; affixes?: ItemAffix[] }[]; rolled: { itemId: string; affixes: ItemAffix[] }[] }> {
   return withTransaction(pool, async (tx) => {
     await lockCharacter(tx, characterId);
     const delta: ProgressDelta = {};
     if (r.xp > 0) delta.character = await grantCharacterXpTx(tx, characterId, r.xp);
     let inventory: Inv | null = null;
-    const overflow: { itemId: string; quantity: number }[] = [];
+    const overflow: { itemId: string; quantity: number; affixes?: ItemAffix[] }[] = [];
+    const rolled: { itemId: string; affixes: ItemAffix[] }[] = [];
     if (r.gold > 0 || r.items.length) {
       let { capacity, slots } = await loadSlots(tx, characterId);
       const changed = new Set<number>();
+      // Monster gear rolls random stats, one piece at a time (each roll is unique).
+      const entries: { itemId: string; quantity: number; affixes?: ItemAffix[] }[] = [];
       for (const it of r.items) {
         const def = getItem(it.itemId);
+        if (reason === 'loot' && def?.equip && (def.category === 'weapon' || def.category === 'armor')) {
+          for (let k = 0; k < it.quantity; k++) {
+            const affixes = rollAffixes(def, Math.random, { elite: r.elite });
+            if (affixes.length) rolled.push({ itemId: def.id, affixes });
+            entries.push({ itemId: def.id, quantity: 1, ...(affixes.length ? { affixes } : {}) });
+          }
+        } else entries.push(it);
+      }
+      for (const it of entries) {
+        const def = getItem(it.itemId);
         if (!def) continue;
-        const res = addItem(slots, { itemId: def.id, quality: 0, durability: def.maxDurability, bound: def.bind === 'pickup', enhance: 0 }, it.quantity, def.stackSize, false);
+        const res = addItem(slots, { itemId: def.id, quality: 0, durability: def.maxDurability, bound: def.bind === 'pickup', enhance: 0, ...(it.affixes ? { affixes: it.affixes } : {}) }, it.quantity, def.stackSize, false);
         if (!res.ok) {
           overflow.push(it);
           continue;
@@ -211,24 +226,24 @@ export async function grantKillRewards(
         slots = res.slots;
         res.changed.forEach((i) => changed.add(i));
         if (res.added > 0) await logItemMovement(tx, { itemId: def.id, quantity: res.added, to: characterId, reason, ref: { type: reason === 'loot' ? 'monster' : reason, id: r.monster } });
-        if (res.added < it.quantity) overflow.push({ itemId: def.id, quantity: it.quantity - res.added });
+        if (res.added < it.quantity) overflow.push({ itemId: def.id, quantity: it.quantity - res.added, ...(it.affixes ? { affixes: it.affixes } : {}) });
       }
       await writeSlots(tx, characterId, slots, [...changed]);
       let gold = (await lockCharacter(tx, characterId)).gold;
       if (r.gold > 0) gold = (await changeGold(tx, characterId, r.gold, reason, { type: reason === 'loot' ? 'monster' : reason, id: r.monster })).after;
       inventory = toState(capacity, gold, slots);
     }
-    return { delta, inventory, overflow };
+    return { delta, inventory, overflow, rolled };
   });
 }
 
 /** Pick up a ground drop (all-or-nothing). */
-export async function pickUp(pool: Pool, characterId: string, itemId: string, quantity: number, quality: number): Promise<Inv> {
+export async function pickUp(pool: Pool, characterId: string, itemId: string, quantity: number, quality: number, affixes?: ItemAffix[] | null): Promise<Inv> {
   return withTransaction(pool, async (tx) => {
     const { gold } = await lockCharacter(tx, characterId);
     const { capacity, slots } = await loadSlots(tx, characterId);
     const def = getItem(itemId)!;
-    const res = addItem(slots, { itemId, quality, durability: def.maxDurability, bound: def.bind === 'pickup', enhance: 0 }, quantity, def.stackSize);
+    const res = addItem(slots, { itemId, quality, durability: def.maxDurability, bound: def.bind === 'pickup', enhance: 0, ...(affixes?.length ? { affixes } : {}) }, quantity, def.stackSize);
     if (!res.ok) throw new GameError('Your bag is full.');
     await writeSlots(tx, characterId, res.slots, res.changed);
     await logItemMovement(tx, { itemId, quantity, quality, to: characterId, reason: 'pickup' });

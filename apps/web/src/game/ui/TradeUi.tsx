@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { BALANCE, getItem } from '@terrago/game-data';
-import { QUALITIES, type InventorySlot, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
+import { QUALITIES, affixText, type ItemAffix, type InventorySlot, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
@@ -14,15 +14,22 @@ const CATEGORIES = ['', 'material', 'crop', 'seed', 'fish', 'consumable', 'weapo
 const fmt = (n: number) => n.toLocaleString();
 const qualityTag = (q: number) => (q > 0 ? ` (${QUALITIES[q]})` : '');
 
-function ItemName({ itemId, quality = 0, enhance = 0 }: { itemId: string; quality?: number; enhance?: number }) {
+function ItemName({ itemId, quality = 0, enhance = 0, affixes }: { itemId: string; quality?: number; enhance?: number; affixes?: ItemAffix[] | null }) {
   const def = getItem(itemId);
   return (
     <span className="flex min-w-0 items-center gap-1.5">
       {def && <PixelIcon icon={def.icon} size={22} />}
-      <span className="truncate font-bold" style={{ color: def && def.rarity !== 'common' ? RARITY_COLOR[def.rarity] : undefined }}>
-        {def?.name ?? itemId}
-        {enhance > 0 ? ` +${enhance}` : ''}
-        {qualityTag(quality)}
+      <span className="min-w-0">
+        <span className="block truncate font-bold" style={{ color: def && def.rarity !== 'common' ? RARITY_COLOR[def.rarity] : undefined }}>
+          {def?.name ?? itemId}
+          {enhance > 0 ? ` +${enhance}` : ''}
+          {qualityTag(quality)}
+        </span>
+        {affixes?.length ? (
+          <span className="block truncate text-[10px] font-bold" style={{ color: '#3f7fd0' }} data-testid="affixes">
+            ✦ {affixes.map(affixText).join(' · ')}
+          </span>
+        ) : null}
       </span>
     </span>
   );
@@ -120,7 +127,7 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
             <ul className="space-y-1" data-testid="market-rows">
               {rows.map((l) => (
                 <li key={l.id} className="flex items-center gap-2 border-2 border-ink/30 bg-parchment-2/50 px-1.5 py-1 text-sm">
-                  <ItemName itemId={l.itemId} quality={l.quality} enhance={l.enhance} />
+                  <ItemName itemId={l.itemId} quality={l.quality} enhance={l.enhance} affixes={l.affixes} />
                   <span className="text-xs text-wood-dark/70">×{l.quantity}</span>
                   <span className="ml-auto text-right text-xs">
                     <span className="block font-bold text-gold-dark">◉ {fmt(l.unitPrice * l.quantity)}</span>
@@ -178,7 +185,7 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
           </div>
           {chosen && (
             <div className="space-y-1 border-2 border-ink/40 p-2 text-sm">
-              <ItemName itemId={chosen.itemId} quality={chosen.quality} enhance={chosen.enhance} />
+              <ItemName itemId={chosen.itemId} quality={chosen.quality} enhance={chosen.enhance} affixes={chosen.affixes} />
               <label className="flex items-center gap-2">
                 Quantity
                 <input
@@ -229,7 +236,7 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
           {mine.length === 0 && <p className="text-sm text-wood-dark/70">You have no listings.</p>}
           {mine.map((l) => (
             <li key={l.id} className="flex items-center gap-2 border-2 border-ink/30 px-1.5 py-1 text-sm">
-              <ItemName itemId={l.itemId} quality={l.quality} enhance={l.enhance} />
+              <ItemName itemId={l.itemId} quality={l.quality} enhance={l.enhance} affixes={l.affixes} />
               <span className="text-xs">×{l.quantity}</span>
               <span className="ml-auto text-xs font-bold text-gold-dark">◉ {fmt(l.unitPrice * l.quantity)}</span>
               {l.status === 'active' ? (
@@ -252,7 +259,7 @@ function OfferList({ items, gold }: { items: TradeOfferItem[]; gold: number }) {
     <div className="min-h-[90px] space-y-0.5 border-2 border-ink/40 bg-parchment-2/40 p-1 text-xs">
       {items.map((i) => (
         <div key={i.slot} className="flex items-center gap-1">
-          <ItemName itemId={i.itemId} quality={i.quality} enhance={i.enhance} />
+          <ItemName itemId={i.itemId} quality={i.quality} enhance={i.enhance} affixes={i.affixes} />
           <span className="ml-auto">×{i.quantity}</span>
         </div>
       ))}

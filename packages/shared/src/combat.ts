@@ -1,3 +1,4 @@
+import { setBonuses, type AffixStat } from './affixes';
 import type { BaseStats, ClassId, DerivedStats, InventorySlot } from './types';
 
 /**
@@ -95,6 +96,8 @@ export interface CombatProfile {
   maxHp: number;
   maxMp: number;
   weapon: WeaponProfile;
+  /** Percent of damage dealt that heals you (gear affixes, sets). */
+  lifesteal: number;
 }
 
 const FISTS: WeaponProfile = { type: 'fists', speedMs: 900, range: 1.4, magic: false };
@@ -115,15 +118,19 @@ export function combatProfile(
   const jp = opts.passive ?? {};
   const pct = (v?: number) => 1 + (v ?? 0) / 100;
   const s = statsAtLevel(base, growth, level);
-  const bonus: Required<EquipStats> = { atk: 0, matk: 0, def: 0, mdef: 0, hp: 0, mp: 0, str: 0, agi: 0, int: 0, vit: 0, luk: 0, crit: 0 };
+  const bonus: Record<AffixStat, number> = { atk: 0, matk: 0, def: 0, mdef: 0, hp: 0, mp: 0, str: 0, agi: 0, int: 0, vit: 0, luk: 0, crit: 0, aspd: 0, lifesteal: 0, move: 0 };
   let weapon = FISTS;
+  const worn: string[] = [];
   for (const e of equipment) {
     const d = equipDef(e.itemId);
     if (!d || (e.durability !== null && e.durability <= 0)) continue;
+    worn.push(e.itemId);
     const mult = 1 + (e.enhance ?? 0) * ENHANCE_STEP;
     for (const [k, v] of Object.entries(d.stats) as [keyof EquipStats, number][]) bonus[k] += Math.round(v * mult);
+    for (const a of e.affixes ?? []) if (a.stat in bonus) bonus[a.stat as AffixStat] += a.value;
     if (d.slot === 'mainhand' && d.weapon) weapon = { type: d.weapon, speedMs: d.speedMs ?? 1000, range: d.range ?? 1.5, magic: !!d.magic };
   }
+  for (const [k, v] of Object.entries(setBonuses(worn)) as [AffixStat, number][]) bonus[k] += v;
   const st: BaseStats = {
     strength: s.strength + bonus.str,
     agility: s.agility + bonus.agi,
@@ -141,8 +148,8 @@ export function combatProfile(
     evasion: st.agility + Math.floor(st.luck / 3),
     criticalChance: round1(1 + st.luck * 0.3 + st.agility * 0.05 + bonus.crit + (jp.critAdd ?? 0)),
     criticalDamage: 150 + Math.floor(st.luck / 2),
-    movementSpeed: 100,
-    attackSpeed: 100 + Math.floor(st.agility / 2),
+    movementSpeed: 100 + Math.min(15, bonus.move),
+    attackSpeed: 100 + Math.floor(st.agility / 2) + Math.min(30, bonus.aspd),
     gatheringEfficiency: 100 + Math.floor((st.strength + st.agility) / 4),
   };
   return {
@@ -152,6 +159,7 @@ export function combatProfile(
     // Rage and Energy are always out of 100; Mana grows with level and INT.
     maxMp: opts.resource && opts.resource !== 'mana' ? 100 : Math.round((hp.mpBase + hp.mpPerLevel * (level - 1) + st.intelligence * 3 + bonus.mp) * pct(jp.mpPct)),
     weapon: { ...weapon, speedMs: Math.max(350, Math.round(weapon.speedMs * (100 / derived.attackSpeed))) },
+    lifesteal: Math.min(10, bonus.lifesteal),
   };
 }
 

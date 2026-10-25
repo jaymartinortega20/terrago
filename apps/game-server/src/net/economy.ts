@@ -135,7 +135,7 @@ export function viewStall(deps: GameplayDeps, p: Player, sellerId: unknown): Sta
   const items = [...q.stall.prices]
     .map(([slot, l]) => {
       const s = inv?.slots.find((x) => x.slot === slot && x.itemId === l.itemId);
-      return s ? { slot, itemId: s.itemId, quantity: s.quantity, quality: s.quality, enhance: s.enhance ?? 0, price: l.price } : null;
+      return s ? { slot, itemId: s.itemId, quantity: s.quantity, quality: s.quality, enhance: s.enhance ?? 0, ...(s.affixes?.length ? { affixes: s.affixes } : {}), price: l.price } : null;
     })
     .filter((x): x is NonNullable<typeof x> => !!x);
   return { sellerId: q.id, sellerName: q.name, name: q.stall.name, items };

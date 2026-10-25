@@ -27,6 +27,7 @@ import {
   isWet,
   weatherAt,
   eventMult,
+  affixText,
 } from '@terrago/shared';
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
@@ -226,7 +227,7 @@ export function autoPickup(deps: GameplayDeps, p: Player, drop: DropObject): voi
     .serial(async () => {
       const rt = deps.world.runtimeOf(p);
       if (!rt.objects.has(drop.id)) return;
-      const inv = await pickUp(deps.pool, p.id, drop.itemId, drop.quantity, drop.quality);
+      const inv = await pickUp(deps.pool, p.id, drop.itemId, drop.quantity, drop.quality, drop.affixes);
       deps.world.removeObject(rt, drop.id);
       pushInventory(deps.world, p, inv);
       p.conn?.send('notice', { kind: 'success', text: `Picked up ${drop.quantity}× ${getItem(drop.itemId)?.name}.` });
@@ -256,7 +257,7 @@ export async function act(deps: GameplayDeps, p: Player, raw: unknown): Promise<
   const drop = here.find((o): o is DropObject => o.kind === 'drop');
   if (drop) {
     if (drop.ownerId !== p.id) throw new GameError("That isn't yours.");
-    const inv = await pickUp(pool, p.id, drop.itemId, drop.quantity, drop.quality);
+    const inv = await pickUp(pool, p.id, drop.itemId, drop.quantity, drop.quality, drop.affixes);
     world.removeObject(rt, drop.id);
     pushInventory(world, p, inv);
     return { message: `Picked up ${drop.quantity}× ${getItem(drop.itemId)?.name}.` };
@@ -557,13 +558,14 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
                 r.player.conn?.send('notice', { kind: 'info', text: `You already claimed ${r.monster.def.name}'s treasure today. It returns at midnight (UTC).` });
               }
             }
-            const res = await grantKillRewards(d.pool, r.player.id, { xp: r.xp, gold: r.gold, items: r.items, monster: r.monster.def.id });
+            const res = await grantKillRewards(d.pool, r.player.id, { xp: r.xp, gold: r.gold, items: r.items, monster: r.monster.def.id, elite: r.monster.elite });
             await petOnKill(d, r.player, r.xp);
             pushInventory(d.world, r.player, res.inventory);
             applyDelta(d.world, r.player, res.delta);
             const parts = [`+${r.xp} XP`, r.gold ? `+${r.gold} Gold` : '', ...r.items.map((i) => `${i.quantity}× ${getItem(i.itemId)?.name}`)].filter(Boolean);
             r.player.conn?.send('notice', { kind: 'success', text: `${r.monster.def.name} defeated: ${parts.join(', ')}` });
-            for (const o of res.overflow) d.world.addDrop(rt, r.monster.x, r.monster.y, o.itemId, o.quantity, r.player.id);
+            for (const o of res.overflow) d.world.addDrop(rt, r.monster.x, r.monster.y, o.itemId, o.quantity, r.player.id, o.affixes);
+            for (const g of res.rolled.filter((x) => x.affixes.length >= 2)) r.player.conn?.send('notice', { kind: 'success', text: `✦ ${getItem(g.itemId)?.name}: ${g.affixes.map(affixText).join(', ')}` });
             if (res.overflow.length) r.player.conn?.send('notice', { kind: 'info', text: 'Your bag is full — loot was left on the ground.' });
           })
           .catch((err) => d.log.error('kill_rewards_failed', { err }));

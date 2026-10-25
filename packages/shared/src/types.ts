@@ -147,6 +147,8 @@ export interface DropObject {
   quality: number;
   ownerId: string;
   until: number;
+  /** Rolled gear stats (loot that didn't fit in the bag). */
+  affixes?: ItemAffix[] | null;
 }
 
 /** Interactive things placed in a map at runtime: farm plots, resource nodes, loot drops. */
@@ -421,6 +423,7 @@ export interface MarketListing {
   quality: number;
   enhance: number;
   durability: number | null;
+  affixes?: ItemAffix[] | null;
   unitPrice: number;
   category: string;
   rarity: string;
@@ -445,6 +448,7 @@ export interface TradeOfferItem {
   quantity: number;
   quality: number;
   enhance: number;
+  affixes?: ItemAffix[] | null;
 }
 
 export interface TradeSide {
@@ -628,6 +632,7 @@ export interface StallItem {
   quantity: number;
   quality: number;
   enhance: number;
+  affixes?: ItemAffix[] | null;
   price: number;
 }
 

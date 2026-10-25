@@ -109,7 +109,7 @@ export function setOffer(deps: GameplayDeps, p: Player, req: unknown): null {
     if (!s2 || s2.quantity < (raw.quantity as number)) throw new GameError("You don't have that.");
     const def = getItem(s2.itemId);
     if (!def?.tradable || s2.bound) throw new GameError(`${def?.name ?? 'That item'} can't be traded.`);
-    items.push({ slot, itemId: s2.itemId, quantity: raw.quantity as number, quality: s2.quality, enhance: s2.enhance ?? 0 });
+    items.push({ slot, itemId: s2.itemId, quantity: raw.quantity as number, quality: s2.quality, enhance: s2.enhance ?? 0, ...(s2.affixes?.length ? { affixes: s2.affixes } : {}) });
   }
   const { me } = sides(s, p);
   me.items = items;

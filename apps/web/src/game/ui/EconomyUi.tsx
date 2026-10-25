@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { DUNGEONS, animalForItem, getAnimal, getItem } from '@terrago/game-data';
-import { DIFFICULTIES, ANIMAL_PRODUCT_CAP, PEN_CAPACITY, formatDuration, QUALITIES, type BankViewState, type InventorySlot, type TravelOption } from '@terrago/shared';
+import { DIFFICULTIES, ANIMAL_PRODUCT_CAP, PEN_CAPACITY, formatDuration, QUALITIES, affixText, type BankViewState, type InventorySlot, type TravelOption } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { ItemSlot } from './ItemSlot';
@@ -176,6 +176,7 @@ export function StallBrowseWindow({ client }: { client: GameClient }) {
                 <span className="flex-1 truncate">
                   {d.name}
                   {it.enhance ? ` +${it.enhance}` : ''} ×{it.quantity}
+                  {it.affixes?.length ? <span className="block text-[10px] font-bold text-[#3f7fd0]">✦ {it.affixes.map(affixText).join(' · ')}</span> : null}
                   <span className="block text-xs text-wood-dark/70">◉ {it.price.toLocaleString()} each</span>
                 </span>
                 <button className="px-btn green small" disabled={gold < total} onClick={() => void client.stallBuy(v.sellerId, it.slot, it.itemId, it.price)} data-testid={`stall-buy-${it.slot}`}>

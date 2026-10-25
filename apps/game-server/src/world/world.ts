@@ -39,6 +39,7 @@ import {
   weightSpeed,
   EMOTES,
   type EmoteId,
+  type ItemAffix,
 } from '@terrago/shared';
 import { randomUUID } from 'node:crypto';
 import type { Logger } from '../logger';
@@ -204,6 +205,8 @@ export class World {
     if (p.slowUntil > this.now()) speed *= DISMOUNT_PENALTY_MULT;
     const swift = p.petState && p.petState.id === p.companionId() ? (p.petState.growth.speed ?? 0) : 0;
     speed *= 1 + swift * 0.02;
+    // Move Speed from gear (boots affixes, Star Metal set).
+    speed *= (p.profile.derived.movementSpeed ?? 100) / 100;
     // Carry weight: a heavy bag slows you down (STR carries more).
     const load = bagWeight(this.inventoryCache.get(p.id)?.slots ?? [], getItem);
     const carry = carryLimit(p.profile.stats.strength);
@@ -422,10 +425,10 @@ export class World {
   private dropSeq = 0;
 
   /** Loot that didn't fit in a bag: a pile only its owner can pick up for 2 minutes. */
-  addDrop(rt: MapRuntime, x: number, y: number, itemId: string, quantity: number, ownerId: string): void {
+  addDrop(rt: MapRuntime, x: number, y: number, itemId: string, quantity: number, ownerId: string, affixes?: ItemAffix[] | null): void {
     const tx = Math.floor(x / TILE_SIZE);
     const ty = Math.floor((y - 4) / TILE_SIZE);
-    const drop = { kind: 'drop' as const, id: `drop:${++this.dropSeq}`, x: tx, y: ty, itemId, quantity, quality: 0, ownerId, until: this.now() + 120_000 };
+    const drop = { kind: 'drop' as const, id: `drop:${++this.dropSeq}`, x: tx, y: ty, itemId, quantity, quality: 0, ownerId, until: this.now() + 120_000, ...(affixes?.length ? { affixes } : {}) };
     this.setObjects(rt.key, [drop]);
   }
 

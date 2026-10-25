@@ -5,7 +5,7 @@ import { getClass, getItem, skillsFor } from '@terrago/game-data';
 
 export const RESOURCE_LABEL = { mana: 'Mana', rage: 'Rage', energy: 'Energy' } as const;
 export const RESOURCE_COLOR = { mana: '#4a7fd6', rage: '#c0392b', energy: '#e6c229' } as const;
-import { EQUIP_SLOTS, ENHANCE_SAFE_LEVEL, MAX_ENHANCE, enhanceChance, enhanceCost } from '@terrago/shared';
+import { EQUIP_SLOTS, ENHANCE_SAFE_LEVEL, MAX_ENHANCE, bonusText, enhanceChance, enhanceCost, setOf, wornSets } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
@@ -160,7 +160,38 @@ export function EquipmentGrid({ client }: { client: GameClient }) {
           </div>
         );
       })}
+      <WornSets ids={eq.map((e) => e.itemId)} />
     </div>
+  );
+}
+
+/** Armour sets you're wearing and which bonuses are on. */
+function WornSets({ ids }: { ids: string[] }) {
+  const sets = wornSets(ids);
+  if (!sets.length) return null;
+  return (
+    <div className="col-span-3 mt-1 space-y-0.5 text-[10px] leading-tight" data-testid="worn-sets">
+      {sets.map(({ set, pieces }) => (
+        <div key={set.id}>
+          <b>
+            {set.name} set {Math.min(pieces, 5)}/5
+          </b>
+          <div style={{ color: pieces >= 2 ? '#3a8a3a' : '#8a8478' }}>(2) {bonusText(set.two)}</div>
+          <div style={{ color: pieces >= 4 ? '#3a8a3a' : '#8a8478' }}>(4) {bonusText(set.four)}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Set info for one item's tooltip. */
+export function SetInfo({ itemId }: { itemId: string }) {
+  const set = setOf(itemId);
+  if (!set) return null;
+  return (
+    <li className="text-[11px]" style={{ color: '#3a8a3a' }}>
+      {set.name} set — (2) {bonusText(set.two)} · (4) {bonusText(set.four)}
+    </li>
   );
 }
 

@@ -665,6 +665,15 @@ export class Combat {
     if (res.miss) return this.emit(rt, { s: p.id, t: m.id, a: 0, k: 'miss', ...(skill ? { sk: skill } : {}) });
     const dmg = Math.round(res.damage * effectMult(m.effects, 'taken', now));
     this.damageMonster(rt, m, dmg, p, res.crit ? 'crit' : 'hit', skill);
+    // Lifesteal (gear): heal for a slice of the damage dealt.
+    const ls = p.profile.lifesteal ?? 0;
+    if (ls > 0 && !p.dead && p.rec.hp < p.profile.maxHp) {
+      const heal = Math.min(p.profile.maxHp - p.rec.hp, Math.floor((Math.min(dmg, m.stats.maxHp) * ls) / 100));
+      if (heal > 0) {
+        p.rec.hp += heal;
+        this.emit(rt, { s: p.id, t: p.id, a: heal, k: 'heal', sk: 'lifesteal' });
+      }
+    }
     if ((res.crit && p.profile.weapon.range <= 2) || (skill && KNOCKBACK_SKILLS.has(skill))) this.knockback(rt, p, m);
   }
 
