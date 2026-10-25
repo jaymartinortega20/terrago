@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ACCOUNT } from '@terrago/shared';
 import { api, ApiError } from '@/lib/api';
+import { markSignedIn } from '@/lib/session';
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const router = useRouter();
@@ -13,6 +14,12 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!busy) return setSlow(false);
+    const t = setTimeout(() => setSlow(true), 5000);
+    return () => clearTimeout(t);
+  }, [busy]);
   const register = mode === 'register';
 
   async function submit(e: React.FormEvent) {
@@ -26,6 +33,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     try {
       if (register) await api.register(email, password);
       else await api.login(email, password);
+      markSignedIn(true);
       router.push('/characters');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong.');
@@ -98,6 +106,11 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         <button type="submit" className="px-btn green mt-6 w-full" disabled={busy}>
           {busy ? 'Please wait…' : register ? 'Create account' : 'Log in'}
         </button>
+        {slow && (
+          <p className="mt-3 text-center text-sm text-wood-dark" role="status" data-testid="waking">
+            Waking up the game server… the first visit after a quiet spell can take up to a minute.
+          </p>
+        )}
 
         <p className="mt-4 text-center text-sm">
           {register ? (

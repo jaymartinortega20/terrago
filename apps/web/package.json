@@ -1,6 +1,6 @@
 {
   "name": "@terrago/web",
-  "version": "0.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "description": "TerraGo website and browser game client (Next.js + Phaser).",

@@ -1,7 +1,7 @@
 {
   "name": "terrago",
   "private": true,
-  "version": "0.1.0",
+  "version": "2.2.0",
   "description": "TerraGo \u2014 Farm. Trade. Fight. Grow. A browser multiplayer pixel MMORPG.",
   "type": "module",
   "workspaces": [

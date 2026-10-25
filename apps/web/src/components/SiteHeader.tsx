@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { PlayLink } from './PlayLink';
 
 export function SiteHeader() {
   return (
@@ -11,6 +12,7 @@ export function SiteHeader() {
           <a href="#about" className="hover:text-gold">About</a>
           <a href="#farming" className="hover:text-gold">Farming</a>
           <a href="#trading" className="hover:text-gold">Trading</a>
+          <a href="#roadmap" className="hover:text-gold">Roadmap</a>
           <a href="#world" className="hover:text-gold">World</a>
           <a href="#faq" className="hover:text-gold">FAQ</a>
         </nav>
@@ -18,9 +20,7 @@ export function SiteHeader() {
           <Link href="/login" className="px-btn ghost small">
             Log in
           </Link>
-          <Link href="/characters" className="px-btn green small">
-            Play
-          </Link>
+          <PlayLink className="px-btn green small">Play</PlayLink>
         </div>
       </div>
     </header>

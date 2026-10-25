@@ -16,8 +16,13 @@ export default function CharactersPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [slow, setSlow] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let cancelled = false;
+    setError(null);
+    setSlow(false);
+    const slowTimer = setTimeout(() => !cancelled && setSlow(true), 4000);
     (async () => {
       try {
         const me = await api.me();
@@ -28,14 +33,18 @@ export default function CharactersPage() {
         setCreating(characters.length === 0);
       } catch (err) {
         if (cancelled) return;
-        if (err instanceof ApiError && err.status === 401) router.replace('/login');
+        if (err instanceof ApiError && err.status === 401) router.replace('/login?next=/characters');
         else setError(err instanceof Error ? err.message : 'Could not load characters.');
+      } finally {
+        clearTimeout(slowTimer);
+        if (!cancelled) setSlow(false);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(slowTimer);
     };
-  }, [router]);
+  }, [router, attempt]);
 
   async function logout() {
     await api.logout().catch(() => {});
@@ -61,8 +70,35 @@ export default function CharactersPage() {
         </button>
       </header>
 
-      {error && <p className="px-panel mt-8 p-4 font-bold text-berry">{error}</p>}
-      {!chars && !error && <p className="mt-16 text-center text-xl">Loading your characters…</p>}
+      {error && (
+        <div className="px-panel mt-8 p-4" data-testid="characters-error">
+          <p className="font-bold text-berry">{error}</p>
+          <div className="mt-3 flex gap-2">
+            <button className="px-btn green small" onClick={() => setAttempt((n) => n + 1)}>
+              Try again
+            </button>
+            <Link href="/login?next=/characters" className="px-btn small">
+              Log in
+            </Link>
+          </div>
+        </div>
+      )}
+      {!chars && !error && (
+        <div className="mt-16 text-center" role="status">
+          <p className="text-xl">Loading your characters…</p>
+          {slow && (
+            <div className="px-panel mx-auto mt-6 max-w-md p-4 text-sm" data-testid="waking">
+              <p>Waking up the game server — the first visit after a quiet spell can take up to a minute.</p>
+              <p className="mt-2">
+                Not logged in yet?{' '}
+                <Link href="/login?next=/characters" className="font-bold underline">
+                  Log in here
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {chars && !creating && (
         <section className="mt-8">

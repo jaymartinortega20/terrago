@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { QUESTS, getCrop, getItem, getJob, getMap, getMonster, getNode, getQuest, getSkillDef } from '@terrago/game-data';
 import { SPELL, SpellFx, type SpellColors } from '../fx/SpellFx';
+import { Atmosphere, applyCameraLook, shadowCanvas, type GraphicsMode } from '../fx/hd2d';
 import { itemIcon } from '../art/world';
 import { audio, trackFor } from '../audio';
 import { CombatFx, FIRE_PAL, HOLY_PAL, ICE_PAL, MAGIC_PAL, MONSTER_PAL, POISON_PAL, paletteFor, type WeaponType } from '../fx/CombatFx';
-import { fxSettings, type FxSettings } from '../fx/settings';
+import { fxSettings, onFxSettings, type FxSettings } from '../fx/settings';
 import { monsterSheet } from '../art/monsters';
 import { mountSheet } from '../art/mounts';
 import {
@@ -49,6 +50,8 @@ function MONSTER_ART(id: string): { shape: string; color: string; size: number }
 }
 const LABEL_FONT = '"Pixelify Sans", monospace';
 const LABEL_DEPTH = 1_000_000;
+/** Props that lie flat on the ground and cast no shadow. */
+const FLAT_PROPS = new Set(['teleport_pad', 'flower_bed', 'rug', 'path', 'crop_row', 'puddle']);
 
 interface ObjectView {
   key: string;
@@ -56,6 +59,8 @@ interface ObjectView {
 }
 
 interface Avatar {
+  /** Soft ground shadow (HD-2D). */
+  shadow?: Phaser.GameObjects.Image;
   mount?: Phaser.GameObjects.Sprite | null;
   mountId?: string | null;
   /** Mount id + look the mount sprite was built for, and the trail colour. */
@@ -98,7 +103,7 @@ export class WorldScene extends Phaser.Scene {
   private mapLayer: Phaser.GameObjects.GameObject[] = [];
   private local: Avatar | null = null;
   private remotes = new Map<string, Avatar>();
-  private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number }>();
+  private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number; shadow?: Phaser.GameObjects.Image }>();
   private targetRing!: Phaser.GameObjects.Graphics;
   private guide!: Phaser.GameObjects.Graphics;
   private npcMarkers = new Map<string, Phaser.GameObjects.Text>();
@@ -128,10 +133,25 @@ export class WorldScene extends Phaser.Scene {
 
   private fx!: CombatFx;
   private spell!: SpellFx;
+  private gfx: GraphicsMode = 'hd';
+  private castShadows: Phaser.GameObjects.Image[] = [];
+  private atmos!: Atmosphere;
+  private outdoors = true;
 
   create(): void {
     this.fx = new CombatFx(this, LABEL_DEPTH - 8); // above the night overlay, below names
     this.spell = new SpellFx(this, LABEL_DEPTH - 8, LABEL_FONT);
+    // HD-2D: camera bloom / focus blur / colour grade, sun shadows and sunbeams.
+    this.gfx = fxSettings().graphics;
+    this.atmos = new Atmosphere(this, LABEL_DEPTH - 11);
+    applyCameraLook(this.cameras.main, this.gfx, this.game.renderer as never);
+    const offGfx = onFxSettings((st) => {
+      if (st.graphics === this.gfx) return;
+      this.gfx = st.graphics;
+      applyCameraLook(this.cameras.main, this.gfx, this.game.renderer as never);
+      for (const sh of this.castShadows) sh.setVisible(this.gfx !== 'classic');
+    });
+    this.events.once('shutdown', offGfx);
     const kb = this.input.keyboard!;
     // No key capture: chat inputs must still receive W/A/S/D and Space.
     kb.disableGlobalCapture();
@@ -363,6 +383,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private destroyAvatar(av: Avatar): void {
+    av.shadow?.destroy();
     av.wings?.forEach((w) => w.destroy());
     av.weaponGlow?.destroy();
     av.aura?.destroy();
@@ -373,6 +394,53 @@ export class WorldScene extends Phaser.Scene {
     av.bubble?.destroy();
     av.sprite.destroy();
     av.label.destroy();
+  }
+
+  /** Shadows to bake into one ground layer for this map (HD-2D). */
+  private shadowDraws: { src: HTMLCanvasElement; left: number; by: number; blur: number }[] = [];
+
+  /** The long soft shadow an object casts (HD-2D); `left` is the art's left edge, `by` its ground line. */
+  private castShadow(key: string, left: number, by: number, blur: number): void {
+    this.shadowDraws.push({ src: this.textures.get(key).getSourceImage() as HTMLCanvasElement, left, by, blur });
+  }
+
+  /** All the map's shadows on one canvas: a single cheap image instead of hundreds. */
+  private bakeShadows(mapId: string, W: number, H: number): void {
+    const key = `hd2d:shadows:${mapId}`;
+    if (this.textures.exists(key)) this.textures.remove(key);
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const g = c.getContext('2d')!;
+    const cache = new Map<HTMLCanvasElement, HTMLCanvasElement>();
+    for (const d of this.shadowDraws) {
+      let sh = cache.get(d.src);
+      if (!sh) cache.set(d.src, (sh = shadowCanvas(d.src, d.blur)));
+      g.drawImage(sh, Math.round(d.left - d.blur * 2), Math.round(d.by + d.blur * 4 - sh.height));
+    }
+    this.shadowDraws = [];
+    this.textures.addCanvas(key, c);
+    const img = this.add.image(0, 0, key).setOrigin(0, 0).setDepth(-5).setAlpha(0.3).setVisible(this.gfx !== 'classic');
+    this.castShadows = [img];
+    this.mapLayer.push(img);
+  }
+
+  /** A soft dark blob under feet (characters and monsters). */
+  private blobKey(): string {
+    return this.canvasTexture('hd2d:blob', () => {
+      const c = document.createElement('canvas');
+      c.width = 64;
+      c.height = 32;
+      const g = c.getContext('2d')!;
+      const gr = g.createRadialGradient(32, 16, 2, 32, 16, 30);
+      gr.addColorStop(0, 'rgba(8,10,24,0.55)');
+      gr.addColorStop(1, 'rgba(8,10,24,0)');
+      g.fillStyle = gr;
+      g.beginPath();
+      g.ellipse(32, 16, 31, 15, 0, 0, Math.PI * 2);
+      g.fill();
+      return c;
+    });
   }
 
   private buildMap(): void {
@@ -415,6 +483,11 @@ export class WorldScene extends Phaser.Scene {
     }
     const ground = this.add.image(0, 0, this.canvasTexture(`ground:${map.id}`, () => renderGround(map))).setOrigin(0, 0).setDepth(-10);
     this.mapLayer.push(ground);
+    this.castShadows = [];
+    this.shadowDraws = [];
+    this.outdoors = !indoor;
+    if (this.outdoors) this.atmos.build();
+    else this.atmos.destroy();
 
     for (const o of map.objects) {
       if (o.kind === 'building') {
@@ -423,6 +496,7 @@ export class WorldScene extends Phaser.Scene {
         const bx = o.x * TILE_SIZE;
         const by = (o.y + o.h) * TILE_SIZE;
         this.mapLayer.push(this.add.image(bx, by, key).setOrigin(0, 1).setDepth(by));
+        this.castShadow(key, bx, by, 3);
         // Night: windows light up, lanterns and torches glow, chimneys smoke.
         for (const wdw of art.windows) {
           const g = this.add.rectangle(bx + wdw.x, by + wdw.y, wdw.w, wdw.h, 0xffc060, 0).setOrigin(0, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(LABEL_DEPTH - 9);
@@ -450,6 +524,7 @@ export class WorldScene extends Phaser.Scene {
         const by = (o.y + art.footH) * TILE_SIZE;
         const depth = o.type === 'teleport_pad' || o.type === 'flower_bed' ? 0 : by;
         this.mapLayer.push(this.add.image(cx, by, key).setOrigin(0.5, 1).setDepth(depth));
+        if (depth !== 0 && !FLAT_PROPS.has(o.type)) this.castShadow(key, cx - art.canvas.width / 2, by, 2);
         if (o.text) {
           const label = this.add
             .text(cx, by - art.canvas.height - 4, o.text, {
@@ -470,6 +545,7 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
+    this.bakeShadows(map.id, W, H);
     for (const id of [...this.objectViews.keys()]) this.destroyObjectView(id);
     for (const o of this.client.objects.values()) this.syncObject(o);
 
@@ -768,6 +844,7 @@ export class WorldScene extends Phaser.Scene {
     const v = this.monsterViews.get(id);
     if (!v) return;
     this.monsterViews.delete(id);
+    v.shadow?.destroy();
     v.label.destroy();
     v.bar.destroy();
     this.tweens.add({ targets: v.sprite, alpha: 0, duration: 300, onComplete: () => v.sprite.destroy() });
@@ -1304,6 +1381,8 @@ export class WorldScene extends Phaser.Scene {
     const dead = (av.deadUntil ?? 0) > now;
     if (hurt) rx += Math.round(Math.sin(now / 12) * 2);
     av.sprite.setPosition(rx, ry + 2 - lift).setFrame(DIR_ROW[shownDir] * CHAR_FRAMES_PER_DIR + col).setDepth(y + 0.5);
+    if (!av.shadow) av.shadow = this.add.image(rx, ry, this.blobKey()).setDepth(-4);
+    av.shadow.setPosition(rx + 4, ry + 3).setScale(av.mount ? 1 : 0.55, av.mount ? 0.7 : 0.5).setVisible(this.gfx !== 'classic' && !dead);
     // Taking damage flashes red; a fallen character lies down, greyed.
     if (hurt || dead) {
       av.sprite.setTint(dead ? 0x9a9aa8 : 0xff7a6a);
@@ -1592,7 +1671,15 @@ export class WorldScene extends Phaser.Scene {
     for (const g of this.glows) g.setAlpha(glow * 1.6);
     const lit = Math.max(0, Math.min(0.85, (dark - 0.12) * 1.6));
     for (const w of this.windowGlows) w.setFillStyle(0xffc060, lit * (0.9 + Math.sin(time / 600 + w.x) * 0.06));
+    // Sun shadows fade at night; sunbeams and dust only in daylight outdoors (HD-2D).
+    const day = Math.max(0, Math.min(1, 1 - dark / 0.55));
+    const shadowAlpha = 0.08 + 0.26 * day;
+    for (const sh of this.castShadows) sh.setAlpha(shadowAlpha);
+    const dt = this.lastLightAt ? time - this.lastLightAt : 16;
+    this.lastLightAt = time;
+    this.atmos?.update(time, dt, day, this.gfx !== 'hd' || !this.outdoors);
   }
+  private lastLightAt = 0;
 
   override update(time: number): void {
     const client = this.client;
@@ -1654,6 +1741,8 @@ export class WorldScene extends Phaser.Scene {
       const rx = Math.round(m.x);
       const ry = Math.round(m.y);
       v.sprite.setPosition(rx, ry + 2).setDepth(m.y).setFrame(m.moving ? Math.floor(time / 180) % 2 : 0).setFlipX(m.dir === 'left');
+      if (!v.shadow) v.shadow = this.add.image(rx, ry, this.blobKey()).setDepth(-4);
+      v.shadow.setPosition(rx + 4, ry + 3).setScale(Math.min(2.4, v.sprite.displayWidth / 52), 0.55).setVisible(this.gfx !== 'classic' && v.sprite.alpha > 0.5);
       const top = ry - v.sprite.displayHeight - 2;
       v.label.setPosition(rx, top - 6);
       v.bar.clear();

@@ -4,7 +4,8 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { ApiError } from '@/lib/api';
 
 // Phaser touches `window` on import, so the game is client-only.
 const GameView = dynamic(() => import('@/game/GameView'), {
@@ -15,6 +16,12 @@ const GameView = dynamic(() => import('@/game/GameView'), {
 function Play() {
   const id = useSearchParams().get('c');
   const router = useRouter();
+  // Not logged in (or the session expired): go to the login page instead of a dead screen.
+  useEffect(() => {
+    api.me().catch((err) => {
+      if (err instanceof ApiError && err.status === 401) router.replace('/login?next=/characters');
+    });
+  }, [router]);
   if (!id) {
     return (
       <main className="flex min-h-dvh items-center justify-center">

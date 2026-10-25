@@ -2,37 +2,57 @@ import Link from 'next/link';
 import { HeroScene } from '@/components/HeroScene';
 import { PixelIcon } from '@/components/PixelIcon';
 import { SiteHeader } from '@/components/SiteHeader';
+import { PlayLink, WakeServer } from '@/components/PlayLink';
+
+const VERSION = '2.2';
 
 const FEATURES = [
   {
-    id: 'farming',
-    title: 'Farming',
-    icon: 'carrot',
-    status: 'Next: v0.2',
-    body: 'Claim a homestead off the Whispering Fields lane. Till, plant, water and harvest — crops keep growing while you are offline. Quality matters: a Gold-quality harvest is worth far more than a common one.',
+    id: 'combat',
+    title: 'Classes & Combat',
+    icon: 'weapon:sword:5',
+    status: 'Live',
+    body: 'Warrior, Mage, Archer or Acolyte, each with its own Rage, Mana or Energy. At level 40 beat Gnarlfang and become a Paladin, Berserker, Sorcerer, Necromancer, Ranger, Beastmaster, High Priest or Inquisitor. Spend stat points your way, combo skills with flashy effects, and raid Pyraxis for mythic loot.',
   },
   {
-    id: 'combat',
-    title: 'Combat',
-    icon: 'hoe',
-    status: 'Planned: v0.5',
-    body: 'Real-time battles as a Warrior, Ranger, Mage, Priest or Rogue. Monsters five levels above you are dangerous; fifteen above, you will want friends.',
+    id: 'farming',
+    title: 'Farming & Gathering',
+    icon: 'carrot',
+    status: 'Live',
+    body: 'Claim a homestead: till, plant, water and harvest — crops grow while you are offline. Raise chickens, sheep and cows, fish the ponds, mine ore and chop wood. Quality matters: a Gold-quality harvest is worth far more.',
   },
   {
     id: 'trading',
-    title: 'Trading',
+    title: 'Trading & Crafting',
     icon: 'ore_copper',
-    status: 'Planned: v0.4',
-    body: 'A player-driven economy. List goods on the marketplace, trade face to face, open a stall. Shops pay pennies — other players pay what things are really worth.',
+    status: 'Live',
+    body: 'A player-driven economy: the marketplace, face-to-face trades, market stalls and bank vaults. Craft gear and food, specialise at level 40, and upgrade your weapons with gems until they glow.',
   },
   {
-    id: 'crafting',
-    title: 'Crafting',
-    icon: 'log',
-    status: 'Planned',
-    body: 'Wheat becomes flour becomes bread. Iron ore becomes ingots becomes a blade. Specialise as a smith, alchemist or cook and become the person others depend on.',
+    id: 'companions',
+    title: 'Mounts & Pets',
+    icon: 'mount:stag:dfe6ff',
+    status: 'New in 2.1',
+    body: 'Ride horses, wolves, a wyvern or the Celestial Stag, each with speed and terrain perks, and dress them with saddles, barding and trails. Pets fight beside you, level up to 100, earn loyalty and learn new skills.',
   },
 ] as const;
+
+/** What is finished, and what comes next. */
+const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 'next' | 'later' }[] = [
+  { v: '0.1', name: 'The world', text: 'Accounts, characters, Oakhaven, multiplayer movement and chat.', state: 'done' },
+  { v: '0.2', name: 'Farming', text: 'Homesteads, crops, watering, quality and offline growth.', state: 'done' },
+  { v: '0.3', name: 'Gathering & crafting', text: 'Mining, woodcutting, fishing and crafting stations.', state: 'done' },
+  { v: '0.4', name: 'Trading', text: 'Player marketplace and face-to-face trades.', state: 'done' },
+  { v: '0.5', name: 'Combat', text: 'Real-time fights, skills, equipment and upgrades.', state: 'done' },
+  { v: '0.6', name: 'Social', text: 'Parties, friends, guilds, chat channels, mute/block/report.', state: 'done' },
+  { v: '0.7–0.9', name: 'Dungeons, seasons, progress', text: 'Dungeons and bosses, day/night and weather, dailies, achievements and leaderboards.', state: 'done' },
+  { v: '1.0–1.1', name: 'Launch & endgame', text: 'Music and sound, phone controls, professions, bank, stalls, world events, level 100.', state: 'done' },
+  { v: '2.0', name: 'The great revision', text: 'Four classes and eight second jobs, the six-map world, gem upgrades, wings, combat pets and the Pyraxis raid.', state: 'done' },
+  { v: '2.1', name: 'Mounts, pets & HUD', text: 'Stable with 3D preview, mount gear, pet levels and loyalty, the ornate HUD and spell effects.', state: 'done' },
+  { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: real shadows, light bloom, tilt-shift focus and colour grading.', state: 'now' },
+  { v: '2.3', name: 'Polish & balance', text: 'Carry weight from STR, boss and levelling balance from real play, glass menus everywhere.', state: 'next' },
+  { v: '3.0', name: 'Full 3D', text: 'Low-poly floating islands, 3D chibi characters and visible gear.', state: 'later' },
+];
 
 const FAQ = [
   {
@@ -49,7 +69,7 @@ const FAQ = [
   },
   {
     q: 'What can I do right now?',
-    a: 'TerraGo is in early development (v0.1). You can create a character, explore six maps from Oakhaven to the Infernal Caldera with other players, chat, meet the townsfolk and manage your bag. Farming arrives next.',
+    a: 'Almost everything: pick one of four classes and a second job at 40, explore six maps from Oakhaven to the Infernal Caldera, farm, fish, mine, craft, trade, join a guild, ride mounts, raise pets, run dungeons and raid Pyraxis. TerraGo is in open alpha (v2.2), so expect balance changes.',
   },
   {
     q: 'Is my progress saved?',
@@ -60,6 +80,7 @@ const FAQ = [
 export default function LandingPage() {
   return (
     <main className="min-h-dvh">
+      <WakeServer />
       <SiteHeader />
 
       {/* Hero */}
@@ -73,14 +94,12 @@ export default function LandingPage() {
             A multiplayer pixel world in your browser. Start with almost nothing — become a famous farmer, a master smith, a monster hunter or a merchant prince.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/characters" className="px-btn green text-lg">
-              ▶ PLAY NOW
-            </Link>
+            <PlayLink className="px-btn green text-lg">▶ PLAY NOW</PlayLink>
             <Link href="/register" className="px-btn text-lg">
               CREATE ACCOUNT
             </Link>
           </div>
-          <p className="text-outline mt-6 text-sm text-parchment/80">Version 0.1 · Early development · No download needed</p>
+          <p className="text-outline mt-6 text-sm text-parchment/80">Version {VERSION} · Open alpha · No download needed</p>
         </div>
       </section>
 
@@ -112,6 +131,34 @@ export default function LandingPage() {
         ))}
       </section>
 
+      {/* Roadmap */}
+      <section id="roadmap" className="mx-auto max-w-5xl px-4 py-12">
+        <h2 className="text-outline text-3xl font-bold text-gold">Roadmap</h2>
+        <p className="mt-2 text-parchment/80">Where TerraGo is now, and what is next.</p>
+        <ol className="mt-6 grid gap-3 sm:grid-cols-2">
+          {ROADMAP.map((r) => (
+            <li
+              key={r.v}
+              className={`px-panel-dark flex gap-3 p-4 ${r.state === 'now' ? 'ring-4 ring-gold' : ''}`}
+              data-testid={`roadmap-${r.state}`}
+            >
+              <span className={`mt-0.5 shrink-0 text-xl ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-parchment/40'}`} aria-hidden>
+                {r.state === 'done' ? '✔' : r.state === 'now' ? '★' : '○'}
+              </span>
+              <div>
+                <p className="font-bold text-parchment">
+                  v{r.v} · {r.name}
+                  <span className={`ml-2 text-xs ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-parchment/50'}`}>
+                    {r.state === 'done' ? 'Done' : r.state === 'now' ? 'Just released' : r.state === 'next' ? 'Next' : 'Later'}
+                  </span>
+                </p>
+                <p className="mt-1 text-sm text-parchment/80">{r.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* World */}
       <section id="world" className="mx-auto max-w-5xl px-4 py-12">
         <h2 className="text-outline text-3xl font-bold text-gold">The World</h2>
@@ -141,7 +188,7 @@ export default function LandingPage() {
           <h2 className="text-3xl font-bold text-gold">Community</h2>
           <p className="mt-3 leading-relaxed text-parchment/90">
             Every player you see in Oakhaven is a real person. Say hello at the fountain, form a party, start a guild. Chat has filters, rate limits, and mute, block and
-            report tools are on the roadmap — be kind, trade fair, and help newcomers find their feet.
+            report tools — be kind, trade fair, and help newcomers find their feet.
           </p>
         </div>
       </section>
@@ -163,13 +210,11 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-4 pb-20 text-center">
-        <Link href="/register" className="px-btn green text-xl">
-          Begin your journey
-        </Link>
+        <PlayLink className="px-btn green text-xl">Begin your journey</PlayLink>
       </section>
 
       <footer className="border-t-4 border-ink bg-night-2 py-6 text-center text-sm text-parchment/60">
-        TerraGo v0.1 · All art and world content are original · Made for the browser
+        TerraGo v{VERSION} · All art and world content are original · Made for the browser
       </footer>
     </main>
   );

@@ -353,6 +353,21 @@ function FxSection() {
   );
   return (
     <>
+      <h3 className="mt-4 font-bold">Graphics</h3>
+      <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Graphics">
+        {(
+          [
+            ['hd', 'HD-2D'],
+            ['lite', 'Lite'],
+            ['classic', 'Classic'],
+          ] as const
+        ).map(([id, label]) => (
+          <button key={id} className={`px-btn small ${fx.graphics === id ? '' : 'ghost'}`} onClick={() => set({ graphics: id })} aria-pressed={fx.graphics === id} data-testid={`gfx-${id}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs text-wood-dark/70">HD-2D adds sun shadows, light bloom, sunbeams and a soft focus blur. Lite keeps shadows and colour. Classic is plain pixels for slow devices.</p>
       <h3 className="mt-4 font-bold">Attack effects</h3>
       <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Effect amount">
         {(['full', 'light', 'off'] as FxLevel[]).map((l) => (

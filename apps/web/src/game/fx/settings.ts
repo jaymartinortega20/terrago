@@ -14,6 +14,8 @@ export interface FxSettings {
   shake: boolean;
   /** Floating damage numbers. */
   numbers: boolean;
+  /** HD-2D look (shadows, bloom, focus blur), a lighter version, or plain pixels. */
+  graphics: import('./hd2d').GraphicsMode;
 }
 
 export const FX_STYLES: { id: FxStyle; label: string }[] = [
@@ -28,7 +30,14 @@ export const FX_STYLES: { id: FxStyle; label: string }[] = [
 ];
 
 const KEY = 'terrago.fx';
-const DEFAULTS: FxSettings = { level: 'full', style: 'weapon', handWeapon: true, shake: true, numbers: true };
+const touchDevice = () => {
+  try {
+    return globalThis.matchMedia?.('(pointer: coarse)').matches ?? false;
+  } catch {
+    return false;
+  }
+};
+const DEFAULTS: FxSettings = { level: 'full', style: 'weapon', handWeapon: true, shake: true, numbers: true, graphics: touchDevice() ? 'lite' : 'hd' };
 
 let current: FxSettings = { ...DEFAULTS };
 let loaded = false;
