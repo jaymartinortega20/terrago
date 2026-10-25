@@ -5,6 +5,9 @@ import {
   PET_GROWTH,
   PET_GROWTH_MAX,
   PET_MAX_LEVEL,
+  PET_EVOLVE_LOYALTY,
+  PET_STAGES,
+  removeItemById,
   getMountStyle,
   petFoodValue,
   petGrowthPoints,
@@ -18,8 +21,8 @@ import {
   type StableState,
 } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
-import { consumeFromSlotTx, lockCharacter, toState } from '../services/inventory';
-import { changeGold } from '../services/ledger';
+import { consumeFromSlotTx, loadSlots, lockCharacter, toState, writeSlots } from '../services/inventory';
+import { changeGold, logItemMovement } from '../services/ledger';
 import type { Player, PetState } from '../world/player';
 import { npcService, pushInventory, questEvent, type GameplayDeps } from './gameplay';
 
@@ -158,6 +161,7 @@ interface PetRow {
   loyalty: number;
   growth: PetState['growth'];
   kills: number;
+  stage: number;
 }
 
 const kindOf = (id: string) => (id === 'hawk' ? 'hawk' : (getItem(id)?.pet?.kind ?? 'dog'));
@@ -165,15 +169,15 @@ const nameOf = (id: string) => (id === 'hawk' ? 'Gale Hawk' : (getItem(id)?.name
 
 async function loadRows(pool: Pool, characterId: string, ids: string[]): Promise<Map<string, PetRow>> {
   if (!ids.length) return new Map();
-  const r = await pool.query<PetRow>(`SELECT pet_id, level, xp, loyalty, growth, kills FROM character_pets WHERE character_id = $1 AND pet_id = ANY($2)`, [characterId, ids]);
+  const r = await pool.query<PetRow>(`SELECT pet_id, level, xp, loyalty, growth, kills, stage FROM character_pets WHERE character_id = $1 AND pet_id = ANY($2)`, [characterId, ids]);
   return new Map(r.rows.map((x) => [x.pet_id, x]));
 }
 
 async function savePet(pool: Pool, characterId: string, st: PetState): Promise<void> {
   await pool.query(
-    `INSERT INTO character_pets (character_id, pet_id, level, xp, loyalty, growth, kills, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, now())
-     ON CONFLICT (character_id, pet_id) DO UPDATE SET level = $3, xp = $4, loyalty = $5, growth = $6, kills = $7, updated_at = now()`,
-    [characterId, st.id, st.level, st.xp, st.loyalty, JSON.stringify(st.growth), st.kills],
+    `INSERT INTO character_pets (character_id, pet_id, level, xp, loyalty, growth, kills, stage, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now())
+     ON CONFLICT (character_id, pet_id) DO UPDATE SET level = $3, xp = $4, loyalty = $5, growth = $6, kills = $7, stage = $8, updated_at = now()`,
+    [characterId, st.id, st.level, st.xp, st.loyalty, JSON.stringify(st.growth), st.kills, st.stage],
   );
 }
 
@@ -183,6 +187,7 @@ export async function syncCompanion(deps: GameplayDeps, p: Player): Promise<void
   if (!id) {
     if (p.petState) {
       p.petState = null;
+      setPetStage(deps, p);
       deps.world.recomputeSpeed(p);
       p.conn?.send('pet:update', null);
     }
@@ -201,17 +206,19 @@ export async function syncCompanion(deps: GameplayDeps, p: Player): Promise<void
     loyalty: row?.loyalty ?? 50,
     growth: row?.growth ?? {},
     kills: row?.kills ?? 0,
-    hp: keep && !keep.stub ? keep.hp : petStats(kind, level).maxHp,
+    hp: keep && !keep.stub ? keep.hp : petStats(kind, level, row?.stage ?? 1).maxHp,
     koUntil: keep?.koUntil ?? 0,
     attacks: keep?.attacks ?? 0,
     tauntUntil: 0,
+    stage: row?.stage ?? 1,
   };
+  setPetStage(deps, p);
   deps.world.recomputeSpeed(p);
   p.conn?.send('pet:update', petView(p, p.petState, true));
 }
 
 function petView(p: Player, st: PetState, active: boolean): PetView {
-  const stats = petStats(st.kind, st.level);
+  const stats = petStats(st.kind, st.level, st.stage);
   return {
     id: st.id,
     name: nameOf(st.id),
@@ -228,7 +235,20 @@ function petView(p: Player, st: PetState, active: boolean): PetView {
     atk: stats.atk,
     aggro: stats.aggro,
     koUntil: st.koUntil,
+    stage: st.stage,
+    next: (() => {
+      const n = PET_STAGES[st.stage];
+      return n ? { stage: n.stage, title: n.title, minLevel: n.minLevel, stones: n.stones, gold: n.gold, loyalty: PET_EVOLVE_LOYALTY } : null;
+    })(),
   };
+}
+
+/** Others see a bigger (and at stage 3, glowing) pet. */
+function setPetStage(deps: GameplayDeps, p: Player): void {
+  const stage = p.petState && p.petState.id === p.pet ? p.petState.stage : 1;
+  if (stage === p.petStage) return;
+  p.petStage = stage;
+  deps.world.broadcastLook(p, { petStage: stage });
 }
 
 /** Add Pet EXP, levelling up to the owner's level (max 100). Returns levels gained. */
@@ -243,7 +263,7 @@ export function addPetXp(st: PetState, gained: number, ownerLevel: number): numb
   }
   // At the owner's level the pet banks EXP up to just short of the next level.
   if (st.level >= cap) st.xp = Math.min(st.xp, Math.max(0, petXpToNext(st.level) - 1));
-  if (n) st.hp = petStats(st.kind, st.level).maxHp;
+  if (n) st.hp = petStats(st.kind, st.level, st.stage).maxHp;
   return n;
 }
 
@@ -291,7 +311,8 @@ async function menu(deps: GameplayDeps, p: Player): Promise<PetMenuState> {
     const r = rows.get(id);
     const kind = kindOf(id);
     const level = r?.level ?? 1;
-    const st: PetState = { id, kind, level, xp: r?.xp ?? 0, loyalty: r?.loyalty ?? 50, growth: r?.growth ?? {}, kills: r?.kills ?? 0, hp: petStats(kind, level).maxHp, koUntil: 0, attacks: 0, tauntUntil: 0 };
+    const stage = r?.stage ?? 1;
+    const st: PetState = { id, kind, level, xp: r?.xp ?? 0, loyalty: r?.loyalty ?? 50, growth: r?.growth ?? {}, kills: r?.kills ?? 0, hp: petStats(kind, level, stage).maxHp, koUntil: 0, attacks: 0, tauntUntil: 0, stage };
     return petView(p, st, false);
   });
   return { active: active ? petView(p, active, true) : null, pets };
@@ -325,6 +346,39 @@ export const pets = {
     const name = nameOf(st.id);
     const message = `${name} ate the ${def.name}: +${food.xp} Pet EXP, +${food.loyalty} loyalty.${levels ? ` Level ${st.level}!` : ''}`;
     return { ...(await menu(deps, p)), message };
+  },
+
+  /** Evolve the active pet: level 30 / 60, loyalty 60+, Evolution Stones and Gold. */
+  async evolve(deps: GameplayDeps, p: Player): Promise<PetMenuState & { message: string }> {
+    if (!p.companionId()) throw new GameError('Call a pet to your side first.');
+    await syncCompanion(deps, p);
+    const st = p.petState!;
+    const next = PET_STAGES[st.stage];
+    if (!next) throw new GameError(`${nameOf(st.id)} is already fully evolved.`);
+    if (st.level < next.minLevel) throw new GameError(`${nameOf(st.id)} needs to reach level ${next.minLevel} first.`);
+    if (st.loyalty < PET_EVOLVE_LOYALTY) throw new GameError(`${nameOf(st.id)} needs ${PET_EVOLVE_LOYALTY} loyalty to evolve (feed it and fight together).`);
+    const inv = await withTransaction(deps.pool, async (tx) => {
+      await lockCharacter(tx, p.id);
+      const { capacity, slots } = await loadSlots(tx, p.id);
+      const res = removeItemById(slots, 'evolution_stone', next.stones);
+      if (!res.ok) throw new GameError(`You need ${next.stones} Evolution Stone${next.stones > 1 ? 's' : ''} (Stablemaster Hana sells them; world bosses drop them).`);
+      const { after } = await changeGold(tx, p.id, -next.gold, 'enhance', { type: 'pet', id: st.id });
+      await writeSlots(tx, p.id, res.slots, res.changed);
+      await logItemMovement(tx, { itemId: 'evolution_stone', quantity: next.stones, from: p.id, reason: 'consume', ref: { type: 'pet', id: st.id } });
+      st.stage = next.stage;
+      await tx.query(
+        `INSERT INTO character_pets (character_id, pet_id, level, xp, loyalty, growth, kills, stage) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (character_id, pet_id) DO UPDATE SET stage = $8, updated_at = now()`,
+        [p.id, st.id, st.level, st.xp, st.loyalty, JSON.stringify(st.growth), st.kills, st.stage],
+      );
+      return toState(capacity, after, res.slots);
+    });
+    pushInventory(deps.world, p, inv);
+    st.hp = petStats(st.kind, st.level, st.stage).maxHp;
+    setPetStage(deps, p);
+    p.conn?.send('pet:update', petView(p, st, true));
+    deps.log.info('pet_evolved', { characterId: p.id, pet: st.id, stage: st.stage });
+    return { ...(await menu(deps, p)), message: `✨ ${nameOf(st.id)} evolved into a ${next.title} ${nameOf(st.id)}! Stronger, tougher — and bigger.` };
   },
 
   /** Spend a Growth Point (one per 10 pet levels) on a passive trait. */

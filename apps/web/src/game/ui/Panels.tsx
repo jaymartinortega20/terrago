@@ -12,6 +12,20 @@ import type { GameClient } from '../net/client';
 import { useStore, type Panel } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
 import { Window } from './Window';
+
+/** "+5% damage, +3 HP/s" for a food buff. */
+function foodText(m: { dmg?: number; taken?: number; eva?: number; regen?: number; xp?: number }): string {
+  const pct = (v: number) => `${v > 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
+  return [
+    m.dmg ? `${pct(m.dmg)} damage` : '',
+    m.taken ? `${pct(m.taken)} damage taken` : '',
+    m.eva ? `${pct(m.eva)} evasion` : '',
+    m.regen ? `+${m.regen} HP/s` : '',
+    m.xp ? `${pct(m.xp)} EXP` : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
 import { EquipmentGrid, SetInfo } from './CombatUi';
 
 export function InventoryPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
@@ -84,6 +98,11 @@ export function InventoryPanel({ client, onClose }: { client: GameClient; onClos
               </li>
             ))}
             {def.equip && setOf(def.id) && <SetInfo itemId={def.id} />}
+            {def.consumable?.buff && (
+              <li className="font-bold" style={{ color: '#3a8a3a' }} data-testid="food-buff">
+                🍲 {def.consumable.buff.name} ({Math.round(def.consumable.buff.durationMs / 60_000)} min): {foodText(def.consumable.buff.mods)}
+              </li>
+            )}
             {sel.durability !== null && def.maxDurability && (
               <li>
                 Durability {sel.durability}/{def.maxDurability}

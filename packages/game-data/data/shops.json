@@ -327,6 +327,10 @@
    {
     "itemId": "premium_pet_treat",
     "price": 450
+   },
+   {
+    "itemId": "evolution_stone",
+    "price": 25000
    }
   ],
   "buys": []

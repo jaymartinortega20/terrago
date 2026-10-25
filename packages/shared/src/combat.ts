@@ -324,6 +324,8 @@ export interface EffectMods {
   acc?: number;
   /** Extra critical chance (percent points) for attacks against this target (Hunter's Eye). */
   critTaken?: number;
+  /** Multiplier on EXP earned (food). */
+  xp?: number;
 }
 
 export interface SkillDef {
@@ -365,7 +367,7 @@ export function effectSum(effects: ActiveEffect[], key: 'critTaken', now: number
   return s;
 }
 
-export function effectMult(effects: ActiveEffect[], key: 'dmg' | 'taken' | 'eva' | 'slow' | 'acc', now: number): number {
+export function effectMult(effects: ActiveEffect[], key: 'dmg' | 'taken' | 'eva' | 'slow' | 'acc' | 'xp', now: number): number {
   let m = 1;
   for (const e of effects) if (e.until > now && e.mods[key] !== undefined) m *= e.mods[key]!;
   return m;

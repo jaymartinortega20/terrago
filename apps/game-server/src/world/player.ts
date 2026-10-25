@@ -24,6 +24,8 @@ export interface PetState {
   koUntil: number;
   attacks: number;
   tauntUntil: number;
+  /** Evolution stage (1-3). */
+  stage: number;
   /** Not loaded from the database yet (defaults in use). */
   stub?: boolean;
   sentHp?: number;
@@ -83,6 +85,8 @@ export class Player {
   mountLook: import('@terrago/shared').MountLook = {};
   /** The active companion's growth (loaded from character_pets) and live health. */
   petState: PetState | null = null;
+  /** The active pet's evolution stage (shown to others). */
+  petStage = 1;
   // --- Social ---------------------------------------------------------------
   party: import('../net/social').Party | null = null;
   /** People this player muted (chat hidden) or blocked (also no whispers/trades/invites). */
@@ -178,6 +182,7 @@ export class Player {
       guild: this.guild?.tag ?? null,
       shop: this.stall?.name ?? null,
       pet: this.pet,
+      ...(this.pet && this.petStage > 1 ? { petStage: this.petStage } : {}),
       mountLook: this.mount ? this.mountLook : null,
       pose: this.pose,
       job: this.rec.job ?? null,

@@ -901,6 +901,12 @@ export class GameClient {
   async feedPet(slot: number): Promise<import('@terrago/shared').PetMenuState | null> {
     return this.run<import('@terrago/shared').PetMenuState & { message?: string }>('pet:feed', { slot });
   }
+  async evolvePet(): Promise<import('@terrago/shared').PetMenuState | null> {
+    const r = await this.run<import('@terrago/shared').PetMenuState & { message?: string }>('pet:evolve');
+    if (r) audio.sfx('achievement');
+    return r;
+  }
+
   async growPet(trait: import('@terrago/shared').PetGrowthId): Promise<import('@terrago/shared').PetMenuState | null> {
     return this.run<import('@terrago/shared').PetMenuState & { message?: string }>('pet:grow', { trait });
   }

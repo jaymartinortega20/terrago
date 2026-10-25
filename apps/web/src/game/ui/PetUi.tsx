@@ -9,6 +9,7 @@ import {
   PET_LOYALTY_SKILL,
   PET_SKILL2_LEVEL,
   archetypeOf,
+  petStage,
   petFoodValue,
   type PetGrowthId,
   type PetMenuState,
@@ -86,6 +87,7 @@ export function PetPanel({ client, onClose }: { client: GameClient; onClose: () 
                 <Portrait pet={pet} />
                 <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-2 font-bold">
+                    {petStage(pet.stage).title && <span className="text-[#c9a0ff]">{petStage(pet.stage).title}</span>}
                     {pet.name}
                     <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: `${ROLE[arche.role]!.color}33`, color: ROLE[arche.role]!.color }}>
                       {ROLE[arche.role]!.label}
@@ -133,6 +135,8 @@ export function PetPanel({ client, onClose }: { client: GameClient; onClose: () 
                   );
                 })}
               </div>
+
+              {pet.id !== 'hawk' && <Evolve client={client} pet={pet} onDone={setMenu} />}
 
               <div className="glass-dark p-3" data-testid="pet-growth">
                 <h3 className="mb-2 flex text-xs font-bold tracking-widest text-parchment/70 uppercase">
@@ -210,6 +214,53 @@ export function PetPanel({ client, onClose }: { client: GameClient; onClose: () 
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Evolution: stage, what the next one needs, and the button. */
+function Evolve({ client, pet, onDone }: { client: GameClient; pet: PetView; onDone: (m: PetMenuState) => void }) {
+  const stones = useStore(client.ui, (s) => (s.inventory?.slots ?? []).reduce((n, x) => n + (x.itemId === 'evolution_stone' ? x.quantity : 0), 0));
+  const gold = useStore(client.ui, (s) => s.inventory?.gold ?? 0);
+  const n = pet.next;
+  const ready = !!n && pet.level >= n.minLevel && pet.loyalty >= n.loyalty && stones >= n.stones && gold >= n.gold;
+  return (
+    <div className="glass-dark p-3" data-testid="pet-evolve">
+      <h3 className="mb-1 flex text-xs font-bold tracking-widest text-parchment/70 uppercase">
+        Evolution
+        <span className="ml-auto text-[#c9a0ff]">Stage {pet.stage}/3</span>
+      </h3>
+      {!n ? (
+        <p className="text-sm text-parchment/80">✨ Fully evolved. A Mythic companion!</p>
+      ) : (
+        <>
+          <p className="text-sm">
+            Next: <b className="text-[#c9a0ff]">{n.title}</b> — stronger, tougher and bigger.
+          </p>
+          <ul className="mt-1 text-xs text-parchment/80">
+            <li className={pet.level >= n.minLevel ? 'text-leaf' : ''}>
+              {pet.level >= n.minLevel ? '✓' : '•'} Pet level {n.minLevel} ({pet.level})
+            </li>
+            <li className={pet.loyalty >= n.loyalty ? 'text-leaf' : ''}>
+              {pet.loyalty >= n.loyalty ? '✓' : '•'} Loyalty {n.loyalty}+ ({pet.loyalty})
+            </li>
+            <li className={stones >= n.stones ? 'text-leaf' : ''}>
+              {stones >= n.stones ? '✓' : '•'} {n.stones} Evolution Stone{n.stones > 1 ? 's' : ''} ({stones}) — Hana sells them; world bosses drop them
+            </li>
+            <li className={gold >= n.gold ? 'text-leaf' : ''}>
+              {gold >= n.gold ? '✓' : '•'} {n.gold.toLocaleString()} Gold
+            </li>
+          </ul>
+          <button
+            className="mt-2 rounded-full bg-[#9b59d0] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-30"
+            disabled={!ready}
+            onClick={() => void client.evolvePet().then((m) => m && onDone(m))}
+            data-testid="pet-evolve-btn"
+          >
+            ✨ Evolve
+          </button>
+        </>
+      )}
     </div>
   );
 }

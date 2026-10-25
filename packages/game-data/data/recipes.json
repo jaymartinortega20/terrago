@@ -3066,5 +3066,57 @@
    "itemId": "linen",
    "quantity": 2
   }
+ },
+ {
+  "id": "cook_hunters_feast",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 30,
+  "xp": 60,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "salmon_steak",
+    "quantity": 1
+   },
+   {
+    "itemId": "hearty_stew",
+    "quantity": 1
+   },
+   {
+    "itemId": "pumpkin_pie",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "hunters_feast",
+   "quantity": 2
+  }
+ },
+ {
+  "id": "cook_dragon_pepper_stew",
+  "station": "cooking_pot",
+  "skill": "cooking",
+  "level": 55,
+  "xp": 120,
+  "fee": 0,
+  "inputs": [
+   {
+    "itemId": "hunters_feast",
+    "quantity": 1
+   },
+   {
+    "itemId": "drake_scale",
+    "quantity": 1
+   },
+   {
+    "itemId": "ember_core",
+    "quantity": 1
+   }
+  ],
+  "output": {
+   "itemId": "dragon_pepper_stew",
+   "quantity": 2
+  }
  }
 ]

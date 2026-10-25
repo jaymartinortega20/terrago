@@ -1464,7 +1464,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private animalSprites: Phaser.GameObjects.Image[] = [];
-  private pets = new Map<string, { item: string; sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
+  private pets = new Map<string, { item: string; stage: number; sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
   /** Beastmasters' hawks, by owner. */
   private hawks = new Map<string, { sprite: Phaser.GameObjects.Sprite; strike?: { x: number; y: number; at: number } }>();
 
@@ -1545,15 +1545,17 @@ export class WorldScene extends Phaser.Scene {
 
   /** Pets trot after their owners (local player and everyone visible). */
   private updatePets(): void {
-    const want = new Map<string, { item: string; x: number; y: number; dir: string }>();
-    const self = this.client.ui.get().self;
-    if (self?.pet && this.local) want.set(self.characterId, { item: self.pet, x: this.local.sprite.x, y: this.local.sprite.y, dir: this.client.dir });
+    const want = new Map<string, { item: string; x: number; y: number; dir: string; stage: number }>();
+    const ui = this.client.ui.get();
+    const self = ui.self;
+    const myStage = ui.pet && ui.pet.id === self?.pet ? ui.pet.stage : 1;
+    if (self?.pet && this.local) want.set(self.characterId, { item: self.pet, x: this.local.sprite.x, y: this.local.sprite.y, dir: this.client.dir, stage: myStage });
     for (const [id, r] of this.client.remotes) {
       const av = this.remotes.get(id);
-      if (r.info.pet && av) want.set(id, { item: r.info.pet, x: av.sprite.x, y: av.sprite.y, dir: r.dir });
+      if (r.info.pet && av) want.set(id, { item: r.info.pet, x: av.sprite.x, y: av.sprite.y, dir: r.dir, stage: r.info.petStage ?? 1 });
     }
     for (const [id, pet] of this.pets)
-      if (want.get(id)?.item !== pet.item) {
+      if (want.get(id)?.item !== pet.item || want.get(id)?.stage !== pet.stage) {
         pet.sprite.destroy();
         this.pets.delete(id);
       }
@@ -1570,7 +1572,10 @@ export class WorldScene extends Phaser.Scene {
           tex.add(0, 0, 0, 0, sheet.w * 2, sheet.h * 2);
           tex.add(1, 0, sheet.w * 2, 0, sheet.w * 2, sheet.h * 2);
         }
-        pet = { item: w.item, sprite: this.add.sprite(w.x - 20, w.y, key, 0).setOrigin(0.5, 1).setScale(art.scale) };
+        // Evolved pets are bigger; Mythic ones glow.
+        const sprite = this.add.sprite(w.x - 20, w.y, key, 0).setOrigin(0.5, 1).setScale(art.scale * (1 + 0.22 * (w.stage - 1)));
+        if (w.stage >= 3 && sprite.preFX) sprite.preFX.addGlow(0xc9a0ff, 3, 0, false, 0.1, 8);
+        pet = { item: w.item, stage: w.stage, sprite };
         this.pets.set(id, pet);
       }
       const side = w.dir === 'left' ? 22 : -22;

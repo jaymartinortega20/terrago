@@ -29,6 +29,7 @@ import {
   eventMult,
   affixText,
   worldBossBonus,
+  effectMult,
 } from '@terrago/shared';
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
@@ -549,7 +550,7 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
           .serial(async () => {
             questEvent(d, r.player, 'kill', r.monster.def.id);
             bountyKill(d, r.player, r.monster.def.id);
-            r.xp = Math.round(r.xp * eventMult('xp', Date.now()) * settings().xpRate);
+            r.xp = Math.round(r.xp * eventMult('xp', Date.now()) * settings().xpRate * effectMult(r.player.effects, 'xp', Date.now()));
             // Newcomer boost: early levels come quickly (×3 under level 10, ×2 under 20).
             const lvl = r.player.rec.level;
             if (lvl < 10) r.xp *= 3;

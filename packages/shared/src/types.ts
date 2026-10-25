@@ -105,8 +105,9 @@ export interface SelfState {
   speed: number;
   /** Profession specializations: skill -> spec id. */
   specs?: Record<string, string>;
-  /** Active pet item id. */
+  /** Active pet item id and its evolution stage. */
   pet?: string | null;
+  petStage?: number;
   /** Second job (from level 40). */
   job?: JobId | null;
   /** Unspent stat points. */
@@ -188,8 +189,9 @@ export interface PublicPlayer {
   guild?: string | null;
   /** Name of the player's open stall, if any. */
   shop?: string | null;
-  /** Active pet (item id). */
+  /** Active pet (item id) and its evolution stage. */
   pet?: string | null;
+  petStage?: number;
   /** Sitting down (from the sit emote). */
   pose?: 'sit' | null;
   /** Second job, shown under the name. */
@@ -235,7 +237,7 @@ export interface ItemDef {
   bind: 'none' | 'pickup' | 'equip';
   /** Max durability for tools/equipment; null for items without durability. */
   maxDurability: number | null;
-  consumable?: { energy?: number; hp?: number; mp?: number };
+  consumable?: { energy?: number; hp?: number; mp?: number; buff?: FoodBuff };
   /** Gathering/farming tools. Higher tiers cost less Energy and reach harder nodes. */
   tool?: { kind: ToolKind; tier: number };
   /** Mixed into a planted plot: quality bonus and growth speed multiplier. */
@@ -787,4 +789,11 @@ export function guildWeek(now: number): string {
 /** Each helper's reward for a completed guild quest. */
 export function guildQuestReward(level: number): { gold: number; xp: number } {
   return { gold: 300 + level * 40, xp: Math.round(level * level * 6 + 400) };
+}
+
+/** A "Well Fed" effect from cooked food. Only one food buff at a time. */
+export interface FoodBuff {
+  name: string;
+  durationMs: number;
+  mods: { dmg?: number; taken?: number; eva?: number; regen?: number; xp?: number };
 }

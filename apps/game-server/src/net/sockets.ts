@@ -305,7 +305,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
           if (!Number.isInteger(slot)) throw new GameError('Invalid slot.');
           const inv = world.inventoryCache.get(p.id)?.slots.find((x) => x.slot === slot);
           const cons = inv ? getItem(inv.itemId)?.consumable : undefined;
-          if (cons && !cons.energy && ((cons.hp && !cons.mp && p.rec.hp >= p.profile.maxHp) || (cons.mp && !cons.hp && p.rec.mp >= p.profile.maxMp))) {
+          if (cons && !cons.energy && !cons.buff && ((cons.hp && !cons.mp && p.rec.hp >= p.profile.maxHp) || (cons.mp && !cons.hp && p.rec.mp >= p.profile.maxMp))) {
             throw new GameError(cons.hp ? "You're already at full health." : 'Your MP is already full.');
           }
           if (p.dead) throw new GameError("You can't do that right now.");
@@ -347,6 +347,10 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
           p.lastEnergySent = res.energy;
           world.inventoryCache.set(p.id, res.inventory);
           p.conn?.send('self:update', { energy: res.energy });
+          if (cons?.buff) {
+            world.combat.applyFood(p, cons.buff);
+            return { inventory: res.inventory, message: `${res.message} Well Fed: ${cons.buff.name} (${Math.round(cons.buff.durationMs / 60_000)} min).` };
+          }
           return { inventory: res.inventory, message: res.message };
         }),
       ),
@@ -390,6 +394,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('pet:get', (ack) => serial(ack, () => pets.get(g, p)));
     socket.on('pet:feed', (req, ack) => serial(ack, () => pets.feed(g, p, req)));
     socket.on('pet:grow', (req, ack) => serial(ack, () => pets.grow(g, p, req)));
+    socket.on('pet:evolve', (ack) => serial(ack, () => pets.evolve(g, p)));
     socket.on('market:search', (q, ack) => respond(ack, () => market.search(g, p, q)));
     socket.on('market:mine', (ack) => respond(ack, () => market.mine(g, p)));
     socket.on('market:list', (req, ack) => serial(ack, () => market.list(g, p, req)));

@@ -370,7 +370,7 @@ export class Combat {
     if (!id) return null;
     if (p.petState?.id === id) return p.petState;
     const kind = id === 'hawk' ? 'hawk' : (getItem(id)?.pet?.kind ?? 'dog');
-    p.petState = { id, kind, level: 1, xp: 0, loyalty: 50, growth: {}, kills: 0, hp: petStats(kind, 1).maxHp, koUntil: 0, attacks: 0, tauntUntil: 0, stub: true };
+    p.petState = { id, kind, level: 1, xp: 0, loyalty: 50, growth: {}, kills: 0, hp: petStats(kind, 1).maxHp, koUntil: 0, attacks: 0, tauntUntil: 0, stage: 1, stub: true };
     this.hooks.loadCompanion?.(p);
     return p.petState;
   }
@@ -379,7 +379,7 @@ export class Combat {
   private petIntercept(rt: MapRuntime, p: Player, m: Monster, dmg: number, now: number): boolean {
     const st = this.companion(p);
     if (!st || st.koUntil > now) return false;
-    const stats = petStats(st.kind, st.level);
+    const stats = petStats(st.kind, st.level, st.stage);
     const chance = st.tauntUntil > now ? 100 : stats.aggro;
     if (this.rand() * 100 >= chance) return false;
     const taken = Math.max(1, Math.round(dmg * (archetypeOf(st.kind).role === 'tank' ? 0.6 : 1)));
@@ -401,7 +401,7 @@ export class Combat {
     if (!force && (st.hp === st.sentHp || now - (st.sentAt ?? 0) < 500)) return;
     st.sentHp = st.hp;
     st.sentAt = now;
-    p.conn.send('pet:hp', { hp: st.hp, maxHp: petStats(st.kind, st.level).maxHp, koUntil: st.koUntil });
+    p.conn.send('pet:hp', { hp: st.hp, maxHp: petStats(st.kind, st.level, st.stage).maxHp, koUntil: st.koUntil });
   }
 
   /**
@@ -412,7 +412,7 @@ export class Combat {
   private companionTick(rt: MapRuntime, p: Player, now: number): void {
     const st = this.companion(p);
     if (!st) return;
-    const maxHp = petStats(st.kind, st.level).maxHp;
+    const maxHp = petStats(st.kind, st.level, st.stage).maxHp;
     // Back on its feet after a knock-out; heals up out of combat.
     if (st.koUntil && now >= st.koUntil) {
       st.koUntil = 0;
@@ -449,7 +449,7 @@ export class Combat {
       else mult = 3;
     }
     const crit = forceCrit || this.rand() * 100 < 5 + (spec.crit ?? 0);
-    const atk = petStats(st.kind, st.level).atk;
+    const atk = petStats(st.kind, st.level, st.stage).atk;
     const lowLoyalty = st.loyalty < PET_LOYALTY_LOW ? 0.5 : 1;
     const base = (6 + atk * 1.6) * spec.mult * mult * lowLoyalty * (crit ? 1.5 : 1) * (0.85 + this.rand() * 0.3);
     const dmg = Math.max(1, Math.round(base * effectMult(m.effects, 'taken', now)));
@@ -550,6 +550,14 @@ export class Combat {
       p.lastVitalsAt = now;
       p.conn?.send('self:update', { hp: p.rec.hp, mp: p.rec.mp });
     }
+  }
+
+  /** Eat: one food buff at a time (a new dish replaces the old one). */
+  applyFood(p: Player, buff: import('@terrago/shared').FoodBuff): void {
+    const now = this.now();
+    p.effects = p.effects.filter((e) => !e.id.startsWith('food:'));
+    p.effects.push({ id: `food:${buff.name}`, name: `🍲 ${buff.name}`, until: now + buff.durationMs, mods: { ...buff.mods } });
+    this.pushEffects(p);
   }
 
   pushEffects(p: Player): void {

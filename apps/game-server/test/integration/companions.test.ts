@@ -197,3 +197,49 @@ describe('pet growth', () => {
     await leaveWorld(a.socket);
   });
 });
+
+describe('food buffs and pet evolution', () => {
+  test('cooked food gives one Well Fed buff at a time that changes your fighting', async () => {
+    const { a, p } = await setup({ map: 'greenhaven', tx: 30, ty: 30, level: 40, items: [['salmon_steak', 2], ['pumpkin_pie', 1]] });
+    const inv = server.world.inventoryCache.get(p.id)!;
+    const salmon = inv.slots.find((s) => s.itemId === 'salmon_steak')!;
+    const r1 = await ack(a.socket, 'inventory:use', { slot: salmon.slot });
+    assert.equal(r1.ok, true, JSON.stringify(r1));
+    assert.match(r1.data.message, /Sea Strength/);
+    const food = p.effects.filter((e) => e.id.startsWith('food:'));
+    assert.equal(food.length, 1);
+    assert.equal(food[0]!.mods.dmg, 1.08);
+    const pie = server.world.inventoryCache.get(p.id)!.slots.find((s) => s.itemId === 'pumpkin_pie')!;
+    assert.equal((await ack(a.socket, 'inventory:use', { slot: pie.slot })).ok, true);
+    const now = p.effects.filter((e) => e.id.startsWith('food:'));
+    assert.equal(now.length, 1, 'a new dish replaces the old buff');
+    assert.equal(now[0]!.mods.xp, 1.1);
+    await leaveWorld(a.socket);
+  });
+
+  test('pets evolve at level 30 with loyalty, a stone and Gold — stronger and visible to others', async () => {
+    const { A, a, p } = await setup({ map: 'greenhaven', tx: 30, ty: 30, level: 40, pet: 'pet_dog', gold: 9000, items: [['evolution_stone', 1]] });
+    await db.query(`INSERT INTO character_pets (character_id, pet_id, level, loyalty) VALUES ($1, 'pet_dog', 30, 70)`, [A.character.id]);
+    await ack(a.socket, 'pet:get');
+    await waitFor(() => p.petState && !p.petState.stub && p.petState.level === 30);
+    const before = p.petState!;
+    const hp1 = (await ack(a.socket, 'pet:get')).data.active.maxHp;
+    await db.query(`UPDATE characters SET gold = 5000 WHERE id = $1`, [A.character.id]); // achievements may have paid out on login
+    const poor = await ack(a.socket, 'pet:evolve');
+    assert.equal(poor.ok, false, 'not enough Gold');
+    await db.query(`UPDATE characters SET gold = 20000 WHERE id = $1`, [A.character.id]);
+    const evo = await ack(a.socket, 'pet:evolve');
+    assert.equal(evo.ok, true, JSON.stringify(evo));
+    assert.equal(evo.data.active.stage, 2);
+    assert.ok(evo.data.active.maxHp > hp1 * 1.3, `${hp1} → ${evo.data.active.maxHp}`);
+    assert.equal(before.stage, 2);
+    assert.equal(p.petStage, 2);
+    assert.equal(p.toPublic().petStage, 2);
+    const row = await db.query(`SELECT stage FROM character_pets WHERE character_id = $1 AND pet_id = 'pet_dog'`, [A.character.id]);
+    assert.equal(row.rows[0].stage, 2);
+    const stones = await db.query(`SELECT count(*)::int AS n FROM inventory_items WHERE character_id = $1 AND item_id = 'evolution_stone'`, [A.character.id]);
+    assert.equal(stones.rows[0].n, 0, 'stone used');
+    assert.equal((await ack(a.socket, 'pet:evolve')).ok, false, 'stage 3 needs level 60');
+    await leaveWorld(a.socket);
+  });
+});

@@ -187,12 +187,28 @@ export function petXpToNext(level: number): number {
   return Math.round(10 * Math.pow(level, 1.8));
 }
 
-export function petStats(kind: string, level: number): { maxHp: number; atk: number; aggro: number } {
+/**
+ * Pet evolution: at level 30 and 60 a loyal pet can evolve (Evolution Stones +
+ * Gold). Each stage makes it stronger and bigger; stage 3 glows.
+ */
+export const PET_STAGES = [
+  { stage: 1, title: '', mult: 1, minLevel: 1, stones: 0, gold: 0 },
+  { stage: 2, title: 'Grown', mult: 1.35, minLevel: 30, stones: 1, gold: 10_000 },
+  { stage: 3, title: 'Mythic', mult: 1.8, minLevel: 60, stones: 3, gold: 50_000 },
+] as const;
+export const PET_EVOLVE_LOYALTY = 60;
+
+export function petStage(stage: number | undefined) {
+  return PET_STAGES[Math.max(0, Math.min(PET_STAGES.length - 1, (stage ?? 1) - 1))]!;
+}
+
+export function petStats(kind: string, level: number, stage = 1): { maxHp: number; atk: number; aggro: number } {
   const a = archetypeOf(kind);
   const l = Math.max(1, level) - 1;
+  const m = petStage(stage).mult;
   return {
-    maxHp: Math.round(a.hp[0] + a.hp[1] * l),
-    atk: Math.round((a.atk[0] + a.atk[1] * l) * 10) / 10,
+    maxHp: Math.round((a.hp[0] + a.hp[1] * l) * m),
+    atk: Math.round((a.atk[0] + a.atk[1] * l) * m * 10) / 10,
     aggro: Math.min(45, Math.round((a.aggro[0] + a.aggro[1] * l) * 10) / 10),
   };
 }
@@ -230,4 +246,7 @@ export interface PetView {
   aggro: number;
   /** Knocked out until (ms since epoch). */
   koUntil: number;
+  /** Evolution stage (1-3) and what the next one needs (null at the top). */
+  stage: number;
+  next: { stage: number; title: string; minLevel: number; stones: number; gold: number; loyalty: number } | null;
 }

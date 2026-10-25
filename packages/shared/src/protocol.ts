@@ -232,6 +232,7 @@ export interface ClientToServerEvents {
   'pet:get': (ack: Ack<PetMenuState>) => void;
   'pet:feed': (req: { slot: number }, ack: Ack<PetMenuState & { message: string }>) => void;
   'pet:grow': (req: { trait: import('./companions').PetGrowthId }, ack: Ack<PetMenuState>) => void;
+  'pet:evolve': (ack: Ack<PetMenuState & { message: string }>) => void;
   'market:search': (q: MarketQuery, ack: Ack<{ listings: MarketListing[]; total: number }>) => void;
   'market:mine': (ack: Ack<{ listings: MarketListing[] }>) => void;
   'market:list': (req: { slot: number; quantity: number; unitPrice: number }, ack: Ack<{ message: string }>) => void;
