@@ -465,6 +465,14 @@ class AudioManager {
       src.stop(at + 0.15);
     };
     const schedule = () => {
+      // A hidden tab throttles this timer but the audio clock keeps running. Without this
+      // jump the loop would try to "catch up" every missed note at once (a burst of
+      // thousands of sounds that freezes the page).
+      if (next < ctx.currentTime) {
+        const missed = Math.ceil((ctx.currentTime - next) / (beat / 2));
+        step += missed;
+        next += missed * (beat / 2);
+      }
       while (next < ctx.currentTime + 0.4) {
         const bar = Math.floor(step / 8) % bars;
         const s = step % 8;

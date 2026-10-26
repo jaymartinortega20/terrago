@@ -128,12 +128,22 @@ export function nextPortal(from: string, to: string, getMap: (id: string) => Map
   return null;
 }
 
+/**
+ * How close counts as "at" a waypoint. It must be at least one movement step,
+ * or a fast mount (12+ px per step) jumps over the target every step and
+ * walks back and forth forever.
+ */
+export function waypointRadius(stepPx: number): number {
+  return Math.max(4, stepPx * 0.75);
+}
+
 /** Arrow-key input that walks from `pos` toward the centre of tile `t`. */
-export function inputToward(pos: { x: number; y: number }, t: PathTile, tileSize: number): MoveInput {
+export function inputToward(pos: { x: number; y: number }, t: PathTile, tileSize: number, stepPx = 6): MoveInput {
   const tx = (t.x + 0.5) * tileSize;
   const ty = (t.y + 0.5) * tileSize + 6; // positions are at the feet
   const ex = tx - pos.x;
   const ey = ty - pos.y;
-  const dz = 3;
+  // Don't step on an axis that's already closer than half a step (that only overshoots).
+  const dz = Math.max(3, stepPx / 2);
   return { dx: (ex > dz ? 1 : ex < -dz ? -1 : 0) as MoveInput['dx'], dy: (ey > dz ? 1 : ey < -dz ? -1 : 0) as MoveInput['dy'] };
 }

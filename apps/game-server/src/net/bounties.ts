@@ -174,7 +174,11 @@ export function bountyKill(deps: GameplayDeps, p: Player, monsterId: string): vo
         for (const r of rows) p.bountyTargets!.ids.add(r.monster_id);
         if (p.bountyTargets!.ids.has(monsterId)) bountyKill(deps, p, monsterId);
       })
-      .catch((err) => deps.log.error('bounty_load_failed', { err }));
+      .catch((err) => {
+        // Don't cache an empty list for the whole day after a failed load: try again next kill.
+        p.bountyTargets = null;
+        deps.log.error('bounty_load_failed', { err });
+      });
     return;
   }
   if (!p.bountyTargets.ids.has(monsterId)) return;

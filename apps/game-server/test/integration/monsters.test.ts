@@ -103,3 +103,21 @@ describe('late-map monsters', () => {
     await leaveWorld(a.socket);
   });
 });
+
+describe('monster AI loops', () => {
+  test("a monster that can't get home doesn't stay stuck in 'return' forever", async () => {
+    const { a, rt } = await at('desolate_crags', 31, 44, 60);
+    const m = [...rt.monsters.values()].find((x) => x.alive && x.def.id === 'earth_elemental')!;
+    // Somewhere far from its spawn, half dead, heading home — and taking far too long.
+    m.x = 50 * 32;
+    m.y = 40 * 32;
+    m.hp = 5;
+    m.state = 'return';
+    m.returnSince = Date.now() - 9000;
+    await waitFor(() => m.state === 'idle', 2000);
+    const area = m.spawn.area;
+    assert.ok(m.x >= area.x * 32 && m.x <= (area.x + area.w) * 32 && m.y >= area.y * 32 && m.y <= (area.y + area.h + 1) * 32, 'back home');
+    assert.equal(m.hp, m.stats.maxHp, 'healed');
+    await leaveWorld(a.socket);
+  });
+});

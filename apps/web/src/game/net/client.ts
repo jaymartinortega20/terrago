@@ -3,6 +3,7 @@ import { DUNGEONS, NPCS, QUESTS, getCrop, getItem, getMap, getNode, getQuest, sk
 import {
   findPath,
   inputToward,
+  waypointRadius,
   nextPortal,
   CHAT,
   CODE_DIR,
@@ -876,11 +877,13 @@ export class GameClient {
         return null;
       }
     }
-    // Drop waypoints we've reached.
+    // Drop waypoints we've reached (the radius grows with speed so mounts don't overshoot forever).
+    const stepPx = (PLAYER_SPEED * this.speed() * SIM.stepMs) / 1000;
+    const near = waypointRadius(stepPx);
     while (this.walkPath.length) {
       const w = this.walkPath[0]!;
       const c = { x: (w.x + 0.5) * TILE_SIZE, y: (w.y + 0.5) * TILE_SIZE + 6 };
-      if (Math.abs(c.x - this.pos.x) <= 4 && Math.abs(c.y - this.pos.y) <= 4) this.walkPath.shift();
+      if (Math.abs(c.x - this.pos.x) <= near && Math.abs(c.y - this.pos.y) <= near) this.walkPath.shift();
       else break;
     }
     if (!this.walkPath.length) {
@@ -902,7 +905,7 @@ export class GameClient {
       s.y = this.pos.y;
       s.n = 0;
     }
-    return inputToward(this.pos, this.walkPath[0]!, TILE_SIZE);
+    return inputToward(this.pos, this.walkPath[0]!, TILE_SIZE, stepPx);
   }
 
   private achievementQueue: NonNullable<import('../store').UiState['achievementToast']>[] = [];

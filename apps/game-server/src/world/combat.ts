@@ -57,6 +57,8 @@ export class Monster {
   nextAttackAt = 0;
   nextThinkAt = 0;
   wander: { x: number; y: number } | null = null;
+  /** When it started walking home (to give up and reappear at home if it can't get there). */
+  returnSince = 0;
   respawnAt = 0;
   lastMovedAt = 0;
   effects: ActiveEffect[] = [];
@@ -271,6 +273,7 @@ export class Combat {
     if (m.state === 'chase') {
       if (!target || target.dead || target.changingMap || dist(m.x, m.y, homeX, homeY) > leash || dist(m.x, m.y, target.x, target.y) > 20 * TILE) {
         m.state = 'return';
+        m.returnSince = now;
         m.targetId = null;
       } else {
         if (m.def.abilities && this.bossTick(rt, m, target, now)) return;
@@ -287,12 +290,24 @@ export class Combat {
       }
     }
     if (m.state === 'return') {
-      if (dist(m.x, m.y, homeX, homeY) < 2 * TILE) {
+      // Monsters walk straight lines, so a wall between them and home used to trap them in
+      // 'return' forever (frozen, never regenerating). Blocked or taking too long: snap home.
+      const home = dist(m.x, m.y, homeX, homeY) < 2 * TILE;
+      const stuck = !home && (!this.moveToward(rt, m, homeX, homeY, dtMs, now, 1.5) || now - m.returnSince > 8000);
+      if (home || stuck) {
+        if (stuck) {
+          const pos = randomTileIn(rt, m.spawn.area, this.rand);
+          if (pos) {
+            m.x = pos.x;
+            m.y = pos.y;
+          }
+        }
         m.state = 'idle';
         m.hp = m.stats.maxHp;
         m.damageBy.clear();
+        m.wander = null;
         this.resetBoss(rt, m);
-      } else this.moveToward(rt, m, homeX, homeY, dtMs, now, 1.5);
+      }
       return;
     }
     // Idle: look for prey, otherwise wander.
@@ -327,10 +342,13 @@ export class Combat {
   private moveToward(rt: MapRuntime, m: Monster, tx: number, ty: number, dtMs: number, now: number, speedMult = 1): boolean {
     const dx = tx - m.x;
     const dy = ty - m.y;
-    const ax = Math.abs(dx) > 3 ? (Math.sign(dx) as -1 | 1) : 0;
-    const ay = Math.abs(dy) > 3 ? (Math.sign(dy) as -1 | 1) : 0;
-    if (!ax && !ay) return false;
     const speed = m.def.speed * speedMult * effectMult(m.effects, 'slow', now);
+    // Fast movers (charging monsters) step 10+ px; a fixed 3 px dead zone made them zig-zag
+    // across the target line every tick. Ignore an axis that's closer than half a step.
+    const dz = Math.max(3, (speed * dtMs) / 2000);
+    const ax = Math.abs(dx) > dz ? (Math.sign(dx) as -1 | 1) : 0;
+    const ay = Math.abs(dy) > dz ? (Math.sign(dy) as -1 | 1) : 0;
+    if (!ax && !ay) return false;
     let next = stepMovement({ x: m.x, y: m.y }, { dx: ax, dy: ay }, rt.grid, speed, dtMs);
     if (next.x === m.x && next.y === m.y && ax && ay) {
       next = stepMovement({ x: m.x, y: m.y }, { dx: ax, dy: 0 }, rt.grid, speed, dtMs);
