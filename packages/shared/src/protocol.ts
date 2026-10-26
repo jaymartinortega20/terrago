@@ -228,6 +228,7 @@ export interface ClientToServerEvents {
   'equip': (req: { from: number }, ack: Ack<null>) => void;
   'unequip': (req: { slot: number }, ack: Ack<null>) => void;
   'enhance': (req: { equipSlot: number; npcId?: string }, ack: Ack<{ success: boolean; message: string }>) => void;
+  'gear:reroll': (req: { container: 'bag' | 'equip'; slot: number; index: number; npcId: string }, ack: Ack<{ message: string; affixes: import('./types').ItemAffix[] }>) => void;
   'mount:toggle': (ack: Ack<{ mount: string | null; channelMs?: number }>) => void;
   'mount:stable': (ack: Ack<StableState>) => void;
   'mount:choose': (itemId: string, ack: Ack<StableState>) => void;

@@ -482,6 +482,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('quest:complete', (req, ack) => serial(ack, () => questServices.complete(g, p, req)));
     socket.on('unequip', (req, ack) => serial(ack, () => gear.unequip(g, p, req)));
     socket.on('enhance', (req, ack) => serial(ack, () => gear.enhance(g, p, req)));
+    socket.on('gear:reroll', (req, ack) => serial(ack, () => gear.reroll(g, p, req)));
     socket.on('attack', (targetId, ack) => {
       antibot?.action(p);
       respond(ack, () => {

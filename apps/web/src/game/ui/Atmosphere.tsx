@@ -112,3 +112,33 @@ export function WorldBossBadge({ client }: { client: GameClient }) {
     </button>
   );
 }
+
+/** One badge for timed things: a live world boss wins; otherwise event and boss timers take turns. */
+export function TimersBadge({ client }: { client: GameClient }) {
+  const now = useNow(client, 5000);
+  const live = !!currentWorldBoss(now);
+  const event = !!currentEvent(now);
+  const turn = Math.floor(now / 6000) % 2;
+  if (live) return <WorldBossBadge client={client} />;
+  if (event) return <EventBadge client={client} />;
+  return turn ? <WorldBossBadge client={client} /> : <EventBadge client={client} />;
+}
+
+/** Phones: a small crown button while a world boss is up (tap to walk there). */
+export function PhoneBossButton({ client }: { client: GameClient }) {
+  const now = useNow(client, 5000);
+  const wb = currentWorldBoss(now);
+  if (!wb) return null;
+  const where = { map: wb.def.map, x: wb.def.area.x + Math.floor(wb.def.area.w / 2), y: wb.def.area.y + Math.floor(wb.def.area.h / 2), label: wb.def.name };
+  return (
+    <button
+      className="orb pointer-events-auto h-11 w-11 text-lg"
+      onClick={() => client.autoWalkTo(where)}
+      title={`${wb.def.name} is up in ${getMap(wb.def.map)?.name} — tap to go`}
+      aria-label={`World boss ${wb.def.name}: walk there`}
+      data-testid="phone-boss"
+    >
+      👑
+    </button>
+  );
+}

@@ -7,6 +7,7 @@ import {
   moveItem,
   removeFromSlot,
   settleEnergy,
+  energyFor,
   tileCenter,
   toInventorySlots,
   type AckResult,
@@ -297,7 +298,7 @@ export class LocalServer {
     const def = getItem(s.itemId);
     if (!def?.consumable) throw new Error(`${def?.name ?? 'That item'} can't be used right now.`);
     const now = Date.now();
-    const settled = settleEnergy(p.rec.energy, p.rec.energyUpdatedAt, now, BALANCE.energy);
+    const settled = settleEnergy(p.rec.energy, p.rec.energyUpdatedAt, now, energyFor(BALANCE.energy, p.rec.level));
     if (settled.energy >= BALANCE.energy.max) throw new Error("You're full of energy already.");
     const r = removeFromSlot(slots, slot, 1);
     if (!r.ok) throw new Error(r.error);

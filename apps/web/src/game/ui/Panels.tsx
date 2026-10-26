@@ -9,7 +9,7 @@ import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
 import { FX_STYLES, fxSettings, setFxSettings, type FxLevel, type FxSettings, type FxStyle } from '../fx/settings';
 import type { GameClient } from '../net/client';
-import { useStore, type Panel } from '../store';
+import { saveDnd, useStore, type Panel } from '../store';
 import { ItemSlot, RARITY_COLOR } from './ItemSlot';
 import { Window } from './Window';
 
@@ -404,13 +404,27 @@ export function MapPanel({ client, onClose }: { client: GameClient; onClose: () 
     <Window title={map.name} onClose={onClose} testId="map-panel">
       <div className="relative mx-auto border-4 border-ink" style={{ width: map.width * 5, maxWidth: '100%' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={`Map of ${map.name}`} className="pixel block w-full" />
+        <img
+          src={url}
+          alt={`Map of ${map.name}`}
+          className="pixel block w-full cursor-pointer"
+          data-testid="map-image"
+          onClick={(e) => {
+            // Tap / click anywhere: walk there by yourself.
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = Math.floor(((e.clientX - r.left) / r.width) * map.width);
+            const y = Math.floor(((e.clientY - r.top) / r.height) * map.height);
+            onClose();
+            client.autoWalkTo({ map: map.id, x, y, label: '' });
+          }}
+        />
         <span
           className="absolute h-2.5 w-2.5 animate-pulse border-2 border-ink bg-gold"
           style={{ left: `${((tile.x + 0.5) / map.width) * 100}%`, top: `${((tile.y + 0.5) / map.height) * 100}%`, transform: 'translate(-50%,-50%)' }}
           aria-label="You are here"
         />
       </div>
+      <p className="mt-1 text-center text-[11px] text-wood-dark/70">Tap the map to walk there.</p>
       <ul className="mt-2 grid grid-cols-2 gap-x-3 text-xs">
         {map.objects.flatMap((o) => (o.kind === 'building' ? [<li key={o.id}>■ {o.name}</li>] : []))}
       </ul>
@@ -492,6 +506,7 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
       </label>
       <p className="mt-1 text-xs text-wood-dark/70">Music and sounds start after your first click or key press. Levels are saved in this browser.</p>
       <FxSection />
+      <DndToggle client={client} />
       <ControlsSection />
       <h3 className="mt-4 font-bold">Connection</h3>
       <p className="text-sm">Latency: {ping === null ? '—' : `${ping} ms`}</p>
@@ -511,23 +526,49 @@ export function SettingsPanel({ client, onClose, onLogout, onSwitch }: { client:
   );
 }
 
-export const MENU: { id: Exclude<Panel, null> | string; label: string; key: string; version?: string }[] = [
+/** Menu buttons. Some appear as you progress so the first screen isn't 15 unexplained buttons. */
+export const MENU: { id: Exclude<Panel, null> | string; label: string; key: string; version?: string; minLevel?: number; afterFirstQuest?: boolean }[] = [
   { id: 'character', label: 'Character', key: 'C' },
   { id: 'inventory', label: 'Inventory', key: 'I' },
   { id: 'skills', label: 'Skills', key: 'K' },
   { id: 'quests', label: 'Quests', key: 'J' },
   { id: 'map', label: 'Map', key: 'M' },
-  { id: 'journal', label: 'Journal', key: 'L' },
-  { id: 'crafting', label: 'Crafting', key: 'N' },
-  { id: 'market', label: 'Market', key: 'P' },
-  { id: 'stable', label: 'Stable', key: 'Shift+Z' },
-  { id: 'pets', label: 'Pets', key: 'U' },
-  { id: 'arena', label: 'Arena', key: 'Shift+B' },
-  { id: 'gems', label: 'Gem Shop', key: 'Shift+G' },
-  { id: 'guild', label: 'Guild', key: 'G' },
+  { id: 'journal', label: 'Journal', key: 'L', minLevel: 2 },
+  { id: 'crafting', label: 'Crafting', key: 'N', minLevel: 3 },
+  { id: 'market', label: 'Market', key: 'P', minLevel: 5 },
+  { id: 'stable', label: 'Stable', key: 'Shift+Z', afterFirstQuest: true },
+  { id: 'pets', label: 'Pets', key: 'U', minLevel: 4 },
+  { id: 'arena', label: 'Arena', key: 'Shift+B', minLevel: 15 },
+  { id: 'gems', label: 'Gem Shop', key: 'Shift+G', afterFirstQuest: true },
+  { id: 'guild', label: 'Guild', key: 'G', minLevel: 5 },
   { id: 'friends', label: 'Friends', key: 'O' },
   { id: 'settings', label: 'Settings', key: 'Esc' },
 ];
+
+/** Which menu buttons this character has unlocked. */
+export function menuUnlocked(m: (typeof MENU)[number], level: number, questsDone: number): boolean {
+  if (m.minLevel && level < m.minLevel) return false;
+  if (m.afterFirstQuest && questsDone === 0) return false;
+  return true;
+}
+
+/** Buttons the player hasn't opened since they appeared (the "New!" dot). Saved in this browser. */
+export function menuSeen(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem('terrago:menuSeen') ?? '[]') as string[]);
+  } catch {
+    return new Set();
+  }
+}
+export function markMenuSeen(id: string): void {
+  try {
+    const s = menuSeen();
+    s.add(id);
+    localStorage.setItem('terrago:menuSeen', JSON.stringify([...s]));
+  } catch {
+    // ignore
+  }
+}
 
 /** Bag weight against what your STR lets you carry. */
 function WeightBar({ client }: { client: GameClient }) {
@@ -553,6 +594,25 @@ function WeightBar({ client }: { client: GameClient }) {
 }
 
 /** Rebind action keys: click a key, then press the new one. */
+function DndToggle({ client }: { client: GameClient }) {
+  const dnd = useStore(client.ui, (s) => s.dnd);
+  return (
+    <label className="mt-3 flex items-center gap-2 text-sm" data-testid="dnd">
+      <input
+        type="checkbox"
+        checked={dnd}
+        onChange={(e) => {
+          saveDnd(e.target.checked);
+          client.ui.set({ dnd: e.target.checked });
+        }}
+      />
+      <span>
+        <b>Do not disturb</b> — fewer pop-ups: loot and progress go to the side feed, server news stays in chat.
+      </span>
+    </label>
+  );
+}
+
 function ControlsSection() {
   const [, bump] = useState(0);
   const [wait, setWait] = useState<ActionId | null>(null);

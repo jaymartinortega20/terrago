@@ -1,5 +1,5 @@
 import { BALANCE, getClass, getItem, getMap } from '@terrago/game-data';
-import { ACCOUNT, maxHp, maxMp, settleEnergy, tileCenter, toInventorySlots, type CharacterSummary, type CreateCharacterInput } from '@terrago/shared';
+import { ACCOUNT, maxHp, maxMp, settleEnergy, energyFor, tileCenter, toInventorySlots, type CharacterSummary, type CreateCharacterInput } from '@terrago/shared';
 import { GameError, isUniqueViolation, withTransaction, type Pool } from '../db';
 import { sanitizePosition, type CharacterRecord, type PositionSave } from '../world/characterState';
 
@@ -160,12 +160,12 @@ export async function useItem(
     const def = getItem(s.itemId);
     if (!def?.consumable) throw new GameError(`${def?.name ?? 'That item'} can't be used right now.`);
 
-    const st = await tx.query<{ energy: number; energy_updated_at: Date }>(
-      'SELECT energy, energy_updated_at FROM character_stats WHERE character_id = $1',
+    const st = await tx.query<{ energy: number; energy_updated_at: Date; level: number }>(
+      'SELECT s.energy, s.energy_updated_at, c.level FROM character_stats s JOIN characters c ON c.id = s.character_id WHERE s.character_id = $1',
       [characterId],
     );
     const now = Date.now();
-    const settled = settleEnergy(st.rows[0]!.energy, new Date(st.rows[0]!.energy_updated_at).getTime(), now, BALANCE.energy);
+    const settled = settleEnergy(st.rows[0]!.energy, new Date(st.rows[0]!.energy_updated_at).getTime(), now, energyFor(BALANCE.energy, st.rows[0]!.level));
     const gain = def.consumable.energy ?? 0;
     const hpGain = def.consumable.hp ?? 0;
     const mpGain = def.consumable.mp ?? 0;

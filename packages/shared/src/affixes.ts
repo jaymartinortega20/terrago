@@ -209,3 +209,17 @@ export function setBonuses(itemIds: string[]): SetBonus {
 export function bonusText(b: SetBonus): string {
   return (Object.entries(b) as [AffixStat, number][]).map(([stat, value]) => affixText({ stat, value })).join(', ');
 }
+
+/** Blacksmith re-roll price for one bonus stat: Gold (a sink) plus an Enhancement Stone. */
+export function rerollCost(levelRequirement: number): { gold: number; stones: number } {
+  return { gold: 500 + Math.max(1, levelRequirement) * 120, stones: 1 };
+}
+
+/** Re-roll one bonus stat: a new stat the item doesn't already have, valued for its level. */
+export function rerollAffix(item: AffixItem, affixes: ItemAffix[], index: number, rand: () => number = Math.random): ItemAffix[] {
+  const pool = affixPool(item).filter((s) => !affixes.some((a, i) => i !== index && a.stat === s));
+  if (!pool.length || !affixes[index]) return affixes;
+  const stat = pool[Math.floor(rand() * pool.length)]!;
+  const next = affixes.map((a, i) => (i === index ? { stat, value: affixValue(stat, Math.max(1, item.levelRequirement), rand) } : a));
+  return next.sort((a, b) => a.stat.localeCompare(b.stat));
+}

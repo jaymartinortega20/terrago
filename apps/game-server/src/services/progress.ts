@@ -5,6 +5,7 @@ import {
   applyXp,
   emptySkills,
   settleEnergy,
+  energyFor,
   type SkillId,
   type SkillProgress,
   type SkillSet,
@@ -77,12 +78,12 @@ export async function spendEnergyTx(
   amount: number,
   now = Date.now(),
 ): Promise<{ energy: number; energyUpdatedAt: number }> {
-  const st = await tx.query<{ energy: number; energy_updated_at: Date }>(
-    'SELECT energy, energy_updated_at FROM character_stats WHERE character_id = $1',
+  const st = await tx.query<{ energy: number; energy_updated_at: Date; level: number }>(
+    'SELECT s.energy, s.energy_updated_at, c.level FROM character_stats s JOIN characters c ON c.id = s.character_id WHERE s.character_id = $1',
     [characterId],
   );
   const row = st.rows[0]!;
-  const settled = settleEnergy(row.energy, new Date(row.energy_updated_at).getTime(), now, BALANCE.energy);
+  const settled = settleEnergy(row.energy, new Date(row.energy_updated_at).getTime(), now, energyFor(BALANCE.energy, row.level));
   if (amount <= 0) return { energy: settled.energy, energyUpdatedAt: settled.updatedAtMs };
   if (settled.energy < amount) throw new GameError("You're too tired. Eat something or rest a while.");
   const energy = settled.energy - amount;

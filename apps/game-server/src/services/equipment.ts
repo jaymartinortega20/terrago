@@ -11,6 +11,9 @@ import {
   type SlotItem,
   type Slots,
   rollAffixes,
+  rerollAffix,
+  rerollCost,
+  affixText,
   type ItemAffix,
 } from '@terrago/shared';
 import { GameError, withTransaction, type Pool } from '../db';
@@ -180,6 +183,61 @@ export async function enhance(pool: Pool, characterId: string, equipSlot: unknow
         ? `Failed... ${def.name} dropped to +${next}.`
         : `Failed. ${def.name} stays at +${lvl}.`;
     return { success, message, inventory: toState(bag.capacity, after, stones.slots, eqSlots) };
+  });
+}
+
+/** Re-roll one bonus stat on a piece of gear (bag or worn) for Gold and an Enhancement Stone. */
+export async function rerollGear(
+  pool: Pool,
+  characterId: string,
+  req: { container?: unknown; slot?: unknown; index?: unknown },
+  rand: () => number = Math.random,
+): Promise<{ message: string; inventory: Inv; affixes: ItemAffix[] }> {
+  const container = req.container === 'equip' ? 'equip' : 'bag';
+  if (!Number.isInteger(req.slot) || !Number.isInteger(req.index)) throw new GameError('Pick a bonus stat to re-roll.');
+  return withTransaction(pool, async (tx) => {
+    await lockCharacter(tx, characterId);
+    const bag = await loadSlots(tx, characterId);
+    const eq = await loadSlots(tx, characterId, 'equip');
+    const src = container === 'equip' ? eq : bag;
+    const item = src.slots[req.slot as number];
+    if (!item?.affixes?.length) throw new GameError('That item has no bonus stats to re-roll.');
+    const old = item.affixes[req.index as number];
+    if (!old) throw new GameError('Pick a bonus stat to re-roll.');
+    const def = getItem(item.itemId)!;
+    const cost = rerollCost(def.levelRequirement);
+    const stones = removeItemById(bag.slots, 'enhancement_stone', cost.stones);
+    if (!stones.ok) throw new GameError('You need an Enhancement Stone (bosses, Elites and bounties drop them).');
+    const { after } = await changeGold(tx, characterId, -cost.gold, 'enhance', { type: 'reroll', id: def.id });
+    await logItemMovement(tx, { itemId: 'enhancement_stone', quantity: cost.stones, from: characterId, reason: 'enhance' });
+    const affixes = rerollAffix(def, item.affixes, req.index as number, rand);
+    let bagSlots = stones.slots;
+    const changedBag = new Set(stones.changed);
+    let eqSlots = eq.slots;
+    if (container === 'equip') {
+      eqSlots = eq.slots.map((s) => (s ? { ...s } : null));
+      eqSlots[req.slot as number] = { ...item, affixes };
+      await writeSlots(tx, characterId, eqSlots, [req.slot as number], 'equip');
+    } else {
+      // A stacked piece: only one of them changes.
+      bagSlots = bagSlots.map((s) => (s ? { ...s } : null));
+      const one = { ...item, quantity: 1, affixes };
+      if (item.quantity > 1) {
+        bagSlots[req.slot as number] = { ...item, quantity: item.quantity - 1 };
+        const res = addItem(bagSlots, { ...one, quantity: undefined } as unknown as Omit<SlotItem, 'quantity'>, 1, def.stackSize);
+        if (!res.ok) throw new GameError('Make one free bag slot first (the re-rolled piece gets its own slot).');
+        bagSlots = res.slots;
+        res.changed.forEach((i) => changedBag.add(i));
+      } else bagSlots[req.slot as number] = one;
+      changedBag.add(req.slot as number);
+    }
+    await writeSlots(tx, characterId, bagSlots, [...changedBag]);
+    const added = affixes.find((a) => !item.affixes!.some((b) => b.stat === a.stat && b.value === a.value));
+    return {
+      message: `${def.name}: ${affixText(old)} → ${added ? affixText(added) : 'the same stat'}`,
+      inventory: toState(bag.capacity, after, bagSlots, eqSlots),
+      affixes,
+    };
   });
 }
 

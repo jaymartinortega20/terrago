@@ -35,7 +35,7 @@ async function setup(opts: { classId?: string; map: string; tx: number; ty: numb
 }
 
 describe('mounts', () => {
-  test('getting on takes 0.5 s; moving cancels it; the stable picks the mount and its look', async () => {
+  test('getting on takes 0.5 s and you can keep walking; the stable picks the mount and its look', async () => {
     const { A, a, p } = await setup({ map: 'greenhaven', tx: 45, ty: 23, items: [['brown_pony', 1], ['war_wolf', 1]], gold: 15_000 });
     const self: any[] = [];
     a.socket.on('self:update', (u: any) => self.push(u));
@@ -45,11 +45,7 @@ describe('mounts', () => {
     assert.equal(p.mount, null, 'not on yet');
     await waitFor(() => self.some((u) => u.mountChannelUntil));
     server.world.enqueueMove(p, [p.lastQueuedSeq + 1, 1, 0]);
-    await waitFor(() => p.mountChannel === null);
-    await new Promise((r) => setTimeout(r, 600));
-    assert.equal(p.mount, null, 'moving cancelled it');
-
-    await ack(a.socket, 'mount:toggle');
+    // Walking doesn't interrupt it any more.
     await waitFor(() => p.mount === 'war_wolf', 3000);
     assert.equal(p.speed, 2.15, 'rides the fastest mount by default');
 

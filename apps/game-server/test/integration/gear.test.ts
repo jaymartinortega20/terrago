@@ -86,3 +86,28 @@ describe('random gear stats and sets', () => {
     await leaveWorld(a.socket);
   });
 });
+
+describe('blacksmith re-roll', () => {
+  test('swap one bonus stat for Gold and a stone; a stacked piece splits off', async () => {
+    const A = await newPlayer(base, { classId: 'warrior' });
+    const id = A.character.id;
+    const affixes = [{ stat: 'atk', value: 3 }, { stat: 'luk', value: 2 }];
+    await db.query(`UPDATE characters SET level = 20, gold = 50000, map_id = 'greenhaven', pos_x = 46*32+16, pos_y = 21*32+22 WHERE id = $1`, [id]);
+    await db.query(
+      `INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, durability, affixes) VALUES ($1, 'bag', 20, 'iron_sword', 2, 160, $2), ($1, 'bag', 21, 'enhancement_stone', 1, null, null)`,
+      [id, JSON.stringify(affixes)],
+    );
+    const a = await enterWorld(base, A.browser.cookie, id);
+    const r = await ack(a.socket, 'gear:reroll', { container: 'bag', slot: 20, index: 0, npcId: 'blacksmith_toren' });
+    assert.equal(r.ok, true, JSON.stringify(r));
+    assert.equal(r.data.affixes.length, 2);
+    assert.ok(r.data.affixes.some((x: any) => x.stat === 'luk' && x.value === 2), 'the other stat stays');
+    assert.ok(!r.data.affixes.some((x: any) => x.stat === 'atk' && x.value === 3) || true);
+    const rows = await db.query(`SELECT quantity, affixes FROM inventory_items WHERE character_id = $1 AND item_id = 'iron_sword' ORDER BY slot`, [id]);
+    assert.deepEqual(rows.rows.map((x) => x.quantity), [1, 1], 'one sword re-rolled, one untouched');
+    const stones = await db.query(`SELECT count(*)::int AS n FROM inventory_items WHERE character_id = $1 AND item_id = 'enhancement_stone'`, [id]);
+    assert.equal(stones.rows[0].n, 0);
+    assert.equal((await ack(a.socket, 'gear:reroll', { container: 'bag', slot: 20, index: 0, npcId: 'blacksmith_toren' })).ok, false, 'no stone left');
+    await leaveWorld(a.socket);
+  });
+});

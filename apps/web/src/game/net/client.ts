@@ -42,7 +42,7 @@ import {
   setManualEvent,
 } from '@terrago/shared';
 import { api, GAME_SERVER_URL } from '@/lib/api';
-import { initialUi, pushNotice, Store, type UiState } from '../store';
+import { initialUi, loadDnd, pushNotice, Store, type UiState } from '../store';
 import { audio } from '../audio';
 
 interface Sample {
@@ -102,6 +102,8 @@ type ClientEvents = {
   look: [string];
   monsterRemove: [string];
   combat: [CombatEvent[]];
+  /** The local player started a basic attack (played right away, before the server answers). */
+  swing: [string];
   chat: [ChatMessage];
   /** Objects added/changed (ids) or removed. */
   objects: [WorldObject[], string[]];
@@ -124,7 +126,7 @@ export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
  *   snapshots, so motion is smooth at any frame rate.
  */
 export class GameClient {
-  readonly ui = new Store<UiState>({ ...initialUi });
+  readonly ui = new Store<UiState>({ ...initialUi, dnd: typeof window !== 'undefined' && loadDnd() });
   socket: GameSocket | null = null;
 
   map: MapDef | null = null;
@@ -148,7 +150,11 @@ export class GameClient {
   readonly remotes = new Map<string, RemotePlayer>();
   readonly monsters = new Map<string, RemoteMonster>();
   private nextAttackAt = 0;
-  private attackInFlight = false;
+  private attacksInFlight = 0;
+  private lastHitBy: string | null = null;
+  private bufferedSkill: number | null = null;
+  /** Last weapon cooldown the server reported (ms). */
+  private attackCooldown = 900;
   readonly objects = new Map<string, WorldObject>();
   /** Tile index for quick "what's here?" lookups. */
   private objectsByTile = new Map<string, WorldObject>();
@@ -240,7 +246,12 @@ export class GameClient {
       this.ui.set({ nearby: this.remotes.size });
     });
     socket.on('combat', (events) => {
-      for (const e of events) if (e.k === 'death' && e.t === this.ui.get().targetId) this.ui.set({ targetId: null, autoAttack: false });
+      const me = this.ui.get().self?.characterId;
+      for (const e of events) {
+        if (e.k === 'death' && e.t === this.ui.get().targetId) this.ui.set({ targetId: null, autoAttack: false });
+        if (e.t === me && e.s !== me && (e.k === 'hit' || e.k === 'crit')) this.lastHitBy = this.monsters.get(e.s)?.info.name ?? this.remotes.get(e.s)?.info.name ?? 'something';
+        if (e.k === 'death' && e.t === me) this.ui.set({ death: { by: this.lastHitBy ?? 'something', at: Date.now() }, autoWalk: null });
+      }
       this.emit('combat', events);
     });
     socket.on('telegraph', (t) => this.emit('telegraph', t));
@@ -256,6 +267,7 @@ export class GameClient {
     });
     socket.on('event:manual', (ev) => setManualEvent(ev));
     socket.on('announce', (text) => {
+      if (this.ui.get().dnd && !/world boss|has fallen/i.test(text)) return; // still in chat
       audio.sfx('quest');
       this.ui.set({ announcement: text });
       setTimeout(() => this.ui.get().announcement === text && this.ui.set({ announcement: null }), 12000);
@@ -462,8 +474,6 @@ export class GameClient {
     }
     if (this.pending.length > 40) return; // server isn't acknowledging; don't run ahead
     if (this.ui.get().fishing) this.cancelFishing();
-    // Moving cancels getting on a mount (the server agrees).
-    if (this.ui.get().self?.mountChannelUntil) this.ui.set((st) => ({ self: st.self ? { ...st.self, mountChannelUntil: null } : st.self }));
     const cmd: MoveCommand = [++this.seq, input.dx, input.dy];
     this.pending.push(cmd);
     s.emit('move', cmd);
@@ -837,14 +847,63 @@ export class GameClient {
   }
 
   stopAutoWalk(msg?: string): void {
+    this.chaseId = null;
     if (!this.ui.get().autoWalk) return;
     this.walkPath = null;
     this.ui.set({ autoWalk: null });
     if (msg) pushNotice(this.ui, 'info', msg, 2000);
   }
 
+  /** Clicked a monster: walk into weapon range, then the normal auto-attack takes over. */
+  private chaseId: string | null = null;
+  private chasePath: { x: number; y: number }[] | null = null;
+  private chaseFor: { x: number; y: number; at: number } | null = null;
+
+  engage(id: string): void {
+    this.setTarget(id, true);
+    this.chaseId = id;
+    this.chasePath = null;
+  }
+
+  private chaseInput(): MoveInput | null {
+    const id = this.chaseId;
+    const m = id ? this.monsters.get(id) : undefined;
+    if (!id || !m || m.hp <= 0 || this.ui.get().targetId !== id || !this.grid) {
+      this.chaseId = null;
+      return null;
+    }
+    const range = this.weaponRange();
+    // Close enough: stop and let the auto-attack swing.
+    if (Math.hypot(this.pos.x - m.x, this.pos.y - 5 - (m.y - 6)) <= (range + 0.1) * TILE_SIZE) return null;
+    const mt = { x: Math.floor(m.x / TILE_SIZE), y: Math.floor(m.y / TILE_SIZE) };
+    const now = performance.now();
+    // Re-plan when the monster moved to another tile (at most every 400 ms).
+    if (!this.chasePath || !this.chaseFor || ((mt.x !== this.chaseFor.x || mt.y !== this.chaseFor.y) && now - this.chaseFor.at > 400)) {
+      const here = { x: Math.floor(this.pos.x / TILE_SIZE), y: Math.floor(this.pos.y / TILE_SIZE) };
+      this.chasePath = findPath(this.grid, here, mt, Math.max(1, Math.floor(range)), 6000);
+      this.chaseFor = { ...mt, at: now };
+      if (!this.chasePath) {
+        this.chaseId = null;
+        return null;
+      }
+    }
+    const stepPx = (PLAYER_SPEED * this.speed() * SIM.stepMs) / 1000;
+    const near = waypointRadius(stepPx);
+    while (this.chasePath.length) {
+      const w = this.chasePath[0]!;
+      if (Math.abs((w.x + 0.5) * TILE_SIZE - this.pos.x) <= near && Math.abs((w.y + 0.5) * TILE_SIZE + 6 - this.pos.y) <= near) this.chasePath.shift();
+      else break;
+    }
+    // Out of waypoints but still not in range (it moved): head straight for it.
+    return this.chasePath.length ? inputToward(this.pos, this.chasePath[0]!, TILE_SIZE, stepPx) : inputToward(this.pos, mt, TILE_SIZE, stepPx);
+  }
+
   /** The input auto-walk wants this step (null when not walking). */
   autoWalkInput(): MoveInput | null {
+    if (this.chaseId) {
+      const c = this.chaseInput();
+      if (c) return c;
+    }
     const goal = this.ui.get().autoWalk;
     const mapId = this.ui.get().mapId;
     if (!goal || !this.grid || !mapId) return null;
@@ -1050,16 +1109,25 @@ export class GameClient {
         ui = this.ui.get();
       }
     }
-    if (!ui.autoAttack || !ui.targetId || this.attackInFlight) return;
+    // Up to two attacks may be on their way; we don't wait for the server's answer
+    // (that added a full round trip to every swing).
+    if (!ui.autoAttack || !ui.targetId || this.attacksInFlight >= 2) return;
     const m = this.monsters.get(ui.targetId) ?? (ui.duel?.id === ui.targetId ? this.remotes.get(ui.targetId) : undefined);
     if (!m) return this.setTarget(null);
     const range = this.weaponRange();
-    if (Math.hypot(this.pos.x - m.x, this.pos.y - 5 - (m.y - 6)) > (range + 0.4) * TILE_SIZE || performance.now() < this.nextAttackAt) return;
-    this.attackInFlight = true;
+    const now = performance.now();
+    if (Math.hypot(this.pos.x - m.x, this.pos.y - 5 - (m.y - 6)) > (range + 0.4) * TILE_SIZE || now < this.nextAttackAt) return;
+    // Swing now; the next swing is timed from when this one was SENT.
+    const sentAt = now;
+    this.nextAttackAt = sentAt + this.attackCooldown;
+    this.attacksInFlight++;
+    this.emit('swing', m.info.id);
     this.socket?.emit('attack', m.info.id, (res) => {
-      this.attackInFlight = false;
-      if (res.ok) this.nextAttackAt = performance.now() + res.data.cooldownMs;
-      else if (res.error === 'cooldown') this.nextAttackAt = performance.now() + 150;
+      this.attacksInFlight = Math.max(0, this.attacksInFlight - 1);
+      if (res.ok) {
+        this.attackCooldown = res.data.cooldownMs;
+        this.nextAttackAt = Math.max(this.nextAttackAt, sentAt + res.data.cooldownMs);
+      } else if (res.error === 'cooldown') this.nextAttackAt = performance.now() + 80;
       else {
         this.nextAttackAt = performance.now() + 500;
         if (!/far/i.test(res.error)) pushNotice(this.ui, 'error', res.error, 1500);
@@ -1086,6 +1154,18 @@ export class GameClient {
     const sk = skillsFor(self.classId, self.job)[n];
     if (!sk) return;
     if (self.level < sk.level) return pushNotice(this.ui, 'info', `${sk.name} unlocks at level ${sk.level}.`, 2000);
+    // Input buffer: pressed just before the cooldown ends? Fire it the moment it's ready.
+    const left = (this.ui.get().cooldowns[sk.id] ?? 0) - this.serverNow();
+    if (left > 0) {
+      if (left <= 250 && this.bufferedSkill !== n) {
+        this.bufferedSkill = n;
+        setTimeout(() => {
+          this.bufferedSkill = null;
+          this.useSkill(n);
+        }, left + 15);
+      }
+      return;
+    }
     let target = this.ui.get().targetId;
     const duelFoe = this.ui.get().duel?.id;
     if ((sk.kind === 'attack' || sk.kind === 'debuff' || (sk.kind === 'aoe' && sk.range > 0)) && !(target && (this.monsters.has(target) || target === duelFoe))) {
@@ -1539,6 +1619,17 @@ export class GameClient {
 
   unequip(slot: number) {
     return this.run('unequip', { slot });
+  }
+
+  async reroll(container: 'bag' | 'equip', slot: number, index: number): Promise<void> {
+    try {
+      const npcId = this.ui.get().serviceNpc ?? 'blacksmith_toren';
+      const r = await this.request<{ message: string }>('gear:reroll', { container, slot, index, npcId });
+      audio.sfx('magic');
+      pushNotice(this.ui, 'success', `✦ ${r.message}`, 4000);
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
   }
 
   async enhance(equipSlot: number): Promise<void> {

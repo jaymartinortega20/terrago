@@ -47,7 +47,7 @@ import { closeStall, rememberVisit } from './economy';
 import { chooseSpec } from '../services/specs';
 import { progressEvent, track } from './journal';
 import { antibot } from '../security/antibot';
-import { deathPenalty, enhance, equip, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
+import { deathPenalty, enhance, equip, rerollGear, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
 import { bountyKill } from './bounties';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
@@ -515,6 +515,14 @@ export const gear = {
     const inv = await unequip(deps.pool, p.id, (req as { slot?: unknown })?.slot);
     pushInventory(deps.world, p, inv);
     return null;
+  },
+  async reroll(deps: GameplayDeps, p: Player, req: unknown) {
+    const r = (req ?? {}) as { container?: unknown; slot?: unknown; index?: unknown; npcId?: unknown };
+    npcService(deps.world, p, r.npcId, 'enhance');
+    const res = await rerollGear(deps.pool, p.id, r);
+    pushInventory(deps.world, p, res.inventory);
+    if (r.container === 'equip') deps.world.setEquipment(p, res.inventory.equipment ?? []);
+    return { message: res.message, affixes: res.affixes };
   },
   async enhance(deps: GameplayDeps, p: Player, req: unknown) {
     const r = (req ?? {}) as { equipSlot?: unknown; npcId?: unknown };

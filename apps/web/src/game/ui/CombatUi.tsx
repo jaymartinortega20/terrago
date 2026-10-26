@@ -5,7 +5,7 @@ import { getClass, getItem, skillsFor } from '@terrago/game-data';
 
 export const RESOURCE_LABEL = { mana: 'Mana', rage: 'Rage', energy: 'Energy' } as const;
 export const RESOURCE_COLOR = { mana: '#4a7fd6', rage: '#c0392b', energy: '#e6c229' } as const;
-import { EQUIP_SLOTS, ENHANCE_SAFE_LEVEL, MAX_ENHANCE, bonusText, enhanceChance, enhanceCost, setOf, wornSets } from '@terrago/shared';
+import { EQUIP_SLOTS, ENHANCE_SAFE_LEVEL, MAX_ENHANCE, affixText, rerollCost, bonusText, enhanceChance, enhanceCost, setOf, wornSets } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
@@ -249,7 +249,60 @@ export function EnhancePanel({ client, onClose }: { client: GameClient; onClose:
         })}
         {!(inv.equipment ?? []).length && <li className="text-sm">Wear something first.</li>}
       </ul>
+      <Reroll client={client} busy={busy} setBusy={setBusy} />
     </Window>
+  );
+}
+
+/** Re-roll one bonus stat on a piece of gear (worn or in the bag). */
+function Reroll({ client, busy, setBusy }: { client: GameClient; busy: boolean; setBusy: (b: boolean) => void }) {
+  const inv = useStore(client.ui, (s) => s.inventory);
+  if (!inv) return null;
+  const stones = inv.slots.filter((s) => s.itemId === 'enhancement_stone').reduce((n, s) => n + s.quantity, 0);
+  const items = [
+    ...(inv.equipment ?? []).map((e) => ({ container: 'equip' as const, s: e })),
+    ...inv.slots.map((s) => ({ container: 'bag' as const, s })),
+  ].filter((x) => x.s.affixes?.length);
+  return (
+    <div className="mt-3" data-testid="reroll">
+      <h3 className="font-bold">Re-roll a bonus stat</h3>
+      <p className="text-xs">Don&apos;t like one of the random stats? Swap it for a new random one (the others stay). You have {stones} Enhancement Stone{stones === 1 ? '' : 's'}.</p>
+      {!items.length && <p className="mt-1 text-xs text-wood-dark/70">No gear with bonus stats yet — monsters drop them, Elites drop better ones.</p>}
+      <ul className="mt-1 space-y-1">
+        {items.map(({ container, s }) => {
+          const def = getItem(s.itemId);
+          if (!def) return null;
+          const cost = rerollCost(def.levelRequirement);
+          return (
+            <li key={`${container}-${s.slot}`} className="border-2 border-parchment-3 bg-parchment-2 p-1 text-xs">
+              <p className="flex items-center gap-1 font-bold" style={{ color: RARITY_COLOR[def.rarity] }}>
+                <PixelIcon icon={def.icon} size={20} /> {def.name}
+                <span className="font-normal text-wood-dark/70">{container === 'equip' ? '(worn)' : '(bag)'}</span>
+                <span className="ml-auto font-normal text-wood-dark">◉ {cost.gold.toLocaleString()} + 1 stone</span>
+              </p>
+              <div className="mt-0.5 flex flex-wrap gap-1">
+                {s.affixes!.map((a, i) => (
+                  <button
+                    key={`${a.stat}-${i}`}
+                    className="rounded border border-[#3f7fd0]/60 px-1.5 py-0.5 font-bold text-[#3f7fd0] disabled:opacity-40"
+                    disabled={busy || stones < cost.stones || inv.gold < cost.gold}
+                    onClick={async () => {
+                      setBusy(true);
+                      await client.reroll(container, s.slot, i);
+                      setBusy(false);
+                    }}
+                    title="Re-roll this stat"
+                    data-testid={`reroll-${container}-${s.slot}-${i}`}
+                  >
+                    ↻ {affixText(a)}
+                  </button>
+                ))}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

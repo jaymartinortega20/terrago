@@ -3,6 +3,7 @@ import {
   STAT_POINTS_PER_LEVEL,
   combatProfile,
   settleEnergy,
+  energyFor,
   tileCenter,
   xpToNext,
   type Appearance,
@@ -94,7 +95,7 @@ export function sanitizePosition(rec: CharacterRecord): CharacterRecord {
 }
 
 export function buildSelfState(rec: CharacterRecord, now = Date.now(), profile = profileFor(rec)): SelfState {
-  const energy = settleEnergy(rec.energy, rec.energyUpdatedAt, now, BALANCE.energy);
+  const energy = settleEnergy(rec.energy, rec.energyUpdatedAt, now, energyFor(BALANCE.energy, rec.level));
   return {
     characterId: rec.id,
     name: rec.name,

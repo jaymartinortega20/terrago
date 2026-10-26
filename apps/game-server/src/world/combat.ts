@@ -119,6 +119,9 @@ export class Monster {
   }
 }
 
+/** How early a basic attack may arrive (ms) without counting as too fast. */
+const ATTACK_SLACK_MS = 150;
+
 export interface KillReward {
   /** Dungeon difficulty the kill happened on. */
   difficulty?: string;
@@ -524,6 +527,7 @@ export class Combat {
     this.emit(rt, { s: p.id, t: p.id, a: 0, k: 'death' });
     for (const m of rt.monsters.values()) if (m.targetId === p.id) {
       m.state = 'return';
+      m.returnSince = now;
       m.targetId = null;
     }
     p.conn?.send('notice', { kind: 'error', text: 'You were defeated. Your gear took some damage.' });
@@ -652,8 +656,8 @@ export class Combat {
     if (foe) {
       if (!this.inReach(p, foe, w.range)) return 'Too far away.';
       if (!this.canSee(rt, p, foe, w.range)) return 'No line of sight.';
-      if (now < p.nextAttackAt) return 'cooldown';
-      p.nextAttackAt = now + w.speedMs - 60;
+      if (now < p.nextAttackAt - ATTACK_SLACK_MS) return 'cooldown';
+      p.nextAttackAt = Math.max(now, p.nextAttackAt) + w.speedMs;
       this.hooks.dismount?.(p);
       this.strikePlayer(rt, p, foe, w.magic, 1, undefined, now);
       return { cooldownMs: w.speedMs };
@@ -663,8 +667,10 @@ export class Combat {
     if (!m || !m.alive) return 'No target.';
     if (!this.inReach(p, m, w.range)) return 'Too far away.';
     if (!this.canSee(rt, p, m, w.range)) return 'No line of sight.';
-    if (now < p.nextAttackAt) return 'cooldown';
-    p.nextAttackAt = now + w.speedMs - 60;
+    // Network jitter can deliver a swing a little early. Accept it, but schedule the next
+    // one from when this one was due — so arriving early never adds up to attacking faster.
+    if (now < p.nextAttackAt - ATTACK_SLACK_MS) return 'cooldown';
+    p.nextAttackAt = Math.max(now, p.nextAttackAt) + w.speedMs;
     p.lastCombatAt = now;
     this.hooks.dismount?.(p);
     this.strike(rt, p, m, w.magic, 1, undefined, now);

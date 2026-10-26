@@ -17,6 +17,7 @@ import {
   maskProfanity,
   sanitizeChatText,
   settleEnergy,
+  energyFor,
   stepMovement,
   tileCenter,
   type ChatMessage,
@@ -721,7 +722,6 @@ export class World {
     }
     while (p.inputs.length > 0 && p.budgetMs >= SIM.stepMs) {
       const [seq, dx, dy] = p.inputs.shift()!;
-      if (p.mountChannel && (dx !== 0 || dy !== 0)) this.cancelMountChannel(p, 'You moved. Getting on your mount was cancelled.');
       p.budgetMs -= SIM.stepMs;
       p.lastSeq = seq;
       const next = stepMovement({ x: p.x, y: p.y }, { dx, dy }, rt.grid, PLAYER_SPEED * p.speed, SIM.stepMs);
@@ -1009,7 +1009,7 @@ export class World {
     const now = this.now();
     for (const p of this.players.values()) {
       if (!p.conn) continue;
-      const e = settleEnergy(p.rec.energy, p.rec.energyUpdatedAt, now, BALANCE.energy).energy;
+      const e = settleEnergy(p.rec.energy, p.rec.energyUpdatedAt, now, energyFor(BALANCE.energy, p.rec.level)).energy;
       if (e !== p.lastEnergySent) {
         p.lastEnergySent = e;
         p.conn.send('self:update', { energy: e });

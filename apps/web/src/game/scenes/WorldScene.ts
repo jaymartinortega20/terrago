@@ -107,7 +107,11 @@ export class WorldScene extends Phaser.Scene {
   private nextCullAt = 0;
   private local: Avatar | null = null;
   private remotes = new Map<string, Avatar>();
-  private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number; shadow?: Phaser.GameObjects.Image }>();
+  private monsterViews = new Map<string, { sprite: Phaser.GameObjects.Sprite; label: Phaser.GameObjects.Text; bar: Phaser.GameObjects.Graphics; frameW: number; shadow?: Phaser.GameObjects.Image; kick?: { x: number; y: number; until: number } }>();
+  /** Hit-stop: the picture holds still until then (performance.now ms). */
+  private freezeUntil = 0;
+  private predictedSwingAt = -1e9;
+  private lastKillTarget: string | null = null;
   private targetRing!: Phaser.GameObjects.Graphics;
   private guide!: Phaser.GameObjects.Graphics;
   private npcMarkers = new Map<string, Phaser.GameObjects.Text>();
@@ -217,7 +221,8 @@ export class WorldScene extends Phaser.Scene {
       for (const [id, v] of this.monsterViews) {
         const b = v.sprite.getBounds();
         if (b.contains(wp.x, wp.y)) {
-          this.client.setTarget(id, true);
+          // Walk into range (around walls) and start attacking.
+          this.client.engage(id);
           return;
         }
       }
@@ -266,6 +271,12 @@ export class WorldScene extends Phaser.Scene {
       this.client.on('monsterAdd', (m) => this.addMonster(m)),
       this.client.on('monsterRemove', (id) => this.removeMonster(id)),
       this.client.on('combat', (ev) => this.showCombat(ev)),
+      this.client.on('swing', (id) => {
+        // Instant feedback: strike pose toward the target before the server answers.
+        const to = this.entityPos(id);
+        if (to) this.pose(this.local, 280, to);
+        this.predictedSwingAt = this.time.now;
+      }),
       this.client.on('telegraph', (t) => this.showTelegraph(t)),
       this.client.on('animals', (list) => this.drawAnimals(list)),
       this.client.on('look', (id) => {
@@ -288,12 +299,34 @@ export class WorldScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.unsubs.forEach((u) => u()));
   }
 
+  private baseZoom = 1;
+  private mountedView = false;
+
+  /**
+   * Camera feel: look a little ahead of where you're walking, and pull back half a
+   * zoom step while mounted (you move twice as fast and need to see further).
+   */
+  private updateCameraFeel(delta: number, mounted: boolean): void {
+    const cam = this.cameras.main;
+    const c = this.client;
+    const v = c.moving ? { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[c.dir] ?? [0, 0] : [0, 0];
+    const k = 1 - Math.pow(0.04, delta / 1000);
+    cam.followOffset.x += (-v[0]! * 30 - cam.followOffset.x) * k;
+    cam.followOffset.y += (24 - v[1]! * 22 - cam.followOffset.y) * k;
+    if (mounted !== this.mountedView) {
+      this.mountedView = mounted;
+      const target = mounted && this.baseZoom >= 2 ? this.baseZoom - 0.5 : this.baseZoom;
+      this.tweens.add({ targets: cam, zoom: target, duration: 450, ease: 'Sine.easeInOut' });
+    }
+  }
+
   /** Zoom so the visible world never exceeds MAX_VIEW; art stays crisp at 0.5 steps. */
   private updateZoom(): void {
     const { width, height } = this.scale.gameSize;
     const min = Math.max(width / MAX_VIEW.width, height / MAX_VIEW.height);
     const zoom = Math.max(1, Math.ceil(min * 0.92 * 2) / 2);
-    this.cameras.main.setZoom(zoom);
+    this.baseZoom = zoom;
+    this.cameras.main.setZoom(this.mountedView && zoom >= 2 ? zoom - 0.5 : zoom);
   }
 
   // ---------------------------------------------------------------------------
@@ -922,7 +955,21 @@ export class WorldScene extends Phaser.Scene {
       const companion = e.sk === 'pet' || e.sk === 'hawk';
       if (companion && e.s !== e.t) this.companionStrike(e.s, e.sk === 'hawk', pos.x, pos.y);
       if (HAWK_SKILLS.has(e.sk ?? '')) this.companionStrike(e.s, true, pos.x, pos.y);
-      if (srcAv && !companion && e.k !== 'death' && e.k !== 'dot') this.pose(srcAv, 280, e.s !== e.t ? pos : undefined);
+      // (My own basic attacks already posed when the button was pressed.)
+      const predicted = e.s === me && !e.sk && now - this.predictedSwingAt < 700;
+      if (srcAv && !companion && !predicted && e.k !== 'death' && e.k !== 'dot') this.pose(srcAv, 280, e.s !== e.t ? pos : undefined);
+      // Hit-stop: a tiny freeze on my crits and kills sells the impact.
+      if (opts.shake && e.s === me && e.k === 'crit') this.freezeUntil = performance.now() + 60;
+      if (opts.shake && e.k === 'death' && this.lastKillTarget === e.t) this.freezeUntil = performance.now() + 75;
+      if (e.s === me && (e.k === 'hit' || e.k === 'crit')) this.lastKillTarget = e.t;
+      // Knock the monster's sprite back a few pixels (visual only).
+      const kv = this.monsterViews.get(e.t);
+      const src = this.entityPos(e.s);
+      if (kv && src && (e.k === 'hit' || e.k === 'crit') && e.s !== e.t) {
+        const a = Math.atan2(pos.y - src.y, pos.x - src.x);
+        const d = e.k === 'crit' ? 6 : 3;
+        kv.kick = { x: Math.cos(a) * d, y: Math.sin(a) * d * 0.6, until: now + 140 };
+      }
       if (tgtAv && (e.k === 'hit' || e.k === 'crit')) tgtAv.hurtUntil = now + (e.k === 'crit' ? 260 : 170);
       if (tgtAv && e.k === 'death') tgtAv.deadUntil = now + 1800;
       if (e.k === 'death') continue;
@@ -1758,6 +1805,7 @@ export class WorldScene extends Phaser.Scene {
     const delta = this.lastFrameAt ? nowMs - this.lastFrameAt : 16.7;
     this.lastFrameAt = nowMs;
     if (!client.map || !this.local) return;
+    const frozen = nowMs < this.freezeUntil;
 
     // Fixed-step input simulation (matches the server's 20 Hz movement steps).
     this.acc += Math.min(delta, 300);
@@ -1772,6 +1820,8 @@ export class WorldScene extends Phaser.Scene {
       steps++;
     }
     const alpha = Math.min(1, this.acc / 50);
+    // Hit-stop: hold the picture for a few frames (input and simulation keep running).
+    if (frozen) return;
 
     // Decay any reconciliation correction smoothly.
     const decay = Math.pow(0.001, delta / 1000);
@@ -1785,6 +1835,7 @@ export class WorldScene extends Phaser.Scene {
     this.setAvatarMount(this.local, client.ui.get().self?.mount, client.ui.get().self?.mountLook);
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time, { sit: client.pose === 'sit', speed: client.speed() });
     this.drawMountChannel(lx, ly);
+    this.updateCameraFeel(delta, !!client.ui.get().self?.mount);
     const fxo = fxSettings();
     const selfId = client.ui.get().self?.characterId;
     if (selfId) {
@@ -1808,7 +1859,8 @@ export class WorldScene extends Phaser.Scene {
       if (!v) continue;
       const rx = Math.round(m.x);
       const ry = Math.round(m.y);
-      v.sprite.setPosition(rx, ry + 2).setDepth(m.y).setFrame(m.moving ? Math.floor(time / 180) % 2 : 0).setFlipX(m.dir === 'left');
+      const k = v.kick && v.kick.until > time ? (v.kick.until - time) / 140 : 0;
+      v.sprite.setPosition(rx + Math.round((v.kick?.x ?? 0) * k), ry + 2 + Math.round((v.kick?.y ?? 0) * k)).setDepth(m.y).setFrame(m.moving ? Math.floor(time / 180) % 2 : 0).setFlipX(m.dir === 'left');
       if (!v.shadow) v.shadow = this.add.image(rx, ry, this.blobKey()).setDepth(-4);
       v.shadow.setPosition(rx + 4, ry + 3).setScale(Math.min(2.4, v.sprite.displayWidth / 52), 0.55).setVisible(this.gfx !== 'classic' && v.sprite.alpha > 0.5);
       const top = ry - v.sprite.displayHeight - 2;

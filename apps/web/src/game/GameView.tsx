@@ -8,6 +8,7 @@ import { StablePanel } from './ui/StableUi';
 import { PetPanel } from './ui/PetUi';
 import { ArenaBanner, ArenaPanel } from './ui/ArenaUi';
 import { GemShopPanel } from './ui/GemShop';
+import { DeathScreen } from './ui/DeathScreen';
 import Phaser from 'phaser';
 import { useEffect, useRef, useState } from 'react';
 import { getItem } from '@terrago/game-data';
@@ -22,11 +23,11 @@ import { DialogueBox } from './ui/DialogueBox';
 import { Hud } from './ui/Hud';
 import { ItemSlot } from './ui/ItemSlot';
 import { MobileControls } from './ui/MobileControls';
-import { CharacterPanel, InventoryPanel, JobPanel, MapPanel, MENU, SettingsPanel } from './ui/Panels';
+import { CharacterPanel, InventoryPanel, JobPanel, MapPanel, MENU, markMenuSeen, menuSeen, menuUnlocked, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel, RecipeBook } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
-import { EnvBadge, EventBadge, WeatherLayer, WorldBossBadge } from './ui/Atmosphere';
+import { EnvBadge, PhoneBossButton, TimersBadge, WeatherLayer } from './ui/Atmosphere';
 import { JournalPanel, ProgressToasts } from './ui/JournalUi';
 import { AnimalsPanel, BankPanel, DungeonPanel, StallBrowseWindow, StallSetupPanel, TravelPanel } from './ui/EconomyUi';
 import { FriendsPanel, GuildPanel, PartyFrame, ProfileWindow } from './ui/SocialUi';
@@ -137,6 +138,10 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
     else client.selectSlot(slot);
   };
   const [menuOpen, setMenuOpen] = useState(false);
+  const level = useStore(ui, (s) => s.self?.level ?? 1);
+  const questsDone = useStore(ui, (s) => s.quests.filter((q) => q.done).length);
+  const [seen, setSeen] = useState<Set<string>>(() => new Set());
+  useEffect(() => setSeen(menuSeen()), []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -206,8 +211,8 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           <span className="ml-2 text-parchment/70">👥 {nearby}</span>
           <span className="ml-2 text-parchment/70">{ping === null ? '' : `${ping}ms`}</span>
         </div>
-        {!touch && <EventBadge client={client} />}
-        {!touch && <WorldBossBadge client={client} />}
+        {!touch && <TimersBadge client={client} />}
+        {touch && <PhoneBossButton client={client} />}
         {touch && (
           <button className="orb studs pointer-events-auto h-11 w-11" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} aria-label="Menu" data-testid="menu-toggle">
             <HudIcon name="menu" size={22} />
@@ -217,7 +222,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           className={`pointer-events-auto flex justify-end gap-x-3.5 gap-y-4 pt-1.5 pr-1.5 ${touch ? (menuOpen ? 'max-w-[56vw] flex-wrap' : 'hidden') : 'max-w-[64vw] flex-wrap'}`}
           aria-label="Game menu"
         >
-          {MENU.filter((m) => !touch || !m.version).map((m) => (
+          {MENU.filter((m) => (!touch || !m.version) && menuUnlocked(m, level, questsDone)).map((m) => (
             <button
               key={m.id}
               disabled={!!m.version}
@@ -226,11 +231,20 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
               onClick={() => {
                 open(m.id as Panel);
                 setMenuOpen(false);
+                if (!seen.has(m.id)) {
+                  markMenuSeen(m.id);
+                  setSeen(menuSeen());
+                }
               }}
-              className={`orb pointer-events-auto ${touch ? 'h-10 w-10' : 'h-11 w-11'} ${m.version ? 'orb-disabled' : panel === m.id ? 'orb-on' : ''}`}
+              className={`orb pointer-events-auto relative ${touch ? 'h-10 w-10' : 'h-11 w-11'} ${m.version ? 'orb-disabled' : panel === m.id ? 'orb-on' : ''}`}
               data-testid={`menu-${m.id}`}
             >
               <HudIcon name={m.id} size={touch ? 20 : 22} />
+              {(m.minLevel || m.afterFirstQuest) && !seen.has(m.id) && (
+                <span className="absolute -top-1 -right-1 rounded-full bg-[#ff5a4a] px-1 text-[8px] leading-tight font-bold text-white shadow" data-testid={`new-${m.id}`}>
+                  NEW
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -328,6 +342,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <SocialPopups client={client} />
       <ProgressToasts client={client} openJournal={() => open('journal')} touch={touch} />
       <ArenaBanner client={client} />
+      <DeathScreen client={client} />
       <TradeWindow client={client} />
       <ProfileWindow client={client} />
       <StallBrowseWindow client={client} />

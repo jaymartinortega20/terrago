@@ -88,3 +88,9 @@ export function settleEnergy(stored: number, updatedAtMs: number, nowMs: number,
   if (energy >= cfg.max) return { energy, updatedAtMs: nowMs };
   return { energy, updatedAtMs: updatedAtMs + points * cfg.regenIntervalMs };
 }
+
+/** Newcomers (under level 15) regain Energy twice as fast, so the first farm days don't stall. */
+export const FAST_ENERGY_BELOW = 15;
+export function energyFor<T extends EnergyConfig>(cfg: T, level: number): T {
+  return level < FAST_ENERGY_BELOW ? { ...cfg, regenIntervalMs: Math.round(cfg.regenIntervalMs / 2) } : cfg;
+}

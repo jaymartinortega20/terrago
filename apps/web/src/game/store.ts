@@ -107,6 +107,10 @@ export interface UiState {
   dailyReady: boolean;
   achievementToast: { id: string; name: string; icon: string; gold: number } | null;
   announcement: string | null;
+  /** You were defeated: by whom and when (for the death screen). */
+  death: { by: string; at: number } | null;
+  /** Do not disturb (fewer pop-ups). */
+  dnd: boolean;
   /** Text to put in the chat box (e.g. "/w Name "). */
   chatDraft: string | null;
   /** Fishing in progress. */
@@ -182,6 +186,8 @@ export const initialUi: UiState = {
   dailyReady: false,
   achievementToast: null,
   announcement: null,
+  death: null,
+  dnd: false,
 };
 
 let noticeId = 0;
@@ -192,9 +198,29 @@ let noticeId = 0;
  */
 const FEED = /defeated:|^\+\d|bag is full|loot was left|harvested|you caught|picked up|daily task done|gathered|mined|chopped|pet exp|reached level \d+!.*growth/i;
 
+/** Big moments that deserve the middle of the screen; everything else goes to the side feed. */
+const CENTER = /level \d|reached level|world boss|has appeared|has fallen|arena|victory|evolved|unlocked|quest (complete|accepted)|complete!|bounty done|welcome|can't|cannot|too far|full/i;
+
+/** Do not disturb: fewer pop-ups (errors and your own big moments only). Saved in this browser. */
+export function loadDnd(): boolean {
+  try {
+    return localStorage.getItem('terrago:dnd') === '1';
+  } catch {
+    return false;
+  }
+}
+export function saveDnd(on: boolean): void {
+  try {
+    localStorage.setItem('terrago:dnd', on ? '1' : '0');
+  } catch {
+    // Private mode: the setting lasts for this session only.
+  }
+}
+
 export function pushNotice(store: Store<UiState>, kind: Notice['kind'], text: string, ms = 3500): void {
   const id = ++noticeId;
-  if (kind !== 'error' && FEED.test(text)) {
+  const center = kind === 'error' || (!FEED.test(text) && CENTER.test(text) && (!store.get().dnd || /level|victory|evolved|unlocked/i.test(text)));
+  if (!center) {
     store.set((s) => ({ feed: [...s.feed.slice(-4), { id, kind, text }] }));
     setTimeout(() => store.set((s) => ({ feed: s.feed.filter((n) => n.id !== id) })), 4500);
     return;
