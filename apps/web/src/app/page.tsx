@@ -1,8 +1,15 @@
-import Link from 'next/link';
 import { HeroScene } from '@/components/HeroScene';
 import { PixelIcon } from '@/components/PixelIcon';
 import { SiteHeader } from '@/components/SiteHeader';
-import { PlayLink, WakeServer } from '@/components/PlayLink';
+import { WakeServer } from '@/components/PlayLink';
+import { ClassShowcase } from '@/components/landing/ClassShowcase';
+import { BossCountdown, PlayCta, RegisterCta } from '@/components/landing/Cta';
+import { HeroTitle } from '@/components/landing/HeroTitle';
+import { LiveCounters, LiveTicker, StatsProvider } from '@/components/landing/LiveTicker';
+import { MonsterParade } from '@/components/landing/MonsterParade';
+import { Reveal } from '@/components/landing/reveal';
+import { Blip, SoundProvider, SoundToggle } from '@/components/landing/sound';
+import { WorldGallery } from '@/components/landing/WorldGallery';
 
 const VERSION = '2.4';
 
@@ -78,7 +85,7 @@ const FAQ = [
   },
   {
     q: 'What can I do right now?',
-    a: 'Almost everything: pick one of four classes and a second job at 40, explore six maps from Oakhaven to the Infernal Caldera, farm, fish, mine, craft, trade, join a guild, ride mounts, raise and evolve pets, fight world bosses, climb the ranked arena, run dungeons and raid Pyraxis. TerraGo is in open alpha (v2.3), so expect balance changes.',
+    a: 'Almost everything: pick one of four classes and a second job at 40, explore six maps from Oakhaven to the Infernal Caldera, farm, fish, mine, craft, trade, join a guild, ride mounts, raise and evolve pets, fight world bosses, climb the ranked arena, run dungeons and raid Pyraxis. TerraGo is in open alpha (v' + VERSION + '), so expect balance changes.',
   },
   {
     q: 'Is my progress saved?',
@@ -88,143 +95,188 @@ const FAQ = [
 
 export default function LandingPage() {
   return (
-    <main className="min-h-dvh">
-      <WakeServer />
-      <SiteHeader />
+    <SoundProvider>
+      <StatsProvider>
+        <main className="min-h-dvh overflow-x-hidden">
+          <WakeServer />
+          <SiteHeader />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b-4 border-ink">
-        <HeroScene className="absolute inset-0 h-full w-full object-cover opacity-90" />
-        <div className="absolute inset-0 bg-gradient-to-b from-night/40 via-night/10 to-night/85" />
-        <div className="relative mx-auto flex min-h-[78dvh] max-w-5xl flex-col items-center justify-center px-4 py-24 text-center">
-          <h1 className="text-outline text-6xl font-bold tracking-wider text-gold sm:text-8xl">TERRAGO</h1>
-          <p className="text-outline mt-4 text-2xl font-bold text-parchment sm:text-3xl">Farm. Trade. Fight. Grow.</p>
-          <p className="text-outline mt-3 max-w-xl text-base text-parchment/90 sm:text-lg">
-            A multiplayer pixel world in your browser. Start with almost nothing — become a famous farmer, a master smith, a monster hunter or a merchant prince.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <PlayLink className="px-btn green text-lg">▶ PLAY NOW</PlayLink>
-            <Link href="/register" className="px-btn text-lg">
-              CREATE ACCOUNT
-            </Link>
-          </div>
-          <p className="text-outline mt-6 text-sm text-parchment/80">Version {VERSION} · Open alpha · No download needed</p>
-        </div>
-      </section>
-
-      {/* About */}
-      <section id="about" className="mx-auto max-w-5xl px-4 py-16">
-        <div className="px-panel p-6 sm:p-8">
-          <h2 className="text-3xl font-bold text-wood-dark">About TerraGo</h2>
-          <p className="mt-3 text-lg leading-relaxed">
-            TerraGo is a living online world where progress is earned. New arrivals are weak and nearly broke. After a few sessions you are capable; after a few weeks,
-            established; after months, you might be wealthy, powerful or famous. Professions matter, rare items are genuinely rare, and the economy is built by players.
-          </p>
-          <p className="mt-3 text-lg font-bold text-leaf-dark">Time + Skill + Knowledge + Cooperation = Progress.</p>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="mx-auto grid max-w-5xl gap-6 px-4 pb-8 sm:grid-cols-2">
-        {FEATURES.map((f) => (
-          <article key={f.id} id={f.id} className="px-panel p-6">
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-parchment-2">
-                <PixelIcon icon={f.icon} size={32} />
+          {/* Hero */}
+          <section className="relative overflow-hidden">
+            <HeroScene className="absolute inset-0 h-full w-full object-cover opacity-95" />
+            <div className="absolute inset-0 bg-gradient-to-b from-night/50 via-night/5 to-night/90" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(18,20,31,0.6),transparent_60%)]" />
+            <div className="relative mx-auto flex min-h-[86dvh] max-w-5xl flex-col items-center justify-center px-4 py-20 text-center">
+              <span className="text-outline mb-4 inline-flex items-center gap-2 rounded-full border-2 border-ink bg-red-700/90 px-3 py-1 text-xs font-bold uppercase tracking-widest text-parchment">
+                <span className="h-2 w-2 animate-ping rounded-full bg-parchment" /> v{VERSION} is live · Endless Rift &amp; Gem Shop
               </span>
-              <h3 className="text-2xl font-bold text-wood-dark">{f.title}</h3>
-              <span className="ml-auto border-2 border-ink bg-night-3 px-2 py-0.5 text-xs text-parchment">{f.status}</span>
+              <HeroTitle />
+              <p className="text-outline mt-3 max-w-xl text-base text-parchment/90 sm:text-lg">
+                A multiplayer pixel world in your browser. Start with almost nothing — become a famous farmer, a master smith, a monster hunter or a merchant prince.
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
+                <PlayCta>▶ PLAY NOW — FREE</PlayCta>
+                <RegisterCta />
+              </div>
+              <LiveCounters />
+              <p className="text-outline mt-5 text-sm text-parchment/80">Open alpha · No download · Desktop &amp; phone</p>
+              <a href="#heroes" className="text-outline mt-6 animate-bounce text-3xl text-gold motion-reduce:animate-none" aria-label="See more">
+                ▼
+              </a>
             </div>
-            <p className="mt-3 leading-relaxed">{f.body}</p>
-          </article>
-        ))}
-      </section>
+          </section>
 
-      {/* Roadmap */}
-      <section id="roadmap" className="mx-auto max-w-5xl px-4 py-12">
-        <h2 className="text-outline text-3xl font-bold text-gold">Roadmap</h2>
-        <p className="mt-2 text-parchment/80">Where TerraGo is now, and what is next.</p>
-        <ol className="mt-6 grid gap-3 sm:grid-cols-2">
-          {ROADMAP.map((r) => (
-            <li
-              key={r.v}
-              className={`px-panel-dark flex gap-3 p-4 ${r.state === 'now' ? 'ring-4 ring-gold' : ''}`}
-              data-testid={`roadmap-${r.state}`}
-            >
-              <span className={`mt-0.5 shrink-0 text-xl ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-parchment/40'}`} aria-hidden>
-                {r.state === 'done' ? '✔' : r.state === 'now' ? '★' : '○'}
-              </span>
-              <div>
-                <p className="font-bold text-parchment">
-                  v{r.v} · {r.name}
-                  <span className={`ml-2 text-xs ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-parchment/50'}`}>
-                    {r.state === 'done' ? 'Done' : r.state === 'now' ? 'Just released' : r.state === 'next' ? 'Next' : 'Later'}
-                  </span>
+          <LiveTicker />
+
+          {/* Classes */}
+          <section id="heroes" className="mx-auto max-w-6xl scroll-mt-16 px-4 py-16">
+            <Reveal className="text-center">
+              <h2 className="text-outline text-4xl font-bold text-gold sm:text-5xl">Choose your hero</h2>
+              <p className="mt-2 text-parchment/80">Four classes. Eight second jobs at level 40. Hover a hero to see them move.</p>
+            </Reveal>
+            <Reveal delay={150} className="mt-8">
+              <ClassShowcase />
+            </Reveal>
+          </section>
+
+          {/* Monsters */}
+          <section className="border-y-4 border-ink bg-night-2/60 py-8">
+            <Reveal className="text-center">
+              <h2 className="text-outline text-3xl font-bold text-gold">60+ monsters are waiting for you</h2>
+              <p className="mt-1 text-sm text-parchment/70">From squishy slimes to Vyrnax the Elder Dragon.</p>
+            </Reveal>
+            <MonsterParade />
+          </section>
+
+          {/* About */}
+          <section id="about" className="mx-auto max-w-5xl px-4 py-16">
+            <Reveal>
+              <div className="px-panel p-6 sm:p-8">
+                <h2 className="text-3xl font-bold text-wood-dark">About TerraGo</h2>
+                <p className="mt-3 text-lg leading-relaxed">
+                  TerraGo is a living online world where progress is earned. New arrivals are weak and nearly broke. After a few sessions you are capable; after a few weeks,
+                  established; after months, you might be wealthy, powerful or famous. Professions matter, rare items are genuinely rare, and the economy is built by players.
                 </p>
-                <p className="mt-1 text-sm text-parchment/80">{r.text}</p>
+                <p className="mt-3 text-lg font-bold text-leaf-dark">Time + Skill + Knowledge + Cooperation = Progress.</p>
               </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+            </Reveal>
+          </section>
 
-      {/* World */}
-      <section id="world" className="mx-auto max-w-5xl px-4 py-12">
-        <h2 className="text-outline text-3xl font-bold text-gold">The World</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {[
-            ['Oakhaven Sanctuary', 'The safe town hub: quest givers, the blacksmith, crafting stations, the market and a pond full of rare catches.', 'Town'],
-            ['Whispering Fields', 'Slimes, goblins and wolves, levels 1–40. Gnarlfang guards the Job Trainer at the far end.', 'Lv 1–40'],
-            ['Desolate Crags', 'Cracked stone and living rock. Ore veins and the first upgrade gems.', 'Lv 41–70'],
-            ['Glacial Depths', 'Frozen caverns with rare ore and high-tier gems, guarded by frost giants.', 'Lv 71–99'],
-            ["Dragon's Peak", 'Level 100 drakes, dragon knights and champions.', 'Lv 100'],
-            ['The Infernal Caldera', 'Raid lair of Pyraxis, the Infernal Titan.', 'Raid'],
-          ].map(([name, text, status]) => (
-            <div key={name} className="px-panel-dark p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gold">{name}</h3>
-                <span className={`text-xs ${status === 'Town' ? 'text-leaf' : 'text-parchment/60'}`}>{status}</span>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-parchment/85">{text}</p>
+          {/* Features */}
+          <section className="mx-auto grid max-w-5xl gap-6 px-4 pb-8 sm:grid-cols-2">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.id} delay={(i % 2) * 120}>
+                <Blip s="open">
+                  <article id={f.id} className="group px-panel h-full p-6 transition duration-300 hover:-translate-y-1 hover:rotate-[-0.4deg]">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-parchment-2 transition group-hover:scale-110 group-hover:rotate-6">
+                        <PixelIcon icon={f.icon} size={32} />
+                      </span>
+                      <h3 className="text-2xl font-bold text-wood-dark">{f.title}</h3>
+                      <span className={`ml-auto border-2 border-ink px-2 py-0.5 text-xs ${f.status === 'Live' ? 'bg-night-3 text-parchment' : 'animate-pulse bg-gold text-ink'}`}>{f.status}</span>
+                    </div>
+                    <p className="mt-3 leading-relaxed">{f.body}</p>
+                  </article>
+                </Blip>
+              </Reveal>
+            ))}
+          </section>
+
+          {/* World */}
+          <section id="world" className="mx-auto max-w-6xl px-4 py-12">
+            <Reveal>
+              <h2 className="text-outline text-4xl font-bold text-gold">The World</h2>
+              <p className="mt-2 text-parchment/80">Six hand-built maps, from a cosy town to a dragon&apos;s lair.</p>
+            </Reveal>
+            <Reveal delay={120} className="mt-6">
+              <WorldGallery />
+            </Reveal>
+          </section>
+
+          {/* World boss countdown */}
+          <section className="px-4 py-12">
+            <Reveal>
+              <BossCountdown />
+            </Reveal>
+          </section>
+
+          {/* Roadmap */}
+          <section id="roadmap" className="mx-auto max-w-5xl px-4 py-12">
+            <Reveal>
+              <h2 className="text-outline text-3xl font-bold text-gold">Roadmap</h2>
+              <p className="mt-2 text-parchment/80">Where TerraGo is now, and what is next.</p>
+            </Reveal>
+            <div role="list" className="mt-6 grid gap-3 sm:grid-cols-2">
+              {ROADMAP.map((r, i) => (
+                <Reveal key={r.v} delay={(i % 2) * 80}>
+                  <div role="listitem"
+                    className={`px-panel-dark flex h-full gap-3 p-4 ${r.state === 'now' ? 'ring-4 ring-gold' : ''}`}
+                    data-testid={`roadmap-${r.state}`}
+                  >
+                    <span className={`mt-0.5 shrink-0 text-xl ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'animate-spin text-gold [animation-duration:4s]' : 'text-parchment/40'}`} aria-hidden>
+                      {r.state === 'done' ? '✔' : r.state === 'now' ? '★' : '○'}
+                    </span>
+                    <div>
+                      <p className="font-bold text-parchment">
+                        v{r.v} · {r.name}
+                        <span className={`ml-2 text-xs ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-parchment/50'}`}>
+                          {r.state === 'done' ? 'Done' : r.state === 'now' ? 'Just released' : r.state === 'next' ? 'Next' : 'Later'}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-sm text-parchment/80">{r.text}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
 
-      {/* Community */}
-      <section id="community" className="mx-auto max-w-5xl px-4 py-12">
-        <div className="px-panel-dark p-6 sm:p-8">
-          <h2 className="text-3xl font-bold text-gold">Community</h2>
-          <p className="mt-3 leading-relaxed text-parchment/90">
-            Every player you see in Oakhaven is a real person. Say hello at the fountain, form a party, start a guild. Chat has filters, rate limits, and mute, block and
-            report tools — be kind, trade fair, and help newcomers find their feet.
-          </p>
-        </div>
-      </section>
+          {/* Community */}
+          <section id="community" className="mx-auto max-w-5xl px-4 py-12">
+            <Reveal>
+              <div className="px-panel-dark p-6 sm:p-8">
+                <h2 className="text-3xl font-bold text-gold">Community</h2>
+                <p className="mt-3 leading-relaxed text-parchment/90">
+                  Every player you see in Oakhaven is a real person. Say hello at the fountain, form a party, start a guild. Chat has filters, rate limits, and mute, block and
+                  report tools — be kind, trade fair, and help newcomers find their feet.
+                </p>
+              </div>
+            </Reveal>
+          </section>
 
-      {/* FAQ */}
-      <section id="faq" className="mx-auto max-w-3xl px-4 py-12">
-        <h2 className="text-outline text-3xl font-bold text-gold">FAQ</h2>
-        <div className="mt-6 space-y-3">
-          {FAQ.map((f) => (
-            <details key={f.q} className="px-panel group p-4">
-              <summary className="cursor-pointer list-none text-lg font-bold text-wood-dark">
-                <span className="mr-2 inline-block transition-transform group-open:rotate-90">▶</span>
-                {f.q}
-              </summary>
-              <p className="mt-2 leading-relaxed">{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+          {/* FAQ */}
+          <section id="faq" className="mx-auto max-w-3xl px-4 py-12">
+            <Reveal>
+              <h2 className="text-outline text-3xl font-bold text-gold">FAQ</h2>
+            </Reveal>
+            <div className="mt-6 space-y-3">
+              {FAQ.map((f) => (
+                <Blip key={f.q} s="click">
+                  <details className="px-panel group p-4">
+                    <summary className="cursor-pointer list-none text-lg font-bold text-wood-dark">
+                      <span className="mr-2 inline-block transition-transform group-open:rotate-90">▶</span>
+                      {f.q}
+                    </summary>
+                    <p className="mt-2 leading-relaxed">{f.a}</p>
+                  </details>
+                </Blip>
+              ))}
+            </div>
+          </section>
 
-      <section className="mx-auto max-w-5xl px-4 pb-20 text-center">
-        <PlayLink className="px-btn green text-xl">Begin your journey</PlayLink>
-      </section>
+          <section className="mx-auto max-w-5xl px-4 pb-24 text-center">
+            <Reveal>
+              <p className="text-outline mb-5 text-3xl font-bold text-parchment">Your adventure is one click away.</p>
+              <PlayCta big>▶ PLAY TERRAGO NOW</PlayCta>
+            </Reveal>
+          </section>
 
-      <footer className="border-t-4 border-ink bg-night-2 py-6 text-center text-sm text-parchment/60">
-        TerraGo v{VERSION} · All art and world content are original · Made for the browser
-      </footer>
-    </main>
+          <footer className="border-t-4 border-ink bg-night-2 py-6 text-center text-sm text-parchment/60">
+            TerraGo v{VERSION} · All art and world content are original · Made for the browser
+          </footer>
+          <SoundToggle />
+        </main>
+      </StatsProvider>
+    </SoundProvider>
   );
 }

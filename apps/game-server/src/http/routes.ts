@@ -232,6 +232,37 @@ export function buildRouter(deps: Deps): Router {
     return { credited: !!credit };
   });
 
+  // ---------------------------------------------------------------------------
+  // Public stats for the home page (cached; no personal data beyond names on leaderboards)
+  // ---------------------------------------------------------------------------
+  let publicStats: { at: number; data: object } | null = null;
+  router.get('/api/public/stats', async () => {
+    if (publicStats && Date.now() - publicStats.at < 30_000) return publicStats.data;
+    const [chars, top, rift, arena] = await Promise.all([
+      pool.query(`SELECT count(*)::int AS n FROM characters WHERE deleted_at IS NULL`),
+      pool.query(`SELECT name, level, class_id FROM characters WHERE deleted_at IS NULL ORDER BY level DESC, xp DESC LIMIT 3`),
+      pool.query(`SELECT c.name, max(r.floor)::int AS floor FROM rift_runs r JOIN characters c ON c.id = r.character_id WHERE c.deleted_at IS NULL GROUP BY c.id ORDER BY floor DESC LIMIT 1`),
+      pool.query(
+        `SELECT c.name, r.rating FROM arena_ratings r JOIN characters c ON c.id = r.character_id
+          WHERE r.season = to_char(now() AT TIME ZONE 'utc', 'YYYY-MM') AND r.wins + r.losses > 0 AND c.deleted_at IS NULL ORDER BY r.rating DESC LIMIT 1`,
+      ),
+    ]);
+    const kills = await pool
+      .query(`SELECT coalesce(sum(value), 0)::bigint AS n FROM character_counters WHERE key = 'kills'`)
+      .then((r) => Number(r.rows[0].n))
+      .catch(() => 0);
+    const data = {
+      online: [...world.players.values()].filter((p) => p.conn).length,
+      heroes: chars.rows[0].n,
+      monstersDefeated: kills,
+      topLevel: top.rows.map((r) => ({ name: r.name, level: r.level, classId: r.class_id })),
+      rift: rift.rows[0] ? { name: rift.rows[0].name, floor: rift.rows[0].floor } : null,
+      arena: arena.rows[0] ? { name: arena.rows[0].name, rating: arena.rows[0].rating } : null,
+    };
+    publicStats = { at: Date.now(), data };
+    return data;
+  });
+
   router.post('/api/game/ticket', async (ctx) => {
     const user = await requireUser(ctx);
     const characterId = (ctx.body as { characterId?: unknown })?.characterId;

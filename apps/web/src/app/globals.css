@@ -326,3 +326,27 @@ img.pixel {
 
 }
 @keyframes feed-in { from { opacity: 0; transform: translateX(12px); } }
+
+/* Home page */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes letter-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: rotate(45deg) scale(0.3); } 50% { opacity: 1; transform: rotate(45deg) scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes eq { from { height: 3px; } to { height: 16px; } }
+@keyframes nudge { 0%, 85%, 100% { transform: translateY(0) rotate(0); } 90% { transform: translateY(-4px) rotate(-3deg); } 95% { transform: translateY(-2px) rotate(3deg); } }
+@keyframes play-glow {
+  0%, 100% { box-shadow: inset 0 -4px 0 #3f7a2f, 0 4px 0 var(--color-ink), 0 0 0 0 rgba(95, 160, 74, 0.7); }
+  50% { box-shadow: inset 0 -4px 0 #3f7a2f, 0 4px 0 var(--color-ink), 0 0 0 14px rgba(95, 160, 74, 0); }
+}
+.play-cta { position: relative; overflow: hidden; animation: play-glow 1.8s ease-out infinite; }
+.play-cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: play-shine 2.8s ease-in-out infinite;
+}
+@keyframes play-shine { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) { .play-cta, .play-cta::after { animation: none; } }
