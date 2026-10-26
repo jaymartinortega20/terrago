@@ -25,11 +25,13 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              `connect-src 'self' ${gameServer} ${wsServer}`,
+              // blob:/data: — the 3D view's model textures load through blob URLs.
+              `connect-src 'self' blob: data: ${gameServer} ${wsServer}`,
               "img-src 'self' data: blob:",
               "style-src 'self' 'unsafe-inline'",
               // Next.js injects inline bootstrap scripts; Phaser needs eval-free WebGL only.
-              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
+              // wasm-unsafe-eval: the 3D model decoder (meshopt) is WebAssembly.
+              `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
               "font-src 'self' data:",
               "frame-ancestors 'none'",
               "base-uri 'self'",

@@ -11,7 +11,7 @@ import { Reveal } from '@/components/landing/reveal';
 import { Blip, SoundProvider, SoundToggle } from '@/components/landing/sound';
 import { WorldGallery } from '@/components/landing/WorldGallery';
 
-const VERSION = '2.4';
+const VERSION = '3.0';
 
 const FEATURES = [
   {
@@ -65,9 +65,9 @@ const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 
   { v: '2.1', name: 'Mounts, pets & HUD', text: 'Stable with 3D preview, mount gear, pet levels and loyalty, the ornate HUD and spell effects.', state: 'done' },
   { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: sun shadows, richer colour, sunbeams and depth haze — tuned to run on low-end PCs, with an Ultra mode for gaming GPUs.', state: 'done' },
   { v: '2.3', name: 'Adventure update', text: '50-slot bags that stack, a faster first hour, minimap and auto-pickup, Elites and new late-map monsters, random gear stats and sets, story chains, bounties and auto-walk, world bosses, party finder, guild quests, food buffs, pet evolution and the ranked arena.', state: 'done' },
-  { v: '2.4', name: 'Feel & progression', text: 'Snappier combat (instant swings, hit-stop, click-to-engage), the Gem Shop, the Endless Rift, guild levels, arena tokens and bounty seals, stat re-rolls, a calmer HUD with grouped menus and a death screen.', state: 'now' },
-  { v: '2.5', name: 'Polish & balance', text: 'Boss and levelling balance from real play, more Rift bosses, new maps beyond the Caldera.', state: 'next' },
-  { v: '3.0', name: 'Full 3D', text: 'Low-poly floating islands, 3D chibi characters and visible gear.', state: 'later' },
+  { v: '2.4', name: 'Feel & progression', text: 'Snappier combat (instant swings, hit-stop, click-to-engage), the Gem Shop, the Endless Rift, guild levels, arena tokens and bounty seals, stat re-rolls, a calmer HUD with grouped menus and a death screen.', state: 'done' },
+  { v: '3.0', name: 'Full 3D (beta)', text: 'Switch the world to 3D: floating islands with painted forests and shiny water, animated chibi heroes wearing their real weapons, shields, helmets and armour, 3D monsters and mounts, glowing spells, bloom and soft shadows. 2D stays for low-end phones.', state: 'now' },
+  { v: '3.1', name: '3D polish', text: 'Interiors, more monster models, 3D dungeons and the Rift, camera options and balance from real play.', state: 'next' },
 ];
 
 const FAQ = [
@@ -108,7 +108,7 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(18,20,31,0.6),transparent_60%)]" />
             <div className="relative mx-auto flex min-h-[86dvh] max-w-5xl flex-col items-center justify-center px-4 py-20 text-center">
               <span className="text-outline mb-4 inline-flex items-center gap-2 rounded-full border-2 border-ink bg-red-700/90 px-3 py-1 text-xs font-bold uppercase tracking-widest text-parchment">
-                <span className="h-2 w-2 animate-ping rounded-full bg-parchment" /> v{VERSION} is live · Endless Rift &amp; Gem Shop
+                <span className="h-2 w-2 animate-ping rounded-full bg-parchment" /> v{VERSION} is live · Full 3D (beta)
               </span>
               <HeroTitle />
               <p className="text-outline mt-3 max-w-xl text-base text-parchment/90 sm:text-lg">
@@ -272,7 +272,11 @@ export default function LandingPage() {
           </section>
 
           <footer className="border-t-4 border-ink bg-night-2 py-6 text-center text-sm text-parchment/60">
-            TerraGo v{VERSION} · All art and world content are original · Made for the browser
+            TerraGo v{VERSION} · World and 2D art are original · 3D models by KayKit (Kay Lousberg), Quaternius and others —{' '}
+            <a className="underline" href="/3d/CREDITS.md">
+              credits
+            </a>{' '}
+            · Made for the browser
           </footer>
           <SoundToggle />
         </main>

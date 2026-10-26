@@ -135,6 +135,8 @@ export class GameClient {
 
   /** Predicted position after the latest input step, and the one before (for render interpolation). */
   pos = { x: 0, y: 0 };
+  /** Where the local player is drawn this frame (smoothed); set by the 2D scene, read by the 3D view. */
+  renderPos: { x: number; y: number } | null = null;
   prevPos = { x: 0, y: 0 };
   dir: Direction = 'down';
   moving = false;

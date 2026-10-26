@@ -160,7 +160,7 @@ export class World {
   }
 
   /** Tell every player who can see `p` about a look change. */
-  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; petStage?: number; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance; job?: import('@terrago/shared').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null; mountLook?: import('@terrago/shared').MountLook | null }): void {
+  broadcastLook(p: Player, patch: { mount?: string | null; weapon?: string | null; guild?: string | null; shop?: string | null; pet?: string | null; petStage?: number; pose?: 'sit' | null; appearance?: import('@terrago/shared').Appearance; job?: import('@terrago/shared').JobId | null; weaponGlow?: number; armorGlow?: number; back?: string | null; offhand?: string | null; head?: string | null; chest?: string | null; mountLook?: import('@terrago/shared').MountLook | null }): void {
     if ('pet' in patch) p.conn?.send('self:update', { pet: patch.pet ?? null });
     for (const q of this.runtimeOf(p).players) if (q !== p && q.known.has(p.id)) q.conn?.send('entity:update', p.id, patch);
   }
@@ -307,7 +307,7 @@ export class World {
     this.refreshProfile(p);
     const after = equipment.find((e) => e.slot === 0)?.itemId ?? null;
     const look = gearLook(equipment);
-    if (before !== after || look.weaponGlow !== lookBefore.weaponGlow || look.armorGlow !== lookBefore.armorGlow || look.back !== lookBefore.back) {
+    if (before !== after || JSON.stringify(look) !== JSON.stringify(lookBefore)) {
       this.broadcastLook(p, { weapon: after, ...look });
       p.conn?.send('entity:update', p.id, look);
     }

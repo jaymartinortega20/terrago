@@ -17,6 +17,7 @@ import { audio } from './audio';
 import { isTyping } from './input';
 import { GameClient } from './net/client';
 import { WorldScene } from './scenes/WorldScene';
+import { View3D } from './three/View3D';
 import { useStore, type Panel } from './store';
 import { EmoteMenu } from './ui/EmoteMenu';
 import { ChatBox } from './ui/ChatBox';
@@ -106,6 +107,7 @@ export default function GameView({
   return (
     <div className="fixed inset-0 overflow-hidden bg-night no-select">
       <div ref={host} className="absolute inset-0" data-testid="game-canvas" />
+      {client && <View3D client={client} />}
       <DepthHaze />
       {client && <WeatherLayer client={client} />}
       {client && <Overlay client={client} touch={touch} onExit={onExit} badge={badge} />}
@@ -463,8 +465,8 @@ function LootFeed({ client, touch }: { client: GameClient; touch: boolean }) {
  * free on any graphics chip.
  */
 function DepthHaze() {
-  const [mode, setMode] = useState(() => fxSettings().graphics);
-  useEffect(() => onFxSettings((st) => setMode(st.graphics)), []);
+  const [mode, setMode] = useState(() => (fxSettings().view3d ? '3d' : fxSettings().graphics));
+  useEffect(() => onFxSettings((st) => setMode(st.view3d ? '3d' : st.graphics)), []);
   if (mode !== 'hd' && mode !== 'ultra') return null;
   return (
     <div

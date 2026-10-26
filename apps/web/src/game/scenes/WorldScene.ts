@@ -38,6 +38,7 @@ import { emoteIcon } from '../art/emotes';
 import { wingCanvas } from '../art/wings';
 import { TREE_VARIANTS, buildingArt, propArt, renderGround } from '../art/world';
 import { isTyping, joystickToInput, touchInput } from '../input';
+import { view3d } from '../three/World3D';
 import { pushNotice } from '../store';
 import type { GameClient, RemoteMonster, RemotePlayer } from '../net/client';
 
@@ -163,6 +164,14 @@ export class WorldScene extends Phaser.Scene {
       } else this.atmos.destroy();
     });
     this.events.once('shutdown', offGfx);
+    // 3D view: keep simulating here, but don't draw the 2D picture.
+    const set3d = (on: boolean) => {
+      this.cameras.main.setVisible(!on);
+      this.game.canvas.style.visibility = on ? 'hidden' : 'visible';
+    };
+    set3d(fxSettings().view3d);
+    const off3d = onFxSettings((st) => set3d(st.view3d));
+    this.events.once('shutdown', off3d);
     const kb = this.input.keyboard!;
     // No key capture: chat inputs must still receive W/A/S/D and Space.
     kb.disableGlobalCapture();
@@ -1417,6 +1426,8 @@ export class WorldScene extends Phaser.Scene {
     let dx = (k.right.isDown || k.d.isDown ? 1 : 0) - (k.left.isDown || k.a.isDown ? 1 : 0);
     let dy = (k.down.isDown || k.s.isDown ? 1 : 0) - (k.up.isDown || k.w.isDown ? 1 : 0);
     if (dx === 0 && dy === 0 && touchInput.active) ({ dx, dy } = joystickToInput(touchInput.joyX, touchInput.joyY));
+    // 3D view: "up" means away from the camera, whichever way it faces.
+    if (view3d.active) return view3d.rotate(dx, dy);
     return { dx: dx as MoveInput['dx'], dy: dy as MoveInput['dy'] };
   }
 
@@ -1756,6 +1767,11 @@ export class WorldScene extends Phaser.Scene {
    */
   private watchFps(time: number, dt: number): void {
     const w = this.fpsWindow;
+    if (view3d.active) {
+      // The 3D view has its own quality settings; don't judge 2D by its frame rate.
+      w.start = time + 8000;
+      return;
+    }
     if (!w.start) w.start = time + 8000; // let the map settle first
     if (time < w.start) return;
     w.frames++;
@@ -1832,6 +1848,7 @@ export class WorldScene extends Phaser.Scene {
 
     const lx = client.prevPos.x + (client.pos.x - client.prevPos.x) * alpha + client.correction.x;
     const ly = client.prevPos.y + (client.pos.y - client.prevPos.y) * alpha + client.correction.y;
+    client.renderPos = { x: lx, y: ly };
     this.setAvatarMount(this.local, client.ui.get().self?.mount, client.ui.get().self?.mountLook);
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time, { sit: client.pose === 'sit', speed: client.speed() });
     this.drawMountChannel(lx, ly);
