@@ -157,6 +157,7 @@ export interface ServerToClientEvents {
   'entity:act': (e: { id: string; tx: number; ty: number; tool: string | null }) => void;
   'quests': (quests: QuestState[]) => void;
   'arena': (ev: ArenaEvent) => void;
+  'gems': (state: { balance: number }) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
   'invite': (invite: InvitePayload) => void;
   /** You unlocked an achievement. */
@@ -238,7 +239,7 @@ export interface ClientToServerEvents {
   'pet:evolve': (ack: Ack<PetMenuState & { message: string }>) => void;
   'market:search': (q: MarketQuery, ack: Ack<{ listings: MarketListing[]; total: number }>) => void;
   'market:mine': (ack: Ack<{ listings: MarketListing[] }>) => void;
-  'market:list': (req: { slot: number; quantity: number; unitPrice: number }, ack: Ack<{ message: string }>) => void;
+  'market:list': (req: { slot: number; quantity: number; unitPrice: number; currency?: 'gold' | 'gems' }, ack: Ack<{ message: string }>) => void;
   'market:buy': (listingId: number, ack: Ack<{ message: string }>) => void;
   'market:cancel': (listingId: number, ack: Ack<{ message: string }>) => void;
   'trade:request': (playerId: string, ack: Ack<{ message: string }>) => void;
@@ -254,6 +255,9 @@ export interface ClientToServerEvents {
   'party:join': (leaderId: string, ack: Ack<{ message: string }>) => void;
   'guild:quests': (ack: Ack<GuildQuestsView>) => void;
   'arena:get': (ack: Ack<ArenaView>) => void;
+  'gems:get': (ack: Ack<import('./premium').GemShopState>) => void;
+  'gems:checkout': (packId: string, ack: Ack<{ url: string; orderId: string }>) => void;
+  'gems:buy': (cosmeticId: string, ack: Ack<import('./premium').GemShopState & { message: string }>) => void;
   'arena:queue': (ack: Ack<ArenaView>) => void;
   'arena:leave': (ack: Ack<ArenaView>) => void;
   'guild:questClaim': (questId: string, ack: Ack<{ view: GuildQuestsView; message: string }>) => void;

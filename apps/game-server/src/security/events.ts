@@ -17,7 +17,8 @@ export type SecurityEventKind =
   | 'bot_loop'
   | 'bot_marathon'
   | 'trade_ring'
-  | 'multi_account';
+  | 'multi_account'
+  | 'bad_webhook_signature';
 
 /**
  * Records security-relevant events in the database (for moderation and the

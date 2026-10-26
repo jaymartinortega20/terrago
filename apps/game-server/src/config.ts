@@ -28,6 +28,15 @@ const schema = z.object({
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   /** Disables auth rate limits; only honoured outside production (load tests). */
   DISABLE_RATE_LIMITS: bool(false),
+  /** PayMongo (Gem purchases). Without a key the Gem Shop can't sell Gems. */
+  PAYMONGO_SECRET_KEY: z.string().optional(),
+  PAYMONGO_WEBHOOK_SECRET: z.string().optional(),
+  PAYMONGO_METHODS: z.string().default('gcash,paymaya,card,qrph'),
+  PAYMONGO_API_URL: z.string().default('https://api.paymongo.com/v1'),
+  /** Where players return after paying (defaults to the first WEB_ORIGINS entry). */
+  PUBLIC_WEB_URL: z.string().optional(),
+  /** Development only: a pretend checkout that credits Gems without money. */
+  GEM_FAKE_PAYMENTS: bool(false),
 });
 
 export interface Config {
@@ -48,6 +57,14 @@ export interface Config {
   migrateOnStart: boolean;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
   rateLimitsEnabled: boolean;
+  payments: {
+    mode: 'live' | 'test' | 'fake' | 'off';
+    secretKey: string | undefined;
+    webhookSecret: string | undefined;
+    methods: string[];
+    apiUrl: string;
+    webUrl: string;
+  };
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -79,5 +96,19 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     migrateOnStart: e.MIGRATE_ON_START,
     logLevel: e.LOG_LEVEL,
     rateLimitsEnabled: production || !e.DISABLE_RATE_LIMITS,
+    payments: {
+      mode: e.PAYMONGO_SECRET_KEY?.startsWith('sk_live_')
+        ? 'live'
+        : e.PAYMONGO_SECRET_KEY?.startsWith('sk_test_')
+          ? 'test'
+          : e.GEM_FAKE_PAYMENTS && !production
+            ? 'fake'
+            : 'off',
+      secretKey: e.PAYMONGO_SECRET_KEY || undefined,
+      webhookSecret: e.PAYMONGO_WEBHOOK_SECRET || undefined,
+      methods: e.PAYMONGO_METHODS.split(',').map((s) => s.trim()).filter(Boolean),
+      apiUrl: e.PAYMONGO_API_URL.replace(/\/$/, ''),
+      webUrl: (e.PUBLIC_WEB_URL || e.WEB_ORIGINS.split(',')[0] || 'http://localhost:3000').trim().replace(/\/$/, ''),
+    },
   };
 }

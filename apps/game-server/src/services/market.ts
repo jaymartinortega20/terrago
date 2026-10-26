@@ -1,8 +1,9 @@
 import { BALANCE, getItem } from '@terrago/game-data';
-import { addItem, removeFromSlot, type SlotItem, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
+import { GEM_MARKET_TAX, GEM_MAX_PRICE, addItem, removeFromSlot, type SlotItem, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
 import { GameError, withTransaction, type Pool, type Tx } from '../db';
 import { loadSlots, lockCharacter, toState, writeSlots } from './inventory';
 import { changeGold, logItemMovement } from './ledger';
+import { changeGems } from './gems';
 
 /**
  * Player marketplace and direct trades.
@@ -29,6 +30,7 @@ function rowToListing(r: Record<string, any>, me?: string): MarketListing {
     durability: r.durability,
     ...(r.affixes?.length ? { affixes: r.affixes } : {}),
     unitPrice: Number(r.unit_price),
+    currency: r.currency === 'gems' ? 'gems' : 'gold',
     category: r.category,
     rarity: r.rarity,
     createdAt: new Date(r.created_at).getTime(),
@@ -57,6 +59,10 @@ export async function searchMarket(pool: Pool, q: MarketQuery, me: string): Prom
     args.push(q.category.slice(0, 20));
     where.push(`l.category = $${args.length}`);
   }
+  if (q.currency === 'gold' || q.currency === 'gems') {
+    args.push(q.currency);
+    where.push(`l.currency = $${args.length}`);
+  }
   if (typeof q.rarity === 'string' && q.rarity) {
     args.push(q.rarity.slice(0, 20));
     where.push(`l.rarity = $${args.length}`);
@@ -80,9 +86,12 @@ export async function myListings(pool: Pool, me: string): Promise<MarketListing[
   return rows.map((r) => rowToListing(r, me));
 }
 
-export async function createListing(pool: Pool, sellerId: string, slot: unknown, quantity: unknown, unitPrice: unknown): Promise<{ message: string; inventory: Inv }> {
+export async function createListing(pool: Pool, sellerId: string, slot: unknown, quantity: unknown, unitPrice: unknown, currencyIn: unknown = 'gold'): Promise<{ message: string; inventory: Inv }> {
+  const currency = currencyIn === 'gems' ? 'gems' : 'gold';
+  const gems = currency === 'gems';
   if (!Number.isInteger(slot) || !Number.isInteger(quantity) || (quantity as number) < 1) throw new GameError('Invalid amount.');
-  if (!Number.isInteger(unitPrice) || (unitPrice as number) < 1 || (unitPrice as number) > M().maxPrice) throw new GameError('Set a price between 1 and 100,000,000 Gold.');
+  if (!Number.isInteger(unitPrice) || (unitPrice as number) < 1 || (unitPrice as number) > (gems ? GEM_MAX_PRICE : M().maxPrice))
+    throw new GameError(gems ? `Set a price between 1 and ${GEM_MAX_PRICE.toLocaleString()} Gems.` : 'Set a price between 1 and 100,000,000 Gold.');
   return withTransaction(pool, async (tx) => {
     await lockCharacter(tx, sellerId);
     const active = await tx.query<{ n: number }>(`SELECT count(*)::int AS n FROM marketplace_listings WHERE seller_id = $1 AND status = 'active'`, [sellerId]);
@@ -95,18 +104,22 @@ export async function createListing(pool: Pool, sellerId: string, slot: unknown,
     const qty = quantity as number;
     if (qty > s.quantity) throw new GameError('You don\'t have that many.');
     const total = qty * (unitPrice as number);
-    const fee = listingFee(total);
-    const { after } = await changeGold(tx, sellerId, -fee, 'marketplace_fee');
+    // Gold listings pay a small fee up front; Gem sales pay their tax when they sell.
+    const fee = gems ? 0 : listingFee(total);
+    const after = gems ? (await lockCharacter(tx, sellerId)).gold : (await changeGold(tx, sellerId, -fee, 'marketplace_fee')).after;
     const res = removeFromSlot(slots, slot as number, qty);
     if (!res.ok) throw new GameError(res.error);
     await writeSlots(tx, sellerId, res.slots, [slot as number]);
     const ins = await tx.query<{ id: number }>(
-      `INSERT INTO marketplace_listings (seller_id, item_id, quantity, quality, durability, enhance, unit_price, category, rarity, item_name, expires_at, affixes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, now() + make_interval(hours => $11), $12) RETURNING id`,
-      [sellerId, s.itemId, qty, s.quality, s.durability, s.enhance ?? 0, unitPrice, def.category, def.rarity, def.name, M().durationHours, s.affixes?.length ? JSON.stringify(s.affixes) : null],
+      `INSERT INTO marketplace_listings (seller_id, item_id, quantity, quality, durability, enhance, unit_price, category, rarity, item_name, expires_at, affixes, currency)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, now() + make_interval(hours => $11), $12, $13) RETURNING id`,
+      [sellerId, s.itemId, qty, s.quality, s.durability, s.enhance ?? 0, unitPrice, def.category, def.rarity, def.name, M().durationHours, s.affixes?.length ? JSON.stringify(s.affixes) : null, currency],
     );
     await logItemMovement(tx, { itemId: s.itemId, quantity: qty, quality: s.quality, from: sellerId, reason: 'marketplace', ref: { type: 'listing', id: String(ins.rows[0]!.id) } });
-    return { message: `Listed ${qty}× ${def.name} for ${total.toLocaleString()} Gold (fee ${fee}).`, inventory: toState(capacity, after, res.slots) };
+    return {
+      message: gems ? `Listed ${qty}× ${def.name} for ${total.toLocaleString()} Gems (10% tax when it sells).` : `Listed ${qty}× ${def.name} for ${total.toLocaleString()} Gold (fee ${fee}).`,
+      inventory: toState(capacity, after, res.slots),
+    };
   });
 }
 
@@ -115,7 +128,11 @@ async function lockPair(tx: Tx, a: string, b: string): Promise<void> {
   for (const id of [a, b].sort()) await lockCharacter(tx, id);
 }
 
-export async function buyListing(pool: Pool, buyerId: string, listingId: unknown): Promise<{ message: string; inventory: Inv; sellerId: string; sellerGold: number; net: number; itemName: string; qty: number }> {
+export async function buyListing(
+  pool: Pool,
+  buyerId: string,
+  listingId: unknown,
+): Promise<{ message: string; inventory: Inv; sellerId: string; sellerGold: number; net: number; itemName: string; qty: number; currency: 'gold' | 'gems'; gems?: { buyerUser: string; buyer: number; sellerUser: string; seller: number } }> {
   if (!Number.isInteger(listingId)) throw new GameError('Unknown listing.');
   return withTransaction(pool, async (tx) => {
     const { rows } = await tx.query('SELECT * FROM marketplace_listings WHERE id = $1 FOR UPDATE', [listingId]);
@@ -124,29 +141,52 @@ export async function buyListing(pool: Pool, buyerId: string, listingId: unknown
     if (l.seller_id === buyerId) throw new GameError("That's your own listing.");
     await lockPair(tx, buyerId, l.seller_id);
     const total = Number(l.unit_price) * l.quantity;
-    const tax = marketTax(total);
+    const gems = l.currency === 'gems';
+    const tax = gems ? Math.ceil(total * GEM_MARKET_TAX) : marketTax(total);
     const def = getItem(l.item_id)!;
     const { capacity, slots } = await loadSlots(tx, buyerId);
     const res = addItem(slots, { itemId: l.item_id, quality: l.quality, durability: l.durability, bound: false, enhance: l.enhance, ...(l.affixes?.length ? { affixes: l.affixes } : {}) }, l.quantity, def.stackSize);
     if (!res.ok) throw new GameError('Your bag is full.');
     const ref = { type: 'listing', id: String(l.id) };
-    const buyerGold = (await changeGold(tx, buyerId, -total, 'marketplace_purchase', ref)).after;
-    const sellerGold = (await changeGold(tx, l.seller_id, total - tax, 'marketplace_sale', ref)).after;
+    let buyerGold: number;
+    let sellerGold: number;
+    let gemInfo: { buyerUser: string; buyer: number; sellerUser: string; seller: number } | undefined;
+    if (gems) {
+      const users = await tx.query<{ id: string; user_id: string }>(`SELECT id, user_id FROM characters WHERE id = ANY($1)`, [[buyerId, l.seller_id]]);
+      const userOf = new Map(users.rows.map((r) => [r.id, r.user_id]));
+      const bu = userOf.get(buyerId)!;
+      const su = userOf.get(l.seller_id)!;
+      if (bu === su) throw new GameError("That's your own account's listing.");
+      // Lock wallets in a fixed order so two crossing purchases can't deadlock.
+      const [first, second] = [bu, su].sort();
+      for (const u of [first!, second!]) await tx.query(`INSERT INTO gem_wallets (user_id) VALUES ($1) ON CONFLICT DO NOTHING`, [u]);
+      await tx.query(`SELECT 1 FROM gem_wallets WHERE user_id = ANY($1) ORDER BY user_id FOR UPDATE`, [[first, second]]);
+      const buyerGems = await changeGems(tx, bu, -total, 'market_purchase', `listing:${l.id}`, buyerId);
+      const sellerGems = await changeGems(tx, su, total - tax, 'market_sale', `listing:${l.id}`, l.seller_id);
+      gemInfo = { buyerUser: bu, buyer: buyerGems, sellerUser: su, seller: sellerGems };
+      buyerGold = (await lockCharacter(tx, buyerId)).gold;
+      sellerGold = (await lockCharacter(tx, l.seller_id)).gold;
+    } else {
+      buyerGold = (await changeGold(tx, buyerId, -total, 'marketplace_purchase', ref)).after;
+      sellerGold = (await changeGold(tx, l.seller_id, total - tax, 'marketplace_sale', ref)).after;
+    }
     await writeSlots(tx, buyerId, res.slots, res.changed);
     await tx.query(`UPDATE marketplace_listings SET status = 'sold', buyer_id = $2, closed_at = now() WHERE id = $1`, [l.id, buyerId]);
     await tx.query(
-      `INSERT INTO marketplace_transactions (listing_id, seller_id, buyer_id, item_id, quantity, total, tax) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [l.id, l.seller_id, buyerId, l.item_id, l.quantity, total, tax],
+      `INSERT INTO marketplace_transactions (listing_id, seller_id, buyer_id, item_id, quantity, total, tax, currency) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [l.id, l.seller_id, buyerId, l.item_id, l.quantity, total, tax, gems ? 'gems' : 'gold'],
     );
     await logItemMovement(tx, { itemId: l.item_id, quantity: l.quantity, quality: l.quality, from: l.seller_id, to: buyerId, reason: 'marketplace', ref });
     return {
-      message: `Bought ${l.quantity}× ${def.name} for ${total.toLocaleString()} Gold.`,
+      message: `Bought ${l.quantity}× ${def.name} for ${total.toLocaleString()} ${gems ? 'Gems' : 'Gold'}.`,
       inventory: toState(capacity, buyerGold, res.slots),
       sellerId: l.seller_id,
       sellerGold,
       net: total - tax,
       itemName: def.name,
       qty: l.quantity,
+      currency: gems ? 'gems' : 'gold',
+      ...(gemInfo ? { gems: gemInfo } : {}),
     };
   });
 }

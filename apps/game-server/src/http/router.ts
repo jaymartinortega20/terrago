@@ -16,6 +16,8 @@ export interface Ctx {
   ip: string | null;
   cookies: Record<string, string>;
   body: unknown;
+  /** The exact request body (for webhook signatures). */
+  rawBody: string;
   setCookie(cookie: string): void;
 }
 
@@ -108,7 +110,8 @@ export class Router {
         const ct = req.headers['content-type'] ?? '';
         if (!ct.toLowerCase().startsWith('application/json')) throw new HttpError(415, 'Expected application/json.');
       }
-      const body = req.method === 'POST' ? await readJson(req, this.opts.maxBodyBytes ?? 16 * 1024) : undefined;
+      const read = req.method === 'POST' ? await readJson(req, this.opts.maxBodyBytes ?? 64 * 1024) : { json: undefined, raw: '' };
+      const body = read.json;
       const ctx: Ctx = {
         req,
         res,
@@ -116,6 +119,7 @@ export class Router {
         ip: clientIp(req, this.opts.trustProxy),
         cookies: parseCookies(req.headers.cookie),
         body,
+        rawBody: read.raw,
         setCookie: (c) => cookiesToSet.push(c),
       };
       const result = await route.handler(ctx);
@@ -143,7 +147,7 @@ export function sendJson(res: ServerResponse, status: number, data: unknown): vo
   res.end(body);
 }
 
-function readJson(req: IncomingMessage, limit: number): Promise<unknown> {
+function readJson(req: IncomingMessage, limit: number): Promise<{ json: unknown; raw: string }> {
   return new Promise((resolve, reject) => {
     let size = 0;
     const chunks: Buffer[] = [];
@@ -157,9 +161,10 @@ function readJson(req: IncomingMessage, limit: number): Promise<unknown> {
       chunks.push(c);
     });
     req.on('end', () => {
-      if (size === 0) return resolve({});
+      if (size === 0) return resolve({ json: {}, raw: '' });
       try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+        const raw = Buffer.concat(chunks).toString('utf8');
+        resolve({ json: JSON.parse(raw), raw });
       } catch {
         reject(new HttpError(400, 'Invalid JSON.'));
       }

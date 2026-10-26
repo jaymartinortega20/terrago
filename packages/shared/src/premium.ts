@@ -67,8 +67,18 @@ export interface GemHistoryEntry {
 
 export interface GemShopState {
   balance: number;
-  /** 'live' (real PayMongo), 'test' (fake checkout for development) or 'off'. */
-  payments: 'live' | 'test' | 'off';
+  /** 'live' (real money), 'test' (PayMongo test keys), 'fake' (local development) or 'off'. */
+  payments: 'live' | 'test' | 'fake' | 'off';
   owned: string[];
   history: GemHistoryEntry[];
 }
+
+/** Gem reasons in the history. */
+export const GEM_REASON_LABEL: Record<string, string> = {
+  purchase: 'Bought Gems',
+  cosmetic: 'Gem Shop',
+  market_sale: 'Marketplace sale',
+  market_purchase: 'Marketplace purchase',
+  admin: 'Adjustment',
+  refund: 'Refund',
+};

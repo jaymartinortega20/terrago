@@ -1,4 +1,6 @@
 import type { Server as HttpServer } from 'node:http';
+import { buyCosmetic, createCheckout, shopState } from '../services/gems';
+import { getCosmetic } from '@terrago/shared';
 import { Server, type Socket } from 'socket.io';
 import {
   PROTOCOL_VERSION,
@@ -373,6 +375,18 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('emote', (emote, ack) => respond(ack, () => world.emote(p, emote)));
     socket.on('wardrobe:get', (ack) => respond(ack, async () => ({ outfit: p.rec.appearance.outfit, owned: await ownedSkins(pool, p.id) })));
     socket.on('wardrobe:set', (outfit, ack) => serial(ack, () => wearOutfit(pool, world, p, outfit)));
+    socket.on('gems:get', (ack) => respond(ack, () => shopState(pool, p.userId, config.payments)));
+    socket.on('gems:checkout', (packId, ack) => serial(ack, () => createCheckout(pool, config.payments, { id: p.userId }, packId)));
+    socket.on('gems:buy', (id, ack) =>
+      serial(ack, async () => {
+        const r = await buyCosmetic(pool, p.userId, p.id, id);
+        log.info('gem_cosmetic', { userId: p.userId, cosmetic: id });
+        for (const q of world.players.values()) if (q.userId === p.userId) q.conn?.send('gems', { balance: r.balance });
+        const c = getCosmetic(id)!;
+        const where = c.kind === 'outfit' ? 'Wear it from the Wardrobe (Character window) on any of your characters.' : 'Put it on in the Stable (Shift+Z).';
+        return { ...(await shopState(pool, p.userId, config.payments)), message: `✨ ${r.name} unlocked! ${where}` };
+      }),
+    );
     socket.on('shop:get', (npcId, ack) => serial(ack, () => npcServices.shopGet(g, p, npcId)));
     socket.on('shop:buy', (req, ack) => serial(ack, () => npcServices.shopBuy(g, p, req)));
     socket.on('shop:sell', (req, ack) => serial(ack, () => npcServices.shopSell(g, p, req)));

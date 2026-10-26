@@ -1,12 +1,19 @@
 import { BASE_OUTFIT_COUNT, OUTFITS, type Appearance } from '@terrago/shared';
 import { GameError, type Pool } from '../db';
+import { premiumOutfits } from '../services/gems';
 import type { World } from '../world/world';
 import type { Player } from '../world/player';
 
 /** Skins this character owns (outfit indexes beyond the starter outfits). */
 export async function ownedSkins(pool: Pool, characterId: string): Promise<number[]> {
-  const { rows } = await pool.query<{ outfit: number }>(`SELECT outfit FROM character_skins WHERE character_id = $1 ORDER BY outfit`, [characterId]);
-  return rows.map((r) => r.outfit).filter((o) => o < OUTFITS.length);
+  const { rows } = await pool.query<{ outfit: number }>(
+    `SELECT outfit FROM character_skins WHERE character_id = $1 ORDER BY outfit`,
+    [characterId],
+  );
+  // Gem Shop skins belong to the whole account.
+  const u = await pool.query<{ user_id: string }>(`SELECT user_id FROM characters WHERE id = $1`, [characterId]);
+  const premium = u.rows[0] ? await premiumOutfits(pool, u.rows[0].user_id) : [];
+  return [...new Set([...rows.map((r) => r.outfit), ...premium])].filter((o) => o >= 0 && o < OUTFITS.length).sort((a, b) => a - b);
 }
 
 /** Put on an outfit: any starter outfit, or a skin you own. Everyone nearby sees the change. */

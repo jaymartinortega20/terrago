@@ -55,6 +55,12 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M7.5 17c0-3 2-5 4.5-5s4.5 2 4.5 5c0 2-2 2.5-4.5 2.5S7.5 19 7.5 17Z" fill="#fff" />
     </>
   ),
+  gems: (
+    <>
+      <path d="M6 4h12l4 5-10 12L2 9Z" fill="#7ab8ff" stroke="#fff" strokeWidth="1.2" />
+      <path d="M2 9h20M9 4l3 17 3-17" stroke="#d8ecff" strokeWidth="1" fill="none" />
+    </>
+  ),
   arena: (
     <>
       <path d="M5 4l9 9M19 4l-9 9" stroke="#dfe6f0" strokeWidth="2.6" strokeLinecap="round" />

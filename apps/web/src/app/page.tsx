@@ -65,7 +65,7 @@ const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 
 const FAQ = [
   {
     q: 'Is TerraGo free to play?',
-    a: 'Yes. TerraGo will never sell power: no best weapons, no levels, no tradable gold for cash. Anything sold later will be cosmetic or convenience only.',
+    a: 'Yes. TerraGo never sells power: no weapons, levels or Gold for cash. The optional Gem Shop (GCash, Maya, cards) sells cosmetics only — premium outfits and mount gear.',
   },
   {
     q: 'Do I need to download anything?',
@@ -73,7 +73,7 @@ const FAQ = [
   },
   {
     q: 'Can I earn real money playing?',
-    a: 'No. TerraGo is a game, not an income source. Any rewards are in-game only and have no cash value.',
+    a: 'No. You can earn Gems by selling the gear you find to other players on the Marketplace and spend them in the Gem Shop, but Gems stay in the game: they have no cash value and can never be withdrawn as money.',
   },
   {
     q: 'What can I do right now?',

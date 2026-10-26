@@ -1,4 +1,5 @@
 import { OUTFITS, WORLD_EVENTS, createCharacterSchema, currentEvent, firstIssue, loginSchema, registerSchema, type ManualEvent } from '@terrago/shared';
+import { changeGems, gemBalance, handlePaymongoEvent, markPaid, verifyPaymongoSignature } from '../services/gems';
 import { saveSettings, settings, validateSettings } from '../services/serverConfig';
 import { getDummyHash, hashPassword, needsRehash, verifyPassword } from '../auth/passwords';
 import {
@@ -13,7 +14,7 @@ import {
 } from '../auth/sessions';
 import type { TicketStore } from '../auth/tickets';
 import type { Config } from '../config';
-import { GameError, isUniqueViolation, type Pool } from '../db';
+import { GameError, isUniqueViolation, withTransaction, type Pool } from '../db';
 import type { Logger } from '../logger';
 import type { Metrics } from '../metrics';
 import type { SecurityEvents } from '../security/events';
@@ -172,6 +173,65 @@ export function buildRouter(deps: Deps): Router {
   });
 
   /** One-time pass for the game connection (works even when web and game server are on different sites). */
+  // ---------------------------------------------------------------------------
+  // Gems (PayMongo)
+  // ---------------------------------------------------------------------------
+
+  /** Tell a player's online characters about new Gems. */
+  const gemsArrived = (userId: string, gems: number, balance: number) => {
+    for (const p of world.players.values()) {
+      if (p.userId !== userId) continue;
+      p.conn?.send('gems', { balance });
+      p.conn?.send('notice', { kind: 'success', text: `💎 +${gems.toLocaleString()} Gems added. Thank you for supporting TerraGo!` });
+    }
+  };
+
+  /** PayMongo calls this when a checkout is paid. Only signed events count. */
+  router.post('/api/payments/paymongo', async (ctx) => {
+    const p = config.payments;
+    if (!p.webhookSecret || (p.mode !== 'live' && p.mode !== 'test')) throw new HttpError(404, 'Not found.');
+    const sig = ctx.req.headers['paymongo-signature'];
+    if (!verifyPaymongoSignature(Array.isArray(sig) ? sig[0] : sig, ctx.rawBody, p.webhookSecret, p.mode === 'live')) {
+      security.record('bad_webhook_signature', { ip: ctx.ip });
+      throw new HttpError(401, 'Bad signature.');
+    }
+    let credit: Awaited<ReturnType<typeof handlePaymongoEvent>> = null;
+    try {
+      credit = await handlePaymongoEvent(pool, ctx.body);
+    } catch (err) {
+      // A signed event that doesn't match its order (amount, session): never credit, flag it for a human.
+      log.warn('gem_payment_mismatch', { err: String(err) });
+      return {};
+    }
+    if (credit) {
+      log.info('gems_purchased', { userId: credit.userId, gems: credit.gems });
+      gemsArrived(credit.userId, credit.gems, credit.balance);
+    }
+    return {};
+  });
+
+  /** The return page asks how an order went. */
+  router.get('/api/gems/order', async (ctx) => {
+    const user = await requireUser(ctx);
+    const id = ctx.url.searchParams.get('id') ?? '';
+    if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(400, 'Unknown order.');
+    const { rows } = await pool.query(`SELECT status, gems, pack_id FROM gem_orders WHERE id = $1 AND user_id = $2`, [id, user.userId]);
+    if (!rows[0]) throw new HttpError(404, 'Unknown order.');
+    return { status: rows[0].status, gems: rows[0].gems, balance: await gemBalance(pool, user.userId) };
+  });
+
+  /** Development only: complete a pretend checkout. */
+  router.post('/api/gems/fake-pay', async (ctx) => {
+    if (config.payments.mode !== 'fake') throw new HttpError(404, 'Not found.');
+    const user = await requireUser(ctx);
+    const id = String((ctx.body as { orderId?: unknown })?.orderId ?? '');
+    const own = await pool.query(`SELECT 1 FROM gem_orders WHERE id = $1 AND user_id = $2 AND provider = 'fake'`, [id, user.userId]);
+    if (!own.rowCount) throw new HttpError(404, 'Unknown order.');
+    const credit = await markPaid(pool, id);
+    if (credit) gemsArrived(credit.userId, credit.gems, credit.balance);
+    return { credited: !!credit };
+  });
+
   router.post('/api/game/ticket', async (ctx) => {
     const user = await requireUser(ctx);
     const characterId = (ctx.body as { characterId?: unknown })?.characterId;
@@ -307,6 +367,22 @@ export function buildRouter(deps: Deps): Router {
       throw err;
     }
   };
+
+  /** Support: add or remove Gems on a player's account (e.g. a payment that never arrived). */
+  router.post('/api/admin/gems', async (ctx) => {
+    const admin = await requireAdmin(ctx);
+    const b = body(ctx);
+    const id = uuid(b.characterId, 'character');
+    const amount = Math.trunc(Number(b.amount ?? 0));
+    if (!Number.isSafeInteger(amount) || amount === 0 || Math.abs(amount) > 1_000_000) throw new HttpError(400, 'Amount must be a whole number (±1,000,000).');
+    const reason = b.refund ? 'refund' : 'admin';
+    const u = await pool.query(`SELECT user_id FROM characters WHERE id = $1`, [id]);
+    if (!u.rows[0]) throw new HttpError(404, 'No such character.');
+    const balance = await withTransaction(pool, (tx) => changeGems(tx, u.rows[0].user_id, amount, reason, `admin:${admin.userId}`, id));
+    for (const p of world.players.values()) if (p.userId === u.rows[0].user_id) p.conn?.send('gems', { balance });
+    await audit(admin, 'gems', id, { amount, reason });
+    return { balance };
+  });
 
   router.post('/api/admin/give', async (ctx) => {
     const admin = await requireAdmin(ctx);

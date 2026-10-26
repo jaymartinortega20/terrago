@@ -228,7 +228,7 @@ function Wardrobe({ client }: { client: GameClient }) {
           );
         })}
       </div>
-      {owned.length === 0 && <p className="mt-1 text-[11px] text-wood-dark/70">Exclusive skins appear here when a game master gives you one.</p>}
+      {owned.length === 0 && <p className="mt-1 text-[11px] text-wood-dark/70">Exclusive skins appear here — get them in the Gem Shop or from a game master.</p>}
     </>
   );
 }
@@ -523,6 +523,7 @@ export const MENU: { id: Exclude<Panel, null> | string; label: string; key: stri
   { id: 'stable', label: 'Stable', key: 'Shift+Z' },
   { id: 'pets', label: 'Pets', key: 'U' },
   { id: 'arena', label: 'Arena', key: 'Shift+B' },
+  { id: 'gems', label: 'Gem Shop', key: 'Shift+G' },
   { id: 'guild', label: 'Guild', key: 'G' },
   { id: 'friends', label: 'Friends', key: 'O' },
   { id: 'settings', label: 'Settings', key: 'Esc' },

@@ -711,19 +711,25 @@ export const market = {
   search: (deps: GameplayDeps, p: Player, q: unknown) => searchMarket(deps.pool, (q ?? {}) as MarketQuery, p.id),
   mine: async (deps: GameplayDeps, p: Player) => ({ listings: await myListings(deps.pool, p.id) }),
   async list(deps: GameplayDeps, p: Player, req: unknown) {
-    const r = (req ?? {}) as { slot?: unknown; quantity?: unknown; unitPrice?: unknown };
-    const res = await createListing(deps.pool, p.id, r.slot, r.quantity, r.unitPrice);
+    const r = (req ?? {}) as { slot?: unknown; quantity?: unknown; unitPrice?: unknown; currency?: unknown };
+    const res = await createListing(deps.pool, p.id, r.slot, r.quantity, r.unitPrice, r.currency);
     pushInventory(deps.world, p, res.inventory);
     return { message: res.message };
   },
   async buy(deps: GameplayDeps, p: Player, id: unknown) {
     const res = await buyListing(deps.pool, p.id, id);
     pushInventory(deps.world, p, res.inventory);
+    if (res.gems) {
+      for (const q of deps.world.players.values()) {
+        if (q.userId === res.gems.buyerUser) q.conn?.send('gems', { balance: res.gems.buyer });
+        if (q.userId === res.gems.sellerUser) q.conn?.send('gems', { balance: res.gems.seller });
+      }
+    }
     const seller = deps.world.players.get(res.sellerId);
     if (seller) {
       const inv = deps.world.inventoryCache.get(seller.id);
       if (inv) pushInventory(deps.world, seller, { ...inv, gold: res.sellerGold });
-      seller.conn?.send('notice', { kind: 'success', text: `Sold ${res.qty}× ${res.itemName} on the market: +${res.net.toLocaleString()} Gold (after tax).` });
+      seller.conn?.send('notice', { kind: 'success', text: `Sold ${res.qty}× ${res.itemName} on the market: +${res.net.toLocaleString()} ${res.currency === 'gems' ? 'Gems 💎' : 'Gold'} (after tax).` });
       track(deps, seller, 'market_sales');
       void antibot?.trade(seller.id, p.id).catch(() => {});
     }

@@ -290,6 +290,7 @@ export class GameClient {
     });
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
     socket.on('pet:update', (pet) => this.ui.set({ pet }));
+    socket.on('gems', ({ balance }) => this.ui.set({ gems: balance }));
     socket.on('arena', (ev) => {
       this.ui.set({ arena: ev, ...(ev.kind === 'found' ? { panel: null, autoWalk: null } : {}) });
       audio.sfx(ev.kind === 'found' ? 'open' : ev.won ? 'achievement' : 'click');
@@ -643,6 +644,29 @@ export class GameClient {
 
   speed(): number {
     return this.ui.get().self?.speed ?? 1;
+  }
+
+  async gemShop(): Promise<import('@terrago/shared').GemShopState> {
+    const s = await this.request<import('@terrago/shared').GemShopState>('gems:get');
+    this.ui.set({ gems: s.balance });
+    return s;
+  }
+
+  gemCheckout(packId: string): Promise<{ url: string; orderId: string }> {
+    return this.request('gems:checkout', packId);
+  }
+
+  async gemBuy(id: string): Promise<import('@terrago/shared').GemShopState | null> {
+    try {
+      const r = await this.request<import('@terrago/shared').GemShopState & { message: string }>('gems:buy', id);
+      this.ui.set({ gems: r.balance });
+      audio.sfx('achievement');
+      pushNotice(this.ui, 'success', r.message, 4000);
+      return r;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
   }
 
   arenaGet(): Promise<import('@terrago/shared').ArenaView> {
@@ -1252,8 +1276,8 @@ export class GameClient {
     return this.request<{ listings: import('@terrago/shared').MarketListing[] }>('market:mine');
   }
 
-  marketList(slot: number, quantity: number, unitPrice: number) {
-    return this.run('market:list', { slot, quantity, unitPrice });
+  marketList(slot: number, quantity: number, unitPrice: number, currency: 'gold' | 'gems' = 'gold') {
+    return this.run('market:list', { slot, quantity, unitPrice, currency });
   }
 
   marketBuy(listingId: number) {

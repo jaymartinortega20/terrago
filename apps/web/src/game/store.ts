@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | 'arena' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | 'arena' | 'gems' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -121,6 +121,8 @@ export interface UiState {
   trackedQuest: string | null;
   /** Arena match found (countdown/fight) or its result, for the banner. */
   arena: import('@terrago/shared').ArenaEvent | null;
+  /** Account Gem balance (null until loaded). */
+  gems: number | null;
 }
 
 export const initialUi: UiState = {
@@ -154,6 +156,7 @@ export const initialUi: UiState = {
   autoWalk: null,
   trackedQuest: null,
   arena: null,
+  gems: null,
   targetId: null,
   autoAttack: false,
   effects: [],

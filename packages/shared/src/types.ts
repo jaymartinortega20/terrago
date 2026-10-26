@@ -431,6 +431,8 @@ export interface MarketListing {
   durability: number | null;
   affixes?: ItemAffix[] | null;
   unitPrice: number;
+  /** What the price is in. */
+  currency: 'gold' | 'gems';
   category: string;
   rarity: string;
   createdAt: number;
@@ -444,6 +446,7 @@ export interface MarketQuery {
   search?: string;
   category?: string;
   rarity?: string;
+  currency?: 'gold' | 'gems';
   sort?: 'price_asc' | 'price_desc' | 'newest';
   page?: number;
 }

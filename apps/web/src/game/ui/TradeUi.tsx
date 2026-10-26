@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { BALANCE, getItem } from '@terrago/game-data';
-import { QUALITIES, affixText, type ItemAffix, type InventorySlot, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
+import { GEM_MARKET_TAX, QUALITIES, affixText, type ItemAffix, type InventorySlot, type MarketListing, type MarketQuery, type TradeOfferItem } from '@terrago/shared';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
@@ -35,10 +35,18 @@ function ItemName({ itemId, quality = 0, enhance = 0, affixes }: { itemId: strin
   );
 }
 
+function Price({ l }: { l: MarketListing }) {
+  const total = fmt(l.unitPrice * l.quantity);
+  return l.currency === 'gems' ? <span className="block font-bold text-[#3f7fd0]">💎 {total}</span> : <span className="block font-bold text-gold-dark">◉ {total}</span>;
+}
+
 /** Player marketplace: browse/buy, sell from your bag, manage your listings. */
 export function MarketPanel({ client, onClose }: { client: GameClient; onClose: () => void }) {
   const inv = useStore(client.ui, (s) => s.inventory);
+  const gems = useStore(client.ui, (s) => s.gems ?? 0);
   const [tab, setTab] = useState<'browse' | 'sell' | 'mine'>('browse');
+  const [sellCur, setSellCur] = useState<'gold' | 'gems'>('gold');
+  useEffect(() => void client.gemShop().catch(() => {}), [client]);
   const [q, setQ] = useState<MarketQuery>({ search: '', category: '', sort: 'price_asc', page: 0 });
   const [rows, setRows] = useState<MarketListing[]>([]);
   const [total, setTotal] = useState(0);
@@ -95,6 +103,7 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
           </button>
         ))}
         <span className="ml-auto text-sm font-bold text-gold-dark">◉ {fmt(inv.gold)}</span>
+        <span className="text-sm font-bold text-[#3f7fd0]" data-testid="market-gems">💎 {fmt(gems)}</span>
       </div>
       {err && <p className="mb-2 text-sm text-[#b8402f]">{err}</p>}
 
@@ -115,6 +124,17 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
                 </option>
               ))}
             </select>
+            <select
+              className="border-2 border-ink bg-parchment"
+              value={q.currency ?? ''}
+              onChange={(e) => setQ({ ...q, currency: (e.target.value || undefined) as MarketQuery['currency'], page: 0 })}
+              aria-label="Currency"
+              data-testid="market-currency"
+            >
+              <option value="">Gold & Gems</option>
+              <option value="gold">◉ Gold</option>
+              <option value="gems">💎 Gems</option>
+            </select>
             <select className="border-2 border-ink bg-parchment" value={q.sort} onChange={(e) => setQ({ ...q, sort: e.target.value as MarketQuery['sort'] })} aria-label="Sort">
               <option value="price_asc">Cheapest</option>
               <option value="price_desc">Priciest</option>
@@ -130,7 +150,7 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
                   <ItemName itemId={l.itemId} quality={l.quality} enhance={l.enhance} affixes={l.affixes} />
                   <span className="text-xs text-wood-dark/70">×{l.quantity}</span>
                   <span className="ml-auto text-right text-xs">
-                    <span className="block font-bold text-gold-dark">◉ {fmt(l.unitPrice * l.quantity)}</span>
+                    <Price l={l} />
                     <span className="text-wood-dark/70">{l.sellerName}</span>
                   </span>
                   {l.mine ? (
@@ -138,7 +158,7 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
                   ) : (
                     <button
                       className="px-btn green small"
-                      disabled={busy || inv.gold < l.unitPrice * l.quantity}
+                      disabled={busy || (l.currency === 'gems' ? gems : inv.gold) < l.unitPrice * l.quantity}
                       onClick={() => act(() => client.marketBuy(l.id))}
                       data-testid={`market-buy-${l.id}`}
                     >
@@ -198,6 +218,15 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
                   data-testid="market-sell-qty"
                 />
               </label>
+              <div className="flex items-center gap-1" data-testid="market-sell-currency">
+                Sell for
+                <button className={`px-btn small ${sellCur === 'gold' ? 'green' : 'ghost'}`} onClick={() => setSellCur('gold')}>
+                  ◉ Gold
+                </button>
+                <button className={`px-btn small ${sellCur === 'gems' ? 'green' : 'ghost'}`} onClick={() => setSellCur('gems')} data-testid="market-sell-gems">
+                  💎 Gems
+                </button>
+              </div>
               <label className="flex items-center gap-2">
                 Price each
                 <input
@@ -210,15 +239,21 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
                 />
                 <span className="text-xs text-wood-dark/70">shop pays {getItem(chosen.itemId)?.vendorValue ?? 0}</span>
               </label>
-              <p className="text-xs">
-                Total ◉ {fmt(listTotal)} · listing fee ◉ {fmt(fee)} · you get ◉ {fmt(net)} after {Math.round(m.taxRate * 100)}% tax
-              </p>
+              {sellCur === 'gems' ? (
+                <p className="text-xs">
+                  Total 💎 {fmt(listTotal)} · no listing fee · you get 💎 {fmt(listTotal - Math.ceil(listTotal * GEM_MARKET_TAX))} after {Math.round(GEM_MARKET_TAX * 100)}% tax. Gems are spent in the Gem Shop and can&apos;t be cashed out.
+                </p>
+              ) : (
+                <p className="text-xs">
+                  Total ◉ {fmt(listTotal)} · listing fee ◉ {fmt(fee)} · you get ◉ {fmt(net)} after {Math.round(m.taxRate * 100)}% tax
+                </p>
+              )}
               <button
                 className="px-btn green small"
-                disabled={busy || inv.gold < fee}
+                disabled={busy || (sellCur === 'gold' && inv.gold < fee)}
                 onClick={() =>
                   act(async () => {
-                    const ok = await client.marketList(chosen.slot, sellQty, sellPrice);
+                    const ok = await client.marketList(chosen.slot, sellQty, sellPrice, sellCur);
                     if (ok) setSellSlot(null);
                   })
                 }
@@ -238,7 +273,9 @@ export function MarketPanel({ client, onClose }: { client: GameClient; onClose: 
             <li key={l.id} className="flex items-center gap-2 border-2 border-ink/30 px-1.5 py-1 text-sm">
               <ItemName itemId={l.itemId} quality={l.quality} enhance={l.enhance} affixes={l.affixes} />
               <span className="text-xs">×{l.quantity}</span>
-              <span className="ml-auto text-xs font-bold text-gold-dark">◉ {fmt(l.unitPrice * l.quantity)}</span>
+              <span className="ml-auto text-xs">
+                <Price l={l} />
+              </span>
               {l.status === 'active' ? (
                 <button className="px-btn ghost small" disabled={busy} onClick={() => act(() => client.marketCancel(l.id))} data-testid={`market-cancel-${l.id}`}>
                   {l.expiresAt <= Date.now() ? 'Claim' : 'Cancel'}

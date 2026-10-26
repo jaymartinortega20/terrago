@@ -23,6 +23,7 @@ import {
 import { GameError, withTransaction, type Pool } from '../db';
 import { consumeFromSlotTx, loadSlots, lockCharacter, toState, writeSlots } from '../services/inventory';
 import { changeGold, logItemMovement } from '../services/ledger';
+import { premiumMountStyles } from '../services/gems';
 import type { Player, PetState } from '../world/player';
 import { npcService, pushInventory, questEvent, type GameplayDeps } from './gameplay';
 
@@ -87,7 +88,7 @@ export function onMounted(deps: GameplayDeps, p: Player): void {
 
 async function stableState(deps: GameplayDeps, p: Player): Promise<StableState> {
   const r = await deps.pool.query<{ style_id: string }>(`SELECT style_id FROM character_mount_styles WHERE character_id = $1`, [p.id]);
-  const styles = [...MOUNT_STYLES.filter((s) => s.price === 0).map((s) => s.id), ...r.rows.map((x) => x.style_id)];
+  const styles = [...MOUNT_STYLES.filter((s) => s.price === 0).map((s) => s.id), ...r.rows.map((x) => x.style_id), ...(await premiumMountStyles(deps.pool, p.userId))];
   return { owned: ownedMounts(deps, p), chosen: p.mountChoice, styles, look: p.mountLook };
 }
 
