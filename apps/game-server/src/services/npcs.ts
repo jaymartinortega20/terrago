@@ -20,6 +20,7 @@ const ACTION_LABELS: Record<DialogueActionId, string> = {
   quest_offer: 'Quest',
   quest_complete: 'Complete quest',
   bounty: 'Bounty board',
+  rift: 'Enter the Endless Rift',
 };
 
 function actionFor(id: DialogueActionId): DialogueAction {

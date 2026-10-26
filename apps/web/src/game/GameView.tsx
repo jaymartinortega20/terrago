@@ -9,6 +9,7 @@ import { PetPanel } from './ui/PetUi';
 import { ArenaBanner, ArenaPanel } from './ui/ArenaUi';
 import { GemShopPanel } from './ui/GemShop';
 import { DeathScreen } from './ui/DeathScreen';
+import { RiftHud, RiftPanel } from './ui/ExchangeUi';
 import Phaser from 'phaser';
 import { useEffect, useRef, useState } from 'react';
 import { getItem } from '@terrago/game-data';
@@ -23,7 +24,7 @@ import { DialogueBox } from './ui/DialogueBox';
 import { Hud } from './ui/Hud';
 import { ItemSlot } from './ui/ItemSlot';
 import { MobileControls } from './ui/MobileControls';
-import { CharacterPanel, InventoryPanel, JobPanel, MapPanel, MENU, markMenuSeen, menuSeen, menuUnlocked, SettingsPanel } from './ui/Panels';
+import { CharacterPanel, InventoryPanel, JobPanel, MapPanel, MENU, MENU_GROUPS, markMenuSeen, menuSeen, menuUnlocked, SettingsPanel } from './ui/Panels';
 import { FarmPanel, PlotMenu, RepairPanel, ShopPanel, SkillsPanel } from './ui/ServicePanels';
 import { CraftPanel, FishingOverlay, LiftPanel, RecipeBook } from './ui/GatherPanels';
 import { BossBar, EffectsBar, EnhancePanel, SkillBar, TargetFrame } from './ui/CombatUi';
@@ -138,6 +139,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
     else client.selectSlot(slot);
   };
   const [menuOpen, setMenuOpen] = useState(false);
+  const [group, setGroup] = useState<string | null>(null);
   const level = useStore(ui, (s) => s.self?.level ?? 1);
   const questsDone = useStore(ui, (s) => s.quests.filter((q) => q.done).length);
   const [seen, setSeen] = useState<Set<string>>(() => new Set());
@@ -222,31 +224,71 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           className={`pointer-events-auto flex justify-end gap-x-3.5 gap-y-4 pt-1.5 pr-1.5 ${touch ? (menuOpen ? 'max-w-[56vw] flex-wrap' : 'hidden') : 'max-w-[64vw] flex-wrap'}`}
           aria-label="Game menu"
         >
-          {MENU.filter((m) => (!touch || !m.version) && menuUnlocked(m, level, questsDone)).map((m) => (
-            <button
-              key={m.id}
-              disabled={!!m.version}
-              title={m.version ? `${m.label} — arrives in ${m.version}` : `${m.label} (${m.key})`}
-              aria-label={m.label}
-              onClick={() => {
-                open(m.id as Panel);
-                setMenuOpen(false);
-                if (!seen.has(m.id)) {
-                  markMenuSeen(m.id);
-                  setSeen(menuSeen());
-                }
-              }}
-              className={`orb pointer-events-auto relative ${touch ? 'h-10 w-10' : 'h-11 w-11'} ${m.version ? 'orb-disabled' : panel === m.id ? 'orb-on' : ''}`}
-              data-testid={`menu-${m.id}`}
-            >
-              <HudIcon name={m.id} size={touch ? 20 : 22} />
-              {(m.minLevel || m.afterFirstQuest) && !seen.has(m.id) && (
-                <span className="absolute -top-1 -right-1 rounded-full bg-[#ff5a4a] px-1 text-[8px] leading-tight font-bold text-white shadow" data-testid={`new-${m.id}`}>
-                  NEW
-                </span>
-              )}
-            </button>
-          ))}
+          {(() => {
+            const unlocked = MENU.filter((m) => (!touch || !m.version) && menuUnlocked(m, level, questsDone));
+            const button = (m: (typeof MENU)[number]) => (
+              <button
+                key={m.id}
+                disabled={!!m.version}
+                title={m.version ? `${m.label} — arrives in ${m.version}` : `${m.label} (${m.key})`}
+                aria-label={m.label}
+                onClick={() => {
+                  open(m.id as Panel);
+                  setMenuOpen(false);
+                  setGroup(null);
+                  if (!seen.has(m.id)) {
+                    markMenuSeen(m.id);
+                    setSeen(menuSeen());
+                  }
+                }}
+                className={`orb pointer-events-auto relative ${touch ? 'h-10 w-10' : 'h-11 w-11'} ${m.version ? 'orb-disabled' : panel === m.id ? 'orb-on' : ''}`}
+                data-testid={`menu-${m.id}`}
+              >
+                <HudIcon name={m.id} size={touch ? 20 : 22} />
+                {(m.minLevel || m.afterFirstQuest) && !seen.has(m.id) && (
+                  <span className="absolute -top-1 -right-1 rounded-full bg-[#ff5a4a] px-1 text-[8px] leading-tight font-bold text-white shadow" data-testid={`new-${m.id}`}>
+                    NEW
+                  </span>
+                )}
+              </button>
+            );
+            // Phones: everything in one sheet behind the menu button.
+            if (touch) return unlocked.map(button);
+            // Desktop: four groups; a group with one button is the button itself.
+            return MENU_GROUPS.map((gr) => {
+              const items = unlocked.filter((m) => gr.ids.includes(m.id));
+              if (!items.length) return null;
+              if (items.length === 1) return button(items[0]!);
+              const fresh = items.some((m) => (m.minLevel || m.afterFirstQuest) && !seen.has(m.id));
+              const on = items.some((m) => m.id === panel);
+              return (
+                <div key={gr.id} className="relative" onMouseLeave={() => setGroup((g) => (g === gr.id ? null : g))}>
+                  <button
+                    className={`orb pointer-events-auto relative h-11 w-11 ${on || group === gr.id ? 'orb-on' : ''}`}
+                    title={`${gr.label}: ${items.map((m) => m.label).join(', ')}`}
+                    aria-label={gr.label}
+                    aria-expanded={group === gr.id}
+                    onClick={() => setGroup(gr.id)}
+                    onMouseEnter={() => setGroup(gr.id)}
+                    data-testid={`menu-group-${gr.id}`}
+                  >
+                    <HudIcon name={gr.icon} size={22} />
+                    {fresh && <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#ff5a4a] shadow" />}
+                  </button>
+                  {group === gr.id && (
+                    <div className="absolute top-12 right-0 z-30 flex gap-2 rounded-2xl bg-[#141a2c]/90 p-2 shadow-xl" data-testid={`menu-pop-${gr.id}`}>
+                      {items.map((m) => (
+                        <div key={m.id} className="flex flex-col items-center gap-0.5">
+                          {button(m)}
+                          <span className="text-[10px] whitespace-nowrap text-parchment/80">{m.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </nav>
         {!panel && <QuestTracker client={client} compact={touch} />}
         <div
@@ -280,6 +322,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
           {panel === 'pets' && <PetPanel client={client} onClose={() => open(null)} />}
           {panel === 'arena' && <ArenaPanel client={client} onClose={() => open(null)} />}
           {panel === 'gems' && <GemShopPanel client={client} onClose={() => open(null)} />}
+          {panel === 'rift' && <RiftPanel client={client} onClose={() => open(null)} />}
           {panel === 'settings' && (
             <SettingsPanel client={client} onClose={() => open(null)} onLogout={() => void leave('/')} onSwitch={() => void leave('/characters')} />
           )}
@@ -343,6 +386,7 @@ function Overlay({ client, touch, onExit, badge }: { client: GameClient; touch: 
       <ProgressToasts client={client} openJournal={() => open('journal')} touch={touch} />
       <ArenaBanner client={client} />
       <DeathScreen client={client} />
+      <RiftHud client={client} />
       <TradeWindow client={client} />
       <ProfileWindow client={client} />
       <StallBrowseWindow client={client} />

@@ -158,6 +158,7 @@ export interface ServerToClientEvents {
   'quests': (quests: QuestState[]) => void;
   'arena': (ev: ArenaEvent) => void;
   'gems': (state: { balance: number }) => void;
+  'rift': (next: { floor: number; startsAt: number }) => void;
   'trade:invite': (from: { id: string; name: string }) => void;
   'invite': (invite: InvitePayload) => void;
   /** You unlocked an achievement. */
@@ -255,7 +256,13 @@ export interface ClientToServerEvents {
   'party:unpost': (ack: Ack<null>) => void;
   'party:join': (leaderId: string, ack: Ack<{ message: string }>) => void;
   'guild:quests': (ack: Ack<GuildQuestsView>) => void;
+  'guild:invest': (req: { gold: number }, ack: Ack<{ message: string }>) => void;
   'arena:get': (ack: Ack<ArenaView>) => void;
+  'rift:get': (npcId: string, ack: Ack<{ best: number; checkpoints: { floor: number; fee: number }[]; level: number }>) => void;
+  'rift:enter': (req: { npcId: string; floor: number }, ack: Ack<{ message: string }>) => void;
+  'rift:leave': (ack: Ack<null>) => void;
+  'exchange:get': (req: { which: string; npcId?: string }, ack: Ack<import('./exchange').ExchangeView>) => void;
+  'exchange:buy': (req: { which: string; offer: string; npcId?: string }, ack: Ack<import('./exchange').ExchangeView & { message: string }>) => void;
   'gems:get': (ack: Ack<import('./premium').GemShopState>) => void;
   'gems:checkout': (packId: string, ack: Ack<{ url: string; orderId: string }>) => void;
   'gems:buy': (cosmeticId: string, ack: Ack<import('./premium').GemShopState & { message: string }>) => void;

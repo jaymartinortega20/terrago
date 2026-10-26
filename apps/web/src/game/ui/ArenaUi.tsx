@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ARENA_MIN_LEVEL, ARENA_TIERS, arenaTier, formatDuration, type ArenaView } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
+import { ExchangeShop } from './ExchangeUi';
 import { Window } from './Window';
 
 const CLASS: Record<string, string> = { warrior: 'Warrior', mage: 'Mage', archer: 'Archer', acolyte: 'Acolyte' };
@@ -71,6 +72,7 @@ export function ArenaPanel({ client, onClose }: { client: GameClient; onClose: (
               </button>
             )}
           </div>
+          <ExchangeShop client={client} which="arena" />
           <h3 className="mt-3 font-bold">Season top 10</h3>
           <ol className="mt-1 space-y-0.5 text-sm" data-testid="arena-top">
             {!v.top.length && <li className="text-wood-dark/70">No ranked matches yet this season. Be the first!</li>}

@@ -327,7 +327,7 @@ export interface DialogueResult {
   actions?: DialogueAction[];
 }
 
-export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job' | 'enhance' | 'bounty';
+export type DialogueActionId = 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'quest_offer' | 'quest_complete' | 'bank' | 'job' | 'enhance' | 'bounty' | 'rift';
 
 export interface DialogueAction {
   id: DialogueActionId;
@@ -548,6 +548,9 @@ export interface GuildView {
   treasury: number;
   myRank: GuildRank;
   members: GuildMemberView[];
+  /** Guild progress. */
+  xp?: number;
+  level?: number;
 }
 
 export interface PlayerProfile {
@@ -622,7 +625,7 @@ export interface JournalView {
   resetsAt: number;
 }
 
-export const LEADERBOARDS = ['level', 'arena', 'wealth', 'achievements', 'boss_kills', 'farming', 'fishing', 'mining', 'woodcutting'] as const;
+export const LEADERBOARDS = ['level', 'arena', 'rift', 'wealth', 'achievements', 'boss_kills', 'farming', 'fishing', 'mining', 'woodcutting'] as const;
 export type LeaderboardId = (typeof LEADERBOARDS)[number];
 
 export interface LeaderboardRow {
@@ -848,4 +851,26 @@ export interface ArenaView {
 /** Server → client: match found, started, finished. */
 export type ArenaEvent =
   | { kind: 'found'; foe: { name: string; level: number; classId: string; rating: number }; startsAt: number; until: number }
-  | { kind: 'result'; won: boolean | null; delta: number; rating: number; gold: number };
+  | { kind: 'result'; won: boolean | null; delta: number; rating: number; gold: number; tokens?: number };
+
+// ---------------------------------------------------------------------------
+// Guild levels
+// ---------------------------------------------------------------------------
+
+/** Guild XP needed for each level (index = level - 1). */
+export const GUILD_LEVEL_XP = [0, 1000, 2500, 5000, 9000, 15000, 24000, 36000, 52000, 75000] as const;
+export const GUILD_MAX_LEVEL = GUILD_LEVEL_XP.length;
+/** Guild XP for finishing a weekly guild quest; investing turns treasury Gold into XP. */
+export const GUILD_QUEST_XP = 600;
+export const GUILD_INVEST_GOLD_PER_XP = 100;
+
+export function guildLevel(xp: number): number {
+  let l = 1;
+  for (let i = 0; i < GUILD_LEVEL_XP.length; i++) if (xp >= GUILD_LEVEL_XP[i]!) l = i + 1;
+  return l;
+}
+
+/** Perks every member gets: +1% EXP per level, +1% Gold per level from level 3. */
+export function guildPerks(level: number): { xpPct: number; goldPct: number } {
+  return { xpPct: level, goldPct: Math.max(0, level - 2) };
+}

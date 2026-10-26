@@ -16,9 +16,12 @@ import {
   PARTY_ACTIVITIES,
   type PartyActivity,
   type PartyListing,
+  GUILD_INVEST_GOLD_PER_XP,
+  guildLevel,
 } from '@terrago/shared';
 import { GameError } from '../db';
 import * as db from '../services/social';
+import { forgetGuildLevel } from './guildQuests';
 import type { Player } from '../world/player';
 import type { World } from '../world/world';
 import { pushInventory, type GameplayDeps } from './gameplay';
@@ -456,6 +459,14 @@ export const guild = {
     if (inv) pushInventory(deps.world, p, { ...inv, gold: res.gold });
     await pushGuild(deps, g.id, amount > 0 ? `${p.name} deposited ${amount.toLocaleString()} Gold.` : `${p.name} withdrew ${(-amount).toLocaleString()} Gold.`);
     return { message: `Treasury: ${res.treasury.toLocaleString()} Gold.` };
+  },
+  async invest(deps: GameplayDeps, p: Player, req: unknown): Promise<{ message: string }> {
+    const g = myGuild(p);
+    const gold = Math.floor(Number((req as { gold?: unknown } | null)?.gold));
+    const res = await db.investTreasury(deps.pool, g.id, p.id, gold, GUILD_INVEST_GOLD_PER_XP);
+    forgetGuildLevel(g.id);
+    await pushGuild(deps, g.id, `${p.name} invested treasury Gold: guild XP is now ${res.xp.toLocaleString()} (level ${guildLevel(res.xp)}).`);
+    return { message: `Invested. Treasury: ${res.treasury.toLocaleString()} Gold.` };
   },
   async motd(deps: GameplayDeps, p: Player, text: unknown): Promise<null> {
     const g = myGuild(p);

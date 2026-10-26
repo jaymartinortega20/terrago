@@ -589,7 +589,7 @@ export class World {
       tickRate: SIM.tickRate,
       snapshotRate: SIM.tickRate / SIM.snapshotEveryTicks,
       self,
-      map: { id: rt.def.id, name: rt.owner && !rt.def.dungeon && !rt.def.arena ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
+      map: { id: rt.def.id, name: rt.owner && !rt.def.dungeon && !rt.def.arena && !rt.def.rift ? `${rt.owner.name}'s ${rt.def.name}` : rt.def.name, safeZone: rt.def.safeZone, owner: rt.owner },
       position: { x: p.x, y: p.y, dir: p.dir },
       npcs: rt.npcs.map(toNpcPublic),
       inventory,

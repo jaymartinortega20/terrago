@@ -59,6 +59,10 @@ export const MOUNT_STYLES: readonly MountStyleDef[] = [
   { id: 'trail_ember', slot: 'trail', name: 'Ember Trail', color: '#ff7a2a', price: 12000 },
   { id: 'trail_frost', slot: 'trail', name: 'Frost Trail', color: '#9ae0ff', price: 12000 },
   { id: 'trail_void', slot: 'trail', name: 'Void Trail', color: '#a050ff', price: 30000 },
+  // Earned only (arena tokens, Endless Rift)
+  { id: 'barding_champion', slot: 'barding', name: "Champion's Barding", color: '#8a1a2a', price: -2 },
+  { id: 'trail_victory', slot: 'trail', name: 'Victory Trail', color: '#f2c14e', price: -2 },
+  { id: 'saddle_rift', slot: 'saddle', name: 'Riftbound Saddle', color: '#7af0ff', price: -2 },
   // Gem Shop only
   { id: 'saddle_starlight', slot: 'saddle', name: 'Starlight Saddle', color: '#9ab8ff', price: -1 },
   { id: 'barding_dragonscale', slot: 'barding', name: 'Dragonscale Barding', color: '#c0302a', price: -1 },

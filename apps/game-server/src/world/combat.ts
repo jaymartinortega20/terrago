@@ -209,6 +209,14 @@ export class Combat {
     m.hp = m.stats.maxHp;
   }
 
+  /** Force an Elite (the Endless Rift's tougher floors). */
+  makeElite(m: Monster): void {
+    if (m.elite) return;
+    m.elite = true;
+    m.stats = { ...m.stats, maxHp: m.stats.maxHp * 3, atk: Math.round(m.stats.atk * 1.5), xp: m.stats.xp * 4 };
+    m.hp = m.stats.maxHp;
+  }
+
   private emit(rt: MapRuntime, e: CombatEvent): void {
     let list = this.pending.get(rt);
     if (!list) this.pending.set(rt, (list = []));

@@ -15,7 +15,7 @@ const label = (reason: string) => reason.replace(/_/g, ' ');
 
 interface Economy {
   days: number;
-  totals: { created: number; removed: number; net: number; supply: number; playerGold: number; guildGold: number; holders: number };
+  totals: { created: number; removed: number; net: number; supply: number; playerGold: number; guildGold: number; holders: number; gems?: number; gemsBought30d?: number };
   sources: { reason: string; amount: number }[];
   sinks: { reason: string; amount: number }[];
   daily: { day: string; created: number; removed: number }[];
@@ -138,6 +138,7 @@ export function EconomyTab({ onPlayer }: { onPlayer: (id: string) => void }) {
         <Tile k="Gold removed" v={n(t.removed)} note="repairs, fees, taxes…" />
         <Tile k="Net change" v={`${t.net >= 0 ? '+' : '−'}${n(Math.abs(t.net))}`} note={t.net > 0 ? 'inflation: more in than out' : 'deflation: more out than in'} />
         <Tile k="Gold in circulation" v={n(t.supply)} note={`${n(t.playerGold)} players · ${n(t.guildGold)} guilds`} />
+        <Tile k="Gems held" v={n(t.gems ?? 0)} note={`${n(t.gemsBought30d ?? 0)} bought in 30 days`} />
       </div>
 
       <div className="mt-3 grid gap-3 md:grid-cols-2">

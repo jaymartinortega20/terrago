@@ -33,6 +33,8 @@ import { loadCompanions, pets, stable, syncCompanion, toggleMount } from './comp
 import * as social from './social';
 import * as journal from './journal';
 import { arena } from './arena';
+import { rift } from './rift';
+import { exchange } from './exchange';
 import { bounties } from './bounties';
 import { claimGuildQuest, guildQuestsView } from './guildQuests';
 import * as eco from './economy';
@@ -455,6 +457,11 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('party:join', (id, ack) => respond(ack, () => social.partyFinder.join(g, p, id)));
     socket.on('guild:quests', (ack) => respond(ack, () => guildQuestsView(g, p)));
     socket.on('arena:get', (ack) => respond(ack, () => arena.get(g, p)));
+    socket.on('rift:get', (npcId, ack) => respond(ack, () => rift.get(g, p, npcId)));
+    socket.on('rift:enter', (req, ack) => serial(ack, () => rift.enter(g, p, req)));
+    socket.on('rift:leave', (ack) => serial(ack, () => rift.leave(g, p)));
+    socket.on('exchange:get', (req, ack) => respond(ack, () => exchange.get(g, p, req)));
+    socket.on('exchange:buy', (req, ack) => serial(ack, () => exchange.buy(g, p, req)));
     socket.on('arena:queue', (ack) => serial(ack, () => arena.join(g, p)));
     socket.on('arena:leave', (ack) => serial(ack, () => arena.leave(g, p)));
     socket.on('guild:questClaim', (id, ack) => serial(ack, () => claimGuildQuest(g, p, id)));
@@ -475,6 +482,7 @@ export function attachSockets(httpServer: HttpServer, deps: Deps): GameIo {
     socket.on('guild:rank', (req, ack) => serial(ack, () => social.guild.rank(g, p, req)));
     socket.on('guild:treasury', (req, ack) => serial(ack, () => social.guild.treasury(g, p, req)));
     socket.on('guild:motd', (text, ack) => serial(ack, () => social.guild.motd(g, p, text)));
+    socket.on('guild:invest', (req, ack) => serial(ack, () => social.guild.invest(g, p, req)));
     socket.on('quest:accept', (req, ack) => serial(ack, () => questServices.accept(g, p, req)));
     socket.on('bounty:board', (npcId, ack) => respond(ack, () => bounties.get(g, p, npcId)));
     socket.on('bounty:accept', (req, ack) => serial(ack, () => bounties.accept(g, p, req)));

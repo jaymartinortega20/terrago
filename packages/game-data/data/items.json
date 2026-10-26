@@ -6029,5 +6029,50 @@
   "tradable": true,
   "bind": "none",
   "maxDurability": null
+ },
+ {
+  "id": "arena_token",
+  "name": "Arena Token",
+  "description": "Earned in ranked arena matches (3 for a win, 1 for a loss). Spend them in the Arena window.",
+  "icon": "gem:f2c14e",
+  "category": "quest",
+  "rarity": "rare",
+  "stackSize": 9999,
+  "vendorValue": 0,
+  "levelRequirement": 1,
+  "tradable": false,
+  "bind": "pickup",
+  "maxDurability": null,
+  "weight": 0
+ },
+ {
+  "id": "bounty_seal",
+  "name": "Bounty Seal",
+  "description": "Earned by handing in bounties (1 / 2 / 4 by difficulty). Trade them at any bounty board.",
+  "icon": "gem:c08a4a",
+  "category": "quest",
+  "rarity": "uncommon",
+  "stackSize": 9999,
+  "vendorValue": 0,
+  "levelRequirement": 1,
+  "tradable": false,
+  "bind": "pickup",
+  "maxDurability": null,
+  "weight": 0
+ },
+ {
+  "id": "rift_shard",
+  "name": "Rift Shard",
+  "description": "Found on the floors of the Endless Rift. Trade them with the Rift Keeper.",
+  "icon": "gem:7af0ff",
+  "category": "quest",
+  "rarity": "epic",
+  "stackSize": 9999,
+  "vendorValue": 0,
+  "levelRequirement": 1,
+  "tradable": false,
+  "bind": "pickup",
+  "maxDurability": null,
+  "weight": 0
  }
 ]

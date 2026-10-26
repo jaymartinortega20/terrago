@@ -79,7 +79,7 @@ export function unspentStatPoints(rec: CharacterRecord): number {
 export function sanitizePosition(rec: CharacterRecord): CharacterRecord {
   let map = getMap(rec.mapId);
   // Nobody stays in an arena between sessions.
-  if (!map || map.arena) {
+  if (!map || map.arena || map.rift) {
     map = getMap(BALANCE.character.startingMap)!;
     rec.mapId = map.id;
     rec.x = NaN; // go to the town spawn

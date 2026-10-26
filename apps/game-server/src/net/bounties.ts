@@ -17,7 +17,7 @@ import { queue } from './journal';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-interface Candidate {
+export interface Candidate {
   monsterId: string;
   map: string;
   x: number;
@@ -27,7 +27,7 @@ interface Candidate {
 }
 
 /** Every regular (non-boss) monster spawn on the open maps. */
-const CANDIDATES: Candidate[] = (() => {
+export const CANDIDATES: Candidate[] = (() => {
   const out: Candidate[] = [];
   const seen = new Set<string>();
   for (const m of Object.values(MAPS)) {
@@ -58,6 +58,8 @@ export function bountyReward(level: number, idx: number): BountyView['reward'] {
   const gold = Math.round(level * 14 * tens * t.mult);
   const xp = Math.round((level * level * 1.6 + 60) * tens * t.mult);
   const items = idx === 2 ? [{ itemId: 'enhancement_stone', quantity: 1 + Math.floor(level / 35) }] : idx === 1 && level >= 10 ? [{ itemId: 'minor_health_potion', quantity: 2 }] : [];
+  // Bounty Seals: the bounty board's own currency (Seal Exchange).
+  items.push({ itemId: 'bounty_seal', quantity: [1, 2, 4][idx]! });
   return { gold, xp, items };
 }
 

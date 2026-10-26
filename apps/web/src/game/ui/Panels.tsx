@@ -545,6 +545,15 @@ export const MENU: { id: Exclude<Panel, null> | string; label: string; key: stri
   { id: 'settings', label: 'Settings', key: 'Esc' },
 ];
 
+/** Desktop menu groups (phones list everything in one sheet). */
+export const MENU_GROUPS: { id: string; label: string; icon: string; ids: string[] }[] = [
+  { id: 'hero', label: 'Character', icon: 'character', ids: ['character', 'inventory', 'skills', 'pets', 'stable'] },
+  { id: 'world', label: 'World', icon: 'map', ids: ['quests', 'map', 'journal', 'crafting', 'arena'] },
+  { id: 'social', label: 'Social', icon: 'friends', ids: ['friends', 'guild', 'market'] },
+  { id: 'shop', label: 'Gem Shop', icon: 'gems', ids: ['gems'] },
+  { id: 'settings', label: 'Settings', icon: 'settings', ids: ['settings'] },
+];
+
 /** Which menu buttons this character has unlocked. */
 export function menuUnlocked(m: (typeof MENU)[number], level: number, questsDone: number): boolean {
   if (m.minLevel && level < m.minLevel) return false;

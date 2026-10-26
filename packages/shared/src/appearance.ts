@@ -57,6 +57,9 @@ export const OUTFITS: readonly OutfitPalette[] = [
   { name: 'Dragon Emperor', shirt: '#b0201a', shirtShade: '#7a1410', pants: '#2a1a14', shoes: '#140c0c', accent: '#ffd34a', robe: true, exclusive: true, extras: ['crown', 'cape'] },
   { name: 'Frost Monarch', shirt: '#bfeaff', shirtShade: '#8ac8f0', pants: '#5fa0d0', shoes: '#2f4a6a', accent: '#ffffff', robe: false, exclusive: true, extras: ['crown', 'cape'] },
   { name: 'Golden Paladin', shirt: '#ffd34a', shirtShade: '#c89a20', pants: '#e8e8f0', shoes: '#8a6420', accent: '#ffffff', robe: false, exclusive: true, extras: ['helmet', 'cape'] },
+  // --- Earned skins (arena, Endless Rift) ---
+  { name: 'Arena Champion', shirt: '#8a1a2a', shirtShade: '#5a101a', pants: '#2a2028', shoes: '#14100c', accent: '#f2c14e', robe: false, exclusive: true, extras: ['helmet', 'cape'] },
+  { name: 'Rift Walker', shirt: '#2a1a4a', shirtShade: '#1a1030', pants: '#140c24', shoes: '#0a0814', accent: '#7af0ff', robe: true, exclusive: true, extras: ['hood', 'cape'] },
 ] as const;
 
 /** Outfits anyone can pick when creating a character (the rest are exclusive skins). */

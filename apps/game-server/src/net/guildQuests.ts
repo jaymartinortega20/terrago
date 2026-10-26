@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { GUILD_QUESTS, GUILD_QUEST_TREASURY, guildQuestReward, guildWeek, type GuildQuestDef, type GuildQuestEvent, type GuildQuestsView } from '@terrago/shared';
+import { GUILD_QUESTS, GUILD_QUEST_TREASURY, GUILD_QUEST_XP, guildLevel, guildQuestReward, guildWeek, type GuildQuestDef, type GuildQuestEvent, type GuildQuestsView } from '@terrago/shared';
 import { GameError, withTransaction } from '../db';
 import { grantKillRewards } from '../services/equipment';
 import type { Player } from '../world/player';
@@ -43,7 +43,8 @@ export async function guildQuestEvent(deps: GameplayDeps, p: Player, event: Guil
       );
       if (rows[0].progress < rows[0].goal) return false;
       await tx.query(`UPDATE guild_quests SET completed_at = now() WHERE guild_id = $1 AND week = $2 AND quest_id = $3`, [g.id, week, q.id]);
-      await tx.query(`UPDATE guilds SET treasury = treasury + $2 WHERE id = $1`, [g.id, GUILD_QUEST_TREASURY]);
+      await tx.query(`UPDATE guilds SET treasury = treasury + $2, xp = xp + $3 WHERE id = $1`, [g.id, GUILD_QUEST_TREASURY, GUILD_QUEST_XP]);
+      levelCache.delete(g.id);
       return true;
     });
     if (done) {
@@ -54,7 +55,7 @@ export async function guildQuestEvent(deps: GameplayDeps, p: Player, event: Guil
           channel: 'guild',
           fromId: null,
           fromName: g.tag,
-          text: `🏆 Guild quest complete: ${q.text}! +${GUILD_QUEST_TREASURY.toLocaleString()} Gold to the treasury. Everyone who helped: collect your reward in the Guild window.`,
+          text: `🏆 Guild quest complete: ${q.text}! +${GUILD_QUEST_TREASURY.toLocaleString()} Gold to the treasury and +${GUILD_QUEST_XP} guild XP. Everyone who helped: collect your reward in the Guild window.`,
           ts: Date.now(),
         });
       }
@@ -108,4 +109,27 @@ export async function claimGuildQuest(deps: GameplayDeps, p: Player, questId: un
   pushInventory(deps.world, p, res.inventory);
   applyDelta(deps.world, p, res.delta);
   return { view: await guildQuestsView(deps, p), message: `Guild reward: +${r.gold.toLocaleString()} Gold, +${r.xp.toLocaleString()} XP` };
+}
+
+// ---------------------------------------------------------------------------
+// Guild level (cached; perks apply to every kill)
+// ---------------------------------------------------------------------------
+
+const levelCache = new Map<number, { level: number; at: number }>();
+
+/** A guild's level from the cache (refreshed in the background every minute). */
+export function guildLevelOf(deps: GameplayDeps, guildId: number): number {
+  const c = levelCache.get(guildId);
+  if (!c || Date.now() - c.at > 60_000) {
+    levelCache.set(guildId, { level: c?.level ?? 1, at: Date.now() });
+    void deps.pool
+      .query<{ xp: string }>(`SELECT xp FROM guilds WHERE id = $1`, [guildId])
+      .then(({ rows }) => levelCache.set(guildId, { level: guildLevel(Number(rows[0]?.xp ?? 0)), at: Date.now() }))
+      .catch(() => levelCache.delete(guildId));
+  }
+  return c?.level ?? 1;
+}
+
+export function forgetGuildLevel(guildId: number): void {
+  levelCache.delete(guildId);
 }

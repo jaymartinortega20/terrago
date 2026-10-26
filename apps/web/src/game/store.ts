@@ -31,7 +31,7 @@ export function useStore<T extends object, S>(store: Store<T>, select: (s: T) =>
   );
 }
 
-export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | 'arena' | 'gems' | null;
+export type Panel = 'inventory' | 'character' | 'skills' | 'quests' | 'map' | 'settings' | 'shop' | 'farm' | 'repair' | 'craft' | 'lift' | 'enhance' | 'market' | 'friends' | 'guild' | 'journal' | 'crafting' | 'bank' | 'travel' | 'stall' | 'animals' | 'dungeon' | 'job' | 'stable' | 'pets' | 'bounty' | 'arena' | 'gems' | 'rift' | null;
 export type ConnStatus = 'connecting' | 'online' | 'reconnecting' | 'ended' | 'error';
 
 export interface Notice {
@@ -111,6 +111,8 @@ export interface UiState {
   death: { by: string; at: number } | null;
   /** Do not disturb (fewer pop-ups). */
   dnd: boolean;
+  /** Endless Rift: the next floor and when it starts. */
+  riftNext: { floor: number; startsAt: number } | null;
   /** Text to put in the chat box (e.g. "/w Name "). */
   chatDraft: string | null;
   /** Fishing in progress. */
@@ -188,6 +190,7 @@ export const initialUi: UiState = {
   announcement: null,
   death: null,
   dnd: false,
+  riftNext: null,
 };
 
 let noticeId = 0;

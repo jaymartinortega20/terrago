@@ -11,6 +11,7 @@ import { EventBadge, WorldBossBadge } from './Atmosphere';
 const BOARD_LABEL: Record<LeaderboardId, string> = {
   level: 'Level',
   arena: 'Arena',
+  rift: 'Rift',
   wealth: 'Gold',
   achievements: 'Achievements',
   boss_kills: 'Boss kills',

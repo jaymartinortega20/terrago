@@ -17,6 +17,7 @@ import { SecurityEvents } from './security/events';
 import { savePositions } from './services/characters';
 import { chatCommand, onLeave as socialLeave } from './net/social';
 import { arenaOnLeave, onArenaDuelEnd, startArena } from './net/arena';
+import { startRiftJanitor } from './net/rift';
 import { track } from './net/journal';
 import { startEventDirector } from './net/events';
 import { AntiBot, setAntiBot } from './security/antibot';
@@ -126,6 +127,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
   rainTimer.unref();
   const stopEvents = startEventDirector({ pool, world, log });
   const stopArena = startArena({ pool, world, log });
+  const stopRift = startRiftJanitor({ pool, world, log });
 
   await new Promise<void>((resolve) => http.listen(config.port, config.host, resolve));
   const addr = http.address();
@@ -151,6 +153,7 @@ export async function startGameServer(config: Config, log: Logger): Promise<Game
         bots.stop();
         stopEvents();
         stopArena();
+        stopRift();
         await world.shutdown();
         io.close();
         await chatLog.close();

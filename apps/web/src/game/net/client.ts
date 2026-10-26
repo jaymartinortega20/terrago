@@ -304,6 +304,7 @@ export class GameClient {
     socket.on('self:update', (patch) => this.ui.set((s) => ({ self: s.self ? { ...s.self, ...patch } : s.self })));
     socket.on('pet:update', (pet) => this.ui.set({ pet }));
     socket.on('gems', ({ balance }) => this.ui.set({ gems: balance }));
+    socket.on('rift', (next) => this.ui.set({ riftNext: next }));
     socket.on('arena', (ev) => {
       this.ui.set({ arena: ev, ...(ev.kind === 'found' ? { panel: null, autoWalk: null } : {}) });
       audio.sfx(ev.kind === 'found' ? 'open' : ev.won ? 'achievement' : 'click');
@@ -677,6 +678,58 @@ export class GameClient {
     } catch (e) {
       pushNotice(this.ui, 'error', (e as Error).message);
       return null;
+    }
+  }
+
+  exchangeGet(which: string, npcId?: string): Promise<import('@terrago/shared').ExchangeView> {
+    return this.request('exchange:get', { which, ...(npcId ? { npcId } : {}) });
+  }
+
+  async exchangeBuy(which: string, offer: string, npcId?: string): Promise<import('@terrago/shared').ExchangeView | null> {
+    try {
+      const r = await this.request<import('@terrago/shared').ExchangeView & { message: string }>('exchange:buy', { which, offer, ...(npcId ? { npcId } : {}) });
+      audio.sfx('achievement');
+      pushNotice(this.ui, 'success', r.message, 3500);
+      return r;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return null;
+    }
+  }
+
+  riftGet(npcId: string): Promise<{ best: number; checkpoints: { floor: number; fee: number }[]; level: number }> {
+    return this.request('rift:get', npcId);
+  }
+
+  async riftEnter(npcId: string, floor: number): Promise<boolean> {
+    try {
+      await this.request('rift:enter', { npcId, floor });
+      this.ui.set({ riftNext: null });
+      return true;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return false;
+    }
+  }
+
+  async riftLeave(): Promise<void> {
+    try {
+      await this.request('rift:leave');
+      this.ui.set({ riftNext: null });
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+    }
+  }
+
+  async guildInvest(gold: number): Promise<boolean> {
+    try {
+      const r = await this.request<{ message: string }>('guild:invest', { gold });
+      pushNotice(this.ui, 'success', r.message, 3000);
+      void this.loadGuild();
+      return true;
+    } catch (e) {
+      pushNotice(this.ui, 'error', (e as Error).message);
+      return false;
     }
   }
 

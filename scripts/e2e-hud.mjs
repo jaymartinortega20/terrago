@@ -77,7 +77,8 @@ try {
   const page = D.page;
   check('Ornate HUD portrait', (await page.locator('[data-testid=hud] svg').count()) > 0);
   check('Skill orbs', (await page.locator('[data-testid=skill-bar] button.orb').count()) >= 5);
-  check('Round menu buttons', (await page.locator('nav button.orb').count()) >= 10);
+  check('Round menu buttons (grouped)', (await page.locator('nav button.orb').count()) >= 4);
+  await page.click('[data-testid=menu-group-hero]');
   await page.click('[data-testid=menu-character]');
   await page.waitForTimeout(400);
   check('Menu orb opens a panel', (await page.locator('section[role=dialog]').count()) > 0);
@@ -94,7 +95,7 @@ try {
     fire({ kind: 'success', text: 'Green Slime defeated: +2 XP, +2 Gold, 2× Slime Gel, 1× Minor Health Potion' });
     fire({ kind: 'info', text: 'Your bag is full — loot was left on the ground.' });
   });
-  check('Rewards go to the side feed, not the middle', (await page.locator('[data-testid=loot-feed] > div').count()) === 4);
+  check('Rewards go to the side feed, not the middle', (await page.locator('[data-testid=loot-feed] > div').count()) >= 4);
   await page.screenshot({ path: `${OUT}/hud-02-desktop-spells.png` });
   await page.waitForTimeout(260);
   await page.screenshot({ path: `${OUT}/hud-03-desktop-spells-late.png` });

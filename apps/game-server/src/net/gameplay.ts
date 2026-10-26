@@ -30,6 +30,7 @@ import {
   affixText,
   worldBossBonus,
   effectMult,
+  guildPerks,
 } from '@terrago/shared';
 import { getClass } from '@terrago/game-data';
 import { GameError, type Pool } from '../db';
@@ -50,6 +51,8 @@ import { antibot } from '../security/antibot';
 import { deathPenalty, enhance, equip, rerollGear, grantKillRewards, pickUp, unequip, wearEquipment } from '../services/equipment';
 import type { CombatHooks } from '../world/combat';
 import { bountyKill } from './bounties';
+import { guildLevelOf } from './guildQuests';
+import { riftOnKill } from './rift';
 import { acceptQuest, completeQuest, loadQuests, npcQuestActions, questEvent as questEventTx } from '../services/quests';
 import { getNpc as findNpc } from '../services/npcs';
 import { buyListing, cancelListing, createListing, myListings, searchMarket } from '../services/market';
@@ -414,7 +417,7 @@ export async function onMapEntered(deps: GameplayDeps, p: Player): Promise<void>
 // NPC services
 // ---------------------------------------------------------------------------
 
-export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job' | 'enhance' | 'bounty') {
+export function npcService(world: World, p: Player, npcId: unknown, service: 'shop' | 'farm_upgrade' | 'repair' | 'lift' | 'bank' | 'job' | 'enhance' | 'bounty' | 'rift') {
   const npc = getNpc(npcId);
   if (!npc || !npcOffers(npc, service)) throw new GameError("They can't help with that.");
   if (!world.npcInRange(p, npc)) throw new GameError("You're too far away.");
@@ -539,6 +542,8 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
   return {
     partyOf,
     onKill: (rewards) => {
+      // Endless Rift: was that the last monster on the floor?
+      if (rewards[0]) riftOnKill(deps(), deps().world.runtimeOf(rewards[0].player));
       const wb = rewards[0]?.monster.def.worldBoss ? rewards[0].monster : null;
       if (wb) {
         const top = [...new Map(rewards.map((r) => [r.player.id, r])).values()].sort((a, b) => (a.dmgRank ?? 99) - (b.dmgRank ?? 99)).slice(0, 3);
@@ -566,6 +571,12 @@ export function combatHooks(deps: () => GameplayDeps): CombatHooks {
             // Pet perks: small, never game-breaking.
             const perk = r.player.pet ? getItem(r.player.pet)?.pet?.perk : undefined;
             if (perk === 'xp') r.xp = Math.round(r.xp * 1.05);
+            // Guild perks: +1% EXP per guild level, +1% Gold per level from level 3.
+            if (r.player.guild) {
+              const gp = guildPerks(guildLevelOf(d, r.player.guild.id));
+              r.xp = Math.round(r.xp * (1 + gp.xpPct / 100));
+              r.gold = Math.round(r.gold * (1 + gp.goldPct / 100));
+            }
             if (perk === 'dragon') r.xp = Math.round(r.xp * 1.1);
             if (perk === 'gold') r.gold = Math.round(r.gold * 1.1);
             if (perk === 'dragon') r.gold = Math.round(r.gold * 1.05);

@@ -63,6 +63,8 @@ describe('ranked arena', () => {
     assert.equal(ra.rating, 1000 + d);
     assert.equal(rb.rating, 1000 - d);
     assert.ok(ra.gold > 0 && rb.gold === 0);
+    assert.equal(ra.tokens, 3, 'winner: 3 Arena Tokens');
+    assert.equal(rb.tokens, 1, 'loser: 1 Arena Token');
     const rows = await db.query(`SELECT character_id, rating, wins, losses FROM arena_ratings ORDER BY rating DESC`);
     assert.deepEqual(rows.rows.map((r) => [r.character_id, r.rating, r.wins, r.losses]), [
       [A.p.id, 1000 + d, 1, 0],

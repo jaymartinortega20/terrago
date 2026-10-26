@@ -165,12 +165,14 @@ async function settle(deps: GameplayDeps, a: Player, b: Player, winner: Player |
     const res = results.get(p.id)!;
     const won = winner ? winner === p : null;
     const gold = won ? 50 + p.rec.level * 10 : 0;
-    if (gold && deps.world.players.get(p.id) === p) {
-      const g = await grantKillRewards(deps.pool, p.id, { xp: 0, gold, items: [], monster: 'arena' }, 'achievement');
+    // Arena Tokens for everyone who fought: 3 for a win, 2 for a draw, 1 for a loss.
+    const tokens = won ? 3 : won === null ? 2 : 1;
+    if (deps.world.players.get(p.id) === p) {
+      const g = await grantKillRewards(deps.pool, p.id, { xp: 0, gold, items: [{ itemId: 'arena_token', quantity: tokens }], monster: 'arena' }, 'achievement');
       pushInventory(deps.world, p, g.inventory);
       applyDelta(deps.world, p, g.delta);
     }
-    p.conn?.send('arena', { kind: 'result', won, delta: res.delta, rating: res.rating, gold });
+    p.conn?.send('arena', { kind: 'result', won, delta: res.delta, rating: res.rating, gold, tokens });
     p.conn?.send('notice', {
       kind: won ? 'success' : 'info',
       text: won === null ? `Arena: a draw. Rating ${res.rating}.` : `Arena: ${won ? 'Victory' : 'Defeat'}! ${res.delta >= 0 ? '+' : ''}${res.delta} rating (${res.rating}, ${arenaTier(res.rating).name}).`,

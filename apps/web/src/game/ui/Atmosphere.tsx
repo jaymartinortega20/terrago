@@ -115,12 +115,10 @@ export function WorldBossBadge({ client }: { client: GameClient }) {
 
 /** One badge for timed things: a live world boss wins; otherwise event and boss timers take turns. */
 export function TimersBadge({ client }: { client: GameClient }) {
-  const now = useNow(client, 5000);
+  const now = useNow(client, 2000);
   const live = !!currentWorldBoss(now);
-  const event = !!currentEvent(now);
   const turn = Math.floor(now / 6000) % 2;
   if (live) return <WorldBossBadge client={client} />;
-  if (event) return <EventBadge client={client} />;
   return turn ? <WorldBossBadge client={client} /> : <EventBadge client={client} />;
 }
 

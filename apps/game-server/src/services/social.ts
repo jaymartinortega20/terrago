@@ -1,4 +1,5 @@
 import type { ClassId, FriendEntry, GuildRank, GuildView, PlayerProfile } from '@terrago/shared';
+import { guildLevel } from '@terrago/shared';
 import { GameError, isUniqueViolation, withTransaction, type Pool, type Tx } from '../db';
 import { lockCharacter } from './inventory';
 import { changeGold } from './ledger';
@@ -170,7 +171,7 @@ export async function createGuild(pool: Pool, leaderId: string, name: string, ta
 
 export async function guildView(pool: Pool, guildId: number, me: string): Promise<Omit<GuildView, 'members'> & { members: Omit<GuildView['members'][number], 'online'>[] }> {
   const [g, m] = await Promise.all([
-    pool.query(`SELECT id, name, tag, motd, treasury FROM guilds WHERE id = $1`, [guildId]),
+    pool.query(`SELECT id, name, tag, motd, treasury, xp FROM guilds WHERE id = $1`, [guildId]),
     pool.query(
       `SELECT c.id, c.name, c.level, c.class_id, m.rank FROM guild_members m JOIN characters c ON c.id = m.character_id
         WHERE m.guild_id = $1 ORDER BY CASE m.rank WHEN 'leader' THEN 0 WHEN 'officer' THEN 1 ELSE 2 END, lower(c.name)`,
@@ -180,7 +181,7 @@ export async function guildView(pool: Pool, guildId: number, me: string): Promis
   const r = g.rows[0];
   if (!r) throw new GameError('That guild no longer exists.');
   const members = m.rows.map((x) => ({ id: x.id, name: x.name, level: x.level, classId: x.class_id as ClassId, rank: x.rank as GuildRank }));
-  return { id: Number(r.id), name: r.name, tag: r.tag, motd: r.motd, treasury: Number(r.treasury), myRank: members.find((x) => x.id === me)?.rank ?? 'member', members };
+  return { id: Number(r.id), name: r.name, tag: r.tag, motd: r.motd, treasury: Number(r.treasury), xp: Number(r.xp), level: guildLevel(Number(r.xp)), myRank: members.find((x) => x.id === me)?.rank ?? 'member', members };
 }
 
 async function rankOf(tx: Tx, guildId: number, id: string): Promise<GuildRank | null> {
@@ -276,4 +277,22 @@ export async function setMotd(pool: Pool, guildId: number, id: string, text: str
   const { rows } = await pool.query(`SELECT rank FROM guild_members WHERE guild_id = $1 AND character_id = $2`, [guildId, id]);
   if (!rows[0] || rows[0].rank === 'member') throw new GameError('Only officers can change the message of the day.');
   await pool.query(`UPDATE guilds SET motd = $2 WHERE id = $1`, [guildId, String(text ?? '').slice(0, 200)]);
+}
+
+/** Officers turn treasury Gold into guild XP (a Gold sink that levels the guild). */
+export async function investTreasury(pool: Pool, guildId: number, id: string, gold: number, goldPerXp: number): Promise<{ xp: number; treasury: number }> {
+  if (!Number.isSafeInteger(gold) || gold < goldPerXp || gold > 1e9) throw new GameError(`Invest at least ${goldPerXp} Gold.`);
+  return withTransaction(pool, async (tx) => {
+    const g = await tx.query(`SELECT treasury, xp FROM guilds WHERE id = $1 FOR UPDATE`, [guildId]);
+    if (!g.rows[0]) throw new GameError('That guild no longer exists.');
+    const rank = await rankOf(tx, guildId, id);
+    if (rank !== 'leader' && rank !== 'officer') throw new GameError('Only officers and the leader can invest the treasury.');
+    const spend = gold - (gold % goldPerXp);
+    if (Number(g.rows[0].treasury) < spend) throw new GameError('The treasury does not have that much.');
+    const xp = Number(g.rows[0].xp) + spend / goldPerXp;
+    const treasury = Number(g.rows[0].treasury) - spend;
+    await tx.query(`UPDATE guilds SET treasury = $2, xp = $3 WHERE id = $1`, [guildId, treasury, xp]);
+    await tx.query(`INSERT INTO guild_treasury_logs (guild_id, character_id, amount) VALUES ($1, $2, $3)`, [guildId, id, -spend]);
+    return { xp, treasury };
+  });
 }

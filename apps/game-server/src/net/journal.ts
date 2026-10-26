@@ -174,6 +174,8 @@ const QUERIES: Record<LeaderboardId, string> = {
   level: `SELECT c.id, c.name, c.class_id, c.level, c.xp AS value FROM characters c WHERE c.deleted_at IS NULL ORDER BY c.level DESC, c.xp DESC LIMIT 50`,
   arena: `SELECT c.id, c.name, c.class_id, c.level, r.rating AS value FROM characters c JOIN arena_ratings r ON r.character_id = c.id
           WHERE c.deleted_at IS NULL AND r.season = to_char(now() AT TIME ZONE 'utc', 'YYYY-MM') AND r.wins + r.losses > 0 ORDER BY r.rating DESC, r.wins DESC LIMIT 50`,
+  rift: `SELECT c.id, c.name, c.class_id, c.level, max(r.floor) AS value FROM characters c JOIN rift_runs r ON r.character_id = c.id
+          WHERE c.deleted_at IS NULL GROUP BY c.id ORDER BY value DESC, min(r.created_at) LIMIT 50`,
   wealth: `SELECT c.id, c.name, c.class_id, c.level, c.gold AS value FROM characters c WHERE c.deleted_at IS NULL ORDER BY c.gold DESC LIMIT 50`,
   achievements: `SELECT c.id, c.name, c.class_id, c.level, count(a.*) AS value FROM characters c JOIN character_achievements a ON a.character_id = c.id
                  WHERE c.deleted_at IS NULL GROUP BY c.id ORDER BY value DESC, min(a.unlocked_at) LIMIT 50`,

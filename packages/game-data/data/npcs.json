@@ -571,5 +571,41 @@
   "services": [
    "bounty"
   ]
+ },
+ {
+  "id": "rift_keeper_sera",
+  "name": "Rift Keeper Sera",
+  "title": "The Endless Rift",
+  "mapId": "greenhaven",
+  "x": 38,
+  "y": 12,
+  "dir": "down",
+  "appearance": {
+   "bodyType": "b",
+   "skinTone": 1,
+   "hairStyle": 1,
+   "hairColor": 6,
+   "eyeColor": 4,
+   "outfit": 4
+  },
+  "accessory": "hood",
+  "firstMeeting": {
+   "lines": [
+    "You feel it too? The old altar hums at night. There's a crack in the world behind it \u2014 the Rift.",
+    "Every floor down is harder than the last, and nobody has found the bottom.",
+    "Go as deep as you dare. Bring friends. Bring food. I'll trade for the shards you find."
+   ]
+  },
+  "greetings": [
+   [
+    "The Rift is restless today."
+   ],
+   [
+    "How deep did you get last time?"
+   ]
+  ],
+  "services": [
+   "rift"
+  ]
  }
 ]

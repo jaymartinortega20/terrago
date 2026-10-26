@@ -525,9 +525,11 @@ export function buildRouter(deps: Deps): Router {
       pool.query(
         `SELECT (SELECT coalesce(sum(gold), 0) FROM characters WHERE deleted_at IS NULL)::bigint AS players,
                 (SELECT coalesce(sum(treasury), 0) FROM guilds)::bigint AS guilds,
-                (SELECT count(*) FROM characters WHERE deleted_at IS NULL AND gold > 0)::int AS holders`,
+                (SELECT count(*) FROM characters WHERE deleted_at IS NULL AND gold > 0)::int AS holders,
+                (SELECT coalesce(sum(balance), 0) FROM gem_wallets)::bigint AS gems,
+                (SELECT coalesce(sum(amount) FILTER (WHERE reason = 'purchase'), 0) FROM gem_transactions WHERE created_at > now() - interval '30 days')::bigint AS gems_bought_30d`,
       ),
-      pool.query(`SELECT count(*)::int AS trades, coalesce(sum(total), 0)::bigint AS volume, coalesce(sum(tax), 0)::bigint AS tax FROM marketplace_transactions WHERE created_at > ${since}`, [days]),
+      pool.query(`SELECT count(*)::int AS trades, coalesce(sum(total), 0)::bigint AS volume, coalesce(sum(tax), 0)::bigint AS tax FROM marketplace_transactions WHERE currency = 'gold' AND created_at > ${since}`, [days]),
       pool.query(`SELECT count(*)::int AS trades, coalesce(-sum(amount), 0)::bigint AS volume FROM currency_transactions WHERE ref_type = 'stall' AND reason = 'marketplace_purchase' AND created_at > ${since}`, [days]),
       pool.query(`SELECT count(*)::int AS trades, coalesce(sum(a_gold + b_gold), 0)::bigint AS gold FROM direct_trade_logs WHERE created_at > ${since}`, [days]),
       pool.query(
@@ -535,7 +537,7 @@ export function buildRouter(deps: Deps): Router {
                 round(sum(t.total)::numeric / sum(t.quantity), 1)::float AS avg_price,
                 min(t.total::numeric / t.quantity)::float AS min_price, max(t.total::numeric / t.quantity)::float AS max_price
            FROM marketplace_transactions t JOIN items i ON i.id = t.item_id
-          WHERE t.created_at > ${since} GROUP BY 1, 2, 3 ORDER BY volume DESC LIMIT 15`,
+          WHERE t.currency = 'gold' AND t.created_at > ${since} GROUP BY 1, 2, 3 ORDER BY volume DESC LIMIT 15`,
         [days],
       ),
       pool.query(
@@ -585,7 +587,7 @@ export function buildRouter(deps: Deps): Router {
     const num = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'string' && /^-?\d+$/.test(v) ? Number(v) : v]));
     return {
       days,
-      totals: { created, removed, net: created - removed, supply: Number(supply.rows[0].players) + Number(supply.rows[0].guilds), playerGold: Number(supply.rows[0].players), guildGold: Number(supply.rows[0].guilds), holders: supply.rows[0].holders },
+      totals: { created, removed, net: created - removed, supply: Number(supply.rows[0].players) + Number(supply.rows[0].guilds), playerGold: Number(supply.rows[0].players), guildGold: Number(supply.rows[0].guilds), holders: supply.rows[0].holders, gems: Number(supply.rows[0].gems), gemsBought30d: Number(supply.rows[0].gems_bought_30d) },
       sources,
       sinks,
       daily: daily.rows.map(num),

@@ -37,8 +37,10 @@ try {
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online', null, { timeout: 90000 });
   await page.waitForTimeout(1500);
-  check('Market hidden for a brand-new player', (await page.locator('[data-testid=menu-market]').count()) === 0);
+  check('Market hidden for a brand-new player', (await page.locator('[data-testid=menu-market]').count()) === 0 && (await page.locator('[data-testid=menu-group-social]').count()) === 0);
+  await page.click('[data-testid=menu-group-world]');
   check('Arena hidden', (await page.locator('[data-testid=menu-arena]').count()) === 0);
+  await page.mouse.move(600, 500);
   await page.screenshot({ path: `${OUT}/feel-01-new-menu.png` });
 
   // Level 16 in the fields next to slimes.
@@ -49,9 +51,12 @@ try {
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online' && window.__terrago.client.ui.get().mapId === 'sunfield_plains', null, { timeout: 90000 });
   await page.waitForTimeout(2000);
+  await page.click('[data-testid=menu-group-social]');
   check('Market unlocked with a NEW dot', (await page.locator('[data-testid=new-market]').count()) === 1);
-  check('Arena unlocked', (await page.locator('[data-testid=menu-arena]').count()) === 1);
   await page.screenshot({ path: `${OUT}/feel-02-unlocked.png` });
+  await page.click('[data-testid=menu-group-world]');
+  check('Arena unlocked', (await page.locator('[data-testid=menu-arena]').count()) === 1);
+  await page.mouse.move(600, 500);
 
   // Click a monster a few tiles away: walk over and fight.
   const target = await page.evaluate(() => {

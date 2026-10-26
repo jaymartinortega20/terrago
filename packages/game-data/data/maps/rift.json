@@ -1,0 +1,109 @@
+{
+ "id": "rift",
+ "name": "The Endless Rift",
+ "safeZone": false,
+ "music": "dungeon",
+ "spawn": {
+  "x": 15,
+  "y": 19,
+  "dir": "up"
+ },
+ "portals": [],
+ "instanced": true,
+ "rift": true,
+ "theme": "cave",
+ "width": 30,
+ "height": 22,
+ "tileSize": 32,
+ "tiles": [
+  "##############################",
+  "##ccccccccccccccccckcckckccc##",
+  "#ccccccccccccccccccccckcckccc#",
+  "#cccccckcccccckccccckcccccccc#",
+  "#ccccckccckckccckkccccccccccc#",
+  "#kccccckckcccccccccccccccckcc#",
+  "#ccccckccccccccckccccckkccccc#",
+  "#ccccckkccccccccccckckkkccccc#",
+  "#ckcccccckccccccckcckcccckccc#",
+  "#kccccckcckckccccccccckccckck#",
+  "#cccccccccccccccccccccccckccc#",
+  "#ccccckckkcckccccccccckcccckk#",
+  "#ckcckcccccccccccccccckckcccc#",
+  "#ccckccckccccccckccckckccckcc#",
+  "#cccccccccccccccccccckccccccc#",
+  "#ckcccccccccccccckcccccccckkc#",
+  "#ckccccccccccccccccccccckcckc#",
+  "#cccckcccccccccckcccccccccccc#",
+  "#ccccccccccccccckcccccccccccc#",
+  "#cccccccccccckckkccckccckcccc#",
+  "##kccckcckcccccccccccccckckc##",
+  "##############################"
+ ],
+ "objects": [
+  {
+   "kind": "prop",
+   "type": "crystal",
+   "x": 7,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "crystal",
+   "x": 22,
+   "y": 6
+  },
+  {
+   "kind": "prop",
+   "type": "crystal",
+   "x": 7,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "crystal",
+   "x": 22,
+   "y": 15
+  },
+  {
+   "kind": "prop",
+   "type": "crystal",
+   "x": 14,
+   "y": 4
+  },
+  {
+   "kind": "prop",
+   "type": "crystal",
+   "x": 15,
+   "y": 17
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 3,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 26,
+   "y": 2
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 3,
+   "y": 19
+  },
+  {
+   "kind": "prop",
+   "type": "torch",
+   "x": 26,
+   "y": 19
+  }
+ ],
+ "respawn": {
+  "mapId": "greenhaven",
+  "x": 38,
+  "y": 13
+ }
+}

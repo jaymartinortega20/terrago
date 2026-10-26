@@ -7,6 +7,7 @@ import { CharacterPreview } from '@/components/CharacterPreview';
 import { PixelIcon } from '@/components/PixelIcon';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
+import { ExchangeShop } from './ExchangeUi';
 import { Window } from './Window';
 
 /** Always-on tracker: what to do next. */
@@ -311,6 +312,7 @@ export function BountyPanel({ client, onClose }: { client: GameClient; onClose: 
               );
             })}
           </ul>
+          <ExchangeShop client={client} which="bounty" npcId={npcId} />
         </>
       )}
     </Window>

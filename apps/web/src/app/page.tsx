@@ -4,7 +4,7 @@ import { PixelIcon } from '@/components/PixelIcon';
 import { SiteHeader } from '@/components/SiteHeader';
 import { PlayLink, WakeServer } from '@/components/PlayLink';
 
-const VERSION = '2.3';
+const VERSION = '2.4';
 
 const FEATURES = [
   {
@@ -57,8 +57,9 @@ const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 
   { v: '2.0', name: 'The great revision', text: 'Four classes and eight second jobs, the six-map world, gem upgrades, wings, combat pets and the Pyraxis raid.', state: 'done' },
   { v: '2.1', name: 'Mounts, pets & HUD', text: 'Stable with 3D preview, mount gear, pet levels and loyalty, the ornate HUD and spell effects.', state: 'done' },
   { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: sun shadows, richer colour, sunbeams and depth haze — tuned to run on low-end PCs, with an Ultra mode for gaming GPUs.', state: 'done' },
-  { v: '2.3', name: 'Adventure update', text: '50-slot bags that stack, a faster first hour, minimap and auto-pickup, Elites and new late-map monsters, random gear stats and sets, story chains, bounties and auto-walk, world bosses, party finder, guild quests, food buffs, pet evolution and the ranked arena.', state: 'now' },
-  { v: '2.4', name: 'Polish & balance', text: 'Boss and levelling balance from real play, more arena seasons and rewards, glass menus everywhere.', state: 'next' },
+  { v: '2.3', name: 'Adventure update', text: '50-slot bags that stack, a faster first hour, minimap and auto-pickup, Elites and new late-map monsters, random gear stats and sets, story chains, bounties and auto-walk, world bosses, party finder, guild quests, food buffs, pet evolution and the ranked arena.', state: 'done' },
+  { v: '2.4', name: 'Feel & progression', text: 'Snappier combat (instant swings, hit-stop, click-to-engage), the Gem Shop, the Endless Rift, guild levels, arena tokens and bounty seals, stat re-rolls, a calmer HUD with grouped menus and a death screen.', state: 'now' },
+  { v: '2.5', name: 'Polish & balance', text: 'Boss and levelling balance from real play, more Rift bosses, new maps beyond the Caldera.', state: 'next' },
   { v: '3.0', name: 'Full 3D', text: 'Low-poly floating islands, 3D chibi characters and visible gear.', state: 'later' },
 ];
 

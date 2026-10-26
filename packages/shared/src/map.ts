@@ -168,6 +168,8 @@ export interface MapDef {
   instanced?: boolean;
   /** The ranked arena: entered only through matchmaking, never saved as a position. */
   arena?: boolean;
+  /** The Endless Rift: entered through the Rift Keeper, never saved as a position. */
+  rift?: boolean;
   /** Farm plot tile positions in unlock order (homesteads). */
   farmPlots?: [number, number][];
   /** Gatherable nodes (ore rocks, choppable trees, herbs...). */

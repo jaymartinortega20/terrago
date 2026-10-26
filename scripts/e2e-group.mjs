@@ -37,7 +37,9 @@ try {
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online', null, { timeout: 90000 });
   await page.waitForTimeout(1500);
-  check('World boss timer in the HUD', (await page.locator('[data-testid^=worldboss-]').count()) === 1, await page.locator('[data-testid^=worldboss-]').innerText());
+  // One badge takes turns between the world event and the world boss.
+  await page.waitForSelector('[data-testid^=worldboss-]', { timeout: 15000 });
+  check('World boss timer in the HUD', true, await page.locator('[data-testid^=worldboss-]').innerText());
   await page.evaluate(() => window.__terrago.client.ui.set({ panel: 'friends' }));
   await page.click('[data-testid=tab-party-finder]');
   await page.locator('[data-testid=party-finder]').waitFor();
@@ -48,7 +50,7 @@ try {
   await page.screenshot({ path: `${OUT}/group-01-finder.png` });
   await page.evaluate(() => window.__terrago.client.ui.set({ panel: 'guild' }));
   await page.fill('[data-testid=guild-name]', `Crew${stamp}`.slice(0, 20));
-  await page.fill('[data-testid=guild-tag]', 'CRW');
+  await page.fill('[data-testid=guild-tag]', stamp.slice(-4).toUpperCase());
   await page.click('[data-testid=guild-create]');
   await page.locator('[data-testid=guild-quests]').waitFor({ timeout: 8000 });
   check('Guild quests shown', (await page.locator('[data-testid=guild-quests] li').count()) === 3);
@@ -57,7 +59,7 @@ try {
   check('No page errors', errors.length === 0, errors.join(' | '));
   log('ALL GROUP CHECKS PASSED');
 } catch (e) {
-  console.error(e);
+  console.error(e, errors);
   process.exitCode = 1;
 } finally {
   await browser.close();

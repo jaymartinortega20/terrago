@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getItem, getMap } from '@terrago/game-data';
-import { PARTY_ACTIVITIES, PARTY_MAX, type GuildQuestsView, type GuildRank, type PartyListing } from '@terrago/shared';
+import { GUILD_INVEST_GOLD_PER_XP, GUILD_LEVEL_XP, GUILD_QUEST_XP, guildLevel, guildPerks, PARTY_ACTIVITIES, PARTY_MAX, type GuildQuestsView, type GuildRank, type PartyListing } from '@terrago/shared';
 import type { GameClient } from '../net/client';
 import { useStore } from '../store';
 import { Window } from './Window';
@@ -303,6 +303,7 @@ export function GuildPanel({ client, onClose }: { client: GameClient; onClose: (
           </li>
         ))}
       </ul>
+      <GuildLevel client={client} />
       <GuildQuests client={client} />
       <button
         className="px-btn ghost small mt-3"
@@ -524,6 +525,43 @@ function GuildQuests({ client }: { client: GameClient }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+/** Guild level, perks for every member, and investing treasury Gold into guild XP. */
+function GuildLevel({ client }: { client: GameClient }) {
+  const g = useStore(client.ui, (s) => s.guild);
+  const [gold, setGold] = useState(1000);
+  if (!g) return null;
+  const xp = g.xp ?? 0;
+  const level = guildLevel(xp);
+  const cur = GUILD_LEVEL_XP[level - 1] ?? 0;
+  const next = GUILD_LEVEL_XP[level];
+  const perks = guildPerks(level);
+  const officer = g.myRank !== 'member';
+  return (
+    <div className="mt-3" data-testid="guild-level">
+      <h3 className="flex font-bold">
+        Guild level {level}
+        <span className="ml-auto text-xs font-normal">{next !== undefined ? `${(xp - cur).toLocaleString()} / ${(next - cur).toLocaleString()} XP` : 'Max level'}</span>
+      </h3>
+      <div className="mt-0.5 h-2 overflow-hidden rounded bg-parchment-3">
+        <div className="h-full bg-[#3f7fd0]" style={{ width: `${next !== undefined ? (100 * (xp - cur)) / (next - cur) : 100}%` }} />
+      </div>
+      <p className="mt-0.5 text-xs text-wood-dark/80">
+        Every member: +{perks.xpPct}% EXP{perks.goldPct ? `, +${perks.goldPct}% Gold` : ''} from monsters. Guild XP comes from guild quests (+{GUILD_QUEST_XP} each) and from investing the treasury.
+      </p>
+      {officer && next !== undefined && (
+        <div className="mt-1 flex items-center gap-1 text-xs">
+          Invest
+          <input type="number" min={GUILD_INVEST_GOLD_PER_XP} step={GUILD_INVEST_GOLD_PER_XP} value={gold} onChange={(e) => setGold(Math.max(GUILD_INVEST_GOLD_PER_XP, Math.floor(Number(e.target.value) || 0)))} onKeyDown={(e) => e.stopPropagation()} className="w-24 border-2 border-ink bg-parchment px-1" />
+          Gold from the treasury → {Math.floor(gold / GUILD_INVEST_GOLD_PER_XP).toLocaleString()} XP
+          <button className="px-btn green small" disabled={g.treasury < gold} onClick={() => void client.guildInvest(gold)} data-testid="guild-invest">
+            Invest
+          </button>
+        </div>
+      )}
     </div>
   );
 }
