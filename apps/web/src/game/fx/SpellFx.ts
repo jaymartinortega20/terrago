@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { Spot } from './CombatFx';
+import { TEXT_RES } from '../hd/screen';
 
 /**
  * The flashy layer: rune circles, lightning, vortex splashes, meteors, pillars
@@ -404,7 +405,7 @@ export class SpellFx {
       .text(at.x, at.y - at.h - 24, text, { fontFamily: this.font, fontSize: `${Math.round(17 * this.textScale)}px`, fontStyle: 'bold', color: c.css, stroke: '#04161f', strokeThickness: 5 })
       .setShadow(0, 0, c.css, 10, true, true)
       .setOrigin(0.5, 1)
-      .setResolution(2)
+      .setResolution(TEXT_RES)
       .setDepth(this.depth + 40)
       .setScale(0.5);
     this.tweens.add({ targets: t, scale: 1, duration: 140, ease: 'Back.easeOut' });
@@ -431,7 +432,7 @@ export class SpellFx {
     const t = this.add
       .text(x, y, text, { fontFamily: face, fontSize: `${kind === 'miss' ? Math.round(scaled * 1.35) : scaled}px`, fontStyle: kind === 'miss' ? 'italic bold' : 'bold', color: '#ffffff', stroke: crit ? '#3a1600' : '#0a0f22', strokeThickness: crit ? 8 : 5 })
       .setOrigin(0.5, 1)
-      .setResolution(2)
+      .setResolution(TEXT_RES)
       .setDepth(this.depth + 30 + n * 0.01);
     t.setShadow(0, 3, '#000000', 0, true, false);
     // Gradient fills: gold for your hits, white for others, red for damage taken, green heals.

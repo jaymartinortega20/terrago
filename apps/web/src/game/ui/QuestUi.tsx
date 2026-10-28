@@ -155,7 +155,7 @@ export function QuestOfferWindow({ client }: { client: GameClient }) {
         <div className="mt-2 flex gap-3">
           {npc && (
             <div className="hidden h-24 w-16 shrink-0 items-end justify-center border-2 border-ink bg-[#67a84a] sm:flex">
-              <CharacterPreview appearance={npc.appearance} accessory={npc.accessory} scale={4} />
+              <CharacterPreview appearance={npc.appearance} accessory={npc.accessory} npcId={npc.id} scale={4} face />
             </div>
           )}
           <div className="space-y-1.5 text-sm leading-snug">

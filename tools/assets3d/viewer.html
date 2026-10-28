@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>TerraGo model check</title>
+<style>
+  body { margin: 0; background: #2a3040; color: #fff; font: 12px monospace; }
+  #labels div { position: absolute; padding: 2px 4px; background: rgba(0,0,0,.55); }
+</style>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<script type="module">
+// Grid preview of models: ?m=heroes/knight.glb,mon/slime.glb&anim=Walk&cols=6
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { clone } from 'three/addons/utils/SkeletonUtils.js';
+const q = new URLSearchParams(location.search);
+const list = (q.get('m') ?? '').split(',').filter(Boolean);
+const cols = Number(q.get('cols') ?? 6);
+const animWant = q.get('anim');
+const W = innerWidth, cell = Math.floor(W / cols), rows = Math.ceil(list.length / cols);
+const canvas = document.getElementById('c');
+const r = new THREE.WebGLRenderer({ canvas, antialias: true });
+r.setSize(W, rows * cell);
+r.setScissorTest(true);
+r.outputColorSpace = THREE.SRGBColorSpace;
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+const heroAnims = q.get('heroAnims') ? (await loader.loadAsync('/apps/web/public/3d/heroes/anims.glb')).animations : [];
+const cells = [];
+const info = [];
+for (const [i, m] of list.entries()) {
+  const g = await loader.loadAsync(`/apps/web/public/3d/${m}`).catch((e) => ({ err: e }));
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(i % 2 ? '#3a4458' : '#34405a');
+  scene.add(new THREE.HemisphereLight('#ffffff', '#445', 2.2));
+  const d = new THREE.DirectionalLight('#fff', 2.0); d.position.set(3, 5, 4); scene.add(d);
+  const cam = new THREE.PerspectiveCamera(35, 1, 0.01, 1000);
+  if (g.err) { info.push(`${m}: ERR ${g.err.message}`); cells.push(null); continue; }
+  const obj = clone(g.scene);
+  obj.traverse((o) => { if (o.isMesh) o.frustumCulled = false; });
+  scene.add(obj);
+  const clips = g.animations.length ? g.animations : heroAnims;
+  let mixer = null;
+  if (clips.length) {
+    mixer = new THREE.AnimationMixer(obj);
+    const c = (animWant && clips.find((c) => c.name.toLowerCase().includes(animWant.toLowerCase()))) || clips.find((c) => /idle/i.test(c.name)) || clips[0];
+    mixer.clipAction(c).play();
+    mixer.update(0.3);
+  }
+  obj.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(obj, true);
+  const size = box.getSize(new THREE.Vector3());
+  const ctr = box.getCenter(new THREE.Vector3());
+  const R = Math.max(size.x, size.y, size.z) || 1;
+  cam.position.set(ctr.x + R * 0.9, ctr.y + R * 0.6, ctr.z + R * 1.6);
+  cam.lookAt(ctr);
+  cells.push({ scene, cam, mixer, obj });
+  const el = document.createElement('div');
+  el.style.left = `${(i % cols) * cell}px`; el.style.top = `${Math.floor(i / cols) * cell}px`;
+  el.textContent = `${m.split('/').pop()} h${size.y.toFixed(2)} w${size.x.toFixed(2)} d${size.z.toFixed(2)} y0=${box.min.y.toFixed(2)} | ${g.animations.map((a) => a.name).join(',').slice(0, 90)}`;
+  el.style.width = `${cell - 8}px`; el.style.whiteSpace = 'normal';
+  document.getElementById('labels').appendChild(el);
+  info.push(el.textContent);
+}
+window.__info = info;
+let last = performance.now();
+function frame() {
+  const now = performance.now(); const dt = (now - last) / 1000; last = now;
+  cells.forEach((c, i) => {
+    if (!c) return;
+    c.mixer?.update(dt);
+    const x = (i % cols) * cell, y = (rows - 1 - Math.floor(i / cols)) * cell;
+    r.setViewport(x, y, cell, cell); r.setScissor(x, y, cell, cell);
+    r.render(c.scene, c.cam);
+  });
+  requestAnimationFrame(frame);
+}
+frame();
+window.__ready = true;
+</script>
+</body>
+</html>

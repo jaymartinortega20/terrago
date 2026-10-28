@@ -115,6 +115,75 @@ export class PixelBuffer {
       }
   }
 
+  /**
+   * Smooth HD version: the pixel art is magnified with an edge-aware
+   * algorithm (EPX ×8), then given soft shading, a rim light and a clean
+   * outline, so it reads like painted art instead of pixels.
+   */
+  toHdCanvas(size = 96): HTMLCanvasElement {
+    let w = this.w;
+    let h = this.h;
+    let px: (string | null)[] = Array.from(this.data, (c) => c ?? null);
+    for (let pass = 0; pass < 3; pass++) {
+      const nw = w * 2;
+      const out: (string | null)[] = new Array(nw * h * 2).fill(null);
+      const at = (x: number, y: number) => (x < 0 || y < 0 || x >= w || y >= h ? null : px[y * w + x]!);
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          const P = at(x, y);
+          const A = at(x, y - 1);
+          const B = at(x + 1, y);
+          const C = at(x - 1, y);
+          const D = at(x, y + 1);
+          let p1 = P;
+          let p2 = P;
+          let p3 = P;
+          let p4 = P;
+          if (C === A && C !== D && A !== B) p1 = A;
+          if (A === B && A !== C && B !== D) p2 = B;
+          if (D === C && D !== B && C !== A) p3 = C;
+          if (B === D && B !== A && D !== C) p4 = D;
+          out[y * 2 * nw + x * 2] = p1;
+          out[y * 2 * nw + x * 2 + 1] = p2;
+          out[(y * 2 + 1) * nw + x * 2] = p3;
+          out[(y * 2 + 1) * nw + x * 2 + 1] = p4;
+        }
+      px = out;
+      w = nw;
+      h *= 2;
+    }
+    const big = makeCanvas(w, h);
+    const bg = big.getContext('2d')!;
+    let last = '';
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const c = px[y * w + x];
+        if (!c) continue;
+        if (c !== last) bg.fillStyle = last = c;
+        bg.fillRect(x, y, 1, 1);
+      }
+    // Soft painted shading: light from the top left, shade to the bottom right.
+    bg.globalCompositeOperation = 'source-atop';
+    const gr = bg.createLinearGradient(0, 0, w, h);
+    gr.addColorStop(0, 'rgba(255,255,255,0.28)');
+    gr.addColorStop(0.45, 'rgba(255,255,255,0)');
+    gr.addColorStop(1, 'rgba(0,0,30,0.25)');
+    bg.fillStyle = gr;
+    bg.fillRect(0, 0, w, h);
+    bg.globalCompositeOperation = 'source-over';
+    const out = makeCanvas(size, size);
+    const g = out.getContext('2d')!;
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    const k = size / Math.max(w, h);
+    // Slightly soften the magnified edges.
+    if ('filter' in g) g.filter = `blur(${Math.max(0.3, k * 1.2)}px)`;
+    g.drawImage(big, 0, 0, w * k, h * k);
+    g.filter = 'none';
+    g.drawImage(big, 0, 0, w * k, h * k);
+    return out;
+  }
+
   toCanvas(scale = ART_SCALE): HTMLCanvasElement {
     const canvas = makeCanvas(this.w * scale, this.h * scale);
     this.draw(canvas.getContext('2d')!, 0, 0, scale);

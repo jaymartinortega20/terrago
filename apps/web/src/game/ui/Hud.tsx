@@ -49,9 +49,7 @@ export function Hud({ client, compact }: { client: GameClient; compact?: boolean
       <div className="relative z-10 shrink-0" style={{ width: portrait, height: portrait }}>
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#ffe9a0] via-[#e0a63a] to-[#8a5a10] p-[2px] shadow-[0_6px_20px_rgba(0,0,0,.5),0_0_18px_rgba(255,200,80,.35)]">
           <div className="relative h-full w-full overflow-hidden rounded-[14px]" style={{ background: 'radial-gradient(circle at 40% 30%, #6ad8ff, #1c2a6a 70%)' }}>
-            <div className="absolute" style={{ left: -portrait * 0.12, top: portrait * 0.02 }}>
-              <CharacterPreview appearance={self.appearance} scale={compact ? 3 : 4} />
-            </div>
+            <CharacterPreview appearance={self.appearance} classId={self.classId} job={self.job} face scale={(portrait - 4) / 24} className="absolute inset-0" />
           </div>
         </div>
         <span

@@ -5,10 +5,25 @@ import type { Connection } from './connection';
 
 /** A character that is currently in the world (connected or briefly link-dead). */
 /** What others see of someone's gear: upgrade glow on weapon/armor, and the back item (wings). */
-export function gearLook(equipment: { slot: number; itemId: string; enhance?: number }[]): { weaponGlow: number; armorGlow: number; back: string | null } {
+export function gearLook(equipment: { slot: number; itemId: string; enhance?: number }[]): {
+  weaponGlow: number;
+  armorGlow: number;
+  back: string | null;
+  offhand: string | null;
+  head: string | null;
+  chest: string | null;
+} {
   const at = (slot: number) => equipment.find((e) => e.slot === slot);
   const armor = equipment.filter((e) => e.slot >= 2 && e.slot <= 5).map((e) => e.enhance ?? 0);
-  return { weaponGlow: at(0)?.enhance ?? 0, armorGlow: armor.length ? Math.max(...armor) : 0, back: at(8)?.itemId ?? null };
+  // Shield, helmet and chest are drawn on your character (paper-doll gear).
+  return {
+    weaponGlow: at(0)?.enhance ?? 0,
+    armorGlow: armor.length ? Math.max(...armor) : 0,
+    back: at(8)?.itemId ?? null,
+    offhand: at(1)?.itemId ?? null,
+    head: at(2)?.itemId ?? null,
+    chest: at(3)?.itemId ?? null,
+  };
 }
 
 /** A companion's growth (saved) and its health in this session (not saved). */

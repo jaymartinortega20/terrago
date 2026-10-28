@@ -39,7 +39,7 @@ try {
   await db.query(`INSERT INTO inventory_items (character_id, container, slot, item_id, quantity, durability) VALUES ($1,'bag',10,'padded_chest',1,180)`, [id]);
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online');
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(Number(process.env.BAKE_WAIT ?? 800));
   check('Starter weapon worn', (await ui()).inventory.equipment.some((e) => e.itemId === 'training_sword'));
   check('Monsters visible', await page.evaluate(() => window.__terrago.client.monsters.size > 0));
 

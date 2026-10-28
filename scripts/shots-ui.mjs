@@ -21,6 +21,7 @@ for (const [tag, vp] of [['desk', { width: 1366, height: 800 }], ...(process.env
   const ctx = await b.newContext({ viewport: vp, ...(tag === 'phone' ? { isMobile: true, hasTouch: true } : {}) });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => (m.type() === 'warning' || m.type() === 'error') && !/Download the React|hydrat/i.test(m.text()) && console.log('[console]', m.text().slice(0, 240)));
   const shot = (n) => page.screenshot({ path: `${OUT}/${tag}-${n}.png` });
   if (want('home')) {
     await page.goto(`${WEB}/`, { waitUntil: 'load' });
@@ -40,18 +41,18 @@ for (const [tag, vp] of [['desk', { width: 1366, height: 800 }], ...(process.env
   await page.click('button[type=submit]');
   await page.waitForURL('**/characters');
   await page.locator('#char-name').waitFor();
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(Number(process.env.PREVIEW_WAIT ?? 800));
   if (want('create')) await shot('create');
   const name = `Ui${tag}${stamp}`.slice(0, 14);
   await page.fill('#char-name', name);
   await page.click('button:has-text("Create character")');
   await page.locator('[data-testid=character-card]').first().waitFor();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(Number(process.env.PREVIEW_WAIT ?? 500));
   if (want('characters')) await shot('characters');
   await db.query(`UPDATE users SET roles = ARRAY['player','admin'] WHERE email = $1`, [email]).catch(() => {});
   await page.locator('[data-testid=character-card]').first().click();
   await page.waitForFunction(() => window.__terrago?.client.ui.get().status === 'online', null, { timeout: 90000 });
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(Number(process.env.GAME_WAIT ?? 6000));
   if (want('game')) await shot('game');
   for (const [key, n] of [['i', 'inventory'], ['c', 'character'], ['k', 'skills'], ['j', 'quests'], ['Escape', 'settings']]) {
     if (!want(n)) continue;

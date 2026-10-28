@@ -58,7 +58,7 @@ export function DialogueBox({ client }: { client: GameClient }) {
     <div className="px-panel pointer-events-auto flex w-[min(94vw,640px)] gap-3 p-3" role="dialog" aria-label={`Talking to ${dialogue.name}`} data-testid="dialogue">
       {npc && (
         <div className="hidden h-24 w-16 shrink-0 items-end justify-center border-2 border-ink bg-[#67a84a] sm:flex">
-          <CharacterPreview appearance={npc.appearance} accessory={npc.accessory} scale={4} />
+          <CharacterPreview appearance={npc.appearance} accessory={npc.accessory} npcId={npc.id} scale={4} face />
         </div>
       )}
       <div className="flex min-h-24 flex-1 flex-col">

@@ -101,7 +101,7 @@ export function CharacterCreator({
       <div className="flex flex-col items-center gap-3">
         <div className="relative flex h-64 w-full items-end justify-center overflow-hidden rounded-2xl pb-5" style={{ background: 'radial-gradient(circle at 50% 85%, rgba(120,220,255,0.6), rgba(70,60,190,0.35) 45%, rgba(10,14,40,0.15) 75%)' }}>
           <div className="absolute bottom-4 h-4 w-32 rounded-[50%] bg-black/35 blur-sm" />
-          <CharacterPreview appearance={look} scale={8} spin walk />
+          <CharacterPreview appearance={look} classId={classId} scale={9} spin />
         </div>
         <button type="button" className="px-btn ghost small" onClick={randomize}>
           🎲 Randomize

@@ -16,6 +16,7 @@ import { getItem } from '@terrago/game-data';
 import { audio } from './audio';
 import { isTyping } from './input';
 import { GameClient } from './net/client';
+import { renderDpr } from './hd/screen';
 import { WorldScene } from './scenes/WorldScene';
 import { useStore, type Panel } from './store';
 import { EmoteMenu } from './ui/EmoteMenu';
@@ -68,31 +69,44 @@ export default function GameView({
     c.connect();
     window.__terrago = { client: c, audio };
     let game: Phaser.Game | null = null;
+    let ro: ResizeObserver | null = null;
     let cancelled = false;
     const start = async () => {
       // Pixel font must be ready before Phaser rasterises any text.
       await Promise.all([document.fonts.load('600 12px "Fredoka"'), document.fonts.load('bold 12px "Fredoka"')]).catch(() => {});
       // React StrictMode mounts effects twice in dev: never start a game for a torn-down mount.
       if (cancelled || !host.current) return;
+      // HD: render at the screen's real pixel density, smooth filtering.
+      const dpr = renderDpr();
+      const el = host.current;
       game = new Phaser.Game({
         type: Phaser.AUTO,
-        parent: host.current,
+        parent: el,
         backgroundColor: '#12141f',
-        pixelArt: true,
-        roundPixels: true,
+        pixelArt: false,
+        antialias: true,
+        roundPixels: false,
         disableContextMenu: true,
-        scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
+        scale: { mode: Phaser.Scale.NONE, width: Math.round(el.clientWidth * dpr), height: Math.round(el.clientHeight * dpr), zoom: 1 / dpr },
         fps: { target: 60 },
         banner: false,
         audio: { noAudio: true },
       });
       game.scene.add('world', WorldScene, true, { client: c });
+      const g = game;
+      ro = new ResizeObserver(() => {
+        const d = renderDpr();
+        g.scale.setZoom(1 / d);
+        g.scale.resize(Math.round(el.clientWidth * d), Math.round(el.clientHeight * d));
+      });
+      ro.observe(el);
       if (window.__terrago?.client === c) window.__terrago.game = game;
     };
     void start();
     setClient(c);
     return () => {
       cancelled = true;
+      ro?.disconnect();
       audio.playMusic(null);
       audio.setAmbient(null);
       game?.destroy(true);

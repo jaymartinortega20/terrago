@@ -682,10 +682,26 @@ export { buildingArt, type BuildingArt } from './buildings';
 
 const iconCache = new Map<string, HTMLCanvasElement>();
 
-export function itemIcon(icon: string, scale = ART_SCALE): HTMLCanvasElement {
-  const key = `${icon}@${scale}`;
+/** HD (smooth) item icon, `size` px square. */
+export function itemIconHd(icon: string, size = 96): HTMLCanvasElement {
+  const key = `${icon}@hd${size}`;
   const hit = iconCache.get(key);
   if (hit) return hit;
+  const c = iconBuffer(icon).toHdCanvas(size);
+  iconCache.set(key, c);
+  return c;
+}
+
+export function itemIcon(icon: string, scale = ART_SCALE): HTMLCanvasElement {
+  const key = `${icon}@${scale}`;
+  const hit0 = iconCache.get(key);
+  if (hit0) return hit0;
+  const canvas = iconBuffer(icon).toCanvas(scale);
+  iconCache.set(key, canvas);
+  return canvas;
+}
+
+function iconBuffer(icon: string): PixelBuffer {
   const b = new PixelBuffer(16, 16);
   switch (icon) {
     case 'hoe':
@@ -736,7 +752,5 @@ export function itemIcon(icon: string, scale = ART_SCALE): HTMLCanvasElement {
       if (!drawExtraIcon(icon, b)) b.rect(3, 3, 10, 10, '#b06ad6').rect(6, 5, 4, 2, '#fff').rect(8, 7, 2, 2, '#fff').rect(7, 10, 2, 2, '#fff');
   }
   b.outline(OUTLINE);
-  const canvas = b.toCanvas(scale);
-  iconCache.set(key, canvas);
-  return canvas;
+  return b;
 }

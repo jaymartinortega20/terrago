@@ -120,7 +120,7 @@ export default function CharactersPage() {
                 <div className="relative flex h-40 w-full items-end justify-center overflow-hidden rounded-2xl" style={{ background: 'radial-gradient(circle at 50% 85%, rgba(120,220,255,0.55), rgba(60,60,170,0.35) 45%, rgba(10,14,40,0.2) 75%)' }}>
                   <div className="absolute bottom-3 h-4 w-28 rounded-[50%] bg-black/35 blur-sm" />
                   <div className="relative transition-transform duration-300 group-hover:scale-110">
-                    <CharacterPreview appearance={c.appearance} scale={6} walk />
+                    <CharacterPreview appearance={c.appearance} classId={c.classId} scale={6} />
                   </div>
                   <span className="absolute top-2 left-2 rounded-full bg-gradient-to-b from-sky to-mana px-2 py-0.5 text-xs font-bold text-white shadow">Lv {c.level}</span>
                 </div>
