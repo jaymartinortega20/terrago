@@ -16,8 +16,6 @@ export interface FxSettings {
   numbers: boolean;
   /** HD-2D look (shadows, bloom, focus blur), a lighter version, or plain pixels. */
   graphics: import('./hd2d').GraphicsMode;
-  /** TerraGo 3.0: draw the world in 3D (beta). */
-  view3d: boolean;
 }
 
 export const FX_STYLES: { id: FxStyle; label: string }[] = [
@@ -39,7 +37,7 @@ const touchDevice = () => {
     return false;
   }
 };
-const DEFAULTS: FxSettings = { level: 'full', style: 'weapon', handWeapon: true, shake: true, numbers: true, graphics: touchDevice() ? 'lite' : 'hd', view3d: false };
+const DEFAULTS: FxSettings = { level: 'full', style: 'weapon', handWeapon: true, shake: true, numbers: true, graphics: touchDevice() ? 'lite' : 'hd' };
 
 let current: FxSettings = { ...DEFAULTS };
 let loaded = false;

@@ -442,17 +442,7 @@ function FxSection() {
   );
   return (
     <>
-      <h3 className="mt-4 font-bold">View</h3>
-      <div className="mt-1 flex gap-1" role="radiogroup" aria-label="View">
-        <button className={`px-btn small ${!fx.view3d ? '' : 'ghost'}`} onClick={() => set({ view3d: false })} aria-pressed={!fx.view3d} data-testid="view-2d">
-          2D pixel
-        </button>
-        <button className={`px-btn small ${fx.view3d ? '' : 'ghost'}`} onClick={() => set({ view3d: true })} aria-pressed={fx.view3d} data-testid="view-3d">
-          3D (beta)
-        </button>
-      </div>
-      <p className="mt-1 text-xs text-wood-dark/70">3D: low-poly floating islands with your gear visible on your hero. Rotate with [ and ] or right-drag, zoom with the mouse wheel. Needs a decent GPU; 2D runs everywhere.</p>
-      <h3 className="mt-4 font-bold">Graphics (2D)</h3>
+      <h3 className="mt-4 font-bold">Graphics</h3>
       <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Graphics">
         {(
           [

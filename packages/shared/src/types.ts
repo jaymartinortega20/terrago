@@ -200,10 +200,6 @@ export interface PublicPlayer {
   weaponGlow?: number;
   armorGlow?: number;
   back?: string | null;
-  /** Shield, helmet and chest piece (item ids), drawn on the 3D character. */
-  offhand?: string | null;
-  head?: string | null;
-  chest?: string | null;
   /** Saddle, barding and trail on the mount. */
   mountLook?: import('./companions').MountLook | null;
 }

@@ -35,7 +35,7 @@ function part(geo: THREE.BufferGeometry, m: THREE.Material, x: number, y: number
   return mesh;
 }
 
-export function mountShade(hex: string, k: number): string {
+function shade(hex: string, k: number): string {
   const c = new THREE.Color(hex);
   const hsl = { h: 0, s: 0, l: 0 };
   c.getHSL(hsl);
@@ -44,7 +44,7 @@ export function mountShade(hex: string, k: number): string {
 }
 
 /** Four legs, a body, neck, head and tail: horses, stags, wolves and boars. */
-export function quadruped(g: THREE.Group, kind: string, m: ShowcaseMount, body: THREE.Material, dark: THREE.Material): number {
+function quadruped(g: THREE.Group, kind: string, m: ShowcaseMount, body: THREE.Material, dark: THREE.Material): number {
   const boar = kind === 'boar';
   const wolf = kind === 'wolf';
   const long = boar ? 1.15 : 1.4;
@@ -90,7 +90,7 @@ export function quadruped(g: THREE.Group, kind: string, m: ShowcaseMount, body: 
   return tall + thick + 0.02;
 }
 
-export function wyvern(g: THREE.Group, m: ShowcaseMount, body: THREE.Material, dark: THREE.Material): number {
+function wyvern(g: THREE.Group, m: ShowcaseMount, body: THREE.Material, dark: THREE.Material): number {
   g.add(part(new THREE.CapsuleGeometry(0.32, 1.1, 3, 8), body, 0, 0.95, 0, 0, 0, Math.PI / 2));
   for (const x of [0.4, -0.35]) for (const z of [0.18, -0.18]) g.add(part(new THREE.CylinderGeometry(0.1, 0.07, 0.75, 6), dark, x, 0.4, z));
   g.add(part(new THREE.CylinderGeometry(0.12, 0.18, 0.8, 6), body, 0.85, 1.35, 0, 0, 0, -0.7));
@@ -100,7 +100,7 @@ export function wyvern(g: THREE.Group, m: ShowcaseMount, body: THREE.Material, d
   const wing = new THREE.BufferGeometry();
   wing.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, -0.9, 0.2, 1.4, 0.5, 0.1, 1.2, 0, 0, 0, 0.5, 0.1, 1.2, -0.9, 0.2, 1.4], 3));
   wing.computeVertexNormals();
-  const wm = mat(mountShade(m.color, 0.15), { side: THREE.DoubleSide });
+  const wm = mat(shade(m.color, 0.15), { side: THREE.DoubleSide });
   const left = part(wing, wm, 0.1, 1.25, 0.2);
   const right = part(wing, wm, 0.1, 1.25, -0.2);
   right.scale.z = -1;
@@ -110,13 +110,13 @@ export function wyvern(g: THREE.Group, m: ShowcaseMount, body: THREE.Material, d
   return 1.27;
 }
 
-export function hovergear(g: THREE.Group, m: ShowcaseMount, body: THREE.Material): number {
+function hovergear(g: THREE.Group, m: ShowcaseMount, body: THREE.Material): number {
   const glow = m.glow ?? '#5ad0ff';
   g.add(part(new THREE.CylinderGeometry(0.85, 0.7, 0.3, 10), body, 0, 0.75, 0));
   const ring = part(new THREE.TorusGeometry(0.8, 0.06, 6, 20), mat(glow, { emissive: new THREE.Color(glow), emissiveIntensity: 1.2 }), 0, 0.72, 0, Math.PI / 2);
   ring.name = 'ring';
   g.add(ring);
-  g.add(part(new THREE.BoxGeometry(0.5, 0.35, 0.5), mat(m.barding ?? mountShade(m.color, -0.15), { metalness: 0.6, roughness: 0.4 }), 0.35, 1.05, 0));
+  g.add(part(new THREE.BoxGeometry(0.5, 0.35, 0.5), mat(m.barding ?? shade(m.color, -0.15), { metalness: 0.6, roughness: 0.4 }), 0.35, 1.05, 0));
   for (const x of [-0.45, 0.45]) for (const z of [-0.45, 0.45]) {
     const jet = part(new THREE.ConeGeometry(0.12, 0.35, 6), mat(glow, { emissive: new THREE.Color(glow), emissiveIntensity: 1.5, transparent: true, opacity: 0.85 }), x, 0.42, z, Math.PI);
     jet.name = 'jet';
@@ -225,7 +225,7 @@ export class MountShowcase {
     }
     const locked = !!m.locked;
     const body = locked ? mat('#151320', { roughness: 1 }) : mat(m.color, m.glow ? { emissive: new THREE.Color(m.glow), emissiveIntensity: 0.15 } : {});
-    const dark = locked ? body : mat(mountShade(m.color, -0.18));
+    const dark = locked ? body : mat(shade(m.color, -0.18));
     const g = new THREE.Group();
     let seat: number;
     if (m.kind === 'wyvern') seat = wyvern(g, m, body, dark);
