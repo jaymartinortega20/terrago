@@ -30,7 +30,7 @@ function Swatches({ colors, value, onChange, label }: { colors: readonly string[
           aria-checked={value === i}
           aria-label={`${label} ${i + 1}`}
           onClick={() => onChange(i)}
-          className={`h-7 w-7 border-2 border-ink ${value === i ? 'outline-3 outline-gold' : ''}`}
+          className={`h-8 w-8 rounded-full border-2 border-white/30 transition hover:scale-110 ${value === i ? 'scale-110 ring-2 ring-gold ring-offset-2 ring-offset-night' : ''}`}
           style={{ background: c, outlineStyle: value === i ? 'solid' : 'none', outlineWidth: 3, outlineColor: '#e8c24a' }}
         />
       ))}
@@ -97,9 +97,10 @@ export function CharacterCreator({
   }
 
   return (
-    <form onSubmit={submit} className="px-panel grid gap-6 p-5 md:grid-cols-[220px_1fr]">
+    <form onSubmit={submit} className="px-panel grid gap-6 p-6 md:grid-cols-[240px_1fr]">
       <div className="flex flex-col items-center gap-3">
-        <div className="flex h-56 w-full items-end justify-center border-4 border-ink bg-[#67a84a] pb-4" style={{ boxShadow: 'inset 0 -16px 0 #58953f' }}>
+        <div className="relative flex h-64 w-full items-end justify-center overflow-hidden rounded-2xl pb-5" style={{ background: 'radial-gradient(circle at 50% 85%, rgba(120,220,255,0.6), rgba(70,60,190,0.35) 45%, rgba(10,14,40,0.15) 75%)' }}>
+          <div className="absolute bottom-4 h-4 w-32 rounded-[50%] bg-black/35 blur-sm" />
           <CharacterPreview appearance={look} scale={8} spin walk />
         </div>
         <button type="button" className="px-btn ghost small" onClick={randomize}>
@@ -133,7 +134,7 @@ export function CharacterCreator({
                 type="button"
                 onClick={() => setClassId(c.id)}
                 aria-pressed={classId === c.id}
-                className={`border-3 border-ink px-2 py-2 text-sm font-bold ${classId === c.id ? 'bg-gold' : 'bg-parchment-2 hover:bg-parchment-3'}`}
+                className={`rounded-xl border px-2 py-2 text-sm font-bold transition ${classId === c.id ? 'border-gold bg-gold/90 text-[#2a1a02] shadow-[0_0_16px_rgba(255,200,80,0.5)]' : 'border-white/15 bg-white/5 hover:bg-white/10'}`}
                 style={{ borderWidth: 3 }}
               >
                 {c.name}
@@ -157,7 +158,7 @@ export function CharacterCreator({
                   type="button"
                   aria-pressed={look.bodyType === b}
                   onClick={() => set('bodyType', b)}
-                  className={`border-ink px-3 py-1 font-bold ${look.bodyType === b ? 'bg-gold' : 'bg-parchment-2'}`}
+                  className={`rounded-xl border px-3 py-1 font-bold transition ${look.bodyType === b ? 'border-gold bg-gold/90 text-[#2a1a02]' : 'border-white/15 bg-white/5 hover:bg-white/10'}`}
                   style={{ borderWidth: 3 }}
                 >
                   Type {b.toUpperCase()}
@@ -198,7 +199,7 @@ export function CharacterCreator({
         </div>
 
         {error && (
-          <p role="alert" className="border-2 border-berry bg-berry/10 px-3 py-2 text-sm font-bold text-berry">
+          <p role="alert" className="rounded-xl border border-berry/60 bg-berry/15 px-3 py-2 text-sm font-bold text-berry">
             {error}
           </p>
         )}

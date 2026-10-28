@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { adminApi, api, ApiError } from '@/lib/api';
 import { EconomyTab, FlagsTab, PlayerDetail, ServerSettings } from './panels';
 import { GmPanel, MyCharacters } from './gm';
+import { Logo } from '@/components/Logo';
 
 type Tab = 'overview' | 'economy' | 'reports' | 'flags' | 'players' | 'tools' | 'log';
 interface Overview {
@@ -81,26 +82,39 @@ export default function AdminPage() {
     );
 
   return (
-    <main className="mx-auto min-h-dvh max-w-6xl px-4 py-6" data-testid="admin">
-      <header className="flex flex-wrap items-center gap-2">
-        <Link href="/characters" className="text-outline text-2xl font-bold tracking-wider text-gold">
-          TERRAGO
-        </Link>
-        <span className="text-outline text-xl font-bold">Admin</span>
-        <nav className="ml-auto flex flex-wrap gap-1">
+    <main className="min-h-dvh lg:flex" data-testid="admin">
+      <aside className="sticky top-0 z-20 border-b border-white/10 bg-night-2/80 backdrop-blur-xl lg:h-dvh lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0">
+        <div className="flex items-center gap-2 p-4">
+          <Link href="/characters" aria-label="Back to characters">
+            <Logo size="sm" />
+          </Link>
+          <span className="ml-auto rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold tracking-widest text-gold uppercase lg:ml-2">Admin</span>
+        </div>
+        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible">
           {(['overview', 'economy', 'reports', 'flags', 'players', 'tools', 'log'] as Tab[]).map((t) => (
-            <button key={t} className={`px-btn small ${tab === t ? 'green' : 'ghost'}`} onClick={() => setTab(t)} data-testid={`admin-tab-${t}`}>
+            <button
+              key={t}
+              className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-bold transition ${tab === t ? 'bg-gradient-to-r from-gold/25 to-gold/5 text-gold shadow-[inset_2px_0_0_#ffcb52]' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
+              onClick={() => setTab(t)}
+              data-testid={`admin-tab-${t}`}
+            >
+              <span className="text-base">{TAB_ICON[t]}</span>
               {t[0]!.toUpperCase() + t.slice(1)}
             </button>
           ))}
         </nav>
-      </header>
+        <Link href="/characters" className="mx-3 hidden rounded-xl px-3 py-2 text-sm text-white/60 hover:text-white lg:block">
+          ← Back to game
+        </Link>
+      </aside>
+      <div className="min-w-0 flex-1 px-4 py-6 lg:px-8">
+      <h1 className="mb-4 text-3xl font-bold text-white">{TAB_ICON[tab]} {tab[0]!.toUpperCase() + tab.slice(1)}</h1>
       {msg && (
         <p className={`px-panel mt-3 p-2 text-sm font-bold ${msg.kind === 'ok' ? 'text-leaf-dark' : 'text-berry'}`} onClick={() => setMsg(null)} role="status">
           {msg.text}
         </p>
       )}
-      <section className="mt-4">
+      <section>
         {tab === 'overview' && <OverviewTab act={act} />}
         {tab === 'reports' && <ReportsTab act={act} />}
         {tab === 'economy' && <EconomyTab onPlayer={openPlayer} />}
@@ -109,9 +123,12 @@ export default function AdminPage() {
         {tab === 'tools' && <ToolsTab act={act} />}
         {tab === 'log' && <LogTab />}
       </section>
+      </div>
     </main>
   );
 }
+
+const TAB_ICON: Record<Tab, string> = { overview: '📊', economy: '💰', reports: '🚩', flags: '⚑', players: '👥', tools: '🛠️', log: '📜' };
 
 type Act = (fn: () => Promise<unknown>, done: string) => Promise<void>;
 
@@ -138,9 +155,9 @@ function OverviewTab({ act }: { act: Act }) {
     <>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="admin-stats">
         {cards.map(([k, v]) => (
-          <div key={k} className="px-panel p-3">
-            <div className="text-xs text-wood-dark/80">{k}</div>
-            <div className="text-2xl font-bold">{v.toLocaleString()}</div>
+          <div key={k} className="px-panel p-4">
+            <div className="text-xs font-bold tracking-wide text-white/60 uppercase">{k}</div>
+            <div className="mt-1 font-display text-3xl font-bold text-white">{v.toLocaleString()}</div>
           </div>
         ))}
       </div>

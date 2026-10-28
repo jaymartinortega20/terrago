@@ -124,8 +124,8 @@ export function LiveCounters() {
   return (
     <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-2 sm:gap-4" data-testid="live-counters">
       {cells.map(([k, v, label]) => (
-        <div key={k} className="rounded border-2 border-ink bg-night/70 px-2 py-3 text-center backdrop-blur-sm">
-          <div className="text-outline text-2xl font-bold text-gold sm:text-4xl">{v}</div>
+        <div key={k} className="glass rounded-2xl px-2 py-3 text-center">
+          <div className="font-display text-2xl font-bold text-gold drop-shadow-[0_0_12px_rgba(255,203,82,.45)] sm:text-4xl">{v}</div>
           <div className="mt-1 text-[11px] uppercase tracking-wide text-parchment/80 sm:text-xs">{label}</div>
         </div>
       ))}

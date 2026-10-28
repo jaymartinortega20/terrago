@@ -71,7 +71,7 @@ export default function GameView({
     let cancelled = false;
     const start = async () => {
       // Pixel font must be ready before Phaser rasterises any text.
-      await document.fonts.load('12px "Pixelify Sans"').catch(() => {});
+      await Promise.all([document.fonts.load('600 12px "Fredoka"'), document.fonts.load('bold 12px "Fredoka"')]).catch(() => {});
       // React StrictMode mounts effects twice in dev: never start a game for a torn-down mount.
       if (cancelled || !host.current) return;
       game = new Phaser.Game({

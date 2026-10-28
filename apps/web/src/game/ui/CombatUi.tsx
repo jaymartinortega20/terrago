@@ -46,9 +46,9 @@ export function TargetFrame({ client }: { client: GameClient }) {
   const diff = m.info.level - level;
   const color = diff >= 10 ? '#ff5a5a' : diff >= 5 ? '#ff9a3a' : diff >= 2 ? '#ffe48a' : diff <= -6 ? '#9a9a9a' : '#ffffff';
   return (
-    <div className="px-panel-dark pointer-events-auto w-56 px-2 py-1" data-testid="target-frame">
+    <div className="glass pointer-events-auto w-64 rounded-2xl px-3 py-2" data-testid="target-frame">
       <div className="flex items-baseline text-xs">
-        <span className="font-bold" style={{ color }}>
+        <span className="font-display text-sm font-bold" style={{ color }}>
           {m.info.name}
         </span>
         <span className="ml-auto text-parchment/80">Lv {m.info.level}</span>
@@ -56,8 +56,9 @@ export function TargetFrame({ client }: { client: GameClient }) {
           ✕
         </button>
       </div>
-      <div className="px-bar mt-0.5">
-        <span style={{ width: `${m.hp}%`, background: '#d64545' }} />
+      <div className="relative mt-1 h-3 overflow-hidden rounded-full bg-black/55 ring-1 ring-white/10">
+        <span className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-300" style={{ width: `${m.hp}%`, background: 'linear-gradient(180deg,#ff6a7a,#c0203a)', boxShadow: '0 0 10px #ff4a5c88' }} />
+        <span className="absolute inset-x-0 top-0 h-1/2 bg-white/15" />
       </div>
       {diff >= 5 && <p className="mt-0.5 text-[10px] text-[#ff9a3a]">{diff >= 10 ? 'Far too strong for you.' : 'Dangerous.'}</p>}
     </div>
@@ -75,7 +76,7 @@ export function EffectsBar({ client }: { client: GameClient }) {
       {live.map((e) => {
         const bad = e.id === 'weakness' || e.id === 'poison' || e.id.includes('slow') || e.id.includes('curse');
         return (
-          <span key={e.id} className="hud-pill flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold" style={{ boxShadow: `0 0 0 1.5px ${bad ? '#ff6a5a' : '#e8c060'}`, color: bad ? '#ffb0a0' : '#ffe9a8' }}>
+          <span key={e.id} className="glass flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ boxShadow: `0 0 0 1px ${bad ? '#ff6a5a' : '#ffcb52'}, 0 0 8px ${bad ? '#ff6a5a55' : '#ffcb5255'}`, color: bad ? '#ffb0a0' : '#ffe9a8' }}>
             {e.name} {Math.ceil((e.until - now) / 1000)}s
           </span>
         );
@@ -122,9 +123,9 @@ export function SkillBar({ client }: { client: GameClient }) {
   if (!self) return null;
   const skills = skillsFor(self.classId, self.job);
   return (
-    <div className="pointer-events-auto flex gap-2.5 px-1 pt-3 pb-1" data-testid="skill-bar">
-      {skills.map((sk, i) => (
-        <SkillOrb key={sk.id} client={client} index={i} size={42} />
+    <div className="glass hotbar pointer-events-auto mt-2" data-testid="skill-bar">
+      {skills.slice(0, 8).map((sk, i) => (
+        <SkillOrb key={sk.id} client={client} index={i} size={46} />
       ))}
     </div>
   );

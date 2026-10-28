@@ -1,96 +1,67 @@
-import { HeroScene } from '@/components/HeroScene';
-import { PixelIcon } from '@/components/PixelIcon';
 import { SiteHeader } from '@/components/SiteHeader';
 import { WakeServer } from '@/components/PlayLink';
-import { ClassShowcase } from '@/components/landing/ClassShowcase';
+import { Logo } from '@/components/Logo';
+import { SkyScene } from '@/components/SkyScene';
 import { BossCountdown, PlayCta, RegisterCta } from '@/components/landing/Cta';
-import { HeroTitle } from '@/components/landing/HeroTitle';
 import { LiveCounters, LiveTicker, StatsProvider } from '@/components/landing/LiveTicker';
-import { MonsterParade } from '@/components/landing/MonsterParade';
 import { Reveal } from '@/components/landing/reveal';
 import { Blip, SoundProvider, SoundToggle } from '@/components/landing/sound';
-import { WorldGallery } from '@/components/landing/WorldGallery';
 
-const VERSION = '2.4';
+const VERSION = '3.0';
 
-const FEATURES = [
-  {
-    id: 'combat',
-    title: 'Classes & Combat',
-    icon: 'weapon:sword:5',
-    status: 'Live',
-    body: 'Warrior, Mage, Archer or Acolyte, each with its own Rage, Mana or Energy. At level 40 beat Gnarlfang and become a Paladin, Berserker, Sorcerer, Necromancer, Ranger, Beastmaster, High Priest or Inquisitor. Spend stat points your way, combo skills with flashy effects, and raid Pyraxis for mythic loot.',
-  },
-  {
-    id: 'farming',
-    title: 'Farming & Gathering',
-    icon: 'carrot',
-    status: 'Live',
-    body: 'Claim a homestead: till, plant, water and harvest — crops grow while you are offline. Raise chickens, sheep and cows, fish the ponds, mine ore and chop wood. Quality matters: a Gold-quality harvest is worth far more.',
-  },
-  {
-    id: 'trading',
-    title: 'Trading & Crafting',
-    icon: 'ore_copper',
-    status: 'Live',
-    body: 'A player-driven economy: the marketplace, face-to-face trades, market stalls and bank vaults. Craft gear and food, specialise at level 40, and upgrade your weapons with gems until they glow.',
-  },
-  {
-    id: 'companions',
-    title: 'Mounts & Pets',
-    icon: 'mount:stag:dfe6ff',
-    status: 'Live',
-    body: 'Ride horses, wolves, a wyvern or the Celestial Stag, each with speed and terrain perks, and dress them with saddles, barding and trails. Pets fight beside you, level up to 100, earn loyalty, learn new skills and evolve twice into Grown and Mythic forms.',
-  },
-  {
-    id: 'adventure',
-    title: 'World Bosses & Arena',
-    icon: 'scale:a83a2a',
-    status: 'New in 2.3',
-    body: 'Every three hours a world boss appears and the whole server fights it. Climb the ranked 1v1 arena each season, find a group in the party finder, take daily bounties and story quests on every map, and chase gear with random bonus stats and set bonuses.',
-  },
-] as const;
+const STORY = [
+  'For a thousand generations, the core of Terago hummed in absolute balance, suspended in a sea of clouds. Its lifeblood — Aetherite Crystals — was protected by the floating island temples.',
+  'Then came the Fracture. A violent, unknown surge tore through the lower strata, shattering the crystals and pulling the World Bosses from their dormant slumbers. Darkness spilled into the fields, and the world began to bleed.',
+  'You awake as a newly arrived Recruit in Oakhaven Sanctuary, the last standing safe haven. Your memory is fractured, but the call in your veins is clear: mend the crystal core, or watch Terago fall into the endless abyss.',
+];
 
-/** What is finished, and what comes next. */
-const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 'next' | 'later' }[] = [
-  { v: '0.1', name: 'The world', text: 'Accounts, characters, Oakhaven, multiplayer movement and chat.', state: 'done' },
-  { v: '0.2', name: 'Farming', text: 'Homesteads, crops, watering, quality and offline growth.', state: 'done' },
-  { v: '0.3', name: 'Gathering & crafting', text: 'Mining, woodcutting, fishing and crafting stations.', state: 'done' },
-  { v: '0.4', name: 'Trading', text: 'Player marketplace and face-to-face trades.', state: 'done' },
-  { v: '0.5', name: 'Combat', text: 'Real-time fights, skills, equipment and upgrades.', state: 'done' },
-  { v: '0.6', name: 'Social', text: 'Parties, friends, guilds, chat channels, mute/block/report.', state: 'done' },
-  { v: '0.7–0.9', name: 'Dungeons, seasons, progress', text: 'Dungeons and bosses, day/night and weather, dailies, achievements and leaderboards.', state: 'done' },
-  { v: '1.0–1.1', name: 'Launch & endgame', text: 'Music and sound, phone controls, professions, bank, stalls, world events, level 100.', state: 'done' },
-  { v: '2.0', name: 'The great revision', text: 'Four classes and eight second jobs, the six-map world, gem upgrades, wings, combat pets and the Pyraxis raid.', state: 'done' },
-  { v: '2.1', name: 'Mounts, pets & HUD', text: 'Stable with 3D preview, mount gear, pet levels and loyalty, the ornate HUD and spell effects.', state: 'done' },
-  { v: '2.2', name: 'HD-2D graphics', text: 'Pixel art with depth: sun shadows, richer colour, sunbeams and depth haze — tuned to run on low-end PCs, with an Ultra mode for gaming GPUs.', state: 'done' },
-  { v: '2.3', name: 'Adventure update', text: '50-slot bags that stack, a faster first hour, minimap and auto-pickup, Elites and new late-map monsters, random gear stats and sets, story chains, bounties and auto-walk, world bosses, party finder, guild quests, food buffs, pet evolution and the ranked arena.', state: 'done' },
-  { v: '2.4', name: 'Feel & progression', text: 'Snappier combat (instant swings, hit-stop, click-to-engage), the Gem Shop, the Endless Rift, guild levels, arena tokens and bounty seals, stat re-rolls, a calmer HUD with grouped menus and a death screen.', state: 'now' },
-  { v: '2.5', name: 'Polish & balance', text: 'Boss and levelling balance from real play, more Rift bosses, new maps beyond the Caldera.', state: 'next' },
-  { v: '3.0', name: 'Full 3D', text: 'Low-poly floating islands, 3D chibi characters and visible gear.', state: 'later' },
+const JOBS = [
+  { icon: '🛡️', name: 'Vanguard', role: 'Melee', res: 'Momentum', color: '#ff7a5a', skills: ['Impact Rush', 'Iron Bastion', 'Shockwave Slam'], paths: ['Juggernaut', 'Bulwark'] },
+  { icon: '🔥', name: 'Elementalist', role: 'Magic', res: 'Mana', color: '#ff9a3a', skills: ['Pyre Shot', 'Frost Nova', 'Static Rift'], paths: ['Chrono-Mage', 'Pyromancer'] },
+  { icon: '🏹', name: 'Wayfinder', role: 'Ranged', res: 'Focus', color: '#4ee08a', skills: ['Steady Shot', 'Concussive Trap', 'Nimble Vault'], paths: ['Sharpshooter', 'Skywarden'] },
+  { icon: '☀️', name: 'Channeler', role: 'Support', res: 'Mana', color: '#ffd84a', skills: ['Restorative Beacon', 'Purifying Ward', 'Sol Strike'], paths: ['Hierophant', 'Arbiter'] },
+  { icon: '🗡️', name: 'Specter', role: 'Stealth', res: 'Stamina', color: '#b48aff', skills: ['Kinetic Edge', 'Razor Flechette', 'Phantom Veil'], paths: ['Void Blade', 'Trickster'] },
+];
+
+const MAPS: [string, string, string, string][] = [
+  ['Oakhaven Sanctuary', 'Town hub', '#4ec06a', '#2a6a8a'],
+  ['Whispering Fields', 'Lv 1–10', '#8ad85a', '#3a8a4a'],
+  ['Echoing Canopy', 'Lv 11–25', '#3a9a5a', '#1a4a3a'],
+  ['Sunken Catacombs', 'Lv 25–40', '#6a5a9a', '#1a1a3a'],
+  ['Desolate Crags', 'Lv 41–55', '#b8946a', '#5a4a3a'],
+  ['Scorched Badlands', 'Lv 50–62', '#f08a3a', '#7a2a1a'],
+  ['Sunlit Shoreline', 'Lv 55–68', '#5ad8e8', '#e8c890'],
+  ['Glacial Depths', 'Lv 62–75', '#bfeaff', '#4a7ab8'],
+  ['Skyward Ridge', 'Lv 76–84', '#9ab8ff', '#5a5ab0'],
+  ['Shadowfen Swamp', 'Lv 84–92', '#6a8a4a', '#2a3a2a'],
+  ["Dragon's Peak", 'Lv 92–100', '#e86a5a', '#4a1a2a'],
+  ['The Infernal Caldera', 'World boss', '#ff5a1a', '#2a0a0a'],
+];
+
+const FEATURES: [string, string, string][] = [
+  ['⚔️', 'Smart AUTO combat', 'Toggle AUTO (Caps Lock) to scan the whole screen for enemies, path to them, drink potions under your chosen HP and weave in your skills.'],
+  ['🎽', 'Every piece of gear shows', 'Helmets, chest plates, boots, weapons and wings layer onto your chibi hero the moment you equip them.'],
+  ['✨', 'Six stats, real choices', 'STR, AGI, VIT, INT, DEX and LUK up to 100 each. Enough DEX and your spells go instant — FAST CAST!'],
+  ['🗿', 'Waystone network', 'Touch a Waystone to unlock its region, then fast-travel across the twelve islands for a little gold.'],
+  ['⏱️', 'World boss schedule', 'A live timetable for every world boss, with a server-wide warning five minutes before each one appears.'],
+  ['💎', 'Refinery +1 to +10', 'Mine gems, refine your weapon at the Blacksmith and watch its strikes leave brighter glowing trails.'],
+  ['🤝', 'Safe trading', 'Two-step trades — Lock Offer, then Accept — checked by the server so nobody gets scammed.'],
+  ['🐉', 'Mounts and companions', 'Press R to ride. Skywardens raise a Gale Falcon that levels from 1 to 100 beside them.'],
+];
+
+const ROADMAP: { v: string; name: string; text: string; state: 'done' | 'now' | 'next' }[] = [
+  { v: '1.0–2.4', name: 'Foundations', text: 'Real-time multiplayer world, combat, gathering, trading, dungeons, world bosses, mounts, pets and the refinery.', state: 'done' },
+  { v: '3.0', name: 'The Fracture — new look', text: 'A brand-new HD interface on every screen: frosted-glass menus, quality-glow items and new damage numbers.', state: 'now' },
+  { v: '3.1', name: 'HD chibi graphics', text: 'Hand-shaded HD chibi heroes and monsters, with every helmet, chest piece, boot, weapon and wing visible.', state: 'next' },
+  { v: '3.2', name: 'Recruit to master', text: 'Five classes and ten mastery paths, job levels, six stats to 100, fast casting, the 8-slot hotbar and AUTO settings.', state: 'next' },
+  { v: '3.3', name: 'Mend the core', text: 'The story intro, main quest Acts I–IV, twelve regions linked by waystones, and the world boss board.', state: 'next' },
 ];
 
 const FAQ = [
-  {
-    q: 'Is TerraGo free to play?',
-    a: 'Yes. TerraGo never sells power: no weapons, levels or Gold for cash. The optional Gem Shop (GCash, Maya, cards) sells cosmetics only — premium outfits and mount gear.',
-  },
-  {
-    q: 'Do I need to download anything?',
-    a: 'No. TerraGo runs in Chrome, Edge, Firefox and Safari on desktop, and in mobile browsers with on-screen touch controls.',
-  },
-  {
-    q: 'Can I earn real money playing?',
-    a: 'No. You can earn Gems by selling the gear you find to other players on the Marketplace and spend them in the Gem Shop, but Gems stay in the game: they have no cash value and can never be withdrawn as money.',
-  },
-  {
-    q: 'What can I do right now?',
-    a: 'Almost everything: pick one of four classes and a second job at 40, explore six maps from Oakhaven to the Infernal Caldera, farm, fish, mine, craft, trade, join a guild, ride mounts, raise and evolve pets, fight world bosses, climb the ranked arena, run dungeons and raid Pyraxis. TerraGo is in open alpha (v' + VERSION + '), so expect balance changes.',
-  },
-  {
-    q: 'Is my progress saved?',
-    a: 'Yes. Your character, position and inventory are stored on the server. Refresh, log out or switch devices and pick up where you left off.',
-  },
+  { q: 'Is Terago Online free?', a: 'Yes. Play in your browser for free — no download, no pay-to-win.' },
+  { q: 'Which devices can I play on?', a: 'Chrome, Edge, Firefox and Safari on desktop, plus mobile browsers with on-screen touch controls.' },
+  { q: 'What happens to my existing character?', a: 'Your hero comes with you. When the new classes arrive, characters are converted automatically — your level and items stay.' },
+  { q: 'Is my progress saved?', a: 'Yes. Everything is stored on the server, so you can switch devices and pick up where you left off.' },
 ];
 
 export default function LandingPage() {
@@ -102,177 +73,192 @@ export default function LandingPage() {
           <SiteHeader />
 
           {/* Hero */}
-          <section className="relative overflow-hidden">
-            <HeroScene className="absolute inset-0 h-full w-full object-cover opacity-95" />
-            <div className="absolute inset-0 bg-gradient-to-b from-night/50 via-night/5 to-night/90" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(18,20,31,0.6),transparent_60%)]" />
-            <div className="relative mx-auto flex min-h-[86dvh] max-w-5xl flex-col items-center justify-center px-4 py-20 text-center">
-              <span className="text-outline mb-4 inline-flex items-center gap-2 rounded-full border-2 border-ink bg-red-700/90 px-3 py-1 text-xs font-bold uppercase tracking-widest text-parchment">
-                <span className="h-2 w-2 animate-ping rounded-full bg-parchment" /> v{VERSION} is live · Endless Rift &amp; Gem Shop
+          <section className="relative -mt-[57px] overflow-hidden">
+            <SkyScene className="absolute inset-0" />
+            <div className="absolute inset-0 bg-gradient-to-b from-night/30 via-transparent to-night" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_42%_at_50%_45%,rgba(10,14,29,.6),transparent)]" />
+            <div className="relative mx-auto flex min-h-[100dvh] max-w-5xl flex-col items-center justify-center px-4 pt-24 pb-16 text-center">
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold tracking-widest text-white uppercase backdrop-blur">
+                <span className="h-2 w-2 animate-ping rounded-full bg-sky" /> v{VERSION} · The Fracture
               </span>
-              <HeroTitle />
-              <p className="text-outline mt-3 max-w-xl text-base text-parchment/90 sm:text-lg">
-                A multiplayer pixel world in your browser. Start with almost nothing — become a famous farmer, a master smith, a monster hunter or a merchant prince.
+              <Logo size="xl" />
+              <p className="text-outline mt-6 font-display text-2xl font-semibold text-white sm:text-4xl">Mend the crystal core.</p>
+              <p className="text-outline mt-3 max-w-2xl text-base text-white/85 sm:text-lg">
+                A real-time fantasy MMORPG above a sea of clouds. Rise from a lost Recruit to a legend — five classes, ten mastery paths, twelve floating regions and the World Bosses the Fracture woke.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4">
-                <PlayCta>▶ PLAY NOW — FREE</PlayCta>
+                <PlayCta>▶ Play free now</PlayCta>
                 <RegisterCta />
               </div>
               <LiveCounters />
-              <p className="text-outline mt-5 text-sm text-parchment/80">Open alpha · No download · Desktop &amp; phone</p>
-              <a href="#heroes" className="text-outline mt-6 animate-bounce text-3xl text-gold motion-reduce:animate-none" aria-label="See more">
-                ▼
+              <a href="#story" className="mt-10 animate-bounce text-2xl text-white/80 motion-reduce:animate-none" aria-label="Read the story">
+                ⌄
               </a>
             </div>
           </section>
 
           <LiveTicker />
 
+          {/* Story */}
+          <section id="story" className="relative mx-auto max-w-4xl scroll-mt-20 px-4 py-20">
+            <Reveal className="text-center">
+              <p className="text-sm font-bold tracking-[0.35em] text-sky uppercase">The story</p>
+              <h2 className="mt-2 text-4xl font-bold text-white sm:text-5xl">The Fracture</h2>
+            </Reveal>
+            <div className="mt-10 space-y-6">
+              {STORY.map((t, i) => (
+                <Reveal key={i} delay={i * 120}>
+                  <p className="px-panel p-6 text-lg leading-relaxed text-white/90 italic sm:p-8 sm:text-xl">
+                    <span className="mr-2 font-display text-3xl text-gold not-italic">{['I', 'II', 'III'][i]}.</span>
+                    {t}
+                  </p>
+                </Reveal>
+              ))}
+            </div>
+          </section>
+
           {/* Classes */}
-          <section id="heroes" className="mx-auto max-w-6xl scroll-mt-16 px-4 py-16">
+          <section id="classes" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
             <Reveal className="text-center">
-              <h2 className="text-outline text-4xl font-bold text-gold sm:text-5xl">Choose your hero</h2>
-              <p className="mt-2 text-parchment/80">Four classes. Eight second jobs at level 40. Hover a hero to see them move.</p>
+              <p className="text-sm font-bold tracking-[0.35em] text-sky uppercase">Classes</p>
+              <h2 className="mt-2 text-4xl font-bold text-white sm:text-5xl">From Recruit to master</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-white/75">
+                🔰 Everyone starts as a Recruit. At level 10 choose one of five jobs; at level 40 master one of two paths.
+              </p>
             </Reveal>
-            <Reveal delay={150} className="mt-8">
-              <ClassShowcase />
-            </Reveal>
-          </section>
-
-          {/* Monsters */}
-          <section className="border-y-4 border-ink bg-night-2/60 py-8">
-            <Reveal className="text-center">
-              <h2 className="text-outline text-3xl font-bold text-gold">60+ monsters are waiting for you</h2>
-              <p className="mt-1 text-sm text-parchment/70">From squishy slimes to Vyrnax the Elder Dragon.</p>
-            </Reveal>
-            <MonsterParade />
-          </section>
-
-          {/* About */}
-          <section id="about" className="mx-auto max-w-5xl px-4 py-16">
-            <Reveal>
-              <div className="px-panel p-6 sm:p-8">
-                <h2 className="text-3xl font-bold text-wood-dark">About TerraGo</h2>
-                <p className="mt-3 text-lg leading-relaxed">
-                  TerraGo is a living online world where progress is earned. New arrivals are weak and nearly broke. After a few sessions you are capable; after a few weeks,
-                  established; after months, you might be wealthy, powerful or famous. Professions matter, rare items are genuinely rare, and the economy is built by players.
-                </p>
-                <p className="mt-3 text-lg font-bold text-leaf-dark">Time + Skill + Knowledge + Cooperation = Progress.</p>
-              </div>
-            </Reveal>
-          </section>
-
-          {/* Features */}
-          <section className="mx-auto grid max-w-5xl gap-6 px-4 pb-8 sm:grid-cols-2">
-            {FEATURES.map((f, i) => (
-              <Reveal key={f.id} delay={(i % 2) * 120}>
-                <Blip s="open">
-                  <article id={f.id} className="group px-panel h-full p-6 transition duration-300 hover:-translate-y-1 hover:rotate-[-0.4deg]">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-parchment-2 transition group-hover:scale-110 group-hover:rotate-6">
-                        <PixelIcon icon={f.icon} size={32} />
-                      </span>
-                      <h3 className="text-2xl font-bold text-wood-dark">{f.title}</h3>
-                      <span className={`ml-auto border-2 border-ink px-2 py-0.5 text-xs ${f.status === 'Live' ? 'bg-night-3 text-parchment' : 'animate-pulse bg-gold text-ink'}`}>{f.status}</span>
-                    </div>
-                    <p className="mt-3 leading-relaxed">{f.body}</p>
-                  </article>
-                </Blip>
-              </Reveal>
-            ))}
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {JOBS.map((j, i) => (
+                <Reveal key={j.name} delay={i * 80}>
+                  <Blip s="open">
+                    <article className="px-panel group h-full p-5 transition duration-300 hover:-translate-y-2" style={{ boxShadow: `0 10px 40px rgba(2,4,16,.55), 0 0 0 1px ${j.color}33` }}>
+                      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full text-4xl transition group-hover:scale-110" style={{ background: `radial-gradient(circle at 35% 30%, ${j.color}cc, ${j.color}33 60%, transparent 72%)`, boxShadow: `0 0 30px ${j.color}66` }}>
+                        {j.icon}
+                      </div>
+                      <h3 className="mt-3 text-center text-2xl font-bold text-white">{j.name}</h3>
+                      <p className="text-center text-xs font-bold tracking-widest uppercase" style={{ color: j.color }}>
+                        {j.role} · {j.res}
+                      </p>
+                      <ul className="mt-4 space-y-1 text-sm text-white/85">
+                        {j.skills.map((s) => (
+                          <li key={s} className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rotate-45" style={{ background: j.color }} /> {s}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-4 border-t border-white/10 pt-3 text-xs text-white/60">Lv 40 → {j.paths.join(' or ')}</p>
+                    </article>
+                  </Blip>
+                </Reveal>
+              ))}
+            </div>
           </section>
 
           {/* World */}
-          <section id="world" className="mx-auto max-w-6xl px-4 py-12">
-            <Reveal>
-              <h2 className="text-outline text-4xl font-bold text-gold">The World</h2>
-              <p className="mt-2 text-parchment/80">Six hand-built maps, from a cosy town to a dragon&apos;s lair.</p>
+          <section id="world" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
+            <Reveal className="text-center">
+              <p className="text-sm font-bold tracking-[0.35em] text-sky uppercase">The world</p>
+              <h2 className="mt-2 text-4xl font-bold text-white sm:text-5xl">Twelve islands in the clouds</h2>
             </Reveal>
-            <Reveal delay={120} className="mt-6">
-              <WorldGallery />
-            </Reveal>
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {MAPS.map(([name, lv, a, b], i) => (
+                <Reveal key={name} delay={(i % 4) * 60}>
+                  <Blip s="portal">
+                    <article className="group relative h-36 overflow-hidden rounded-2xl border border-white/15 shadow-xl transition hover:-translate-y-1">
+                      <div className="absolute inset-0 transition duration-700 group-hover:scale-110" style={{ background: `radial-gradient(circle at 30% 20%, ${a}, ${b} 75%)` }} />
+                      <div className="absolute -right-6 -bottom-8 h-28 w-28 rounded-full opacity-40 blur-xl" style={{ background: a }} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                      <span className="absolute top-2 left-2 rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-bold text-white">Map {i + 1}</span>
+                      <span className="absolute top-2 right-2 rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold text-white backdrop-blur">{lv}</span>
+                      <h3 className="text-outline absolute bottom-2 left-3 text-lg font-bold text-white">{name}</h3>
+                    </article>
+                  </Blip>
+                </Reveal>
+              ))}
+            </div>
           </section>
 
-          {/* World boss countdown */}
+          {/* Boss countdown */}
           <section className="px-4 py-12">
             <Reveal>
               <BossCountdown />
             </Reveal>
           </section>
 
-          {/* Roadmap */}
-          <section id="roadmap" className="mx-auto max-w-5xl px-4 py-12">
-            <Reveal>
-              <h2 className="text-outline text-3xl font-bold text-gold">Roadmap</h2>
-              <p className="mt-2 text-parchment/80">Where TerraGo is now, and what is next.</p>
+          {/* Features */}
+          <section id="features" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16">
+            <Reveal className="text-center">
+              <p className="text-sm font-bold tracking-[0.35em] text-sky uppercase">Features</p>
+              <h2 className="mt-2 text-4xl font-bold text-white sm:text-5xl">Built to be played</h2>
             </Reveal>
-            <div role="list" className="mt-6 grid gap-3 sm:grid-cols-2">
-              {ROADMAP.map((r, i) => (
-                <Reveal key={r.v} delay={(i % 2) * 80}>
-                  <div role="listitem"
-                    className={`px-panel-dark flex h-full gap-3 p-4 ${r.state === 'now' ? 'ring-4 ring-gold' : ''}`}
-                    data-testid={`roadmap-${r.state}`}
-                  >
-                    <span className={`mt-0.5 shrink-0 text-xl ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'animate-spin text-gold [animation-duration:4s]' : 'text-parchment/40'}`} aria-hidden>
-                      {r.state === 'done' ? '✔' : r.state === 'now' ? '★' : '○'}
-                    </span>
-                    <div>
-                      <p className="font-bold text-parchment">
-                        v{r.v} · {r.name}
-                        <span className={`ml-2 text-xs ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-parchment/50'}`}>
-                          {r.state === 'done' ? 'Done' : r.state === 'now' ? 'Just released' : r.state === 'next' ? 'Next' : 'Later'}
-                        </span>
-                      </p>
-                      <p className="mt-1 text-sm text-parchment/80">{r.text}</p>
-                    </div>
-                  </div>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURES.map(([icon, title, text], i) => (
+                <Reveal key={title} delay={(i % 4) * 70}>
+                  <article className="px-panel h-full p-5 transition hover:-translate-y-1">
+                    <div className="text-3xl">{icon}</div>
+                    <h3 className="mt-2 text-lg font-bold text-gold">{title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-white/80">{text}</p>
+                  </article>
                 </Reveal>
               ))}
             </div>
           </section>
 
-          {/* Community */}
-          <section id="community" className="mx-auto max-w-5xl px-4 py-12">
-            <Reveal>
-              <div className="px-panel-dark p-6 sm:p-8">
-                <h2 className="text-3xl font-bold text-gold">Community</h2>
-                <p className="mt-3 leading-relaxed text-parchment/90">
-                  Every player you see in Oakhaven is a real person. Say hello at the fountain, form a party, start a guild. Chat has filters, rate limits, and mute, block and
-                  report tools — be kind, trade fair, and help newcomers find their feet.
-                </p>
-              </div>
+          {/* Roadmap */}
+          <section id="roadmap" className="mx-auto max-w-4xl scroll-mt-20 px-4 py-16">
+            <Reveal className="text-center">
+              <p className="text-sm font-bold tracking-[0.35em] text-sky uppercase">Roadmap</p>
+              <h2 className="mt-2 text-4xl font-bold text-white">What&apos;s live and what&apos;s next</h2>
             </Reveal>
+            <ol className="relative mt-10 space-y-4 border-l border-white/15 pl-6">
+              {ROADMAP.map((r) => (
+                <li key={r.v} data-testid={`roadmap-${r.state}`} className="relative">
+                  <span
+                    className={`absolute top-5 -left-[31px] h-3.5 w-3.5 rounded-full ${r.state === 'done' ? 'bg-leaf' : r.state === 'now' ? 'animate-pulse bg-gold shadow-[0_0_14px_#ffcb52]' : 'bg-white/30'}`}
+                  />
+                  <div className={`px-panel p-4 ${r.state === 'now' ? 'ring-1 ring-gold/70' : ''}`}>
+                    <p className="font-bold text-white">
+                      v{r.v} · {r.name}
+                      <span className={`ml-2 text-xs ${r.state === 'done' ? 'text-leaf' : r.state === 'now' ? 'text-gold' : 'text-white/50'}`}>
+                        {r.state === 'done' ? 'Done' : r.state === 'now' ? 'Live now' : 'Coming next'}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-white/75">{r.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </section>
 
           {/* FAQ */}
-          <section id="faq" className="mx-auto max-w-3xl px-4 py-12">
-            <Reveal>
-              <h2 className="text-outline text-3xl font-bold text-gold">FAQ</h2>
-            </Reveal>
-            <div className="mt-6 space-y-3">
+          <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-16">
+            <h2 className="text-center text-4xl font-bold text-white">FAQ</h2>
+            <div className="mt-8 space-y-3">
               {FAQ.map((f) => (
                 <Blip key={f.q} s="click">
                   <details className="px-panel group p-4">
-                    <summary className="cursor-pointer list-none text-lg font-bold text-wood-dark">
-                      <span className="mr-2 inline-block transition-transform group-open:rotate-90">▶</span>
+                    <summary className="cursor-pointer list-none text-lg font-bold text-white">
+                      <span className="mr-2 inline-block text-gold transition-transform group-open:rotate-90">›</span>
                       {f.q}
                     </summary>
-                    <p className="mt-2 leading-relaxed">{f.a}</p>
+                    <p className="mt-2 leading-relaxed text-white/80">{f.a}</p>
                   </details>
                 </Blip>
               ))}
             </div>
           </section>
 
-          <section className="mx-auto max-w-5xl px-4 pb-24 text-center">
-            <Reveal>
-              <p className="text-outline mb-5 text-3xl font-bold text-parchment">Your adventure is one click away.</p>
-              <PlayCta big>▶ PLAY TERRAGO NOW</PlayCta>
+          <section className="relative overflow-hidden px-4 py-24 text-center">
+            <SkyScene className="absolute inset-0 opacity-60" calm />
+            <div className="absolute inset-0 bg-gradient-to-b from-night via-night/40 to-night" />
+            <Reveal className="relative">
+              <p className="text-outline mb-6 font-display text-4xl font-bold text-white">The crystal is waiting, Recruit.</p>
+              <PlayCta big>▶ Play Terago Online</PlayCta>
             </Reveal>
           </section>
 
-          <footer className="border-t-4 border-ink bg-night-2 py-6 text-center text-sm text-parchment/60">
-            TerraGo v{VERSION} · All art and world content are original · Made for the browser
+          <footer className="border-t border-white/10 bg-night/80 py-8 text-center text-sm text-white/55">
+            <Logo size="sm" className="mb-3 opacity-80" />
+            <p>Terago Online v{VERSION} · Free to play in your browser</p>
           </footer>
           <SoundToggle />
         </main>

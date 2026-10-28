@@ -1,12 +1,18 @@
-import '@fontsource/pixelify-sans/400.css';
-import '@fontsource/pixelify-sans/700.css';
+import '@fontsource/nunito/400.css';
+import '@fontsource/nunito/600.css';
+import '@fontsource/nunito/700.css';
+import '@fontsource/nunito/800.css';
+import '@fontsource/fredoka/500.css';
+import '@fontsource/fredoka/600.css';
+import '@fontsource/fredoka/700.css';
+
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'TerraGo — Farm. Trade. Fight. Grow.',
+  title: 'Terago Online — Mend the crystal core',
   description:
-    'TerraGo is a browser multiplayer pixel MMORPG. Farm your land, gather and craft, trade with real players, fight monsters and grow your legend — no download required.',
+    'Terago Online is a free browser fantasy MMORPG. Rise from Recruit through five classes and ten mastery paths, cross twelve floating regions and help real players mend the crystal core — no download required.',
   icons: { icon: '/favicon.svg' },
 };
 
@@ -15,7 +21,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#12141f',
+  themeColor: '#0a0e1d',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

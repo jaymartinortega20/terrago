@@ -49,7 +49,7 @@ function MONSTER_ART(id: string): { shape: string; color: string; size: number }
   const a = getMonster(id)?.art;
   return { shape: a?.shape ?? 'slime', color: a?.color ?? '#7cc35a', size: a?.size ?? 1 };
 }
-const LABEL_FONT = '"Pixelify Sans", monospace';
+const LABEL_FONT = '"Fredoka", "Nunito", system-ui, sans-serif';
 const LABEL_DEPTH = 1_000_000;
 /** Props that lie flat on the ground and cast no shadow. */
 const FLAT_PROPS = new Set(['teleport_pad', 'flower_bed', 'rug', 'path', 'crop_row', 'puddle']);

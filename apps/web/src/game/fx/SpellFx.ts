@@ -425,22 +425,24 @@ export class SpellFx {
     const crit = kind === 'crit';
     const size = crit ? 40 : kind === 'other' ? 17 : kind === 'taken' ? 24 : kind === 'miss' ? 17 : kind === 'dot' ? 18 : opts.pet ? 20 : 28;
     const scaled = Math.round(size * this.textScale);
-    const text = kind === 'miss' ? 'MISS' : kind === 'heal' ? `+${amount.toLocaleString()}` : amount.toLocaleString();
+    const text = kind === 'miss' ? 'Miss' : kind === 'heal' ? `+${amount.toLocaleString()}` : crit ? `${amount.toLocaleString()}!` : amount.toLocaleString();
+    // Miss / Lucky use a flowing cursive face; everything else the rounded display face.
+    const face = kind === 'miss' ? '"Segoe Script", "Brush Script MT", "Snell Roundhand", cursive' : this.font;
     const t = this.add
-      .text(x, y, text, { fontFamily: this.font, fontSize: `${scaled}px`, fontStyle: 'bold', color: '#ffffff', stroke: '#1a0e02', strokeThickness: crit ? 7 : 5 })
+      .text(x, y, text, { fontFamily: face, fontSize: `${kind === 'miss' ? Math.round(scaled * 1.35) : scaled}px`, fontStyle: kind === 'miss' ? 'italic bold' : 'bold', color: '#ffffff', stroke: crit ? '#3a1600' : '#0a0f22', strokeThickness: crit ? 8 : 5 })
       .setOrigin(0.5, 1)
       .setResolution(2)
       .setDepth(this.depth + 30 + n * 0.01);
     t.setShadow(0, 3, '#000000', 0, true, false);
     // Gradient fills: gold for your hits, white for others, red for damage taken, green heals.
     const stops: Record<string, string[]> = {
-      hit: ['#fff7b0', '#ffe14a', '#ffb81c', '#fff07a'],
-      crit: ['#ffffff', '#fff27a', '#ffb000', '#ffe866'],
+      hit: ['#ffffff', '#ffffff', '#dfe6ff', '#ffffff'],
+      crit: ['#fffbe0', '#ffe066', '#ffaa00', '#ffd23a'],
       taken: ['#ffd0c8', '#ff6a5a', '#c8282a', '#ff8a7a'],
       heal: ['#e8ffd8', '#8af06a', '#2fa83a', '#a8ff8a'],
       dot: ['#f0ffd0', '#b6f06a', '#6aa82a', '#c8f88a'],
       other: ['#ffffff', '#e8e8e8', '#b8b8c0', '#f0f0f0'],
-      miss: ['#e8e8e8', '#c8c8c8', '#9a9aa4', '#d8d8d8'],
+      miss: ['#e8f4ff', '#bcd8ff', '#8fb0e8', '#d8ecff'],
     };
     const ctx = t.context;
     const gr = ctx.createLinearGradient(0, t.height * 0.15, 0, t.height * 0.85);
@@ -459,9 +461,9 @@ export class SpellFx {
         return out;
       };
       const w = Math.max(60, t.width * 0.5);
-      burst.fillStyle(0xe86034, 0.95).fillPoints(pts(w * 0.95, w * 0.45), true);
-      burst.lineStyle(3, 0x4a1406, 1).strokePoints(pts(w * 0.95, w * 0.45), true);
-      burst.fillStyle(0xffaa46, 0.95).fillPoints(pts(w * 0.62, w * 0.32), true);
+      burst.fillStyle(0xff8a1c, 0.92).fillPoints(pts(w * 0.95, w * 0.45), true);
+      burst.lineStyle(3, 0x5a2400, 1).strokePoints(pts(w * 0.95, w * 0.45), true);
+      burst.fillStyle(0xffd23a, 0.95).fillPoints(pts(w * 0.62, w * 0.32), true);
       burst.setScale(0.2);
       this.tweens.add({ targets: burst, scale: 1, angle: 8, duration: 120, ease: 'Back.easeOut' });
       this.tweens.add({ targets: burst, alpha: 0, delay: 520, duration: 260, onComplete: () => burst?.destroy() });
