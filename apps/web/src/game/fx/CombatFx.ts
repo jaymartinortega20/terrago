@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { FxStyle } from './settings';
+import { FX_TEX, burst, flash, shockwave } from './juice';
 
 /** Where an entity stands: feet position plus sprite height. */
 export interface Spot {
@@ -102,7 +103,7 @@ export class CombatFx {
 
     const mace = type === 'mace' || type === 'staff' || type === 'wand';
     const arc = mace ? 1.0 : 1.2;
-    const r = (big ? 40 : 30) * (mace ? 0.9 : 1);
+    const r = (big ? 46 : 34) * (mace ? 0.9 : 1);
     const dur = big ? 240 : mace ? 210 : 170;
     // Mace: overhead chop that always comes down; sword alternates fore- and backhand.
     const a0 = mace ? a - 1.7 : a - arc * side;
@@ -110,8 +111,8 @@ export class CombatFx {
     const img = iconKey
       ? this.add.image(h.x, h.y, iconKey).setOrigin(0.12, 0.88).setScale(big ? 1.2 : 0.95).setDepth(this.depth + 1).setRotation(a0 + ICON_TILT)
       : null;
-    const g = this.add.graphics().setDepth(this.depth);
-    const width = (big ? 9 : 6) * (mace ? 1.2 : 1);
+    const g = this.add.graphics().setDepth(this.depth).setBlendMode(Phaser.BlendModes.ADD);
+    const width = (big ? 12 : 8) * (mace ? 1.2 : 1);
     this.tweens.addCounter({
       from: 0,
       to: 1,
@@ -301,9 +302,9 @@ export class CombatFx {
       g.setRotation(a);
       obj = g;
     } else {
-      const outer = this.add.circle(0, 0, size + 4, pal.glow, 0.35);
-      const inner = this.add.circle(0, 0, size, pal.core, 1).setStrokeStyle(2, 0xffffff, 0.7);
-      const core = this.add.circle(-1, -1, Math.max(1, size * 0.4), 0xffffff, 0.9);
+      const outer = this.add.image(0, 0, FX_TEX.dot).setTint(pal.glow).setBlendMode(Phaser.BlendModes.ADD).setScale((size + 10) / 22);
+      const inner = this.add.image(0, 0, FX_TEX.dot).setTint(pal.core).setBlendMode(Phaser.BlendModes.ADD).setScale(size / 14);
+      const core = this.add.image(0, 0, FX_TEX.flare).setBlendMode(Phaser.BlendModes.ADD).setScale(size / 26);
       obj = this.add.container(0, 0, [outer, inner, core]);
       this.tweens.add({ targets: outer, scale: 1.3, duration: 90, yoyo: true, repeat: -1 });
     }
@@ -323,12 +324,12 @@ export class CombatFx {
         const ox = obj.x;
         const oy = obj.y;
         if (kind === 'arrow') {
-          const p = this.add.rectangle(ox - Math.cos(a) * 8, oy - Math.sin(a) * 8, 6, opts.glow ? 3 : 1.5, opts.glow ? pal.core : 0xe8dcc0, 0.6).setRotation(a).setDepth(this.depth + 2);
-          this.fade(p, 140);
+          const p = this.add.image(ox - Math.cos(a) * 8, oy - Math.sin(a) * 8, FX_TEX.spark).setTint(opts.glow ? pal.core : 0xfff0d0).setBlendMode(Phaser.BlendModes.ADD).setScale(0.35, 0.3).setRotation(a).setDepth(this.depth + 2).setAlpha(0.7);
+          this.fade(p, 160);
         } else {
           const c = kind === 'fire' ? [0xffe48a, 0xffb03a, 0xe0483a][Math.floor(Math.random() * 3)]! : pal.core;
-          const p = this.add.circle(ox + (Math.random() * 6 - 3), oy + (Math.random() * 6 - 3), size * 0.6, c, 0.7).setDepth(this.depth + 2);
-          this.fade(p, kind === 'fire' ? 260 : 200, { scale: 0.2, y: oy - (kind === 'fire' ? 8 : 0) });
+          const p = this.add.image(ox + (Math.random() * 6 - 3), oy + (Math.random() * 6 - 3), FX_TEX.dot).setTint(c).setBlendMode(Phaser.BlendModes.ADD).setScale(size * 0.05).setDepth(this.depth + 2);
+          this.fade(p, kind === 'fire' ? 320 : 240, { scale: 0.02, y: oy - (kind === 'fire' ? 10 : 0) });
         }
       },
       onComplete: () => {
@@ -344,41 +345,37 @@ export class CombatFx {
 
   impact(to: Spot, pal: Palette, crit: boolean, full: boolean): void {
     const t = this.chest(to);
-    if (full) this.sparks(t.x, t.y, crit ? pal.core : pal.spark, crit ? 12 : 6, crit ? 30 : 18);
+    const sc = this.scene;
+    // Hot flash at the point of contact, a star flare, flying sparks.
+    flash(sc, t.x, t.y, pal.glow, crit ? 100 : 46, this.depth + 4, crit ? 300 : 180);
+    flash(sc, t.x, t.y, 0xffffff, crit ? 64 : 30, this.depth + 5, crit ? 220 : 140, FX_TEX.flare);
+    this.sparks(t.x, t.y, crit ? pal.core : pal.spark, full ? (crit ? 22 : 10) : crit ? 10 : 5, crit ? 46 : 28);
     if (crit) {
-      this.star(t.x, t.y, pal.core, 22);
-      if (full) this.ring(t.x, t.y, 0xffffff, 6, 28, 240, 2, 0.8);
-    } else this.star(t.x, t.y, 0xffffff, 8);
+      this.star(t.x, t.y, pal.core, 30);
+      shockwave(sc, to.x, to.y - 2, pal.core, 46, this.depth - 1, 360);
+      if (full) burst(sc, t.x, t.y, { tex: FX_TEX.smoke, n: 5, color: [0xffffff, pal.glow], speed: [20, 60], life: [300, 520], scale: [0.4, 0.7], endScale: 1.2, alpha: 0.5, depth: this.depth + 3 });
+    }
   }
 
   sparks(x: number, y: number, color: number, n: number, dist: number): void {
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * TAU + Math.random() * 0.6;
-      const d = dist * (0.6 + Math.random() * 0.6);
-      const s = this.add.rectangle(x, y, 3, 3, i % 3 === 0 ? 0xffffff : color).setDepth(this.depth + 4);
-      this.tweens.add({ targets: s, x: x + Math.cos(a) * d, y: y + Math.sin(a) * d * 0.8 + 6, alpha: 0, angle: 180, duration: 260 + Math.random() * 160, ease: 'Cubic.easeOut', onComplete: () => s.destroy() });
-    }
+    const sc = this.scene;
+    burst(sc, x, y, { tex: FX_TEX.spark, n, color: [color, 0xffffff, color], speed: [dist * 3.5, dist * 7.5], life: [180, 380], scale: [0.25, 0.5], endScale: 0.05, gravity: 420, rotate: true, depth: this.depth + 4 });
+    burst(sc, x, y, { n: Math.ceil(n / 2), color: [color, 0xffffff], speed: [dist * 1.5, dist * 3.5], life: [250, 500], scale: [0.08, 0.16], gravity: 180, depth: this.depth + 4 });
   }
 
-  /** Four-point flash. */
+  /** Four-point flare that pops and spins. */
   star(x: number, y: number, color: number, size: number): void {
-    const g = this.add.graphics().setDepth(this.depth + 5).setPosition(x, y);
-    const pts = [];
-    for (let i = 0; i < 8; i++) {
-      const r = i % 2 === 0 ? size : size * 0.22;
-      const a = (i / 8) * TAU - Math.PI / 2;
-      pts.push(new Phaser.Math.Vector2(Math.cos(a) * r, Math.sin(a) * r));
-    }
-    g.fillStyle(color, 0.95).fillPoints(pts, true);
-    g.fillStyle(0xffffff, 1).fillCircle(0, 0, size * 0.18);
-    g.setScale(0.3);
-    this.tweens.add({ targets: g, scale: 1, angle: 20, duration: 90, onComplete: () => this.fade(g, 160, { scale: 1.2 }) });
+    const img = flash(this.scene, x, y, color, size * 3.2, this.depth + 5, 260, FX_TEX.flare);
+    this.tweens.add({ targets: img, angle: 25, duration: 260 });
+    flash(this.scene, x, y, 0xffffff, size * 1.4, this.depth + 6, 160, FX_TEX.flare);
   }
 
   ring(x: number, y: number, color: number, r0: number, r1: number, ms: number, width: number, alpha = 0.9): void {
-    const c = this.add.circle(x, y, r1).setStrokeStyle(width, color, alpha).setDepth(this.depth - 1).setScale(r0 / r1);
-    this.tweens.add({ targets: c, scale: 1, duration: ms, ease: 'Cubic.easeOut' });
-    this.tweens.add({ targets: c, alpha: 0, delay: ms * 0.45, duration: ms * 0.55, onComplete: () => c.destroy() });
+    const img = this.add.image(x, y, FX_TEX.ring).setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(this.depth - 1).setAlpha(Math.min(1, alpha + width * 0.04));
+    const s1 = (r1 * 2.2) / 128;
+    img.setScale((s1 * r0) / r1);
+    this.tweens.add({ targets: img, scale: s1, duration: ms, ease: 'Cubic.easeOut' });
+    this.tweens.add({ targets: img, alpha: 0, delay: ms * 0.4, duration: ms * 0.6, onComplete: () => img.destroy() });
   }
 
   whoosh(to: Spot): void {
@@ -390,23 +387,13 @@ export class CombatFx {
   }
 
   heal(to: Spot, full: boolean): void {
-    this.ring(to.x, to.y - 2, 0x7cf06a, 4, 22, 400, 2, 0.8);
-    const n = full ? 7 : 3;
-    for (let i = 0; i < n; i++) {
-      this.later(i * 50, () => {
-        const x = to.x + (Math.random() * 28 - 14);
-        const y = to.y - Math.random() * to.h * 0.7;
-        const t = this.add.text(x, y, '+', { fontFamily: 'monospace', fontSize: i % 2 ? '10px' : '14px', color: '#9cf06a', stroke: '#2a6a2a', strokeThickness: 2 }).setOrigin(0.5).setDepth(this.depth + 4);
-        this.tweens.add({ targets: t, y: y - 22, alpha: 0, duration: 650, onComplete: () => t.destroy() });
-      });
-    }
+    shockwave(this.scene, to.x, to.y - 2, 0x7cf06a, 34, this.depth - 1, 520);
+    flash(this.scene, to.x, to.y - to.h * 0.45, 0x7cf06a, 90, this.depth + 3, 420);
+    burst(this.scene, to.x, to.y - 6, { n: full ? 22 : 10, color: [0x9cf06a, 0xe8ffc0, 0xffffff], speed: [10, 40], angle: [240, 300], life: [600, 1000], scale: [0.12, 0.26], gravity: -90, spread: 16, depth: this.depth + 4 });
   }
 
   bubbles(to: Spot, color: number): void {
-    for (let i = 0; i < 4; i++) {
-      const b = this.add.circle(to.x + (Math.random() * 20 - 10), to.y - to.h * 0.3, 2 + Math.random() * 2, color, 0.8).setDepth(this.depth + 2);
-      this.tweens.add({ targets: b, y: b.y - 16 - Math.random() * 10, alpha: 0, duration: 500 + i * 80, onComplete: () => b.destroy() });
-    }
+    burst(this.scene, to.x, to.y - to.h * 0.3, { n: 6, color: [color, 0xffffff], speed: [8, 24], angle: [250, 290], life: [500, 800], scale: [0.1, 0.2], gravity: -60, spread: 10, depth: this.depth + 2 });
   }
 
   // ---------------------------------------------------------------------------
@@ -415,12 +402,15 @@ export class CombatFx {
 
   explode(to: Spot, pal: Palette, full: boolean): void {
     const t = this.chest(to);
-    const ball = this.add.circle(t.x, t.y, 22, pal.glow, 0.5).setDepth(this.depth + 3).setScale(0.2);
-    const core = this.add.circle(t.x, t.y, 14, pal.core, 0.9).setDepth(this.depth + 3).setScale(0.2);
-    this.tweens.add({ targets: [ball, core], scale: 1, duration: 140, ease: 'Cubic.easeOut', onComplete: () => [ball, core].forEach((o) => this.fade(o, 220)) });
+    const sc = this.scene;
+    flash(sc, t.x, t.y, pal.glow, 150, this.depth + 3, 420);
+    flash(sc, t.x, t.y, pal.core, 80, this.depth + 4, 300);
+    flash(sc, t.x, t.y, 0xffffff, 60, this.depth + 5, 200, FX_TEX.flare);
+    shockwave(sc, to.x, to.y - 2, pal.core, 54, this.depth - 1, 420);
+    this.sparks(t.x, t.y, pal.spark, full ? 18 : 8, 40);
     if (full) {
-      this.sparks(t.x, t.y, pal.spark, 14, 34);
-      this.ring(t.x, t.y, pal.core, 6, 34, 300, 3);
+      burst(sc, t.x, t.y, { tex: FX_TEX.smoke, n: 8, color: [0x3a3030, 0x5a4a40], speed: [20, 70], life: [500, 900], scale: [0.5, 0.9], endScale: 1.6, alpha: 0.55, gravity: -40, add: false, depth: this.depth + 2 });
+      burst(sc, t.x, t.y, { n: 14, color: [pal.core, pal.spark, 0xffffff], speed: [40, 140], life: [500, 900], scale: [0.08, 0.16], gravity: -60, depth: this.depth + 4 });
     }
   }
 
@@ -465,12 +455,10 @@ export class CombatFx {
   nova(from: Spot, pal: Palette, radius: number, full: boolean): void {
     this.ring(from.x, from.y - 6, pal.core, 6, radius, 420, 5, 0.9);
     if (full) this.ring(from.x, from.y - 6, 0xffffff, 4, radius * 0.7, 360, 2, 0.8);
-    const n = full ? 10 : 5;
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * TAU;
-      const shard = this.add.rectangle(from.x, from.y - 10, 4, 9, i % 2 ? pal.core : 0xffffff).setRotation(a + Math.PI / 2).setDepth(this.depth + 2);
-      this.tweens.add({ targets: shard, x: from.x + Math.cos(a) * radius, y: from.y - 10 + Math.sin(a) * radius * 0.8, alpha: 0, duration: 420, ease: 'Cubic.easeOut', onComplete: () => shard.destroy() });
-    }
+    shockwave(this.scene, from.x, from.y - 2, pal.core, radius, this.depth - 1, 480);
+    flash(this.scene, from.x, from.y - 10, pal.glow, radius * 1.4, this.depth + 1, 380);
+    burst(this.scene, from.x, from.y - 10, { tex: FX_TEX.shard, n: full ? 22 : 10, color: [pal.core, 0xffffff], speed: [radius * 1.8, radius * 3], life: [300, 480], scale: [0.5, 0.9], endScale: 0.2, rotate: true, depth: this.depth + 2 });
+    if (full) burst(this.scene, from.x, from.y - 10, { n: 20, color: [0xffffff, pal.core], speed: [20, radius * 2], life: [500, 900], scale: [0.06, 0.14], gravity: -30, depth: this.depth + 3 });
   }
 
   /** Volley: arrows rain down around the target. */
@@ -526,13 +514,8 @@ export class CombatFx {
 
   /** Blessing: golden motes rise around the caster. */
   motes(from: Spot, color: number): void {
-    for (let i = 0; i < 10; i++) {
-      this.later(i * 40, () => {
-        const a = Math.random() * TAU;
-        const m = this.add.rectangle(from.x + Math.cos(a) * 14, from.y - 6 + Math.sin(a) * 6, 3, 3, i % 2 ? color : 0xffffff).setDepth(this.depth + 2);
-        this.tweens.add({ targets: m, y: m.y - 36 - Math.random() * 12, alpha: 0, duration: 700, onComplete: () => m.destroy() });
-      });
-    }
+    shockwave(this.scene, from.x, from.y - 2, color, 30, this.depth - 1, 600, 0.7);
+    burst(this.scene, from.x, from.y - 8, { n: 24, color: [color, 0xffffff], speed: [10, 30], angle: [250, 290], life: [700, 1200], scale: [0.1, 0.22], gravity: -70, spread: 18, depth: this.depth + 2 });
   }
 
   /** Evasion: fading copies of the character slide away. */

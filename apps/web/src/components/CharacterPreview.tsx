@@ -97,7 +97,8 @@ export function CharacterPreview({
       dead = true;
       cancelAnimationFrame(raf);
     };
-  }, [appearance, accessory, classId, job, npcId, w, h, dir, walk, spin, face]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(appearance), accessory, classId, job, npcId, w, h, dir, walk, spin, face]);
 
   return (
     <span className={`relative inline-block ${className}`} style={{ width: w, height: h }} aria-hidden="true">

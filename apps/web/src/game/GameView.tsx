@@ -483,7 +483,10 @@ function DepthHaze() {
   return (
     <div
       className="pointer-events-none absolute inset-0"
-      style={{ background: 'linear-gradient(180deg, rgba(196,222,255,0.16) 0%, rgba(196,222,255,0) 20%, rgba(0,0,0,0) 80%, rgba(8,10,28,0.22) 100%)' }}
+      style={{
+        background:
+          'radial-gradient(ellipse 75% 70% at 50% 52%, rgba(0,0,0,0) 60%, rgba(6,8,24,0.42) 100%), linear-gradient(180deg, rgba(196,222,255,0.14) 0%, rgba(196,222,255,0) 18%, rgba(0,0,0,0) 82%, rgba(8,10,28,0.18) 100%)',
+      }}
       aria-hidden
     />
   );

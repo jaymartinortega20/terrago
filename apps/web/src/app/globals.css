@@ -65,9 +65,12 @@ img.pixel {
    Inside a panel the old "parchment" colour names map onto light text and
    soft glass so all screens pick up the new look.
    --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   Panels: solid cartoon slate cards with a bevelled rim (Valor-style).
+   --------------------------------------------------------------------------- */
 .px-panel,
 .px-panel-dark {
-  --color-ink: #eef1ff;
+  --color-ink: #f4f6ff;
   --color-wood-dark: #ffd36e;
   --color-parchment: rgba(255, 255, 255, 0.06);
   --color-parchment-2: rgba(255, 255, 255, 0.09);
@@ -75,44 +78,35 @@ img.pixel {
   --color-gold-dark: #ffcf5a;
   --color-leaf-dark: #4ee08a;
   position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px) saturate(1.25);
-  -webkit-backdrop-filter: blur(12px) saturate(1.25);
-  color: #eef1ff;
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: 18px;
+  background: linear-gradient(180deg, #3a4357 0%, #2c3344 100%);
+  color: #f4f6ff;
+  border: 3px solid #555f78;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 2px #151a26,
+    inset 0 0 0 2px #232a39,
+    inset 0 3px 0 rgba(255, 255, 255, 0.08),
+    0 10px 28px rgba(5, 8, 20, 0.55);
 }
 .px-panel-dark {
-  background: linear-gradient(160deg, rgba(22, 28, 60, 0.72), rgba(8, 10, 26, 0.82));
+  background: linear-gradient(180deg, #2c3344 0%, #1f2533 100%);
 }
-/* A thin luminous edge along the top of every panel. */
 .px-panel::before,
 .px-panel-dark::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(140deg, rgba(160, 190, 255, 0.55), rgba(160, 190, 255, 0) 35%, rgba(255, 200, 90, 0) 70%, rgba(255, 200, 90, 0.35));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+  content: none;
 }
 .px-panel h2,
 .px-panel h3,
 .px-panel-dark h2,
 .px-panel-dark h3 {
-  text-shadow: 0 2px 12px rgba(255, 200, 90, 0.25);
+  text-shadow: 0 2px 0 rgba(10, 12, 24, 0.85);
 }
 
-/* Old "ink" outlines become soft glass edges everywhere. */
 [class*='border-ink'] {
-  border-color: rgba(190, 205, 255, 0.18) !important;
+  border-color: rgba(120, 135, 170, 0.45) !important;
 }
 [class*='border-parchment-3'] {
-  border-color: rgba(190, 205, 255, 0.16) !important;
+  border-color: rgba(120, 135, 170, 0.4) !important;
 }
 .px-panel .bg-gold,
 .px-panel-dark .bg-gold {
@@ -120,101 +114,97 @@ img.pixel {
 }
 
 /* ---------------------------------------------------------------------------
-   Buttons: glossy gem-cut buttons with a soft glow.
+   Buttons: chunky glossy cartoon buttons with a dark rim and a raised ledge.
    --------------------------------------------------------------------------- */
 .px-btn {
+  --b-top: #ffe27a;
+  --b-mid: #ffbe2e;
+  --b-bot: #f09a10;
+  --b-rim: #7a4400;
+  --b-text: #ffffff;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.62rem 1.3rem;
+  padding: 0.6rem 1.35rem;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
-  color: #2a1a02;
-  background: linear-gradient(180deg, #ffe08a 0%, #ffc23e 48%, #f0a020 52%, #d98612 100%);
-  border: 1px solid rgba(255, 236, 170, 0.9);
+  color: var(--b-text);
+  background: linear-gradient(180deg, var(--b-top) 0%, var(--b-mid) 50%, var(--b-bot) 100%);
+  border: 2px solid var(--b-rim);
   border-radius: 12px;
   box-shadow:
-    0 0 0 1px rgba(60, 30, 0, 0.6),
-    0 6px 18px rgba(240, 160, 30, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -3px 0 rgba(150, 80, 0, 0.35);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
-  transition: transform 0.08s, filter 0.15s, box-shadow 0.15s;
+    0 4px 0 var(--b-rim),
+    0 7px 14px rgba(5, 8, 20, 0.45),
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  text-shadow:
+    -1px -1px 0 var(--b-rim),
+    1px -1px 0 var(--b-rim),
+    -1px 1px 0 var(--b-rim),
+    1px 2px 0 var(--b-rim);
+  transition: transform 0.07s, filter 0.15s, box-shadow 0.07s;
   cursor: pointer;
   user-select: none;
   overflow: hidden;
+  transform: translateY(-2px);
 }
+/* Glossy upper half. */
 .px-btn::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
-  transform: translateX(-130%);
-  transition: transform 0.5s;
+  left: 4px;
+  right: 4px;
+  top: 2px;
+  height: 45%;
+  border-radius: 9px 9px 14px 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.08));
   pointer-events: none;
 }
 .px-btn:hover {
-  filter: brightness(1.08);
-  box-shadow:
-    0 0 0 1px rgba(60, 30, 0, 0.6),
-    0 8px 26px rgba(255, 180, 40, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -3px 0 rgba(150, 80, 0, 0.35);
-}
-.px-btn:hover::after {
-  transform: translateX(130%);
+  filter: brightness(1.08) saturate(1.05);
 }
 .px-btn:active {
-  transform: translateY(1px) scale(0.98);
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 var(--b-rim),
+    0 3px 8px rgba(5, 8, 20, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.45);
 }
 .px-btn:disabled {
-  filter: grayscale(0.85) brightness(0.7);
+  filter: grayscale(0.85) brightness(0.75);
   cursor: not-allowed;
 }
 .px-btn.green {
-  color: #fff;
-  background: linear-gradient(180deg, #6ff0a8 0%, #2fcf7a 48%, #19b062 52%, #0e8a4a 100%);
-  border-color: rgba(170, 255, 210, 0.8);
-  text-shadow: 0 1px 2px rgba(0, 60, 30, 0.6);
-  box-shadow:
-    0 0 0 1px rgba(0, 50, 25, 0.6),
-    0 6px 20px rgba(40, 210, 120, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -3px 0 rgba(0, 80, 40, 0.35);
+  --b-top: #8af07a;
+  --b-mid: #3fcf5a;
+  --b-bot: #22a83e;
+  --b-rim: #0d5a1e;
 }
 .px-btn.ghost {
-  color: #eef1ff;
-  background: linear-gradient(180deg, rgba(120, 140, 230, 0.28), rgba(40, 50, 110, 0.38));
-  border-color: rgba(170, 190, 255, 0.35);
-  text-shadow: none;
-  box-shadow:
-    0 0 0 1px rgba(4, 6, 20, 0.5),
-    0 4px 14px rgba(10, 14, 40, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-}
-.px-btn.ghost:hover {
-  box-shadow:
-    0 0 0 1px rgba(4, 6, 20, 0.5),
-    0 0 18px rgba(120, 150, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --b-top: #6cc4ff;
+  --b-mid: #3a9aff;
+  --b-bot: #2272e6;
+  --b-rim: #0d3a80;
 }
 .px-btn.small {
-  padding: 0.32rem 0.75rem;
+  padding: 0.3rem 0.8rem;
   font-size: 0.85rem;
   border-radius: 10px;
 }
 .px-btn.gold-btn {
-  background: linear-gradient(180deg, #ffe08a 0%, #ffc23e 48%, #f0a020 52%, #d98612 100%);
-  color: #2a1a02;
+  --b-top: #ffe27a;
+  --b-mid: #ffbe2e;
+  --b-bot: #f09a10;
+  --b-rim: #7a4400;
 }
 .px-btn.danger {
-  color: #fff;
-  background: linear-gradient(180deg, #ff8a96 0%, #f04a5a 50%, #c02a3a 100%);
-  border-color: rgba(255, 190, 200, 0.8);
+  --b-top: #ff8a7a;
+  --b-mid: #ff4a4a;
+  --b-bot: #d62a3a;
+  --b-rim: #6a0a14;
 }
 
 /* Inputs: frosted fields with a gold focus glow. */
@@ -309,13 +299,11 @@ select.px-input option {
 
 /* Glass panels (stable, pets, mount button): frosted, translucent, minimal. */
 .glass {
-  background: linear-gradient(160deg, rgba(58, 66, 104, 0.62), rgba(18, 22, 40, 0.72));
-  backdrop-filter: blur(12px) saturate(1.25);
-  -webkit-backdrop-filter: blur(12px) saturate(1.25);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 8px 32px rgba(5, 8, 20, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  border-radius: 18px;
-  color: #f4f1e6;
+  background: linear-gradient(180deg, rgba(58, 67, 87, 0.94), rgba(38, 44, 60, 0.94));
+  border: 2px solid #59647e;
+  box-shadow: 0 0 0 2px rgba(14, 18, 28, 0.9), inset 0 2px 0 rgba(255, 255, 255, 0.1), 0 8px 22px rgba(5, 8, 20, 0.45);
+  border-radius: 16px;
+  color: #f4f6ff;
 }
 .glass-dark {
   background: rgba(10, 13, 26, 0.5);

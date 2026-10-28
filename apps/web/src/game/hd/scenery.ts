@@ -166,3 +166,26 @@ export async function bakeBuilding(def: BuildingDef, useModel = true): Promise<S
   toonify(obj);
   return bakeFit(obj, { outline: { color: '#1a1622', width: 1.6 } });
 }
+
+/** Ground cover: grass tufts, flowers, ferns, pebbles and small mushrooms. */
+export const DECO: Record<string, { files: string[]; h: number; tint?: string }> = {
+  grass: { files: ['nature/Grass_Common_Short.glb', 'nature/Grass_Wide_Short.glb'], h: 0.34, tint: '#c8f08a' },
+  tall: { files: ['nature/Grass_Common_Tall.glb', 'nature/Grass_Wispy_Tall.glb'], h: 0.55, tint: '#b8e070' },
+  flower: { files: ['nature/Flower_1_Group.glb', 'nature/Flower_2_Group.glb', 'nature/Flower_3_Group.glb', 'nature/Flower_4_Group.glb', 'nature/Flower_7_Group.glb'], h: 0.42 },
+  clover: { files: ['nature/Clover_1.glb', 'nature/Plant_1.glb'], h: 0.3 },
+  fern: { files: ['nature/Fern_1.glb', 'nature/Fern_2.glb', 'nature/Plant_7.glb'], h: 0.55 },
+  pebble: { files: ['nature/Pebble_Round_1.glb', 'nature/Pebble_Round_2.glb', 'nature/Pebble_Round_3.glb'], h: 0.14 },
+  shroom: { files: ['nature/Mushroom_Common.glb'], h: 0.3 },
+  dry: { files: ['nature/Grass_Wispy_Tall.glb'], h: 0.45, tint: '#e0d090' },
+};
+
+export function decoVariants(kind: string): number {
+  return DECO[kind]?.files.length ?? 1;
+}
+
+export async function bakeDeco(kind: string, variant: number): Promise<StillArt> {
+  const d = DECO[kind] ?? DECO.grass!;
+  const obj = await modelOf(d.files[variant % d.files.length]!, d.h, d.tint, 0.9);
+  toonify(obj);
+  return bakeFit(obj, { yaw: hash01(variant * 4.7 + kind.length) * Math.PI * 2, outline: null, pad: 2 });
+}

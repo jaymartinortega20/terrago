@@ -33,11 +33,11 @@ function setup(): { renderer: THREE.WebGLRenderer; scene: THREE.Scene } {
   renderer.setClearColor(0x000000, 0);
   scene = new THREE.Scene();
   // Soft sky fill plus a warm key light from the upper left-front and a cool rim from behind.
-  scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x6a5a7a, 1.35));
-  const key = new THREE.DirectionalLight(0xfff2dc, 2.1);
+  scene.add(new THREE.HemisphereLight(0xeef4ff, 0x8a7a8a, 1.7));
+  const key = new THREE.DirectionalLight(0xfff4e0, 2.0);
   key.position.set(-1.4, 2.6, 2.2);
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0x9ad8ff, 1.3);
+  const rim = new THREE.DirectionalLight(0xbfe6ff, 1.6);
   rim.position.set(1.6, 1.4, -2.4);
   scene.add(rim);
   return { renderer, scene };
@@ -46,8 +46,8 @@ function setup(): { renderer: THREE.WebGLRenderer; scene: THREE.Scene } {
 /** Three-step light ramp: the anime cel-shade. */
 function toonRamp(): THREE.DataTexture {
   if (gradient) return gradient;
-  const d = new Uint8Array([120, 120, 120, 255, 196, 196, 196, 255, 255, 255, 255, 255]);
-  gradient = new THREE.DataTexture(d, 3, 1, THREE.RGBAFormat);
+  const d = new Uint8Array([150, 150, 150, 255, 190, 190, 190, 255, 228, 228, 228, 255, 255, 255, 255, 255]);
+  gradient = new THREE.DataTexture(d, 4, 1, THREE.RGBAFormat);
   gradient.minFilter = THREE.NearestFilter;
   gradient.magFilter = THREE.NearestFilter;
   gradient.needsUpdate = true;
@@ -205,7 +205,7 @@ async function doBake(obj: THREE.Object3D, L: SheetLayout): Promise<Sheet> {
     sc.remove(holder);
     holder.remove(obj);
   }
-  if (L.outline !== null) outline(sheet, L.outline?.color ?? '#1a1430', L.outline?.width ?? 1.6);
+  if (L.outline !== null) outline(sheet, L.outline?.color ?? 'rgba(24,18,44,0.8)', L.outline?.width ?? 1.3);
   return { canvas: sheet, fw, fh, cols, rows: L.rows.length, perLine };
 }
 

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { FX_TEX, ensureFxTextures } from './juice';
 
 /**
  * "HD-2D": pixel art with depth. Buildings, trees and props cast long soft
@@ -76,10 +77,22 @@ export function bakeGround(ground: HTMLCanvasElement, shadows: { src: HTMLCanvas
   return c;
 }
 
-/** Soft sunbeams and drifting dust, fixed to the screen (outdoors, daytime). */
+/**
+ * Living air over the map: sunbeams and drifting dust by day, fireflies at
+ * night, falling leaves in green places, slow fog banks and floating motes.
+ * Everything is placed in world space around the camera's view, so it looks
+ * the same at any zoom or screen density.
+ */
 export class Atmosphere {
   private beams: Phaser.GameObjects.Image[] = [];
-  private motes: { o: Phaser.GameObjects.Rectangle; vx: number; vy: number; ph: number }[] = [];
+  private motes: { o: Phaser.GameObjects.Image; x: number; y: number; vx: number; vy: number; ph: number }[] = [];
+  private flies: { o: Phaser.GameObjects.Image; x: number; y: number; ph: number; sp: number }[] = [];
+  private leaves: { o: Phaser.GameObjects.Image; x: number; y: number; vy: number; ph: number; spin: number }[] = [];
+  private fog: { o: Phaser.GameObjects.Image; x: number; y: number; vx: number }[] = [];
+  private butterflies: { o: Phaser.GameObjects.Image; x: number; y: number; ph: number }[] = [];
+  private birds: { o: Phaser.GameObjects.Image; t0: number; y: number }[] = [];
+  private nextBird = 0;
+  private theme = 'meadow';
 
   constructor(
     private scene: Phaser.Scene,
@@ -110,53 +123,122 @@ export class Atmosphere {
     return key;
   }
 
-  build(): void {
+  build(theme = 'meadow'): void {
     this.destroy();
-    const cam = this.scene.cameras.main;
+    this.theme = theme;
+    ensureFxTextures(this.scene);
+    const add = this.scene.add;
     for (let i = 0; i < 4; i++) {
-      const b = this.scene.add
-        .image(cam.width * (0.12 + i * 0.26), -40, this.beamKey())
-        .setOrigin(0.5, 0)
-        .setScrollFactor(0)
-        .setRotation(-0.42)
-        .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(this.depth)
-        .setDisplaySize(70 + i * 24, cam.height * 1.5)
-        .setAlpha(0);
-      this.beams.push(b);
+      this.beams.push(add.image(0, 0, this.beamKey()).setOrigin(0.5, 0).setRotation(-0.42).setBlendMode(Phaser.BlendModes.ADD).setDepth(this.depth).setAlpha(0));
     }
-    for (let i = 0; i < 16; i++) {
-      const o = this.scene.add
-        .rectangle(Math.random() * cam.width, Math.random() * cam.height, 2, 2, 0xfff2c8, 0.6)
-        .setScrollFactor(0)
-        .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(this.depth);
-      this.motes.push({ o, vx: 4 + Math.random() * 8, vy: -2 - Math.random() * 5, ph: Math.random() * 6 });
+    const warm = theme === 'volcano';
+    const cold = theme === 'snow' || theme === 'peak';
+    for (let i = 0; i < 34; i++) {
+      const o = add.image(0, 0, FX_TEX.dot).setBlendMode(Phaser.BlendModes.ADD).setDepth(this.depth).setTint(warm ? 0xff9a4a : cold ? 0xe8f4ff : 0xfff2c8).setScale(0.05 + Math.random() * 0.06);
+      this.motes.push({ o, x: Math.random(), y: Math.random(), vx: 0.004 + Math.random() * 0.01, vy: warm ? -0.02 - Math.random() * 0.02 : -0.003 - Math.random() * 0.006, ph: Math.random() * 6 });
+    }
+    if (!cold && !warm) {
+      for (let i = 0; i < 22; i++) {
+        const o = add.image(0, 0, FX_TEX.dot).setBlendMode(Phaser.BlendModes.ADD).setDepth(this.depth).setTint(i % 3 ? 0xd8ff7a : 0xfff27a).setScale(0.12);
+        this.flies.push({ o, x: Math.random(), y: Math.random(), ph: Math.random() * 6, sp: 0.4 + Math.random() * 0.6 });
+      }
+    }
+    if (theme === 'meadow' || theme === 'forest' || theme === 'lake' || theme === 'swamp') {
+      const tints = theme === 'swamp' ? [0x8a9a4a, 0x6a7a3a] : [0x8ad46a, 0xf2c14e, 0xe8803a, 0x6ab450];
+      for (let i = 0; i < 12; i++) {
+        const o = add.image(0, 0, FX_TEX.leaf).setDepth(this.depth).setTint(tints[i % tints.length]!).setScale(0.45 + Math.random() * 0.3);
+        this.leaves.push({ o, x: Math.random(), y: Math.random(), vy: 0.012 + Math.random() * 0.012, ph: Math.random() * 6, spin: (Math.random() - 0.5) * 3 });
+      }
+    }
+    if (theme === 'meadow' || theme === 'forest' || theme === 'lake') {
+      const tints = [0xff8ad0, 0xffe066, 0x8ad8ff, 0xffffff, 0xffa64a];
+      for (let i = 0; i < 6; i++) {
+        const o = add.image(0, 0, FX_TEX.leaf).setDepth(this.depth).setTint(tints[i % tints.length]!).setScale(0.5);
+        this.butterflies.push({ o, x: Math.random(), y: Math.random(), ph: Math.random() * 6 });
+      }
+    }
+    if (theme !== 'cave') {
+      for (let i = 0; i < 3; i++) this.birds.push({ o: add.image(0, 0, FX_TEX.leaf).setDepth(this.depth - 2).setTint(0x0a0c18).setAlpha(0).setScale(1.6, 0.9), t0: -1e9, y: 0 });
+    }
+    const fogN = theme === 'swamp' || theme === 'cave' ? 6 : theme === 'lake' || cold ? 4 : 3;
+    for (let i = 0; i < fogN; i++) {
+      const o = add.image(0, 0, FX_TEX.smoke).setDepth(this.depth - 1).setTint(theme === 'volcano' ? 0x5a3a3a : theme === 'swamp' ? 0xc8e0c0 : 0xf0f4ff).setAlpha(0);
+      this.fog.push({ o, x: Math.random(), y: Math.random(), vx: 0.004 + Math.random() * 0.004 });
     }
   }
 
   /** day: 0 (night) … 1 (bright day); off hides everything. */
   update(time: number, dtMs: number, day: number, off: boolean): void {
-    const cam = this.scene.cameras.main;
+    const v = this.scene.cameras.main.worldView;
+    const s = Math.min(0.1, dtMs / 1000);
     const k = off ? 0 : day;
+    const night = off ? 0 : 1 - day;
     this.beams.forEach((b, i) => {
-      b.setAlpha(k * (0.07 + 0.04 * Math.sin(time / 2600 + i * 1.7)));
-      b.x = cam.width * (0.12 + i * 0.26) + Math.sin(time / 9000 + i) * 30;
+      b.setPosition(v.x + v.width * (0.12 + i * 0.26) + Math.sin(time / 9000 + i) * 30, v.y - 40)
+        .setDisplaySize(v.width * (0.05 + i * 0.018), v.height * 1.5)
+        .setAlpha(k * (0.08 + 0.05 * Math.sin(time / 2600 + i * 1.7)));
     });
-    const s = dtMs / 1000;
+    const wrap = (n: number) => n - Math.floor(n);
     for (const m of this.motes) {
-      m.o.x += m.vx * s;
-      m.o.y += m.vy * s + Math.sin(time / 900 + m.ph) * 0.15;
-      if (m.o.x > cam.width + 4) m.o.x = -4;
-      if (m.o.y < -4) m.o.y = cam.height + 4;
-      m.o.setAlpha((off ? 0 : 0.25 + 0.35 * day) * (0.6 + 0.4 * Math.sin(time / 700 + m.ph)));
+      m.x = wrap(m.x + m.vx * s);
+      m.y = wrap(m.y + m.vy * s);
+      m.o.setPosition(v.x + m.x * v.width, v.y + m.y * v.height + Math.sin(time / 900 + m.ph) * 6);
+      m.o.setAlpha((off ? 0 : 0.25 + 0.4 * day) * (0.5 + 0.5 * Math.sin(time / 700 + m.ph)));
+    }
+    for (const f of this.flies) {
+      const t = time / 1000;
+      const x = f.x + Math.sin(t * 0.3 * f.sp + f.ph) * 0.05;
+      const y = f.y + Math.cos(t * 0.23 * f.sp + f.ph * 2) * 0.04;
+      f.o.setPosition(v.x + wrap(x) * v.width, v.y + wrap(y) * v.height);
+      f.o.setAlpha(night * Math.max(0, Math.sin(t * 2 * f.sp + f.ph)) * 0.95);
+    }
+    for (const l of this.leaves) {
+      l.y = wrap(l.y + l.vy * s);
+      l.x = wrap(l.x + Math.sin(time / 1300 + l.ph) * 0.0006);
+      l.o.setPosition(v.x + l.x * v.width + Math.sin(time / 600 + l.ph) * 14, v.y + l.y * v.height).setRotation(Math.sin(time / 500 + l.ph) * 1.2 + l.spin);
+      l.o.setAlpha(off ? 0 : 0.85 * (0.4 + 0.6 * day));
+    }
+    for (const b of this.butterflies) {
+      const t = time / 1000;
+      const x = b.x + Math.sin(t * 0.21 + b.ph) * 0.12 + Math.sin(t * 1.3 + b.ph) * 0.01;
+      const y = b.y + Math.cos(t * 0.17 + b.ph * 2) * 0.1 + Math.sin(t * 2.1 + b.ph) * 0.008;
+      b.o.setPosition(v.x + wrap(x) * v.width, v.y + wrap(y) * v.height).setScale(0.5 * Math.abs(Math.sin(t * 16 + b.ph)) + 0.08, 0.45);
+      b.o.setAlpha(k * 0.95);
+    }
+    // Now and then a flock's shadow sweeps over the ground.
+    if (!off && day > 0.5 && time > this.nextBird && this.birds.length) {
+      this.nextBird = time + 14000 + Math.random() * 12000;
+      const y = 0.15 + Math.random() * 0.7;
+      this.birds.forEach((b, i) => {
+        b.t0 = time + i * 260;
+        b.y = y + (i - 1) * 0.04;
+      });
+    }
+    for (const b of this.birds) {
+      const p = (time - b.t0) / 5200;
+      if (p < 0 || p > 1) {
+        b.o.setAlpha(0);
+        continue;
+      }
+      b.o.setPosition(v.x + (-0.1 + p * 1.2) * v.width, v.y + (b.y - p * 0.15) * v.height).setRotation(-0.15).setScale(1.6, 0.6 + 0.4 * Math.abs(Math.sin(time / 120)));
+      b.o.setAlpha(0.16 * Math.sin(p * Math.PI));
+    }
+    const fogBase = this.theme === 'swamp' || this.theme === 'cave' ? 0.22 : 0.1;
+    for (const f of this.fog) {
+      f.x = wrap(f.x + f.vx * s);
+      f.o.setPosition(v.x + (f.x * 1.4 - 0.2) * v.width, v.y + f.y * v.height).setDisplaySize(v.width * 0.7, v.height * 0.45);
+      f.o.setAlpha(off ? 0 : fogBase * (0.6 + 0.6 * night) * (0.6 + 0.4 * Math.sin(time / 5000 + f.y * 9)));
     }
   }
 
   destroy(): void {
-    this.beams.forEach((b) => b.destroy());
-    this.motes.forEach((m) => m.o.destroy());
+    for (const o of [...this.beams, ...this.motes.map((m) => m.o), ...this.flies.map((f) => f.o), ...this.leaves.map((l) => l.o), ...this.fog.map((f) => f.o), ...this.butterflies.map((b) => b.o), ...this.birds.map((b) => b.o)]) o.destroy();
+    this.butterflies = [];
+    this.birds = [];
     this.beams = [];
     this.motes = [];
+    this.flies = [];
+    this.leaves = [];
+    this.fog = [];
   }
 }

@@ -4,7 +4,7 @@ import { ACTIONS, RESERVED, keyFor, keyLabel, onKeysChanged, resetKeys, setKey, 
 import { useEffect, useMemo, useState } from 'react';
 import { CLASSES, getItem, getJob, getMap, skillsForJob } from '@terrago/game-data';
 import { BASE_OUTFIT_COUNT, JOB_LEVEL, OUTFITS, QUALITIES, TILE_SIZE, affixText, setOf } from '@terrago/shared';
-import { characterPreview } from '../art/characters';
+import { CharacterPreview } from '@/components/CharacterPreview';
 import { renderGround } from '../art/world';
 import { audio, loadAudioSettings, type AudioSettings } from '../audio';
 import { FX_STYLES, fxSettings, setFxSettings, type FxLevel, type FxSettings, type FxStyle } from '../fx/settings';
@@ -196,10 +196,6 @@ function Wardrobe({ client }: { client: GameClient }) {
       .catch(() => {});
   }, [client]);
   const choices = useMemo(() => [...OUTFITS.keys()].filter((i) => i < BASE_OUTFIT_COUNT || owned.includes(i)), [owned]);
-  const previews = useMemo(() => {
-    if (!self || typeof document === 'undefined') return {} as Record<number, string>;
-    return Object.fromEntries(choices.map((i) => [i, characterPreview({ ...self.appearance, outfit: i }, 'down', 2).toDataURL()]));
-  }, [choices, self]);
   if (!self) return null;
   return (
     <>
@@ -222,7 +218,7 @@ function Wardrobe({ client }: { client: GameClient }) {
               className={`flex flex-col items-center border-2 p-0.5 text-[9px] leading-tight ${on ? 'border-gold bg-gold/30' : o.exclusive ? 'border-[#b06ad6] bg-parchment-2' : 'border-ink bg-parchment-2'}`}
               data-testid={`wear-${i}`}
             >
-              {previews[i] && <img src={previews[i]} alt="" width={32} height={48} style={{ imageRendering: 'pixelated' }} />}
+              <CharacterPreview appearance={{ ...self.appearance, outfit: i }} classId={self.classId} job={self.job} scale={2} />
               <span className="truncate">{o.exclusive ? '👑 ' : ''}{o.name}</span>
             </button>
           );

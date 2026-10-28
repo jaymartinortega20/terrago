@@ -65,7 +65,11 @@ export type Sfx =
   | 'craft'
   | 'trade'
   | 'chat'
-  | 'error';
+  | 'error'
+  | 'swing'
+  | 'step'
+  | 'spell'
+  | 'pop';
 
 // ---------------------------------------------------------------------------
 // Music: a small generative sequencer. Each area has a key, scale, tempo and
@@ -178,6 +182,19 @@ class AudioManager {
         g.connect(this.master);
         this.bus[ch] = g;
       }
+      // A soft hall reverb that every effect and the music can send into.
+      const sr = this.ctx.sampleRate;
+      const irLen = Math.floor(sr * 2.2);
+      const ir = this.ctx.createBuffer(2, irLen, sr);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = ir.getChannelData(ch);
+        for (let i = 0; i < irLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / irLen, 3.2);
+      }
+      this.reverb = this.ctx.createConvolver();
+      this.reverb.buffer = ir;
+      const wet = this.ctx.createGain();
+      wet.gain.value = 0.9;
+      this.reverb.connect(wet).connect(this.master);
       const len = this.ctx.sampleRate * 2;
       this.noise = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
       const d = this.noise.getChannelData(0);
@@ -190,6 +207,15 @@ class AudioManager {
   }
 
   private analyser: AnalyserNode | null = null;
+  private reverb: ConvolverNode | null = null;
+
+  /** Send a node into the reverb (scaled by the effects volume via `bus`). */
+  private wet(node: AudioNode, amount: number, bus: AudioChannel = 'effects'): void {
+    if (!this.ctx || !this.reverb || amount <= 0) return;
+    const g = this.ctx.createGain();
+    g.gain.value = amount * (this.volumeFor(bus) ** 1.5);
+    node.connect(g).connect(this.reverb);
+  }
 
   /** Debug/test helper: what's playing and how loud the output is right now (RMS 0..1). */
   state(): { ready: boolean; music: string | null; ambient: string | null; level: number } {
@@ -224,7 +250,7 @@ class AudioManager {
 
   // --- Effects ---------------------------------------------------------------
 
-  private tone(opts: { type?: OscillatorType; f: number; f2?: number; at?: number; dur: number; vol?: number; attack?: number; bus?: AudioChannel; detune?: number }) {
+  private tone(opts: { type?: OscillatorType; f: number; f2?: number; at?: number; dur: number; vol?: number; attack?: number; bus?: AudioChannel; detune?: number; rev?: number }) {
     const ctx = this.ctx!;
     const t = ctx.currentTime + (opts.at ?? 0);
     const o = ctx.createOscillator();
@@ -238,11 +264,43 @@ class AudioManager {
     g.gain.exponentialRampToValueAtTime(v, t + (opts.attack ?? 0.005));
     g.gain.exponentialRampToValueAtTime(0.0001, t + opts.dur);
     o.connect(g).connect(this.bus[opts.bus ?? 'effects']!);
+    if (opts.rev) this.wet(g, opts.rev, opts.bus);
     o.start(t);
     o.stop(t + opts.dur + 0.05);
   }
 
-  private hiss(opts: { at?: number; dur: number; vol?: number; type?: BiquadFilterType; f: number; f2?: number; q?: number; bus?: AudioChannel }) {
+  /** A soft bell / chime (FM synthesis), with reverb. */
+  private bell(f: number, at = 0, dur = 0.9, vol = 0.12, rev = 0.35): void {
+    const ctx = this.ctx!;
+    const t = ctx.currentTime + at;
+    const car = ctx.createOscillator();
+    const mod = ctx.createOscillator();
+    const mg = ctx.createGain();
+    const g = ctx.createGain();
+    car.type = 'sine';
+    mod.type = 'sine';
+    car.frequency.value = f;
+    mod.frequency.value = f * 3.51;
+    mg.gain.setValueAtTime(f * 2.2, t);
+    mg.gain.exponentialRampToValueAtTime(f * 0.05, t + dur * 0.6);
+    mod.connect(mg).connect(car.frequency);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    car.connect(g).connect(this.bus.effects!);
+    this.wet(g, rev);
+    car.start(t);
+    mod.start(t);
+    car.stop(t + dur + 0.05);
+    mod.stop(t + dur + 0.05);
+  }
+
+  /** A body thump: a quick pitch-dropping sine. */
+  private thump(f: number, at = 0, dur = 0.14, vol = 0.4): void {
+    this.tone({ type: 'sine', f, f2: f * 0.35, at, dur, vol, attack: 0.002 });
+  }
+
+  private hiss(opts: { at?: number; dur: number; vol?: number; type?: BiquadFilterType; f: number; f2?: number; q?: number; bus?: AudioChannel; rev?: number; attack?: number }) {
     const ctx = this.ctx!;
     const t = ctx.currentTime + (opts.at ?? 0);
     const src = ctx.createBufferSource();
@@ -253,9 +311,13 @@ class AudioManager {
     if (opts.f2) filt.frequency.exponentialRampToValueAtTime(opts.f2, t + opts.dur);
     filt.Q.value = opts.q ?? 1;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(opts.vol ?? 0.3, t);
+    if (opts.attack) {
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(opts.vol ?? 0.3, t + opts.attack);
+    } else g.gain.setValueAtTime(opts.vol ?? 0.3, t);
     g.gain.exponentialRampToValueAtTime(0.0001, t + opts.dur);
     src.connect(filt).connect(g).connect(this.bus[opts.bus ?? 'effects']!);
+    if (opts.rev) this.wet(g, opts.rev, opts.bus);
     src.start(t, Math.random());
     src.stop(t + opts.dur + 0.05);
   }
@@ -268,45 +330,68 @@ class AudioManager {
     this.lastSfx.set(name, now);
     const notes = (list: number[], step: number, type: OscillatorType = 'square', vol = 0.12, dur = 0.12) =>
       list.forEach((m, i) => this.tone({ type, f: freq(m), at: i * step, dur, vol }));
+    const chime = (list: number[], step: number, vol = 0.1, dur = 0.9) => list.forEach((m, i) => this.bell(freq(m), i * step, dur, vol));
     switch (name) {
       case 'hit':
-        this.hiss({ dur: 0.09, f: 1800, vol: 0.35, q: 0.7 });
-        this.tone({ type: 'square', f: 180, f2: 70, dur: 0.1, vol: 0.18 });
+        // Meaty impact: body thump + crunchy noise + a short click.
+        this.thump(150, 0, 0.13, 0.45);
+        this.hiss({ dur: 0.11, type: 'lowpass', f: 2600, f2: 500, vol: 0.45, rev: 0.12 });
+        this.hiss({ dur: 0.03, type: 'highpass', f: 3500, vol: 0.2 });
         break;
       case 'crit':
-        this.hiss({ dur: 0.12, f: 2500, vol: 0.4, q: 0.7 });
-        this.tone({ type: 'square', f: 220, f2: 60, dur: 0.14, vol: 0.22 });
-        this.tone({ type: 'triangle', f: 1600, f2: 2400, dur: 0.12, vol: 0.12, at: 0.02 });
+        this.thump(170, 0, 0.2, 0.6);
+        this.hiss({ dur: 0.18, type: 'lowpass', f: 3500, f2: 400, vol: 0.55, rev: 0.25 });
+        this.bell(freq(91), 0.01, 0.5, 0.08, 0.3);
+        this.bell(freq(98), 0.03, 0.4, 0.05, 0.3);
         break;
       case 'miss':
-        this.hiss({ dur: 0.18, type: 'highpass', f: 800, f2: 3000, vol: 0.12 });
+        this.hiss({ dur: 0.22, type: 'bandpass', f: 600, f2: 2600, q: 1.4, vol: 0.18, attack: 0.04 });
+        break;
+      case 'swing':
+        this.hiss({ dur: 0.2, type: 'bandpass', f: 500, f2: 2200, q: 1.8, vol: 0.22, attack: 0.03 });
+        break;
+      case 'step':
+        this.hiss({ dur: 0.05, type: 'lowpass', f: 900 + Math.random() * 400, vol: 0.09 });
+        break;
+      case 'pop':
+        this.tone({ type: 'sine', f: 500, f2: 1100, dur: 0.07, vol: 0.12 });
         break;
       case 'hurt':
-        this.tone({ type: 'sawtooth', f: 300, f2: 90, dur: 0.18, vol: 0.14 });
+        this.thump(110, 0, 0.18, 0.5);
+        this.hiss({ dur: 0.14, type: 'lowpass', f: 1200, f2: 300, vol: 0.4 });
+        this.tone({ type: 'triangle', f: 320, f2: 140, dur: 0.16, vol: 0.08 });
         break;
       case 'heal':
-        notes([72, 76, 79, 84], 0.06, 'sine', 0.12, 0.25);
+        chime([79, 83, 86, 91], 0.07, 0.08, 1.1);
+        this.hiss({ dur: 0.6, type: 'highpass', f: 6000, vol: 0.05, attack: 0.15, rev: 0.4 });
         break;
       case 'magic':
-        this.tone({ type: 'triangle', f: 600, f2: 1800, dur: 0.25, vol: 0.12 });
-        this.hiss({ dur: 0.25, type: 'highpass', f: 4000, vol: 0.08 });
+      case 'spell':
+        this.tone({ type: 'sine', f: 400, f2: 1600, dur: 0.35, vol: 0.12, attack: 0.03, rev: 0.45 });
+        this.tone({ type: 'triangle', f: 803, f2: 3200, dur: 0.3, vol: 0.05, rev: 0.45 });
+        this.hiss({ dur: 0.4, type: 'bandpass', f: 1500, f2: 7000, q: 2, vol: 0.12, attack: 0.05, rev: 0.4 });
         break;
       case 'death':
-        notes([67, 63, 60, 55], 0.12, 'square', 0.12, 0.2);
+        // A soft "poof" and a falling sparkle.
+        this.thump(220, 0, 0.18, 0.3);
+        this.hiss({ dur: 0.45, type: 'lowpass', f: 3000, f2: 200, vol: 0.4, rev: 0.3 });
+        chime([84, 79, 74], 0.06, 0.05, 0.6);
         break;
       case 'coin':
-        notes([83, 88], 0.07, 'square', 0.09, 0.12);
+        this.bell(freq(93), 0, 0.4, 0.08, 0.2);
+        this.bell(freq(100), 0.07, 0.6, 0.08, 0.25);
         break;
       case 'levelup':
-        notes([60, 64, 67, 72, 76, 79, 84], 0.07, 'square', 0.11, 0.18);
+        chime([72, 76, 79, 84, 88, 91], 0.07, 0.1, 1.4);
+        this.tone({ type: 'sine', f: freq(48), dur: 1.4, vol: 0.18, attack: 0.05, rev: 0.4 });
+        this.hiss({ dur: 1.2, type: 'highpass', f: 5000, vol: 0.06, attack: 0.3, rev: 0.5 });
         break;
       case 'achievement':
-        notes([67, 72, 76], 0.1, 'square', 0.11, 0.16);
-        this.tone({ type: 'square', f: freq(79), at: 0.32, dur: 0.5, vol: 0.12 });
-        this.tone({ type: 'triangle', f: freq(55), at: 0.32, dur: 0.5, vol: 0.12 });
+        chime([67, 72, 76, 79], 0.1, 0.1, 1.2);
+        this.tone({ type: 'sine', f: freq(55), at: 0.3, dur: 0.9, vol: 0.14, rev: 0.4 });
         break;
       case 'quest':
-        notes([72, 79, 84], 0.09, 'triangle', 0.14, 0.2);
+        chime([72, 79, 84], 0.09, 0.1, 1);
         break;
       case 'harvest':
         this.tone({ type: 'triangle', f: 500, f2: 1100, dur: 0.12, vol: 0.18 });
@@ -339,41 +424,45 @@ class AudioManager {
         this.hiss({ dur: 0.35, type: 'lowpass', f: 2200, f2: 400, vol: 0.35 });
         break;
       case 'bite':
-        notes([88, 88], 0.09, 'square', 0.1, 0.06);
+        this.bell(freq(88), 0, 0.2, 0.07, 0.1);
+        this.bell(freq(88), 0.09, 0.2, 0.07, 0.1);
         break;
       case 'catch':
-        notes([76, 79, 84, 88], 0.06, 'triangle', 0.14, 0.14);
+        chime([76, 79, 84, 88], 0.06, 0.09, 0.8);
         this.hiss({ dur: 0.3, type: 'lowpass', f: 2000, f2: 500, vol: 0.2 });
         break;
       case 'click':
-        this.tone({ type: 'square', f: 1200, dur: 0.03, vol: 0.05 });
+        this.thump(900, 0, 0.04, 0.12);
+        this.hiss({ dur: 0.02, type: 'highpass', f: 4000, vol: 0.06 });
         break;
       case 'open':
-        this.tone({ type: 'triangle', f: 500, f2: 800, dur: 0.07, vol: 0.08 });
+        this.tone({ type: 'sine', f: 420, f2: 760, dur: 0.09, vol: 0.12 });
+        this.hiss({ dur: 0.12, type: 'bandpass', f: 1200, f2: 3000, q: 2, vol: 0.05, attack: 0.03 });
         break;
       case 'portal':
-        this.tone({ type: 'sine', f: 200, f2: 1200, dur: 0.45, vol: 0.12 });
-        this.hiss({ dur: 0.45, type: 'bandpass', f: 400, f2: 4000, vol: 0.12 });
+        this.tone({ type: 'sine', f: 200, f2: 1200, dur: 0.6, vol: 0.14, attack: 0.08, rev: 0.6 });
+        this.hiss({ dur: 0.6, type: 'bandpass', f: 400, f2: 5000, q: 2, vol: 0.14, attack: 0.1, rev: 0.6 });
+        chime([84, 91], 0.25, 0.06, 1);
         break;
       case 'telegraph':
         this.tone({ type: 'sawtooth', f: 70, f2: 110, dur: 0.9, vol: 0.15, attack: 0.2 });
         break;
       case 'boom':
-        this.hiss({ dur: 0.6, type: 'lowpass', f: 900, f2: 80, vol: 0.7 });
-        this.tone({ type: 'sine', f: 90, f2: 35, dur: 0.5, vol: 0.35 });
+        this.hiss({ dur: 0.9, type: 'lowpass', f: 1400, f2: 60, vol: 0.8, rev: 0.4 });
+        this.tone({ type: 'sine', f: 90, f2: 30, dur: 0.7, vol: 0.55 });
         break;
       case 'craft':
-        notes([79, 84], 0.08, 'triangle', 0.12, 0.12);
-        this.tone({ type: 'square', f: 1500, dur: 0.04, vol: 0.05 });
+        chime([79, 84], 0.08, 0.09, 0.7);
+        this.thump(400, 0, 0.05, 0.15);
         break;
       case 'trade':
-        notes([76, 81, 85], 0.07, 'square', 0.09, 0.12);
+        chime([76, 81, 85], 0.07, 0.08, 0.8);
         break;
       case 'chat':
         this.tone({ type: 'sine', f: 1400, dur: 0.04, vol: 0.04 });
         break;
       case 'error':
-        this.tone({ type: 'square', f: 180, dur: 0.12, vol: 0.08 });
+        this.tone({ type: 'triangle', f: 220, f2: 160, dur: 0.18, vol: 0.12 });
         break;
     }
   }
@@ -405,7 +494,13 @@ class AudioManager {
     const out = ctx.createGain();
     out.gain.value = 0;
     out.gain.setTargetAtTime(0.35 * tr.gain, ctx.currentTime, 0.8);
-    out.connect(this.bus.music!);
+    // Warm the synths: gentle lowpass and a hall reverb send.
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 2600;
+    lp.Q.value = 0.5;
+    out.connect(lp).connect(this.bus.music!);
+    this.wet(lp, 0.5, 'music');
     const beat = 60 / tr.bpm;
     const r = rng(tr.seed);
     // Pre-compose 8 bars of melody (8 eighth-notes per bar), reused with small variations.
@@ -427,17 +522,28 @@ class AudioManager {
     const note = (degree: number, octave: number) => tr.root + 12 * (octave + Math.floor(degree / tr.scale.length)) + tr.scale[degree % tr.scale.length]!;
     let step = 0;
     let next = ctx.currentTime + 0.1;
-    const play = (type: OscillatorType, midi: number, at: number, dur: number, vol: number) => {
-      const o = ctx.createOscillator();
+    const play = (type: OscillatorType, midi: number, at: number, dur: number, vol: number, attack = 0.01) => {
+      // Harsh waveforms become a soft two-voice blend (less chiptune, more instrument).
+      const soft: OscillatorType = type === 'square' || type === 'sawtooth' ? 'triangle' : type;
       const g = ctx.createGain();
-      o.type = type;
-      o.frequency.value = freq(midi);
       g.gain.setValueAtTime(0.0001, at);
-      g.gain.exponentialRampToValueAtTime(vol, at + 0.01);
+      g.gain.exponentialRampToValueAtTime(vol, at + attack);
       g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-      o.connect(g).connect(out);
-      o.start(at);
-      o.stop(at + dur + 0.05);
+      g.connect(out);
+      for (const [t, det, lvl] of [
+        [soft, -6, 1],
+        ['sine', 6, 0.6],
+      ] as const) {
+        const o = ctx.createOscillator();
+        const og = ctx.createGain();
+        o.type = t;
+        o.frequency.value = freq(midi);
+        o.detune.value = det;
+        og.gain.value = lvl;
+        o.connect(og).connect(g);
+        o.start(at);
+        o.stop(at + dur + 0.05);
+      }
     };
     const drum = (at: number, kind: 'kick' | 'hat' | 'snare') => {
       if (kind === 'kick') {
@@ -458,7 +564,7 @@ class AudioManager {
       f.type = kind === 'hat' ? 'highpass' : 'bandpass';
       f.frequency.value = kind === 'hat' ? 7000 : 1800;
       const g = ctx.createGain();
-      g.gain.setValueAtTime(kind === 'hat' ? 0.06 : 0.18, at);
+      g.gain.setValueAtTime(kind === 'hat' ? 0.03 : 0.12, at);
       g.gain.exponentialRampToValueAtTime(0.0001, at + (kind === 'hat' ? 0.04 : 0.12));
       src.connect(f).connect(g).connect(out);
       src.start(at, Math.random());
@@ -480,9 +586,9 @@ class AudioManager {
         const at = next;
         // Bass on beats, chord pad at bar start, melody on eighths.
         if (s % 2 === 0) play(tr.bass, note(chord, -1) + (s === 4 ? 7 : 0), at, beat * 0.9, 0.16);
-        if (s === 0) for (const k of [0, 2, 4]) play('triangle', note(chord + k, 0), at, beat * 3.8, 0.035);
+        if (s === 0) for (const k of [0, 2, 4]) play('sine', note(chord + k, 0), at, beat * 3.8, 0.04, beat * 0.8);
         const m = melody[bar]![s];
-        if (m !== null && m !== undefined) play(tr.lead, note(m, 1), at, beat * 0.45, tr.lead === 'sawtooth' ? 0.035 : 0.06);
+        if (m !== null && m !== undefined) play(tr.lead, note(m, 1), at, beat * 0.7, 0.05);
         if (tr.drums) {
           if (s === 0 || s === 4) drum(at, 'kick');
           if (s === 2 || s === 6) drum(at, 'snare');

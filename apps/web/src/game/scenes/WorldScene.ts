@@ -31,6 +31,7 @@ import {
   MOUNT_CHANNEL_MS,
   getMountStyle,
   type MountLook,
+  type MapDef,
 } from '@terrago/shared';
 import { cropArt, needsWaterArt, readyArt, soilArt, type SoilState } from '../art/farm';
 import { nodeArt } from '../art/nodes';
@@ -38,11 +39,12 @@ import { CHAR_FRAMES_PER_DIR, FRAME_ACTION, FRAME_SIT, buildCharacterSheet, char
 import { emoteIcon } from '../art/emotes';
 import { wingCanvas } from '../art/wings';
 import { HdSheets } from '../hd/HdSheets';
+import { FX_TEX, burst, ensureFxTextures, flash, shockwave } from '../fx/juice';
 import { TEXT_RES, renderDpr } from '../hd/screen';
 import { BAKE_RES } from '../hd/baker';
 import { HERO_ANIMS, HERO_COLS, HERO_FRAME, heroSheet, type HeroAnim } from '../hd/heroes';
 import { CREATURE_ANIMS, CREATURE_COLS, bakeCreature, hasMountModel, mountSeat } from '../hd/creatures';
-import { bakeBuilding, bakeNode, bakeProp, propVariants, type StillArt } from '../hd/scenery';
+import { bakeBuilding, bakeDeco, bakeNode, bakeProp, decoVariants, propVariants, type StillArt } from '../hd/scenery';
 import type { Sheet } from '../hd/baker';
 import { classBase, heroKey, npcBase, type HeroLook, type Weapon3D } from '../hd/actors';
 import { buildingArt } from '../art/world';
@@ -108,6 +110,7 @@ interface Avatar {
   actionAt?: number;
   actionMs?: number;
   actionKind?: HeroAnim;
+  dustAt?: number;
   /** Wings (back slot) and upgrade glows. */
   wings?: [Phaser.GameObjects.Image, Phaser.GameObjects.Image] | null;
   wingKey?: string | null;
@@ -159,6 +162,7 @@ export class WorldScene extends Phaser.Scene {
   private cursor!: Phaser.GameObjects.Graphics;
   private lastObjectRefresh = 0;
   private lastSweep = 0;
+  private lastLevel = 0;
   private lastActionHint: string | null = null;
 
   constructor() {
@@ -177,6 +181,7 @@ export class WorldScene extends Phaser.Scene {
   private outdoors = true;
 
   create(): void {
+    ensureFxTextures(this);
     this.fx = new CombatFx(this, LABEL_DEPTH - 8); // above the night overlay, below names
     this.spell = new SpellFx(this, LABEL_DEPTH - 8, LABEL_FONT);
     // HD-2D: camera bloom / focus blur / colour grade, sun shadows and sunbeams.
@@ -189,7 +194,7 @@ export class WorldScene extends Phaser.Scene {
       applyCameraLook(this.cameras.main, this.gfx, this.game.renderer as never);
       this.applyGround();
       if (this.gfx === 'hd' || this.gfx === 'ultra') {
-        if (this.outdoors) this.atmos.build();
+        if (this.outdoors) this.atmos.build(this.client.map?.theme);
       } else this.atmos.destroy();
     });
     this.events.once('shutdown', offGfx);
@@ -592,6 +597,53 @@ export class WorldScene extends Phaser.Scene {
     if (old !== want && old !== plainKey) this.textures.remove(old);
   }
 
+  /** Grass tufts, flowers, ferns and pebbles sprinkled over the ground (decoration only). */
+  private scatterGroundCover(map: MapDef): void {
+    if (this.gfx === 'classic') return;
+    const taken = new Set<string>();
+    for (const o of map.objects) {
+      const w = o.kind === 'building' ? o.w : (PROP_TYPES[o.type]?.w ?? 1);
+      const h = o.kind === 'building' ? o.h : (PROP_TYPES[o.type]?.h ?? 1);
+      for (let y = o.y - 1; y <= o.y + h; y++) for (let x = o.x - 1; x <= o.x + w; x++) taken.add(`${x},${y}`);
+    }
+    const theme = map.theme ?? 'meadow';
+    const cold = theme === 'snow' || theme === 'peak';
+    const hot = theme === 'volcano';
+    const lite = this.gfx === 'lite';
+    let budget = lite ? 350 : 900;
+    const hash = (x: number, y: number, k: number) => {
+      let h = (x * 73856093) ^ (y * 19349663) ^ (k * 83492791);
+      h = Math.imul(h ^ (h >>> 13), 1274126177);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    for (let y = 0; y < map.height && budget > 0; y++)
+      for (let x = 0; x < map.width && budget > 0; x++) {
+        if (taken.has(`${x},${y}`)) continue;
+        const t = map.tiles[y]![x];
+        const r = hash(x, y, 1);
+        let kind: string | null = null;
+        if ((t === '.' || t === ',') && !cold && !hot) kind = t === ',' ? (r < 0.75 ? 'tall' : r < 0.85 ? 'grass' : null) : r < 0.2 ? 'grass' : r < 0.25 ? 'clover' : r < 0.28 ? 'flower' : null;
+        else if (t === '*') kind = r < 0.7 ? 'flower' : r < 0.85 ? 'grass' : null;
+        else if (t === 'f') kind = r < 0.35 ? 'fern' : r < 0.42 ? 'shroom' : r < 0.55 ? 'grass' : null;
+        else if (t === '=' || t === 's' || t === 'h' || t === 'a' || t === 'k' || t === 'n' || t === 'c') kind = r < 0.05 ? 'pebble' : r < 0.08 && (t === 'k' || t === 'a' || t === 'n') ? 'dry' : null;
+        if (!kind) continue;
+        budget--;
+        const v = Math.floor(hash(x, y, 2) * decoVariants(kind));
+        const px = (x + 0.2 + hash(x, y, 3) * 0.6) * TILE_SIZE;
+        const py = (y + 0.25 + hash(x, y, 4) * 0.6) * TILE_SIZE;
+        const img = this.add.image(px, py, '__DEFAULT').setDepth(kind === 'pebble' || kind === 'clover' ? -3 : py).setVisible(false);
+        this.mapLayer.push(img);
+        this.statics.push(img);
+        const key = `hd:deco:${kind}:${v}`;
+        const flip = hash(x, y, 5) < 0.5;
+        void this.hd.ensure(key, async () => this.stillSheet(await bakeDeco(kind!, v))).then((ok) => {
+          if (!ok || !img.active) return;
+          const m = this.hd.get(key)!.meta!;
+          img.setTexture(key, 0).setOrigin(m.ox!, m.oy!).setScale(1 / BAKE_RES).setFlipX(flip).setVisible(true);
+        });
+      }
+  }
+
   /** Turn a still bake into a one-frame sheet (keeps its ground point and size). */
   private stillSheet(a: StillArt): Sheet & { foot?: number; w?: number; h?: number; ox?: number; oy?: number } {
     return { canvas: a.canvas, fw: a.canvas.width, fh: a.canvas.height, cols: 1, rows: 1, perLine: 1, w: a.w, h: a.h, ox: a.ox, oy: a.oy };
@@ -681,7 +733,7 @@ export class WorldScene extends Phaser.Scene {
     this.nextCullAt = 0;
     this.shadowDraws = [];
     this.outdoors = !indoor;
-    if (this.outdoors && (this.gfx === 'hd' || this.gfx === 'ultra')) this.atmos.build();
+    if (this.outdoors && (this.gfx === 'hd' || this.gfx === 'ultra')) this.atmos.build(map.theme);
     else this.atmos.destroy();
 
     for (const o of map.objects) {
@@ -752,6 +804,7 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
+    this.scatterGroundCover(map);
     this.applyGround();
     for (const id of [...this.objectViews.keys()]) this.destroyObjectView(id);
     for (const o of this.client.objects.values()) this.syncObject(o);
@@ -1186,7 +1239,10 @@ export class WorldScene extends Phaser.Scene {
       if (sv && e.s !== e.t && e.k !== 'death' && e.k !== 'dot') sv.attackAt = now;
       if (tgtAv && (e.k === 'hit' || e.k === 'crit')) tgtAv.hurtUntil = now + (e.k === 'crit' ? 260 : 170);
       if (tgtAv && e.k === 'death') tgtAv.deadUntil = now + 1800;
-      if (e.k === 'death') continue;
+      if (e.k === 'death') {
+        if (opts.level !== 'off') this.deathFx(e.t, pos);
+        continue;
+      }
       try {
         this.attackFx(e, opts);
         this.spellFxFor(e, opts);
@@ -1282,6 +1338,7 @@ export class WorldScene extends Phaser.Scene {
     const T = TILE_SIZE;
     if (e.k === 'cast') {
       if (!from) return;
+      if (e.s === this.client.ui.get().self?.characterId) audio.sfx('spell');
       switch (sk.id) {
         case 'frost_nova':
           return sp.iceSpikes(from, 2.2 * T);
@@ -1336,6 +1393,61 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /** The struck sprite flashes white for a moment. */
+  private hitFlash(id: string): void {
+    const sp = this.monsterViews.get(id)?.sprite ?? this.avatarOf(id)?.sprite;
+    if (!sp || !sp.active) return;
+    sp.setTintFill(0xffffff);
+    this.time.delayedCall(70, () => sp.active && sp.clearTint());
+  }
+
+  /** A defeated monster bursts into light and its spirit rises. */
+  private deathFx(id: string, pos: { x: number; y: number; h: number }): void {
+    const v = this.monsterViews.get(id);
+    if (!v) return;
+    const d = LABEL_DEPTH - 7;
+    const cy = pos.y - pos.h * 0.45;
+    flash(this, pos.x, cy, 0xfff0c0, 130, d, 380);
+    flash(this, pos.x, cy, 0xffffff, 80, d + 1, 260, FX_TEX.flare);
+    shockwave(this, pos.x, pos.y - 2, 0xffe48a, 50, d - 2, 460);
+    burst(this, pos.x, cy, { tex: FX_TEX.spark, n: 18, color: [0xffe48a, 0xffffff, 0xffb03a], speed: [120, 300], life: [250, 500], scale: [0.3, 0.55], endScale: 0.05, gravity: 380, rotate: true, depth: d });
+    burst(this, pos.x, cy, { n: 26, color: [0xbfeaff, 0xffffff, 0xd8b0ff], speed: [10, 60], angle: [230, 310], life: [700, 1300], scale: [0.1, 0.24], gravity: -120, spread: 14, depth: d });
+    burst(this, pos.x, pos.y, { tex: FX_TEX.smoke, n: 6, color: [0xe8e0d0], speed: [20, 60], angle: [180, 360], life: [400, 700], scale: [0.4, 0.7], endScale: 1.3, alpha: 0.45, add: false, depth: d - 3 });
+    // The body flashes and shrinks away.
+    v.sprite.setTintFill(0xffffff);
+    this.tweens.add({ targets: v.sprite, scaleX: v.sprite.scaleX * 1.25, scaleY: v.sprite.scaleY * 0.2, alpha: 0, duration: 260, ease: 'Quad.easeIn' });
+  }
+
+  /** Level up: a pillar of light, rings and sparkles around the hero. */
+  private levelUpFx(x: number, y: number): void {
+    const d = LABEL_DEPTH - 7;
+    const pillar = this.add.image(x, y + 4, FX_TEX.dot).setTint(0xffe48a).setBlendMode(Phaser.BlendModes.ADD).setOrigin(0.5, 0.95).setDepth(d).setScale(0.2, 0.2);
+    this.tweens.add({ targets: pillar, scaleX: 0.9, scaleY: 6, duration: 260, ease: 'Cubic.easeOut', yoyo: true, hold: 500, onComplete: () => pillar.destroy() });
+    for (let i = 0; i < 3; i++) this.time.delayedCall(i * 180, () => shockwave(this, x, y, i % 2 ? 0xffffff : 0xffcb52, 60 + i * 16, d - 1, 700));
+    flash(this, x, y - 26, 0xffe48a, 160, d + 1, 700);
+    burst(this, x, y - 10, { n: 40, color: [0xffe48a, 0xffffff, 0xffcb52], speed: [20, 90], angle: [230, 310], life: [900, 1600], scale: [0.12, 0.26], gravity: -60, spread: 20, depth: d + 1 });
+    burst(this, x, y - 20, { tex: FX_TEX.flare, n: 10, color: [0xffffff, 0xffe48a], speed: [40, 120], life: [500, 900], scale: [0.15, 0.3], depth: d + 2 });
+    const t = this.add
+      .text(x, y - 70, 'LEVEL UP!', { fontFamily: LABEL_FONT, fontSize: '26px', fontStyle: 'bold', color: '#fff3b0', stroke: '#6a3a00', strokeThickness: 7 })
+      .setOrigin(0.5)
+      .setResolution(TEXT_RES)
+      .setDepth(LABEL_DEPTH + 30)
+      .setScale(0.3);
+    t.setShadow(0, 0, '#ffb000', 16, true, true);
+    this.tweens.add({ targets: t, scale: 1, duration: 260, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: t, y: t.y - 26, alpha: 0, delay: 1300, duration: 600, onComplete: () => t.destroy() });
+    this.cameras.main.flash(180, 255, 236, 170, false);
+  }
+
+  /** Little dust puffs at a runner's feet. */
+  private footDust(av: Avatar, x: number, y: number, now: number, fast: boolean): void {
+    if (now < (av.dustAt ?? 0) || this.gfx === 'classic') return;
+    av.dustAt = now + (fast ? 150 : 230);
+    if (av === this.local && !av.mount) audio.sfx('step');
+    const c = this.outdoors ? 0xe8dcc0 : 0xb8b0c0;
+    burst(this, x + (Math.random() * 6 - 3), y, { tex: FX_TEX.smoke, n: 2, color: [c], speed: [6, 22], angle: [190, 350], life: [350, 600], scale: [0.14, 0.24], endScale: 0.4, alpha: 0.5, add: false, depth: y - 2 });
+  }
+
   private attackFx(e: CombatEvent, opts: FxSettings): void {
     if (opts.level === 'off') return;
     const full = opts.level === 'full';
@@ -1346,21 +1458,26 @@ export class WorldScene extends Phaser.Scene {
     const w = this.weaponOf(e.s);
     const monster = !w ? this.client.monsters.get(e.s) : undefined;
     const pal = w ? paletteFor(e.s === me ? opts.style : 'weapon', w.tier, this.time.now) : monster && getMonster(monster.info.monsterId)?.magic ? MAGIC_PAL : MONSTER_PAL;
-    const icon = w?.icon || null;
+    // HD heroes swing the weapon they hold in the sprite itself.
+    const icon = this.avatarOf(e.s)?.hd ? null : w?.icon || null;
     const hold = (ms: number) => this.swinging.set(e.s, this.time.now + ms + 260);
     const shake = () => {
-      if (e.s === me && opts.shake) this.cameras.main.shake(90, 0.003);
+      if (e.s === me && opts.shake) this.cameras.main.shake(140, 0.006);
     };
     const land = (p = pal) => {
       if (e.k === 'miss') fx.whoosh(to);
       else {
         fx.impact(to, p, e.k === 'crit', full);
+        this.hitFlash(e.t);
         if (e.k === 'crit') shake();
+        else if (e.s === me && opts.shake) this.cameras.main.shake(70, 0.0018);
+        else if (e.t === me && opts.shake) this.cameras.main.shake(110, 0.003);
       }
     };
     const melee = (p = pal, big = false) => {
       if (!from || !w) return land(p);
       hold(260);
+      if (e.s === me) audio.sfx('swing');
       const ms = fx.swing(e.s, from, to, w.type === 'bow' ? 'fist' : w.type, icon, p, { big, full });
       this.time.delayedCall(ms, () => land(p));
     };
@@ -1666,6 +1783,7 @@ export class WorldScene extends Phaser.Scene {
       const acting = (av.actionUntil ?? 0) > now && !av.mount;
       const anim: HeroAnim = dead ? 'dead' : av.mount ? 'ride' : acting ? (av.actionKind ?? 'attack') : !moving && opts.sit ? 'sit' : hurt ? 'hurt' : moving ? 'walk' : 'idle';
       av.sprite.setPosition(rx, ry + 2 - lift).setDepth(y + 0.5);
+      if (moving && !dead) this.footDust(av, rx, ry + 2, now, (opts.speed ?? 1) > 1.3 || !!av.mount);
       this.heroFrame(av, shownDir, (av.danceUntil ?? 0) > now ? 'idle' : anim, time, opts.speed ?? 1);
     } else av.sprite.setPosition(rx, ry + 2 - lift).setFrame(DIR_ROW[shownDir] * CHAR_FRAMES_PER_DIR + col).setDepth(y + 0.5);
     if (!av.shadow) av.shadow = this.add.image(rx, ry, this.blobKey()).setDepth(-4);
@@ -1685,7 +1803,7 @@ export class WorldScene extends Phaser.Scene {
     if (av.mount && av.mountHd) {
       av.mount.setPosition(rx, ry + 3).setDepth(dir === 'up' ? y + 1 : y);
       this.monsterFrame({ sprite: av.mount, hd: av.mountHd }, dir, moving, time, 0);
-    } else if (av.mount) av.mount.setPosition(rx, ry + 4).setFlipX(dir === 'left').setFrame(moving ? Math.floor(time / 110) % 2 : 0).setDepth(dir === 'up' ? y + 1 : y);
+    } else if (av.mount && av.mount.texture.key !== '__DEFAULT') av.mount.setPosition(rx, ry + 4).setFlipX(dir === 'left').setFrame(moving ? Math.floor(time / 110) % 2 : 0).setDepth(dir === 'up' ? y + 1 : y);
     if (moving) this.mountTrail(av, rx, ry + 4, now);
     const sitDrop = col === FRAME_SIT ? 6 : 0;
     av.label.setPosition(rx, ry - 58 - lift + sitDrop);
@@ -1982,7 +2100,18 @@ export class WorldScene extends Phaser.Scene {
   private updateLighting(time: number): void {
     if (!this.night) return;
     const dark = this.indoorDim || darknessAt(this.client.serverNow());
-    this.night.setFillStyle(0x0a0f2c, dark);
+    // Colour grade: warm golden light as the sun sets, deep blue moonlight at night.
+    if (this.indoorDim) this.night.setBlendMode(Phaser.BlendModes.NORMAL).setFillStyle(0x0a0f2c, dark);
+    else {
+      const dusk = Math.max(0, 1 - Math.abs(dark - 0.28) / 0.22);
+      const c = Phaser.Display.Color.Interpolate.ColorWithColor(
+        Phaser.Display.Color.ValueToColor(0xffffff),
+        Phaser.Display.Color.ValueToColor(dark > 0.28 ? 0x3a4a9a : 0xffc890),
+        100,
+        Math.round(Math.min(1, dark > 0.28 ? (dark - 0.1) * 1.15 : dusk * 0.8) * 100),
+      );
+      this.night.setBlendMode(Phaser.BlendModes.MULTIPLY).setFillStyle(Phaser.Display.Color.GetColor(c.r, c.g, c.b), 1);
+    }
     const flicker = 0.85 + Math.sin(time / 130) * 0.05 + Math.sin(time / 47) * 0.04;
     const glow = Math.min(0.5, (dark + (this.indoorDim ? 0.15 : 0)) * 0.75) * flicker;
     for (const g of this.glows) g.setAlpha(glow * 1.6);
@@ -2085,6 +2214,9 @@ export class WorldScene extends Phaser.Scene {
     if (meId) this.syncHdFor(this.local, meId, time);
     this.placeAvatar(this.local, lx, ly, client.dir, client.moving, time, { sit: client.pose === 'sit', speed: client.speed() });
     this.drawMountChannel(lx, ly);
+    const lvl = client.ui.get().self?.level ?? 0;
+    if (this.lastLevel && lvl > this.lastLevel && fxSettings().level !== 'off') this.levelUpFx(lx, ly);
+    this.lastLevel = lvl;
     this.updateCameraFeel(delta, !!client.ui.get().self?.mount);
     const fxo = fxSettings();
     const selfId = client.ui.get().self?.characterId;
@@ -2113,7 +2245,7 @@ export class WorldScene extends Phaser.Scene {
       const k = v.kick && v.kick.until > time ? (v.kick.until - time) / 140 : 0;
       v.sprite.setPosition(rx + Math.round((v.kick?.x ?? 0) * k), ry + 2 + Math.round((v.kick?.y ?? 0) * k)).setDepth(m.y);
       if (v.hd) this.monsterFrame(v, m.dir, m.moving, time, id.length * 131);
-      else v.sprite.setFrame(m.moving ? Math.floor(time / 180) % 2 : 0).setFlipX(m.dir === 'left');
+      else if (v.sprite.texture.key !== '__DEFAULT') v.sprite.setFrame(m.moving ? Math.floor(time / 180) % 2 : 0).setFlipX(m.dir === 'left');
       if (!v.shadow) v.shadow = this.add.image(rx, ry, this.blobKey()).setDepth(-4);
       v.shadow.setPosition(rx + 4, ry + 3).setScale(Math.min(2.4, (v.hd ? v.frameW * 0.55 : v.sprite.displayWidth) / 52), 0.55).setVisible(this.gfx !== 'classic' && v.sprite.alpha > 0.5);
       const top = v.hd ? ry - (this.hd.get(v.hd)?.meta?.top ?? 30) * (v.sprite.scaleX * BAKE_RES) - 4 : ry - v.sprite.displayHeight - 2;
@@ -2164,7 +2296,7 @@ export class WorldScene extends Phaser.Scene {
     // Free HD sheets nobody has shown for a minute (scenery stays while on the map).
     if (nowMs - this.lastSweep > 20000) {
       this.lastSweep = nowMs;
-      this.hd.sweep(60000, (k) => k.startsWith('hd:prop') || k.startsWith('hd:bld') || k.startsWith('hd:node'));
+      this.hd.sweep(60000, (k) => k.startsWith('hd:prop') || k.startsWith('hd:bld') || k.startsWith('hd:node') || k.startsWith('hd:deco'));
     }
     if (nowMs - this.lastObjectRefresh > 400) {
       this.lastObjectRefresh = nowMs;
