@@ -9,4 +9,5 @@
 export const REGISTRY_KEYS = {
   net: 'net',
   gameState: 'gameState',
+  hud: 'hud',
 } as const;

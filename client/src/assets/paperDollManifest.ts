@@ -48,7 +48,10 @@ export const PAPER_DOLL_COMPOSITE_ORDER: readonly PaperDollLayer[] = [
  * (SPEC.md section 6). */
 export const WINGS_FLUTTER_FRAME_COUNT = 6;
 
-const LAYER_DRAWERS: Record<PaperDollLayer, (ctx: CanvasRenderingContext2D, facing: PaperDollFacing, pose: Pose) => void> = {
+/** Exported so the HUD's status-block portrait (`ui/portrait.ts`, task
+ * #81) can composite a static "idle, facing down" frame from the player's
+ * CURRENT equipment without duplicating this layer->drawer lookup. */
+export const LAYER_DRAWERS: Record<PaperDollLayer, (ctx: CanvasRenderingContext2D, facing: PaperDollFacing, pose: Pose) => void> = {
   body: drawBody,
   head: drawHead,
   hair: drawHair,

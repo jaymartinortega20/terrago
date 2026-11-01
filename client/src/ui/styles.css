@@ -21,6 +21,10 @@
   color: var(--terago-text);
 }
 
+#ui-root, #ui-root *, #ui-root *::before, #ui-root *::after {
+  box-sizing: border-box;
+}
+
 .terago-glass {
   background: var(--terago-glass-bg);
   backdrop-filter: blur(12px);
@@ -36,6 +40,15 @@
   font-weight: 400;
   letter-spacing: 0.02em;
   color: var(--terago-text);
+}
+
+.terago-glass h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--terago-text-dim);
 }
 
 .terago-glass input,
@@ -125,3 +138,243 @@
   0%, 100% { box-shadow: 0 0 4px 1px rgba(240, 194, 60, 0.5); }
   50% { box-shadow: 0 0 10px 3px rgba(240, 194, 60, 0.9); }
 }
+
+/* ===================== HUD (task #81, SPEC.md section 7) ===================== */
+
+.terago-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+.terago-hud.is-visible { display: block; }
+
+/* Bars: a thin filled track, used for HP/resource/EXP in the status
+ * block. The exact-number tooltip comes from each bar's own `title`
+ * attribute (set in statusBlock.ts), not a custom widget. */
+.terago-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  margin-top: 4px;
+}
+.terago-bar-fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  transition: width 150ms ease;
+}
+.terago-bar-hp { height: 12px; }
+
+/* ---- Status block (top-left) ---- */
+.terago-hud-status {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 240px;
+  padding: 12px;
+}
+.terago-status-top { display: flex; align-items: center; gap: 10px; }
+.terago-portrait {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+.terago-status-text { min-width: 0; }
+.terago-status-name { font-weight: 600; font-size: 15px; }
+.terago-status-level { font-size: 11px; color: var(--terago-text-dim); margin-top: 2px; }
+.terago-status-bars { margin-top: 10px; }
+
+/* ---- Hotbar (bottom center) + AUTO button beside it ---- */
+.terago-hud-hotbar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+}
+.terago-hotbar-slot {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid var(--terago-glass-border);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.terago-hotbar-slot.terago-empty { opacity: 0.5; }
+.terago-hotbar-slot.terago-depleted .terago-hotbar-icon { opacity: 0.35; }
+.terago-hotbar-key {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  color: var(--terago-text-dim);
+}
+.terago-hotbar-icon { cursor: pointer; width: 40px; height: 40px; }
+.terago-hotbar-qty {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+.terago-hotbar-clear {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 50%;
+  font-size: 11px;
+}
+.terago-hotbar-slot:hover .terago-hotbar-clear { display: block; }
+
+.terago-hud-auto {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(calc(-50% + 260px));
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  align-items: center;
+}
+.terago-auto-toggle {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid var(--terago-glass-border);
+  width: 56px;
+}
+.terago-auto-toggle.is-on {
+  background: var(--terago-accent) !important;
+  box-shadow: 0 0 10px 2px rgba(169, 136, 255, 0.7);
+}
+.terago-auto-cog { font-size: 16px; padding: 6px 10px; }
+
+.terago-hud-auto-settings {
+  position: absolute;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(calc(-50% + 260px));
+  width: 260px;
+  padding: 16px;
+}
+.terago-hud-auto-settings label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.terago-hud-auto-settings input[type='range'] { width: 100%; margin-top: 4px; }
+
+/* ---- Quest tracker (right edge) ---- */
+.terago-hud-quest {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 220px;
+  padding: 12px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.terago-quest-entry + .terago-quest-entry { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--terago-glass-border); }
+.terago-quest-name { font-weight: 600; font-size: 13px; }
+.terago-quest-objective { font-size: 11px; color: var(--terago-text-dim); margin-top: 3px; display: flex; justify-content: space-between; }
+.terago-quest-ready { display: inline-block; margin-top: 4px; font-size: 11px; color: #e0c23c; font-weight: 600; }
+
+/* ---- Chat log (bottom-left) ---- */
+.terago-hud-chat {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 300px;
+  padding: 10px;
+}
+.terago-chat-tabs { display: flex; gap: 4px; margin-bottom: 6px; }
+.terago-chat-tabs button {
+  background: transparent !important;
+  color: var(--terago-text-dim) !important;
+  font-weight: 500 !important;
+  padding: 3px 8px !important;
+  font-size: 11px;
+}
+.terago-chat-tabs button.is-active { color: var(--terago-text) !important; background: rgba(255, 255, 255, 0.1) !important; }
+.terago-chat-messages {
+  height: 110px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.terago-chat-line { word-break: break-word; }
+.terago-chat-system { color: #e0c23c; }
+.terago-chat-map { color: #9fd4ff; }
+.terago-chat-npc { color: #8fe0c0; }
+.terago-chat-monster { color: #ff9a9a; }
+.terago-chat-pet { color: #b8f09a; }
+
+/* ---- Minimap (top-right) ---- */
+.terago-hud-minimap {
+  position: absolute;
+  top: 16px;
+  right: 252px;
+  padding: 6px;
+}
+.terago-hud-minimap canvas { display: block; border-radius: 8px; }
+
+/* ---- Inventory panel ---- */
+.terago-hud-inventory {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 340px;
+  padding: 18px;
+}
+.terago-inventory-equip { display: flex; gap: 8px; margin-bottom: 14px; }
+.terago-equip-slot {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid var(--terago-glass-border);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.terago-inventory-bag {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.terago-bag-slot {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 2px solid var(--terago-glass-border);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: grab;
+}
+.terago-bag-qty {
+  position: absolute;
+  bottom: 1px;
+  right: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+.terago-inventory-close { margin-top: 14px; }

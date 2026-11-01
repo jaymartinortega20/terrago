@@ -3,15 +3,18 @@
  * clamp, local-player click-to-move/WASD with prediction + server
  * reconciliation, and every remote entity (other players and monsters)
  * rendered from world:snapshot with ~100ms interpolation. Combat feedback
- * (damage floaters, hit flashes, AUTO mode) and the DOM HUD are separate,
- * later tasks (#81/#82) layered on top of what this scene already renders
- * and already sends intents for.
+ * (damage floaters, hit flashes) and AUTO mode's own scan/target/attack
+ * loop are a separate, later task (#82) layered on top of what this scene
+ * already renders and already sends intents for. The DOM HUD (task #81,
+ * `ui/hud/Hud.ts`) is a singleton main.ts creates once and this scene just
+ * shows - not torn down/rebuilt on a portal crossing's `scene.restart()`.
  */
 import Phaser from 'phaser';
 import { MAPS, type EntitySnapshot, type EquipmentSlot, type Facing, type MapDef } from '@terago/shared';
 import { REMOTE_INTERPOLATION_DELAY_MS, TILE_SIZE_PX } from '../config.js';
 import { sceneContext } from '../state/sceneContext.js';
 import type { SelfState } from '../state/GameState.js';
+import { isTextInputFocused } from '../util/domFocus.js';
 import { isTallTile, tileKeyFor } from '../world/tilemap.js';
 import {
   createLocalPrediction,
@@ -49,6 +52,7 @@ type WasdKeys = Record<'W' | 'A' | 'S' | 'D', Phaser.Input.Keyboard.Key>;
 export class WorldScene extends Phaser.Scene {
   private net!: ReturnType<typeof sceneContext>['net'];
   private gameState!: ReturnType<typeof sceneContext>['gameState'];
+  private hud!: ReturnType<typeof sceneContext>['hud'];
   private map!: MapDef;
   private loadedMapId: string | null = null;
   private localId: string | null = null;
@@ -67,9 +71,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { net, gameState } = sceneContext(this);
+    const { net, gameState, hud } = sceneContext(this);
     this.net = net;
     this.gameState = gameState;
+    this.hud = hud;
+    hud.show();
 
     const mapId = gameState.mapId ?? 'map1';
     this.map = MAPS[mapId]!;
@@ -242,16 +248,8 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  /** SPEC.md section 7: "Game keys are ignored while the chat box has
-   * focus." There's no chat box yet (task #81), but the check costs
-   * nothing and covers any future DOM text input the same way. */
-  private isTextInputFocused(): boolean {
-    const el = document.activeElement;
-    return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
-  }
-
   private pollWasd(): void {
-    if (!this.wasdKeys || this.isTextInputFocused()) return;
+    if (!this.wasdKeys || isTextInputFocused()) return;
     const dx = (this.wasdKeys.D.isDown ? 1 : 0) - (this.wasdKeys.A.isDown ? 1 : 0);
     const dy = (this.wasdKeys.S.isDown ? 1 : 0) - (this.wasdKeys.W.isDown ? 1 : 0);
     if (dx === this.lastSentDir.dx && dy === this.lastSentDir.dy) return;

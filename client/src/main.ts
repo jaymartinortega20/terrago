@@ -14,10 +14,15 @@ import { BootScene } from './scenes/BootScene.js';
 import { LoginScene } from './scenes/LoginScene.js';
 import { IntroScene } from './scenes/IntroScene.js';
 import { WorldScene } from './scenes/WorldScene.js';
+import { Hud } from './ui/hud/Hud.js';
 
 const netClient = new NetClient();
 const gameState = new GameState();
 netClient.onMessage((message) => gameState.handleServerMessage(message));
+// Created once, alongside net/gameState, rather than per-scene - a scene
+// restart (e.g. WorldScene's on a portal crossing) must not tear down and
+// rebuild the whole DOM HUD (docs/DECISIONS.md, task #81).
+const hud = new Hud(netClient, gameState);
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -38,3 +43,4 @@ const game = new Phaser.Game({
 
 game.registry.set(REGISTRY_KEYS.net, netClient);
 game.registry.set(REGISTRY_KEYS.gameState, gameState);
+game.registry.set(REGISTRY_KEYS.hud, hud);

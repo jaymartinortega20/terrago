@@ -39,11 +39,11 @@ Client:
 - [x] Paper-doll player sprite (layered, 4-facing, idle/walk/attack/cast/hurt/death/wake-up/mounted) — generated procedurally and confirmed rendering correctly through real Phaser (not just the preview page) in the live WorldScene smoke test
 - [x] Monster sprite rendering (`MonsterView`, single-sprite Slime) — confirmed live: Slimes render with name tag + idle animation on Whispering Fields after a portal crossing
 - [x] Click-to-move with destination marker, WASD 8-way (cancels any in-flight path), client prediction + server reconciliation — `world/localPrediction.ts` + `world/remoteInterpolation.ts` (~100ms behind for remote entities); verified live: A* routes around obstacles and arrives cleanly, WASD changes facing/direction immediately, a portal crossing (`self:state.mapId` change → `scene.restart()`) re-renders the new map with no ghost entities from the old one (`GameState.entities` clear fix)
-- [ ] HUD: status block (portrait, Base/Job level+EXP, HP, resource bar), hotbar, quest tracker, chat (All/Map/System), minimap
+- [x] HUD: status block (live paper-doll portrait, Base/Job level+title, HP/resource/EXP bars), 8-slot hotbar (drag-assign, key-use, qty/depleted state), quest tracker (hidden when nothing active), chat (All/Map/System tabs, Enter to focus/send), minimap (Waystone/portals/player+other-player dots) — task #81, `ui/hud/Hud.ts` + one module per panel; verified live via Playwright: toggled AUTO, used the cog settings panel, opened inventory with "I", drag-dropped a potion onto hotbar slot 1 then pressed "1" to consume it (qty 3→2), equipped/unequipped the starting sword, sent a chat message, and talked to Elder Fin to watch the quest tracker populate with "Cleaning the Horizon / Defeat Slime 0/5" - zero console errors throughout
+- [x] Inventory + equipment UI (glassmorphism panels, rarity-colored borders) — `ui/hud/inventoryPanel.ts`, part of the same task #81 verification pass above
+- [x] AUTO button + settings panel (cog) — `ui/hud/autoPanel.ts`; toggle, Auto-Target Mobs, Auto-Use Potions (independent HP%/Resource% sliders), Auto-Cast Low-Tier Skills, all persisted via `auto:toggle`/`auto:configure` and restored from `self:state.autoOn`/`autoConfig` on relogin. AUTO's own scan/target/attack/potion/cast *loop* is task #82, not this.
 - [ ] Damage floaters: normal/crit/miss/lucky/heal styles, screen shake on crit
-- [ ] Inventory + equipment UI (glassmorphism panels, rarity-colored borders)
-- [ ] AUTO button + settings panel (cog)
-- [ ] Settings: rebindable keys, volume sliders, replay intro
+- [ ] Settings: rebindable keys, volume sliders, replay intro — no Settings window exists yet; out of scope for #81 (not named in its own task description), not blocking any M1 acceptance criterion since every key has a sane default and nothing requires rebinding to be playable
 
 Tests & acceptance:
 - [ ] Playwright smoke test: two browser contexts log in and see each other move
