@@ -112,6 +112,11 @@ export const AutoConfigureSchema = z.object({
   autoCastLowTierSkills: z.boolean(),
 });
 
+/** The shape `auto:configure`'s own fields take once echoed back inside
+ * self:state (see AutoConfigureSchema above) - kept as its own schema so
+ * self:state doesn't have to repeat the `t` literal. */
+export const AutoConfigSchema = AutoConfigureSchema.omit({ t: true });
+
 export const DevCommandSchema = z.object({
   t: z.literal('dev:command'),
   line: z.string().min(1).max(200),
@@ -202,6 +207,14 @@ export const SelfStateSchema = z.object({
     ])
   ).length(8),
   inventory: z.array(InventoryItemSchema),
+  /** SPEC.md M1 acceptance: "Logging out and back in restores... settings."
+   * AUTO's on/off state and its settings panel are the only per-character
+   * settings M1 has - client-echoed on every self:state (not just on
+   * change) purely because self:state is already resent on login/join,
+   * which is the one moment this actually needs restoring (see
+   * docs/DECISIONS.md). */
+  autoOn: z.boolean(),
+  autoConfig: AutoConfigSchema,
 });
 
 export const CombatResultSchema = z.object({

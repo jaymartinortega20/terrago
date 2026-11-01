@@ -484,6 +484,72 @@ describe('Room: mount toggle', () => {
   });
 });
 
+describe('Room: AUTO mode settings persist across self:state (SPEC.md M1: "restores... settings")', () => {
+  it('a fresh character defaults to AUTO off with Auto-Target Mobs on and potions/casting off', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+
+    const selfState = sentOf(player).find((m) => m.t === 'self:state') as Extract<ServerMessage, { t: 'self:state' }>;
+    expect(selfState.autoOn).toBe(false);
+    expect(selfState.autoConfig).toEqual({
+      autoTargetMobs: true,
+      autoUsePotionsHpPct: null,
+      autoUsePotionsResourcePct: null,
+      autoCastLowTierSkills: false,
+    });
+  });
+
+  it('toggling AUTO and saving a config is echoed back in the next self:state', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+
+    room.handleAutoToggle(player, true);
+    room.handleAutoConfigure(player, {
+      autoTargetMobs: false,
+      autoUsePotionsHpPct: 50,
+      autoUsePotionsResourcePct: 30,
+      autoCastLowTierSkills: true,
+    });
+    room.tick(0.05); // selfStateDirty is only flushed to a self:state send on the next tick
+
+    const latest = sentOf(player)
+      .filter((m) => m.t === 'self:state')
+      .at(-1) as Extract<ServerMessage, { t: 'self:state' }>;
+    expect(latest.autoOn).toBe(true);
+    expect(latest.autoConfig).toEqual({
+      autoTargetMobs: false,
+      autoUsePotionsHpPct: 50,
+      autoUsePotionsResourcePct: 30,
+      autoCastLowTierSkills: true,
+    });
+  });
+
+  it('AUTO settings survive a leave + rejoin (persisted on the character row)', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+
+    room.handleAutoToggle(player, true);
+    room.handleAutoConfigure(player, {
+      autoTargetMobs: true,
+      autoUsePotionsHpPct: 40,
+      autoUsePotionsResourcePct: null,
+      autoCastLowTierSkills: false,
+    });
+    room.leave(char.id);
+
+    const rejoined = withCollector(room, char.id);
+    const selfState = sentOf(rejoined).find((m) => m.t === 'self:state') as Extract<ServerMessage, { t: 'self:state' }>;
+    expect(selfState.autoOn).toBe(true);
+    expect(selfState.autoConfig.autoUsePotionsHpPct).toBe(40);
+  });
+});
+
 describe('Room: chat broadcast', () => {
   it('delivers a room broadcast to other players but not back to the sender when excluded', async () => {
     const repo = createSqliteRepository(openDatabase(':memory:'));

@@ -505,11 +505,13 @@ export class Room {
   handleAutoToggle(player: PlayerEntity, on: boolean): void {
     player.settings = { ...player.settings, autoOn: on };
     player.rowDirty = true;
+    player.selfStateDirty = true;
   }
 
   handleAutoConfigure(player: PlayerEntity, config: Record<string, unknown>): void {
     player.settings = { ...player.settings, auto: config };
     player.rowDirty = true;
+    player.selfStateDirty = true;
   }
 
   /** Marks the story intro as watched so the NEXT login's self:state tells
@@ -979,6 +981,18 @@ export class Room {
       return { type: 'item' as const, id: binding.id, qty };
     });
     const inventory = player.items.map((it) => ({ id: it.id, itemId: it.itemId, qty: it.qty, refineLevel: it.refineLevel }));
+    const savedAuto = player.settings.auto as Partial<{
+      autoTargetMobs: boolean;
+      autoUsePotionsHpPct: number | null;
+      autoUsePotionsResourcePct: number | null;
+      autoCastLowTierSkills: boolean;
+    }> | undefined;
+    const autoConfig = {
+      autoTargetMobs: savedAuto?.autoTargetMobs ?? true,
+      autoUsePotionsHpPct: savedAuto?.autoUsePotionsHpPct ?? null,
+      autoUsePotionsResourcePct: savedAuto?.autoUsePotionsResourcePct ?? null,
+      autoCastLowTierSkills: savedAuto?.autoCastLowTierSkills ?? false,
+    };
 
     player.send({
       t: 'self:state',
@@ -1006,6 +1020,8 @@ export class Room {
       equipment: equipment as Record<EquipmentSlot, string | null>,
       hotbar,
       inventory,
+      autoOn: Boolean(player.settings.autoOn),
+      autoConfig,
     });
   }
 }

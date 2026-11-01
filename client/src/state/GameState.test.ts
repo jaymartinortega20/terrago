@@ -40,6 +40,8 @@ function selfStateMessage(overrides: Partial<SelfState> = {}): SelfState {
     equipment: { weapon: null, helmet: null, chest: null, boots: null, wings: null },
     hotbar: Array(8).fill(null),
     inventory: [],
+    autoOn: false,
+    autoConfig: { autoTargetMobs: true, autoUsePotionsHpPct: null, autoUsePotionsResourcePct: null, autoCastLowTierSkills: false },
     ...overrides,
   };
 }
