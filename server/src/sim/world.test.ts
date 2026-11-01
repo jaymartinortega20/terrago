@@ -90,6 +90,19 @@ describe('World: message dispatch', () => {
     expect(player.path).not.toBeNull();
   });
 
+  it('routes intro:seen through to the room, flipping the flag', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const world = new World(repo);
+    world.join(char.id, collector().send);
+    const player = world.getRoom('map1')!.players.get(char.id)!;
+    expect(player.introSeen).toBe(false);
+
+    world.handleMessage(char.id, { t: 'intro:seen' });
+
+    expect(player.introSeen).toBe(true);
+  });
+
   it('is a safe no-op for a character that has not joined any room', () => {
     const repo = createSqliteRepository(openDatabase(':memory:'));
     const world = new World(repo);

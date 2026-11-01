@@ -114,6 +114,9 @@ export class World {
       case 'dev:command':
         this.handleDevCommand(room, player, message.line);
         break;
+      case 'intro:seen':
+        room.handleIntroSeen(player);
+        break;
       case 'auth:login':
       case 'auth:register':
         // Never reach here: net/socket.ts's Connection only forwards a

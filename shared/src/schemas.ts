@@ -104,6 +104,12 @@ export const DevCommandSchema = z.object({
   line: z.string().min(1).max(200),
 });
 
+/** Sent once, right after the client finishes playing the story intro
+ * (section 4), so a later login can skip it (SPEC.md M1: "On later logins
+ * the intro is skipped"). Replaying it from Settings is purely client-side
+ * (just re-show the scene) and needs no message of its own. */
+export const IntroSeenSchema = z.object({ t: z.literal('intro:seen') });
+
 export const ClientMessageSchema = z.discriminatedUnion('t', [
   AuthRegisterSchema,
   AuthLoginSchema,
@@ -120,6 +126,7 @@ export const ClientMessageSchema = z.discriminatedUnion('t', [
   AutoToggleSchema,
   AutoConfigureSchema,
   DevCommandSchema,
+  IntroSeenSchema,
 ]);
 export type ClientMessage = z.infer<typeof ClientMessageSchema>;
 
@@ -160,6 +167,7 @@ export const SelfStateSchema = z.object({
   jobExpToNext: z.number().int(),
   stats: z.record(StatNameSchema, z.number().int()),
   unallocatedStatPoints: z.number().int(),
+  introSeen: z.boolean(),
   hp: z.number().int(),
   maxHp: z.number().int(),
   resource: z.number().int(),

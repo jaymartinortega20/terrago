@@ -80,6 +80,46 @@ describe('Room: join/leave persistence', () => {
     expect(repo.getCharacterById(char.id)?.gold).toBe(999);
     expect(player.rowDirty).toBe(false);
   });
+
+  it('a fresh character has not seen the intro, and self:state reports it', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+
+    expect(player.introSeen).toBe(false);
+    const selfState = sentOf(player).find((m) => m.t === 'self:state');
+    expect(selfState).toMatchObject({ introSeen: false });
+  });
+
+  it('handleIntroSeen flips the flag, persists it, and survives a logout/login cycle', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+
+    room.handleIntroSeen(player);
+    expect(player.introSeen).toBe(true);
+    expect(player.rowDirty).toBe(true);
+
+    room.leave(char.id); // persists rowDirty fields, including introSeen
+    expect(repo.getCharacterById(char.id)?.introSeen).toBe(true);
+
+    const reloaded = withCollector(room, char.id);
+    expect(reloaded.introSeen).toBe(true);
+  });
+
+  it('handleIntroSeen is a no-op (doesn\'t re-dirty the row) once already seen', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+    room.handleIntroSeen(player);
+    player.rowDirty = false;
+
+    room.handleIntroSeen(player);
+    expect(player.rowDirty).toBe(false);
+  });
 });
 
 describe('Room: movement + portals', () => {

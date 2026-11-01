@@ -79,6 +79,7 @@ JSON over one WebSocket per connection. Every message shape is a zod schema in `
 - `chat:send` (channel, text)
 - `trade:request/offer/lock/accept/cancel`
 - `mount:toggle`, `auto:toggle`, `auto:configure`
+- `intro:seen` (sent once after the client finishes the story intro, so a later login skips it)
 - `mine:start`
 - `refine:item`
 - `waystone:travel`

@@ -512,6 +512,16 @@ export class Room {
     player.rowDirty = true;
   }
 
+  /** Marks the story intro as watched so the NEXT login's self:state tells
+   * the client to skip it (SPEC.md M1: "On later logins the intro is
+   * skipped"). Idempotent - a client that sends this twice in one session
+   * (shouldn't happen, but cheap to guard) doesn't dirty anything twice. */
+  handleIntroSeen(player: PlayerEntity): void {
+    if (player.introSeen) return;
+    player.introSeen = true;
+    player.rowDirty = true;
+  }
+
   // ------------------------------------------------------------- dev tools
   // Only reachable through dev:command, which sim/world.ts gates on the
   // TERAGO_DEV_TOOLS env flag (SPEC.md section 2: "development mode only").
@@ -957,6 +967,7 @@ export class Room {
       ),
       stats: player.stats,
       unallocatedStatPoints: player.unallocatedStatPoints,
+      introSeen: player.introSeen,
       hp: player.hp,
       maxHp,
       resource: player.resource,

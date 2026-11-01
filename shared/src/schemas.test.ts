@@ -52,6 +52,11 @@ describe('ClientMessageSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts a bare intro:seen message', () => {
+    const result = ClientMessageSchema.safeParse({ t: 'intro:seen' });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('ServerMessageSchema', () => {
