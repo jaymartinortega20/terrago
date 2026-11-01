@@ -5,6 +5,7 @@
  * the collision grid + spawn/portal/NPC/monster-spawn data below, so swapping
  * in real Tiled maps later touches no server logic (see docs/DECISIONS.md).
  */
+import type { TileGrid } from '../pathfinding.js';
 
 export interface Rect {
   x: number;
@@ -125,3 +126,23 @@ export const MAPS: Record<string, MapDef> = {
   [MAP_OAKHAVEN.id]: MAP_OAKHAVEN,
   [MAP_WHISPERING_FIELDS.id]: MAP_WHISPERING_FIELDS,
 };
+
+/**
+ * Adapts a MapDef's collisionRows into the TileGrid shape shared/pathfinding.ts
+ * expects, so both the server (movement authority) and the client (path
+ * preview, once built) run the exact same A* over the exact same grid.
+ * Terrain only: NPC/other-entity tiles don't block movement (classic MMO
+ * convention - you can walk through other characters and NPCs).
+ */
+export function createTileGrid(map: MapDef): TileGrid {
+  return {
+    width: map.width,
+    height: map.height,
+    isWalkable(x: number, y: number): boolean {
+      if (x < 0 || y < 0 || x >= map.width || y >= map.height) return false;
+      const row = map.collisionRows[y];
+      if (!row) return false;
+      return row[x] === '.';
+    },
+  };
+}

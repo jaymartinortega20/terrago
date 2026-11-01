@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAPS, type MapDef } from './maps.js';
+import { MAPS, createTileGrid, type MapDef } from './maps.js';
 
 function isWalkable(map: MapDef, x: number, y: number): boolean {
   if (x < 0 || y < 0 || x >= map.width || y >= map.height) return false;
@@ -77,6 +77,21 @@ describe('map data integrity', () => {
           expect(anyWalkable).toBe(true);
         }
       });
+    });
+  }
+});
+
+describe('createTileGrid', () => {
+  for (const map of Object.values(MAPS)) {
+    it(`${map.name}: matches collisionRows for every tile, including out-of-bounds`, () => {
+      const grid = createTileGrid(map);
+      expect(grid.width).toBe(map.width);
+      expect(grid.height).toBe(map.height);
+      for (let y = -1; y <= map.height; y++) {
+        for (let x = -1; x <= map.width; x++) {
+          expect(grid.isWalkable(x, y)).toBe(isWalkable(map, x, y));
+        }
+      }
     });
   }
 });

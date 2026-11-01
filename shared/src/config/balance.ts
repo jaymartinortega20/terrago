@@ -47,6 +47,12 @@ export const BALANCE = {
   // ---- mount (SPEC.md section 7) ----
   mountSpeedMultiplier: 1.5,
 
+  // ---- movement & combat ranges: not given explicit numbers anywhere in
+  // SPEC.md, decided here (docs/DECISIONS.md) ----
+  playerBaseMoveSpeedTilesPerSec: 4,
+  meleeAttackRangeTiles: 1,
+  interactRangeTiles: 1.5, // lets an NPC/portal interaction land from an adjacent diagonal tile
+
   // ---- server (SPEC.md section 2) ----
   tickRateHz: 20,
   autosaveIntervalMs: 60_000,
