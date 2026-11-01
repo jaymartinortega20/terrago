@@ -89,6 +89,10 @@ export interface PlayerEntity extends MovingEntity {
 
   targetId: string | null;
   lastAttackAt: number | null;
+  /** Set whenever a hit (not a miss/dodge) lands on this player - distinct
+   * from lastAttackAt (when THIS entity last attacked), drives the
+   * 'hurt' anim in EntitySnapshot.anim (see animFor). */
+  lastHurtAt: number | null;
   lastCombatActionAt: number | null;
   lastPotionUseAt: number | null;
   mounted: boolean;
@@ -112,6 +116,9 @@ export interface MonsterEntity extends MovingEntity {
   maxHp: number;
   aggroCharacterId: string | null;
   lastAttackAt: number | null;
+  /** Same role as PlayerEntity.lastHurtAt - set when a hit lands on this
+   * monster. */
+  lastHurtAt: number | null;
 }
 
 interface PendingRespawn {
@@ -191,7 +198,7 @@ export function deriveVitals(stats: Stats, baseLevel: number, jobId: JobId): { m
   };
 }
 
-export function entitySnapshotForPlayer(player: PlayerEntity): EntitySnapshot {
+export function entitySnapshotForPlayer(player: PlayerEntity, nowMs: number): EntitySnapshot {
   const { maxHp } = deriveVitals(player.stats, player.baseLevel, player.jobId);
   const equipment: Record<string, string | null> = {};
   for (const slot of ['weapon', 'helmet', 'chest', 'boots', 'wings'] as const) {
@@ -204,14 +211,14 @@ export function entitySnapshotForPlayer(player: PlayerEntity): EntitySnapshot {
     x: player.x,
     y: player.y,
     facing: player.facing,
-    anim: animFor(player),
+    anim: animFor(player, nowMs),
     hpPct: maxHp > 0 ? Math.round((player.hp / maxHp) * 100) : 0,
     equipment: equipment as EntitySnapshot['equipment'],
     mounted: player.mounted,
   };
 }
 
-export function entitySnapshotForMonster(monster: MonsterEntity, def: MonsterDef): EntitySnapshot {
+export function entitySnapshotForMonster(monster: MonsterEntity, def: MonsterDef, nowMs: number): EntitySnapshot {
   return {
     id: monster.instanceId,
     kind: 'monster',
@@ -219,13 +226,24 @@ export function entitySnapshotForMonster(monster: MonsterEntity, def: MonsterDef
     x: monster.x,
     y: monster.y,
     facing: monster.facing,
-    anim: monster.hp <= 0 ? 'death' : animFor(monster),
+    anim: monster.hp <= 0 ? 'death' : animFor(monster, nowMs),
     hpPct: monster.maxHp > 0 ? Math.round((monster.hp / monster.maxHp) * 100) : 0,
     monsterId: monster.monsterId,
   };
 }
 
-function animFor(entity: { path: TileCoord[] | null; heldDirection: unknown; lastAttackAt?: number | null }): EntitySnapshot['anim'] {
+/** Priority: a fresh hit ('hurt') beats a fresh swing ('attack') beats
+ * moving ('walk') beats standing still ('idle') - death is handled by the
+ * caller (entitySnapshotForMonster; players never "die" visually, see
+ * docs/DECISIONS.md's respawn note) rather than here, since it isn't a
+ * transient window like the other two. 'cast' has no producer yet - no
+ * skill exists in M1 (docs/DECISIONS.md, handleHotbarAssign). */
+function animFor(
+  entity: { path: TileCoord[] | null; heldDirection: unknown; lastAttackAt: number | null; lastHurtAt: number | null },
+  nowMs: number
+): EntitySnapshot['anim'] {
+  if (entity.lastHurtAt !== null && nowMs - entity.lastHurtAt < BALANCE.hurtAnimWindowMs) return 'hurt';
+  if (entity.lastAttackAt !== null && nowMs - entity.lastAttackAt < BALANCE.attackAnimWindowMs) return 'attack';
   if (entity.path || entity.heldDirection) return 'walk';
   return 'idle';
 }
@@ -275,6 +293,7 @@ export class Room {
       maxHp: def.maxHp,
       aggroCharacterId: null,
       lastAttackAt: null,
+      lastHurtAt: null,
     };
     this.monsters.set(monster.instanceId, monster);
   }
@@ -315,6 +334,7 @@ export class Room {
       quests,
       targetId: null,
       lastAttackAt: null,
+      lastHurtAt: null,
       lastCombatActionAt: null,
       lastPotionUseAt: null,
       mounted: false,
@@ -571,6 +591,7 @@ export class Room {
       maxHp: def.maxHp,
       aggroCharacterId: null,
       lastAttackAt: null,
+      lastHurtAt: null,
     };
     this.monsters.set(monster.instanceId, monster);
     return true;
@@ -769,6 +790,7 @@ export class Room {
     if (!monsterDef) return;
     const result = performAttack(attackerInput, monsterDefenderInput(monsterDef), monster.hp, this.roll01);
     monster.hp = result.newHp;
+    if (result.outcome.kind === 'hit') monster.lastHurtAt = nowMs;
     if (result.outcome.kind !== 'perfectDodge' && monster.aggroCharacterId === null) {
       monster.aggroCharacterId = player.characterId;
       const bark = pickBark(monsterDef, this.roll01);
@@ -845,6 +867,7 @@ export class Room {
         this.roll01
       );
       attacker.hp = result.newHp;
+      if (result.outcome.kind === 'hit') attacker.lastHurtAt = nowMs;
       attacker.lastCombatActionAt = nowMs;
       attacker.mounted = false; // taking damage dismounts (SPEC.md section 7)
       attacker.selfStateDirty = true;
@@ -923,14 +946,15 @@ export class Room {
   }
 
   private broadcastSnapshots(): void {
+    const nowMs = this.now();
     const allEntities: Array<{ id: string; snapshot: () => EntitySnapshot; x: number; y: number }> = [];
     for (const player of this.players.values()) {
-      allEntities.push({ id: player.characterId, snapshot: () => entitySnapshotForPlayer(player), x: player.x, y: player.y });
+      allEntities.push({ id: player.characterId, snapshot: () => entitySnapshotForPlayer(player, nowMs), x: player.x, y: player.y });
     }
     for (const monster of this.monsters.values()) {
       const def = MONSTERS[monster.monsterId];
       if (!def) continue;
-      allEntities.push({ id: monster.instanceId, snapshot: () => entitySnapshotForMonster(monster, def), x: monster.x, y: monster.y });
+      allEntities.push({ id: monster.instanceId, snapshot: () => entitySnapshotForMonster(monster, def, nowMs), x: monster.x, y: monster.y });
     }
 
     for (const player of this.players.values()) {

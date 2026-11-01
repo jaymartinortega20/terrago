@@ -33,6 +33,13 @@ export const BALANCE = {
   damageVarianceMax: 1.05,
   minAttackIntervalMs: 300,
   combatStateDurationMs: 6000,
+  // How long a fresh attack/hit keeps EntitySnapshot.anim reporting
+  // 'attack'/'hurt' before falling back to walk/idle - matched to the
+  // paper-doll attack anim's actual playback length (4 frames @ 10fps =
+  // 400ms) and hurt's (2 frames @ 8fps = 250ms, client/paperDollAnims.ts)
+  // so the server's anim window lines up with what's actually rendered.
+  attackAnimWindowMs: 400,
+  hurtAnimWindowMs: 250,
 
   // ---- fast casting (SPEC.md section 9) ----
   castFixedPortion: 0.2,

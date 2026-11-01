@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { MAP_OAKHAVEN, MAP_WHISPERING_FIELDS, type ServerMessage } from '@terago/shared';
+import { BALANCE, MAP_OAKHAVEN, MAP_WHISPERING_FIELDS, type ServerMessage } from '@terago/shared';
 import { openDatabase } from '../db/database.js';
 import { createSqliteRepository, type Repository } from '../db/repository.js';
 import { registerAccount } from '../auth/auth.js';
@@ -292,6 +292,131 @@ describe('Room: combat against a monster', () => {
     room.handleTargetSet(player, 'no-such-monster-id');
     expect(() => room.tick(0.05)).not.toThrow();
     expect(player.targetId).toBeNull();
+  });
+});
+
+describe('Room: combat anim state (EntitySnapshot.anim via animFor, task #82)', () => {
+  /** Finds the most recent world:snapshot entry (entered or updated) for
+   * `entityId` and returns its anim - i.e. what the client would actually
+   * be rendering right now, not just the raw lastAttackAt/lastHurtAt
+   * fields (which have their own more direct assertions alongside this). */
+  function latestAnimFor(player: PlayerEntity, entityId: string): string | undefined {
+    const snapshots = sentOf(player).filter(
+      (m): m is Extract<ServerMessage, { t: 'world:snapshot' }> => m.t === 'world:snapshot'
+    );
+    for (let i = snapshots.length - 1; i >= 0; i--) {
+      const found = [...snapshots[i]!.entered, ...snapshots[i]!.updated].find((e) => e.id === entityId);
+      if (found) return found.anim;
+    }
+    return undefined;
+  }
+
+  it("a landed hit reports 'hurt' immediately, taking priority over a simultaneous 'attack'", async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'hunter');
+    repo.saveCharacter(char.id, { mapId: MAP_WHISPERING_FIELDS.id, x: MAP_WHISPERING_FIELDS.spawnPoint.x, y: MAP_WHISPERING_FIELDS.spawnPoint.y });
+
+    const clock = makeClock();
+    const room = new Room(MAP_WHISPERING_FIELDS, repo, { roll01: ROLL_HALF, now: clock.now });
+    const player = withCollector(room, char.id);
+    const [monster] = [...room.monsters.values()];
+    player.x = monster!.x;
+    player.y = monster!.y;
+
+    room.handleTargetSet(player, monster!.instanceId);
+    clock.advance(50);
+    // First tick: both lastAttackAt fields start null, so the player's
+    // swing and the now-aggroed Slime's retaliation both fire (and land,
+    // under ROLL_HALF) this same tick.
+    room.tick(0.05);
+
+    expect(monster!.lastHurtAt).toBe(50);
+    expect(latestAnimFor(player, monster!.instanceId)).toBe('hurt');
+  });
+
+  it("falls back to 'attack' once the hurt window elapses but the attack window hasn't", async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'hunter');
+    repo.saveCharacter(char.id, { mapId: MAP_WHISPERING_FIELDS.id, x: MAP_WHISPERING_FIELDS.spawnPoint.x, y: MAP_WHISPERING_FIELDS.spawnPoint.y });
+
+    const clock = makeClock();
+    const room = new Room(MAP_WHISPERING_FIELDS, repo, { roll01: ROLL_HALF, now: clock.now });
+    const player = withCollector(room, char.id);
+    const [monster] = [...room.monsters.values()];
+    player.x = monster!.x;
+    player.y = monster!.y;
+
+    room.handleTargetSet(player, monster!.instanceId);
+    clock.advance(50);
+    room.tick(0.05); // hit lands + monster swings back, both at t=50ms
+
+    // hurtAnimWindowMs (250ms) has elapsed since t=50 but attackAnimWindowMs
+    // (400ms) hasn't; neither the player's next swing (~896ms interval) nor
+    // the Slime's (1400ms) is due yet, so nothing re-touches either timestamp.
+    clock.advance(BALANCE.hurtAnimWindowMs + 20);
+    room.tick(0.05);
+
+    expect(latestAnimFor(player, monster!.instanceId)).toBe('attack');
+  });
+
+  it("falls back to 'idle' once both the hurt and attack windows have elapsed", async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'hunter');
+    repo.saveCharacter(char.id, { mapId: MAP_WHISPERING_FIELDS.id, x: MAP_WHISPERING_FIELDS.spawnPoint.x, y: MAP_WHISPERING_FIELDS.spawnPoint.y });
+
+    const clock = makeClock();
+    const room = new Room(MAP_WHISPERING_FIELDS, repo, { roll01: ROLL_HALF, now: clock.now });
+    const player = withCollector(room, char.id);
+    const [monster] = [...room.monsters.values()];
+    player.x = monster!.x;
+    player.y = monster!.y;
+
+    room.handleTargetSet(player, monster!.instanceId);
+    clock.advance(50);
+    room.tick(0.05);
+
+    // Both windows have elapsed since t=50, well before either combatant's
+    // next swing - and Slimes never chase (passive AI, docs/DECISIONS.md),
+    // so with no path/heldDirection either, animFor has nothing left but idle.
+    clock.advance(BALANCE.attackAnimWindowMs + 50);
+    room.tick(0.05);
+
+    expect(latestAnimFor(player, monster!.instanceId)).toBe('idle');
+  });
+
+  it('a missed swing never reports a false \'hurt\' anim, though \'attack\' still plays', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'hunter');
+    repo.saveCharacter(char.id, { mapId: MAP_WHISPERING_FIELDS.id, x: MAP_WHISPERING_FIELDS.spawnPoint.x, y: MAP_WHISPERING_FIELDS.spawnPoint.y });
+
+    const clock = makeClock();
+    // A constant roll of 0.9 clears dodge/crit and guarantees a miss in
+    // both directions here (same trace as combat.test.ts's own miss case):
+    // player-on-Slime hitChancePct=77, Slime-on-player hitChancePct=83,
+    // both comfortably below 90.
+    const room = new Room(MAP_WHISPERING_FIELDS, repo, { roll01: () => 0.9, now: clock.now });
+    const player = withCollector(room, char.id);
+    const [monster] = [...room.monsters.values()];
+    player.x = monster!.x;
+    player.y = monster!.y;
+
+    room.handleTargetSet(player, monster!.instanceId);
+    clock.advance(50);
+    room.tick(0.05);
+
+    expect(monster!.lastHurtAt).toBeNull();
+    expect(player.lastHurtAt).toBeNull();
+    // The swing was still attempted (and should still visibly animate) -
+    // it just didn't land.
+    expect(latestAnimFor(player, monster!.instanceId)).toBe('attack');
+
+    const snapshots = sentOf(player).filter(
+      (m): m is Extract<ServerMessage, { t: 'world:snapshot' }> => m.t === 'world:snapshot'
+    );
+    const everHurt = snapshots.some((s) =>
+      [...s.entered, ...s.updated].some((e) => e.id === monster!.instanceId && e.anim === 'hurt')
+    );
+    expect(everHurt).toBe(false);
   });
 });
 
