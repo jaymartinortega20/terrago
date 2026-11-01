@@ -9,11 +9,11 @@ Setup:
 - [x] `SPEC.md`, `docs/ARCHITECTURE.md`, `docs/PROGRESS.md`, `docs/DECISIONS.md` written
 
 Shared:
-- [ ] zod schemas for every M1 message type
-- [ ] `formulas.ts`: stat derivation (STR/AGI/VIT/LUK/INT/DEX), attack resolution, EXP curves, cast time
-- [ ] `config/balance.ts` with every M1 constant
-- [ ] A* pathfinding over a tile grid
-- [ ] Unit tests for every formula (Vitest)
+- [x] zod schemas for every M1 message type (`shared/src/schemas.ts`)
+- [x] `formulas.ts`: stat derivation (STR/AGI/VIT/LUK/INT/DEX), attack resolution, EXP curves, fast-cast time
+- [x] `config/balance.ts` with every M1 constant (+ refine table, ready for M3)
+- [x] A* pathfinding over a tile grid (`shared/src/pathfinding.ts`), no corner-cutting
+- [x] Unit tests for every formula (Vitest) — 46 tests passing (`npm test`)
 
 Server:
 - [ ] better-sqlite3 database + migrations + repository interface
