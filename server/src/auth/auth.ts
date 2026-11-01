@@ -59,6 +59,21 @@ function spawnPoint(): { mapId: string; x: number; y: number } {
   return { mapId: map.id, x: map.spawnPoint.x, y: map.spawnPoint.y };
 }
 
+const STARTING_WEAPON_ITEM_ID = 'recruit_training_sword';
+const STARTING_POTION_ITEM_ID = 'potion_hp_small';
+const STARTING_POTION_QTY = 3;
+
+/** "Better than fists" (items.ts) - every Recruit needs a weapon to have any
+ * ATK at all, and SPEC.md's M1 acceptance criteria assume fighting Slimes
+ * works out of the box, so registration grants and equips the starter
+ * weapon plus a few potions rather than leaving a brand-new character
+ * unarmed (not stated explicitly in SPEC.md - see docs/DECISIONS.md). */
+function grantStartingKit(repo: Repository, characterId: string): void {
+  const weapon = repo.addItem(characterId, STARTING_WEAPON_ITEM_ID, 1, false, 1);
+  repo.setItemSlot(weapon.id, 'weapon');
+  repo.addItem(characterId, STARTING_POTION_ITEM_ID, STARTING_POTION_QTY, true, 20);
+}
+
 function issueSession(accountId: string, characterId: string): string {
   const token = nanoid(32);
   sessions.set(token, { accountId, characterId });
@@ -82,6 +97,7 @@ export async function registerAccount(repo: Repository, username: string, passwo
     const account = repo.createAccount(username, passwordHash);
     const { hp, resource } = startingHpAndResource();
     const character = repo.createCharacter(account.id, username, spawnPoint(), STARTING_STATS, hp, resource);
+    grantStartingKit(repo, character.id);
     const sessionToken = issueSession(account.id, character.id);
     return { ok: true, account, character, sessionToken };
   } catch {

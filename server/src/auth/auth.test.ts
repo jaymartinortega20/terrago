@@ -27,6 +27,20 @@ describe('registerAccount', () => {
     });
   });
 
+  it('grants and equips a starting weapon plus a few potions', async () => {
+    const repo = freshRepo();
+    const result = await registerAccount(repo, 'newplayer', 'correct-horse');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const weapon = repo.getEquippedInSlot(result.character.id, 'weapon');
+    expect(weapon?.itemId).toBe('recruit_training_sword');
+
+    const items = repo.listItems(result.character.id);
+    const potions = items.find((i) => i.itemId === 'potion_hp_small');
+    expect(potions?.qty).toBe(3);
+  });
+
   it('never stores the plaintext password', async () => {
     const repo = freshRepo();
     const result = await registerAccount(repo, 'newplayer', 'correct-horse');
