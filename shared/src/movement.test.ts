@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MAPS, type Facing } from '@terago/shared';
+import { MAPS } from './config/maps.js';
+import type { Facing } from './types.js';
 import {
   distanceTiles,
   facingFromVector,

@@ -4,14 +4,9 @@
  * knowledge of characters/monsters/combat, so they're trivially unit
  * testable and reusable for both click-to-move and WASD.
  */
-import {
-  createTileGrid,
-  findPath,
-  type Facing,
-  type MapDef,
-  type TileCoord,
-  type TileGrid,
-} from '@terago/shared';
+import { findPath, type TileGrid } from './pathfinding.js';
+import { createTileGrid, type MapDef } from './config/maps.js';
+import type { Facing, TileCoord } from './types.js';
 
 export interface MovingEntity {
   x: number;
