@@ -43,21 +43,30 @@ terrago/
         commands.ts         /level, /give, /tp, etc. — dev-mode only, gated by an env flag
   client/
     src/
-      main.ts             Boot: Phaser game config, scene list
+      main.ts             Boot: Phaser game config, registry seeding (NetClient + GameState), scene list
       net/
-        connection.ts       WS client: connect, send typed intents, receive typed snapshots
-        prediction.ts       Client-side prediction + server reconciliation for the local player
+        NetClient.ts        WS client: connect, send typed ClientMessage, dispatch typed ServerMessage
+      state/
+        GameState.ts        Framework-agnostic store every scene/HUD panel reads from (self, entities,
+                            quests, chat log) - the single place handleServerMessage updates state
+        sceneContext.ts     Typed `{ net, gameState }` lookup off `scene.registry`, used by every scene
       scenes/
-        BootScene.ts, LoginScene.ts, IntroScene.ts, WorldScene.ts, ...
-      entities/
-        PlayerSprite.ts     Paper-doll rendering: layered sprites by equipment slot, 4-facing anim
-        MonsterSprite.ts
+        BootScene.ts        Generates every placeholder texture, registers paper-doll/monster anims
+        LoginScene.ts       DOM login/register form (client/src/ui/styles.css)
+        IntroScene.ts       Story intro (skipped on repeat logins via self:state.introSeen)
+        WorldScene.ts       Tilemap, camera follow+clamp, click-to-move/WASD, local prediction +
+                            remote interpolation, entity/NPC rendering - built on top of `world/`
+      world/                Pure(ish) modules WorldScene wires together, each independently tested:
+        tilemap.ts            Per-map tile theme -> texture key, "tall tile" (obstacle/Waystone) check
+        localPrediction.ts    Local-player movement stepping (shared `movement.ts`) + reconciliation
+        remoteInterpolation.ts  ~100ms-behind position interpolation for every non-local entity
+        entityView.ts         `EntityView` (paper-doll player) / `MonsterView` (single-sprite monster)
       ui/                  DOM overlay (not Phaser) for every panel: HUD, hotbar, inventory,
                             skill tree, chat, minimap, trade, boss board, settings
       assets/
-        manifest.json       Every asset referenced by key; placeholder generator fills this at
-                            build/load time (procedural chibi sprites, tiles, SFX) until real art
-                            exists
+        manifest.ts          Enumerates every generated texture key (tiles, paper-doll frames, monster
+                            frames, UI icons); BootScene drives this to fill Phaser's texture manager
+                            with procedural chibi sprites/tiles until real art exists
   docs/
     ARCHITECTURE.md (this file), PROGRESS.md, DECISIONS.md
   SPEC.md               The build prompt, verbatim

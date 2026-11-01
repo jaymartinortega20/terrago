@@ -35,9 +35,10 @@ Client:
 - [x] Boot/loading scene with progress bar driving the asset manifest + placeholder-art generator — `BootScene` generates all ~650 textures in batches of 24/tick, registers paper-doll animations, then starts Login
 - [x] Story intro (3 scrolls, typewriter, Ken Burns placeholder art, click/space/Esc) — `IntroScene`; verified live (Playwright), zero console errors, chime synthesized via Web Audio API, sends `intro:seen` on completion
 - [x] Login/register screen — `LoginScene`, glassmorphism DOM form (`client/src/ui/styles.css`); verified live: register → Intro → World, and a second login for the same account correctly skips straight to World via `self:state.introSeen`
-- [ ] WorldScene: tile rendering, y-sorting, camera lerp+clamp — only a stand-in exists (tiled floor + a centered idle paper-doll), proving the Boot→texture-generation→render pipeline works; the real tilemap/camera/movement work is task #80
+- [x] WorldScene: tile rendering (theme-per-map via `world/tilemap.ts`), y-sorting (container depth = pixel y, matching obstacle/Waystone "tall tile" depth), camera `setBounds`+`startFollow` with lerp, clamped to map edges — task #80; verified live via Playwright across both M1 maps (Oakhaven town + Whispering Fields), zero console errors
 - [x] Paper-doll player sprite (layered, 4-facing, idle/walk/attack/cast/hurt/death/wake-up/mounted) — generated procedurally and confirmed rendering correctly through real Phaser (not just the preview page) in the live WorldScene smoke test
-- [ ] Click-to-move with path preview, WASD 8-way, client prediction + reconciliation
+- [x] Monster sprite rendering (`MonsterView`, single-sprite Slime) — confirmed live: Slimes render with name tag + idle animation on Whispering Fields after a portal crossing
+- [x] Click-to-move with destination marker, WASD 8-way (cancels any in-flight path), client prediction + server reconciliation — `world/localPrediction.ts` + `world/remoteInterpolation.ts` (~100ms behind for remote entities); verified live: A* routes around obstacles and arrives cleanly, WASD changes facing/direction immediately, a portal crossing (`self:state.mapId` change → `scene.restart()`) re-renders the new map with no ghost entities from the old one (`GameState.entities` clear fix)
 - [ ] HUD: status block (portrait, Base/Job level+EXP, HP, resource bar), hotbar, quest tracker, chat (All/Map/System), minimap
 - [ ] Damage floaters: normal/crit/miss/lucky/heal styles, screen shake on crit
 - [ ] Inventory + equipment UI (glassmorphism panels, rarity-colored borders)
