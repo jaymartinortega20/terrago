@@ -29,7 +29,7 @@ Server:
 - [x] Elder Fin NPC + "First Steps" and "Cleaning the Horizon" quests (state machine + HUD tracker)
 - [x] Save on key events + 60s interval; full state restore on login
 - [x] Multi-map orchestration (`sim/world.ts`): per-character room routing, portal transitions between rooms, global-vs-map chat scoping, gated dev commands (`/level`, `/joblevel`, `/give`, `/tp`, `/spawn`, `/boss`)
-- [ ] Fixed 20 Hz tick loop driver + real HTTP/WS server entry point (`server/src/index.ts`) — last piece of task #74
+- [x] Fixed 20 Hz tick loop driver (`sim/tick.ts`) + real HTTP/WS server entry point (`server/src/index.ts`) — task #74 complete; verified live with an end-to-end WebSocket smoke test (register → self:state/world:snapshot → move:to walks → chat:send echoes → dev:command applies and persists)
 
 Client:
 - [ ] Boot/loading scene with progress bar driving the asset manifest + placeholder-art generator
