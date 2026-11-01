@@ -50,6 +50,14 @@ export const RARITY_COLORS: Record<ItemRarity, string> = {
   mythic: '#f0c23c',
 };
 
+/** The Slime's body colors (matches `slime_gel`'s loot-icon green,
+ * ui.ts's `drawMaterialBlobIcon(ctx, '#7fd94a', 1)`, so the creature and
+ * what it drops read as the same substance). */
+export const SLIME_BASE = '#7fd94a';
+export const SLIME_SHADOW = '#4e9e28';
+export const SLIME_HIGHLIGHT = 'rgba(255, 255, 255, 0.55)';
+export const SLIME_EYE = '#1f3a12';
+
 /** SPEC.md section 11: talking world entities' chat colors. */
 export const CHAT_SPEAKER_COLORS = {
   monster: '#c23c3c',

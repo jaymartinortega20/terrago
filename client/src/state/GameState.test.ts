@@ -64,6 +64,39 @@ describe('GameState: self:state', () => {
     state.handleServerMessage(selfStateMessage({ mapId: 'map2' }));
     expect(state.mapId).toBe('map2');
   });
+
+  it('clears stale entities from the old map when mapId changes - the old room never sends this client explicit left events', () => {
+    const state = new GameState();
+    state.handleServerMessage(selfStateMessage({ mapId: 'map1' }));
+    state.handleServerMessage({
+      t: 'world:snapshot',
+      tick: 1,
+      entered: [snapshot('ghost', { kind: 'monster', name: 'Slime' })],
+      updated: [],
+      left: [],
+    });
+    expect(state.entities.has('ghost')).toBe(true);
+
+    state.handleServerMessage(selfStateMessage({ mapId: 'map2' }));
+
+    expect(state.entities.has('ghost')).toBe(false);
+  });
+
+  it('does not clear entities on a self:state that repeats the same mapId', () => {
+    const state = new GameState();
+    state.handleServerMessage(selfStateMessage({ mapId: 'map1' }));
+    state.handleServerMessage({
+      t: 'world:snapshot',
+      tick: 1,
+      entered: [snapshot('p1', { kind: 'player', name: 'bob' })],
+      updated: [],
+      left: [],
+    });
+
+    state.handleServerMessage(selfStateMessage({ mapId: 'map1', hp: 50 }));
+
+    expect(state.entities.has('p1')).toBe(true);
+  });
 });
 
 describe('GameState: world:snapshot', () => {

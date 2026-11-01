@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { listAllAssetEntries } from './manifest.js';
 import { PAPER_DOLL_FACINGS, PAPER_DOLL_LAYERS, TOTAL_FRAMES_PER_FACING, WINGS_FLUTTER_FRAME_COUNT } from './paperDollManifest.js';
+import { ANIM_FRAME_COUNTS } from './generators/pose.js';
+import { MONSTER_ANIMS, MONSTER_SPRITE_IDS } from './monsterManifest.js';
 import manifestJson from '../../assets/manifest.json' with { type: 'json' };
 
 describe('listAllAssetEntries', () => {
@@ -11,12 +13,14 @@ describe('listAllAssetEntries', () => {
   it('includes every tiles/ui/intro entry from manifest.json plus the full paper-doll grid, with no duplicate keys', () => {
     const entries = listAllAssetEntries();
     const raw = manifestJson as unknown as { tiles: unknown[]; ui: unknown[]; intro: unknown[] };
+    const monsterFrameCount = MONSTER_SPRITE_IDS.length * MONSTER_ANIMS.reduce((sum, a) => sum + ANIM_FRAME_COUNTS[a], 0);
     const expectedCount =
       raw.tiles.length +
       raw.ui.length +
       raw.intro.length +
       PAPER_DOLL_LAYERS.length * PAPER_DOLL_FACINGS.length * TOTAL_FRAMES_PER_FACING +
-      PAPER_DOLL_FACINGS.length * WINGS_FLUTTER_FRAME_COUNT;
+      PAPER_DOLL_FACINGS.length * WINGS_FLUTTER_FRAME_COUNT +
+      monsterFrameCount;
 
     expect(entries).toHaveLength(expectedCount);
     expect(new Set(entries.map((e) => e.key)).size).toBe(entries.length);

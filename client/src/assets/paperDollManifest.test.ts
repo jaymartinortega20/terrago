@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ANIM_FRAME_COUNTS } from './generators/pose.js';
 import {
+  PAPER_DOLL_COMPOSITE_ORDER,
   PAPER_DOLL_FACINGS,
   PAPER_DOLL_LAYERS,
   TOTAL_FRAMES_PER_FACING,
@@ -60,6 +61,13 @@ describe('listWingsFrameAssets', () => {
         expect(listWingsFrameAssets().some((a) => a.key === key)).toBe(true);
       }
     }
+  });
+});
+
+describe('PAPER_DOLL_COMPOSITE_ORDER', () => {
+  it('is exactly PAPER_DOLL_LAYERS, reordered - same set, same length, no typos or omissions', () => {
+    expect(PAPER_DOLL_COMPOSITE_ORDER).toHaveLength(PAPER_DOLL_LAYERS.length);
+    expect(new Set(PAPER_DOLL_COMPOSITE_ORDER)).toEqual(new Set(PAPER_DOLL_LAYERS));
   });
 });
 

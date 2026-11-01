@@ -143,6 +143,12 @@ export const EntitySnapshotSchema = z.object({
   hpPct: z.number().min(0).max(100),
   equipment: z.record(EquipmentSlotSchema, z.string().nullable()).optional(),
   mounted: z.boolean().optional(),
+  /** Present only for kind: 'monster' - MonsterDef's stable id (e.g.
+   * "slime"), distinct from `name` (its display name, e.g. "Slime").
+   * Needed so the client can pick the right monster sprite without
+   * string-matching a display name, which could collide or get renamed
+   * independently of the sprite it's wired to. */
+  monsterId: z.string().optional(),
 });
 export type EntitySnapshot = z.infer<typeof EntitySnapshotSchema>;
 

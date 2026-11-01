@@ -221,6 +221,7 @@ export function entitySnapshotForMonster(monster: MonsterEntity, def: MonsterDef
     facing: monster.facing,
     anim: monster.hp <= 0 ? 'death' : animFor(monster),
     hpPct: monster.maxHp > 0 ? Math.round((monster.hp / monster.maxHp) * 100) : 0,
+    monsterId: monster.monsterId,
   };
 }
 

@@ -26,6 +26,23 @@ export const PAPER_DOLL_FACINGS: readonly PaperDollFacing[] = ['down', 'up', 'le
 export type PaperDollLayer = 'body' | 'head' | 'hair' | 'weapon' | 'helmet' | 'chest' | 'boots';
 export const PAPER_DOLL_LAYERS: readonly PaperDollLayer[] = ['body', 'head', 'hair', 'weapon', 'helmet', 'chest', 'boots'];
 
+/** Back-to-front stacking order for compositing one character (wings are
+ * drawn separately, always behind this whole stack - see WorldScene/
+ * previewGallery). Verified visually via the Playwright-screenshotted
+ * preview gallery (docs/DECISIONS.md, task #78): body, then boots, so
+ * boots peek out from under the torso; chest over the torso; then head,
+ * hair, helmet in that order so hair sits over the skull but helmet sits
+ * over hair; weapon last so it's never occluded by the body holding it. */
+export const PAPER_DOLL_COMPOSITE_ORDER: readonly PaperDollLayer[] = [
+  'body',
+  'boots',
+  'chest',
+  'head',
+  'hair',
+  'helmet',
+  'weapon',
+];
+
 /** How many frames the wings' independent flutter loop gets - not tied to
  * ANIM_FRAME_COUNTS since wings never follow the body's current anim
  * (SPEC.md section 6). */

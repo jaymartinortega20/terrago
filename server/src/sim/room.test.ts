@@ -513,4 +513,21 @@ describe('Room: area-of-interest snapshotting', () => {
     const thirdSnapshot = sentOf(playerA).filter((m) => m.t === 'world:snapshot').pop() as any;
     expect(thirdSnapshot.left).toContain(bob.id);
   });
+
+  it("includes a monster's stable monsterId alongside its display name, so the client can pick its sprite without matching on name", async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const alice = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_WHISPERING_FIELDS, repo);
+    const clock = makeClock();
+    const player = withCollector(room, alice.id);
+    const [monster] = [...room.monsters.values()];
+    player.x = monster!.x;
+    player.y = monster!.y;
+
+    advance(room, clock, 1);
+
+    const snapshot = sentOf(player).filter((m) => m.t === 'world:snapshot').pop() as any;
+    const monsterEntity = snapshot.entered.find((e: any) => e.kind === 'monster');
+    expect(monsterEntity).toMatchObject({ name: 'Slime', monsterId: 'slime' });
+  });
 });

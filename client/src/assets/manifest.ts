@@ -11,6 +11,7 @@ import { GENERATOR_REGISTRY } from './generators/index.js';
 import { ICON_SIZE_PX } from './generators/ui.js';
 import { INTRO_BG_HEIGHT, INTRO_BG_WIDTH } from './generators/intro.js';
 import { listPaperDollFrameAssets, listWingsFrameAssets } from './paperDollManifest.js';
+import { listMonsterFrameAssets } from './monsterManifest.js';
 
 export interface AssetEntry {
   key: string;
@@ -59,6 +60,7 @@ export function listAllAssetEntries(): AssetEntry[] {
   const paperDollSize = { width: SPRITE_FRAME_SIZE_PX, height: SPRITE_FRAME_SIZE_PX };
   const paperDollAssets = listPaperDollFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
   const wingsAssets = listWingsFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
+  const monsterAssets = listMonsterFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
 
-  return [...tileAssets, ...uiAssets, ...introAssets, ...paperDollAssets, ...wingsAssets];
+  return [...tileAssets, ...uiAssets, ...introAssets, ...paperDollAssets, ...wingsAssets, ...monsterAssets];
 }

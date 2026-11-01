@@ -112,3 +112,10 @@ for (let frame = 0; frame < 6; frame++) {
   const target = cell(wingsGrid, `wings ${frame}`, SPRITE_FRAME_SIZE_PX * 2, true);
   target.drawImage(canvas, 0, 0, target.canvas.width, target.canvas.height);
 }
+
+// ---- Monster sprites (task #80: WorldScene needs remote-entity art for
+// monsters too, not just the player paper-doll) ----
+
+for (const anim of ['idle', 'walk', 'attack', 'hurt', 'death', 'wakeUp', 'cast'] as AnimName[]) {
+  renderEntryGrid(`Monster: Slime - ${anim}`, (k) => k.startsWith(`mon_slime_${anim}_`), 2.5);
+}

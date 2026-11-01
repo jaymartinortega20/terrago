@@ -61,6 +61,14 @@ export class GameState {
   handleServerMessage(message: ServerMessage): void {
     switch (message.t) {
       case 'self:state':
+        // A portal/Waystone/`/tp` crossing changes mapId but the OLD
+        // room's AOI bookkeeping never sends this client explicit 'left'
+        // events for entities it can no longer see (it simply stops
+        // tracking this player at all) - without this, remote entities
+        // from the old map would sit frozen in `entities` forever, and
+        // WorldScene would resurrect them as ghosts when it re-seeds
+        // itself from `entities` on the new map.
+        if (this.mapId !== null && this.mapId !== message.mapId) this.entities.clear();
         this.self = message;
         this.mapId = message.mapId;
         this.onSelfState.emit(message);
