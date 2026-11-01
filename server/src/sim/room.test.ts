@@ -51,6 +51,7 @@ describe('Room: join/leave persistence', () => {
     expect(player.x).toBe(MAP_OAKHAVEN.spawnPoint.x);
     const selfState = sentOf(player).find((m) => m.t === 'self:state');
     expect(selfState).toBeDefined();
+    expect(selfState).toMatchObject({ mapId: MAP_OAKHAVEN.id });
   });
 
   it('persists position on leave', async () => {

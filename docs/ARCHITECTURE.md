@@ -87,7 +87,7 @@ JSON over one WebSocket per connection. Every message shape is a zod schema in `
 
 **Server → client snapshots and events:**
 - `world:snapshot` (delta: entities that entered/left/changed in this client's area of interest, at tick rate)
-- `self:state` (full authoritative state for the local player's own HUD-relevant fields: stats, inventory, equipment, hotbar, quests — sent on change, not every tick)
+- `self:state` (full authoritative state for the local player's own HUD-relevant fields: stats, inventory, equipment, hotbar, quests, current `mapId` — sent on change, not every tick, and always re-sent on a room join, which is how the client learns a portal/Waystone/`/tp` crossing happened — `world:snapshot` never names a map)
 - `combat:result` (attacker, defender, roll outcome, damage, floater style)
 - `chat:message`, `system:announce` (boss warnings, etc.)
 - `quest:update`

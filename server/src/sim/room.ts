@@ -984,6 +984,7 @@ export class Room {
       t: 'self:state',
       characterId: player.characterId,
       name: player.name,
+      mapId: this.mapId,
       baseLevel: player.baseLevel,
       jobLevel: player.jobLevel,
       jobId: player.jobId,

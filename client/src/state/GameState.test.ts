@@ -21,6 +21,7 @@ function selfStateMessage(overrides: Partial<SelfState> = {}): SelfState {
     t: 'self:state',
     characterId: 'char1',
     name: 'alice',
+    mapId: 'map1',
     baseLevel: 1,
     jobLevel: 1,
     jobId: 'recruit',
@@ -53,6 +54,15 @@ describe('GameState: self:state', () => {
 
     expect(state.self).toEqual(msg);
     expect(received).toEqual([msg]);
+  });
+
+  it('sets mapId from the message, so a portal crossing updates it on the next self:state', () => {
+    const state = new GameState();
+    state.handleServerMessage(selfStateMessage({ mapId: 'map1' }));
+    expect(state.mapId).toBe('map1');
+
+    state.handleServerMessage(selfStateMessage({ mapId: 'map2' }));
+    expect(state.mapId).toBe('map2');
   });
 });
 
@@ -168,7 +178,6 @@ describe('GameState: reset', () => {
     state.handleServerMessage(selfStateMessage());
     state.handleServerMessage({ t: 'world:snapshot', tick: 1, entered: [snapshot('p1')], updated: [], left: [] });
     state.handleServerMessage({ t: 'chat:message', channel: 'map', speaker: 'alice', text: 'hi' });
-    state.mapId = 'map1';
 
     state.reset();
 

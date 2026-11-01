@@ -284,6 +284,12 @@ describe('World: portal transitions picked up from tick()', () => {
     const movedPlayer = world.getRoom(portal.toMapId)!.players.get(char.id)!;
     expect(movedPlayer.x).toBe(portal.targetSpawn.x);
     expect(movedPlayer.y).toBe(portal.targetSpawn.y);
+
+    // The client has no other way to learn the map changed - toRoom.join()
+    // (inside World.moveCharacterToMap) must re-send self:state carrying the
+    // new mapId, since world:snapshot never names a map at all.
+    const selfStates = c.sent.filter((m) => m.t === 'self:state');
+    expect(selfStates.at(-1)).toMatchObject({ mapId: portal.toMapId });
   });
 });
 

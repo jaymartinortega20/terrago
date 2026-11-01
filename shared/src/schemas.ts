@@ -158,6 +158,7 @@ export const SelfStateSchema = z.object({
   t: z.literal('self:state'),
   characterId: z.string(),
   name: z.string(),
+  mapId: z.string(),
   baseLevel: z.number().int(),
   jobLevel: z.number().int(),
   jobId: z.string(),

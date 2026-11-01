@@ -62,6 +62,7 @@ export class GameState {
     switch (message.t) {
       case 'self:state':
         this.self = message;
+        this.mapId = message.mapId;
         this.onSelfState.emit(message);
         break;
       case 'world:snapshot':
