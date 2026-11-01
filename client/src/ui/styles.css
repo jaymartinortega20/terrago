@@ -1,0 +1,127 @@
+/**
+ * Shared glassmorphism base styles (SPEC.md section 11): "Every window and
+ * HUD panel is frosted glass: a semi-transparent dark fill,
+ * backdrop-filter: blur(12px), a thin light border and a soft shadow."
+ * Every DOM overlay panel (login form, HUD panels built in task #81)
+ * shares these base classes instead of each one redeclaring the look.
+ */
+
+:root {
+  --terago-accent: #8a5fe0;
+  --terago-accent-bright: #a988ff;
+  --terago-error: #e8697a;
+  --terago-text: #f0e9ff;
+  --terago-text-dim: #b8a8d0;
+  --terago-glass-bg: rgba(20, 14, 32, 0.55);
+  --terago-glass-border: rgba(255, 255, 255, 0.14);
+}
+
+#ui-root {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--terago-text);
+}
+
+.terago-glass {
+  background: var(--terago-glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--terago-glass-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.terago-glass h2 {
+  margin: 0 0 14px;
+  font-family: Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--terago-text);
+}
+
+.terago-glass input,
+.terago-glass select {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--terago-glass-border);
+  border-radius: 8px;
+  color: var(--terago-text);
+  padding: 8px 10px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.terago-glass input:focus {
+  outline: none;
+  border-color: var(--terago-accent-bright);
+}
+
+.terago-glass label {
+  display: block;
+  font-size: 12px;
+  color: var(--terago-text-dim);
+  margin-bottom: 10px;
+}
+
+.terago-glass button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--terago-accent);
+  color: #fff;
+  transition: background-color 120ms ease, transform 80ms ease;
+}
+
+.terago-glass button:hover:not(:disabled) {
+  background: var(--terago-accent-bright);
+}
+
+.terago-glass button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.terago-glass button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.terago-link {
+  background: transparent !important;
+  color: var(--terago-text-dim) !important;
+  font-weight: 400 !important;
+  text-decoration: underline;
+  padding: 6px 0 !important;
+}
+
+.terago-error {
+  min-height: 16px;
+  font-size: 12px;
+  color: var(--terago-error);
+  margin: -2px 0 8px;
+}
+
+.terago-login {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  padding: 24px;
+}
+
+/* SPEC.md section 11: item border glow by quality. */
+.terago-rarity-common { border-color: #9aa0ab; }
+.terago-rarity-rare { border-color: #3c8ee2; }
+.terago-rarity-epic { border-color: #a23ce2; }
+.terago-rarity-mythic {
+  border-color: #f0c23c;
+  animation: terago-mythic-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes terago-mythic-glow {
+  0%, 100% { box-shadow: 0 0 4px 1px rgba(240, 194, 60, 0.5); }
+  50% { box-shadow: 0 0 10px 3px rgba(240, 194, 60, 0.9); }
+}

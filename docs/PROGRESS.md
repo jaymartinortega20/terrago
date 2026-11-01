@@ -32,11 +32,11 @@ Server:
 - [x] Fixed 20 Hz tick loop driver (`sim/tick.ts`) + real HTTP/WS server entry point (`server/src/index.ts`) — task #74 complete; verified live with an end-to-end WebSocket smoke test (register → self:state/world:snapshot → move:to walks → chat:send echoes → dev:command applies and persists)
 
 Client:
-- [ ] Boot/loading scene with progress bar driving the asset manifest + placeholder-art generator
-- [ ] Story intro (3 scrolls, typewriter, Ken Burns placeholder art, click/space/Esc)
-- [ ] Login/register screen
-- [ ] WorldScene: tile rendering, y-sorting, camera lerp+clamp
-- [ ] Paper-doll player sprite (layered, 4-facing, idle/walk/attack/cast/hurt/death/wake-up/mounted)
+- [x] Boot/loading scene with progress bar driving the asset manifest + placeholder-art generator — `BootScene` generates all ~650 textures in batches of 24/tick, registers paper-doll animations, then starts Login
+- [x] Story intro (3 scrolls, typewriter, Ken Burns placeholder art, click/space/Esc) — `IntroScene`; verified live (Playwright), zero console errors, chime synthesized via Web Audio API, sends `intro:seen` on completion
+- [x] Login/register screen — `LoginScene`, glassmorphism DOM form (`client/src/ui/styles.css`); verified live: register → Intro → World, and a second login for the same account correctly skips straight to World via `self:state.introSeen`
+- [ ] WorldScene: tile rendering, y-sorting, camera lerp+clamp — only a stand-in exists (tiled floor + a centered idle paper-doll), proving the Boot→texture-generation→render pipeline works; the real tilemap/camera/movement work is task #80
+- [x] Paper-doll player sprite (layered, 4-facing, idle/walk/attack/cast/hurt/death/wake-up/mounted) — generated procedurally and confirmed rendering correctly through real Phaser (not just the preview page) in the live WorldScene smoke test
 - [ ] Click-to-move with path preview, WASD 8-way, client prediction + reconciliation
 - [ ] HUD: status block (portrait, Base/Job level+EXP, HP, resource bar), hotbar, quest tracker, chat (All/Map/System), minimap
 - [ ] Damage floaters: normal/crit/miss/lucky/heal styles, screen shake on crit
