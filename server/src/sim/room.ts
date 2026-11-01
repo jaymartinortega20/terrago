@@ -512,6 +512,58 @@ export class Room {
     player.rowDirty = true;
   }
 
+  // ------------------------------------------------------------- dev tools
+  // Only reachable through dev:command, which sim/world.ts gates on the
+  // TERAGO_DEV_TOOLS env flag (SPEC.md section 2: "development mode only").
+
+  devSetBaseLevel(player: PlayerEntity, level: number): void {
+    player.baseLevel = Math.max(1, Math.min(BALANCE.maxBaseLevel, Math.round(level)));
+    player.baseExp = 0;
+    player.selfStateDirty = true;
+    player.rowDirty = true;
+  }
+
+  devSetJobLevel(player: PlayerEntity, level: number): void {
+    const max = player.jobId === 'recruit' ? BALANCE.maxJobLevelRecruit : BALANCE.maxJobLevelAdvanced;
+    player.jobLevel = Math.max(1, Math.min(max, Math.round(level)));
+    player.jobExp = 0;
+    player.selfStateDirty = true;
+    player.rowDirty = true;
+  }
+
+  devGiveItem(player: PlayerEntity, itemId: string, qty: number): boolean {
+    const def = ITEMS[itemId];
+    if (!def) return false;
+    const added = this.repo.addItem(player.characterId, itemId, qty, def.stackable, def.maxStack);
+    this.mergeLocalItem(player, added);
+    player.selfStateDirty = true;
+    return true;
+  }
+
+  /** Spawns one extra monster at a fixed point rather than inside a
+   * configured spawn area, so it isn't tracked for respawn (spawnAreaIndex
+   * -1 is never looked up by tickRespawns). */
+  devSpawnMonsterAt(monsterId: string, x: number, y: number): boolean {
+    const def = MONSTERS[monsterId];
+    if (!def) return false;
+    const monster: MonsterEntity = {
+      instanceId: nanoid(),
+      monsterId,
+      spawnAreaIndex: -1,
+      x,
+      y,
+      facing: 'down',
+      path: null,
+      heldDirection: null,
+      hp: def.maxHp,
+      maxHp: def.maxHp,
+      aggroCharacterId: null,
+      lastAttackAt: null,
+    };
+    this.monsters.set(monster.instanceId, monster);
+    return true;
+  }
+
   /** Talks to (or attacks, for a monster) whatever `player.targetId` names,
    * once the chase in `tick()` has brought them into range. Monsters are
    * handled continuously in `tick()`; this is only reached for NPCs, which
