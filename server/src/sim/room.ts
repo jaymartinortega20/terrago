@@ -12,6 +12,7 @@ import {
   BALANCE,
   CLASSES,
   ITEMS,
+  MAP_OAKHAVEN,
   MONSTERS,
   applyExp,
   expToNextLevel,
@@ -691,7 +692,7 @@ export class Room {
       }
     }
 
-    this.tickMonsters(nowMs);
+    transitions.push(...this.tickMonsters(nowMs));
     this.tickRespawns(nowMs);
     this.broadcastSnapshots();
 
@@ -813,7 +814,8 @@ export class Room {
     }
   }
 
-  private tickMonsters(nowMs: number): void {
+  private tickMonsters(nowMs: number): PortalTransition[] {
+    const deaths: PortalTransition[] = [];
     for (const monster of this.monsters.values()) {
       if (!monster.aggroCharacterId) continue;
       const attacker = this.players.get(monster.aggroCharacterId);
@@ -852,7 +854,34 @@ export class Room {
         null,
         true
       );
+
+      if (attacker.hp <= 0) {
+        monster.aggroCharacterId = null;
+        deaths.push(this.respawnPlayer(attacker));
+      }
     }
+    return deaths;
+  }
+
+  /** No death penalty in v1 (SPEC.md names none for any milestone): a
+   * defeated player is simply restored to full and sent back to Oakhaven
+   * Sanctuary, "the last standing safe haven" and the only monster-free
+   * map, regardless of which map they died on (docs/DECISIONS.md). Mirrors
+   * a portal crossing - sim/world.ts applies the returned transition the
+   * same way, resetting the player's room without this Room needing to
+   * know any other room exists. */
+  private respawnPlayer(player: PlayerEntity): PortalTransition {
+    const { maxHp, maxResource } = deriveVitals(player.stats, player.baseLevel, player.jobId);
+    player.hp = maxHp;
+    player.resource = maxResource;
+    player.mounted = false;
+    player.lastCombatActionAt = null;
+    player.targetId = null;
+    stopMovement(player);
+    player.selfStateDirty = true;
+    player.rowDirty = true;
+    player.send({ t: 'system:announce', text: 'You were defeated and have returned to Oakhaven Sanctuary.' });
+    return { characterId: player.characterId, toMapId: MAP_OAKHAVEN.id, x: MAP_OAKHAVEN.spawnPoint.x, y: MAP_OAKHAVEN.spawnPoint.y };
   }
 
   private tickRespawns(nowMs: number): void {

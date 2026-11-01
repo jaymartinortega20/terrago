@@ -235,6 +235,35 @@ describe('Room: combat against a monster', () => {
     expect(player.hp).toBeLessThan(startingHp);
   });
 
+  it('respawns a defeated player at Oakhaven, fully healed and out of combat', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'hunter');
+    repo.saveCharacter(char.id, { mapId: MAP_WHISPERING_FIELDS.id, x: MAP_WHISPERING_FIELDS.spawnPoint.x, y: MAP_WHISPERING_FIELDS.spawnPoint.y });
+
+    const clock = makeClock();
+    const room = new Room(MAP_WHISPERING_FIELDS, repo, { roll01: ROLL_HALF, now: clock.now });
+    const player = withCollector(room, char.id);
+    const [monster] = [...room.monsters.values()];
+    player.x = monster!.x;
+    player.y = monster!.y;
+    player.hp = 5; // deliberately low, so the Slime's very first retaliation (6 dmg) kills before the player's own 5 hits can kill it back
+    player.mounted = true;
+
+    room.handleTargetSet(player, monster!.instanceId);
+    let transitions: ReturnType<typeof room.tick> = [];
+    for (let i = 0; i < 40 && transitions.length === 0; i++) {
+      // 2s max, well inside the Slime's first 1400ms attack interval
+      clock.advance(50);
+      transitions = room.tick(0.05);
+    }
+
+    expect(transitions).toEqual([{ characterId: char.id, toMapId: MAP_OAKHAVEN.id, x: MAP_OAKHAVEN.spawnPoint.x, y: MAP_OAKHAVEN.spawnPoint.y }]);
+    expect(player.hp).toBeGreaterThan(5); // restored to max, not left at the lethal blow's clamped-at-0 value
+    expect(player.mounted).toBe(false);
+    expect(player.targetId).toBeNull();
+    expect(sentOf(player).some((m) => m.t === 'system:announce' && /defeated/i.test(m.text))).toBe(true);
+  });
+
   it('clears target and does not throw when the target has already died', async () => {
     const repo = createSqliteRepository(openDatabase(':memory:'));
     const char = await freshCharacter(repo, 'hunter');
