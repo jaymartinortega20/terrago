@@ -1,0 +1,42 @@
+{
+  "_comment": "Every non-paper-doll generated asset, by logical key (SPEC.md section 6: 'Reference every asset through client/assets/manifest.json so any file can later be swapped for hand-drawn art with no code changes'). Each entry names a generator (client/src/assets/generators/) and its params; src/assets/manifest.ts loads this, dispatches each entry through the generator registry, and registers the result as a Phaser texture under `key`. The paper-doll frame grid is regular/parametric (every facing x anim x frame combination exists for a fixed small set of layer contents) and is enumerated in code instead (src/assets/paperDollManifest.ts) rather than hand-listed here frame by frame - swapping it for hand-drawn art later means replacing the generator dispatch for a layer, not this file.",
+
+  "tiles": [
+    { "key": "tile_oakhaven_floor_0", "generator": "oakhavenFloor", "params": { "variant": 0 } },
+    { "key": "tile_oakhaven_floor_1", "generator": "oakhavenFloor", "params": { "variant": 1 } },
+    { "key": "tile_oakhaven_floor_2", "generator": "oakhavenFloor", "params": { "variant": 2 } },
+    { "key": "tile_oakhaven_floor_3", "generator": "oakhavenFloor", "params": { "variant": 3 } },
+    { "key": "tile_oakhaven_path_0", "generator": "oakhavenPath", "params": { "variant": 0 } },
+    { "key": "tile_oakhaven_path_1", "generator": "oakhavenPath", "params": { "variant": 1 } },
+    { "key": "tile_fields_grass_0", "generator": "fieldsGrass", "params": { "variant": 0 } },
+    { "key": "tile_fields_grass_1", "generator": "fieldsGrass", "params": { "variant": 1 } },
+    { "key": "tile_fields_grass_2", "generator": "fieldsGrass", "params": { "variant": 2 } },
+    { "key": "tile_fields_grass_3", "generator": "fieldsGrass", "params": { "variant": 3 } },
+    { "key": "tile_fields_grass_4", "generator": "fieldsGrass", "params": { "variant": 4 } },
+    { "key": "tile_fields_dirt_0", "generator": "fieldsDirtPatch", "params": { "variant": 0 } },
+    { "key": "tile_obstacle_rock_0", "generator": "rockObstacle", "params": { "variant": 0 } },
+    { "key": "tile_obstacle_rock_1", "generator": "rockObstacle", "params": { "variant": 1 } },
+    { "key": "tile_obstacle_bush_0", "generator": "bushObstacle", "params": { "variant": 0 } },
+    { "key": "tile_obstacle_bush_1", "generator": "bushObstacle", "params": { "variant": 1 } },
+    { "key": "tile_waystone_oakhaven", "generator": "waystone", "params": { "baseTile": "oakhaven" } },
+    { "key": "tile_waystone_fields", "generator": "waystone", "params": { "baseTile": "fields" } }
+  ],
+
+  "ui": [
+    { "key": "icon_recruit_training_sword", "generator": "itemIcon", "params": { "itemId": "recruit_training_sword" } },
+    { "key": "icon_potion_hp_small", "generator": "itemIcon", "params": { "itemId": "potion_hp_small" } },
+    { "key": "icon_slime_gel", "generator": "itemIcon", "params": { "itemId": "slime_gel" } },
+    { "key": "icon_recruit_cloth_cap", "generator": "itemIcon", "params": { "itemId": "recruit_cloth_cap" } },
+    { "key": "icon_recruit_cloth_vest", "generator": "itemIcon", "params": { "itemId": "recruit_cloth_vest" } },
+    { "key": "icon_recruit_leather_boots", "generator": "itemIcon", "params": { "itemId": "recruit_leather_boots" } },
+    { "key": "icon_tattered_wings", "generator": "itemIcon", "params": { "itemId": "tattered_wings" } },
+    { "key": "icon_generic_item", "generator": "itemIcon", "params": { "itemId": "__unknown__" } },
+    { "key": "ui_portrait_frame", "generator": "portraitFrame", "params": { "size": 96 } }
+  ],
+
+  "intro": [
+    { "key": "intro_bg_scroll1", "generator": "introScroll1", "params": {} },
+    { "key": "intro_bg_scroll2", "generator": "introScroll2", "params": {} },
+    { "key": "intro_bg_scroll3", "generator": "introScroll3", "params": {} }
+  ]
+}

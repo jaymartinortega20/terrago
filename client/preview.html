@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TERAGO ONLINE - Asset Preview</title>
+    <style>
+      html, body { margin: 0; background: #14101c; color: #eee; font-family: system-ui, sans-serif; }
+      h2 { padding: 8px 16px 0; margin: 0; font-size: 14px; color: #bbb; text-transform: uppercase; letter-spacing: 0.05em; }
+      .grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; }
+      .cell { background: repeating-conic-gradient(#2a2535 0% 25%, #221e2c 0% 50%) 50% / 12px 12px; border: 1px solid #3a3545; padding: 2px; }
+      canvas { display: block; image-rendering: pixelated; }
+      .cell.big canvas { image-rendering: auto; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/previewGallery.ts"></script>
+  </body>
+</html>
