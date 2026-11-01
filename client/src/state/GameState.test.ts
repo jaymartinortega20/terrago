@@ -39,6 +39,7 @@ function selfStateMessage(overrides: Partial<SelfState> = {}): SelfState {
     resourceKind: 'stamina',
     equipment: { weapon: null, helmet: null, chest: null, boots: null, wings: null },
     hotbar: Array(8).fill(null),
+    inventory: [],
     ...overrides,
   };
 }

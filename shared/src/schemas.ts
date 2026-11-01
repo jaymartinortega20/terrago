@@ -21,6 +21,19 @@ export const HotbarBindingSchema = z.union([
   z.null(),
 ]);
 
+/** One stack in the player's bag (never an equipped item - those are
+ * `self:state.equipment`). `id` is the item-row instance id, distinct from
+ * `itemId` (the ItemDef key in shared/config/items.ts the client resolves
+ * name/icon/rarity/stats from), exactly like `EntitySnapshot.monsterId` vs
+ * `name` - a display lookup key kept separate from the stable instance id
+ * drag-drop and equip/unequip/hotbar:assign all operate on. */
+export const InventoryItemSchema = z.object({
+  id: z.string(),
+  itemId: z.string(),
+  qty: z.number().int(),
+  refineLevel: z.number().int(),
+});
+
 // ================= client -> server =================
 
 export const AuthRegisterSchema = z.object({
@@ -188,6 +201,7 @@ export const SelfStateSchema = z.object({
       z.null(),
     ])
   ).length(8),
+  inventory: z.array(InventoryItemSchema),
 });
 
 export const CombatResultSchema = z.object({

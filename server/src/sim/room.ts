@@ -978,6 +978,7 @@ export class Room {
       const qty = player.items.filter((it) => it.itemId === binding.id).reduce((sum, it) => sum + it.qty, 0);
       return { type: 'item' as const, id: binding.id, qty };
     });
+    const inventory = player.items.map((it) => ({ id: it.id, itemId: it.itemId, qty: it.qty, refineLevel: it.refineLevel }));
 
     player.send({
       t: 'self:state',
@@ -1004,6 +1005,7 @@ export class Room {
       resourceKind,
       equipment: equipment as Record<EquipmentSlot, string | null>,
       hotbar,
+      inventory,
     });
   }
 }

@@ -54,6 +54,23 @@ describe('Room: join/leave persistence', () => {
     expect(selfState).toMatchObject({ mapId: MAP_OAKHAVEN.id });
   });
 
+  it('self:state carries the bag (not equipped items) for the HUD inventory panel', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+
+    // registerAccount grants a starting sword (equipped) + 3 HP potions (bag).
+    const selfState = sentOf(player).find((m) => m.t === 'self:state' as const) as Extract<
+      ServerMessage,
+      { t: 'self:state' }
+    >;
+    expect(selfState).toMatchObject({
+      inventory: [{ itemId: 'potion_hp_small', qty: 3 }],
+    });
+    expect(selfState.inventory.some((i) => i.itemId === 'recruit_training_sword')).toBe(false);
+  });
+
   it('persists position on leave', async () => {
     const repo = createSqliteRepository(openDatabase(':memory:'));
     const char = await freshCharacter(repo, 'alice');
