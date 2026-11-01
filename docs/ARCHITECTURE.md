@@ -99,12 +99,12 @@ Area-of-interest: each room tracks, per connection, the entities inside that pla
 Behind the `Repository` interface (`server/src/db/repository.ts`), so the underlying store is swappable:
 
 - `accounts` (id, username, password_hash, created_at)
-- `characters` (id, account_id, name, base_level, job_level, job_id, base_exp, job_exp, stats_json, position_json, settings_json, created_at, updated_at)
+- `characters` (id, account_id, name, map_id, x, y, base_level, job_id, job_level, base_exp, job_exp, stats_json, unallocated_stat_points, hp, resource, gold, settings_json, intro_seen, created_at, updated_at) — position is `map_id`/`x`/`y` columns rather than a `position_json` blob, so movement/room queries don't need to parse JSON on every tick
 - `character_items` (id, character_id, item_id, slot ["bag"|equip slot name], qty, refine_level)
 - `character_hotbar` (character_id, slot_index 1-8, binding_type ["skill"|"item"], binding_id)
-- `character_quests` (character_id, quest_id, state, objective_progress_json)
+- `character_quests` (character_id, quest_id, state, progress_json)
 - `character_unlocks` (character_id, kind ["waystone"|"skill"], ref_id)
-- `trade_log` (id, character_a, character_b, items_json, gold_a, gold_b, created_at)
+- `trade_log` (id, character_a, character_b, items_json, gold_a, gold_b, created_at) — arrives with M3 (Economy); not needed for M1/M2
 
 Saved on key events (level up, equip change, quest update, trade complete) and on a 60 s interval per connected character. A repository method exists for every read/write game logic needs; nothing issues raw SQL outside `db/`.
 
