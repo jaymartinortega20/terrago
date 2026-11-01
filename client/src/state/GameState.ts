@@ -10,6 +10,7 @@ export type SelfState = Extract<ServerMessage, { t: 'self:state' }>;
 export type QuestUpdate = Extract<ServerMessage, { t: 'quest:update' }>;
 export type ChatMessage = Extract<ServerMessage, { t: 'chat:message' }>;
 export type CombatResult = Extract<ServerMessage, { t: 'combat:result' }>;
+export type CombatHeal = Extract<ServerMessage, { t: 'combat:heal' }>;
 
 export interface QuestTrackerEntry {
   questId: string;
@@ -51,6 +52,7 @@ export class GameState {
   readonly onQuestUpdate = new Signal<QuestUpdate>();
   readonly onChatMessage = new Signal<ChatMessage>();
   readonly onCombatResult = new Signal<CombatResult>();
+  readonly onHeal = new Signal<CombatHeal>();
   readonly onAuthResult = new Signal<Extract<ServerMessage, { t: 'auth:result' }>>();
   readonly onSystemAnnounce = new Signal<Extract<ServerMessage, { t: 'system:announce' }>>();
 
@@ -101,6 +103,9 @@ export class GameState {
         break;
       case 'combat:result':
         this.onCombatResult.emit(message);
+        break;
+      case 'combat:heal':
+        this.onHeal.emit(message);
         break;
       case 'auth:result':
         this.onAuthResult.emit(message);

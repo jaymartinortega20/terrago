@@ -484,9 +484,17 @@ export class Room {
 
     if (def.healHp) {
       const { maxHp } = deriveVitals(player.stats, player.baseLevel, player.jobId);
-      player.hp = Math.min(maxHp, player.hp + def.healHp);
+      const newHp = Math.min(maxHp, player.hp + def.healHp);
+      const actualHealed = newHp - player.hp;
+      player.hp = newHp;
       player.selfStateDirty = true;
       player.rowDirty = true;
+      // Only a real gain gets a floater - a potion used at full HP is
+      // already a (pre-existing, unrelated) wasted-use quirk; it doesn't
+      // also need a "+0" floater on top of it.
+      if (actualHealed > 0) {
+        this.broadcastToRoom({ t: 'combat:heal', characterId: player.characterId, amount: actualHealed }, null, true);
+      }
     }
 
     player.lastPotionUseAt = nowMs;

@@ -3,9 +3,11 @@
  * clamp, local-player click-to-move/WASD with prediction + server
  * reconciliation, and every remote entity (other players and monsters)
  * rendered from world:snapshot with ~100ms interpolation. Combat feedback
- * (damage floaters, hit flashes) and AUTO mode's own scan/target/attack
- * loop are a separate, later task (#82) layered on top of what this scene
- * already renders and already sends intents for. The DOM HUD (task #81,
+ * (damage floaters, crit hit-flash/shake - task #82) reacts to
+ * GameState's combat:result/combat:heal signals the same way every other
+ * panel does; AUTO mode's own scan/target/attack loop is the other half
+ * of #82, layered on top of what this scene already sends intents for.
+ * The DOM HUD (task #81,
  * `ui/hud/Hud.ts`) is a singleton main.ts creates once and this scene just
  * shows - not torn down/rebuilt on a portal crossing's `scene.restart()`.
  */
@@ -13,7 +15,7 @@ import Phaser from 'phaser';
 import { MAPS, type EntitySnapshot, type EquipmentSlot, type Facing, type MapDef } from '@terago/shared';
 import { REMOTE_INTERPOLATION_DELAY_MS, TILE_SIZE_PX } from '../config.js';
 import { sceneContext } from '../state/sceneContext.js';
-import type { SelfState } from '../state/GameState.js';
+import type { CombatHeal, CombatResult, SelfState } from '../state/GameState.js';
 import { isTextInputFocused } from '../util/domFocus.js';
 import { isTallTile, tileKeyFor } from '../world/tilemap.js';
 import {
@@ -26,6 +28,7 @@ import {
 } from '../world/localPrediction.js';
 import { RemoteInterpolator } from '../world/remoteInterpolation.js';
 import { EntityView, MonsterView, entityHitArea } from '../world/entityView.js';
+import { DamageFloaters, type FloaterKind } from '../world/damageFloaters.js';
 
 interface LocalDisplayState {
   anim: EntitySnapshot['anim'];
@@ -62,6 +65,7 @@ export class WorldScene extends Phaser.Scene {
   private localDisplay: LocalDisplayState = { anim: 'idle', hpPct: 100, mounted: false, equipment: {} };
 
   private readonly remotes = new Map<string, RemoteEntry>();
+  private floaters!: DamageFloaters;
   private wasdKeys: WasdKeys | null = null;
   private lastSentDir = { dx: 0, dy: 0 };
   private unsubscribers: Array<() => void> = [];
@@ -85,6 +89,7 @@ export class WorldScene extends Phaser.Scene {
     this.lastSentDir = { dx: 0, dy: 0 };
 
     this.cameras.main.setBackgroundColor('#0a0710');
+    this.floaters = new DamageFloaters(this);
     this.renderTilemap();
     this.renderNpcMarkers();
     this.createLocalPlayer();
@@ -212,7 +217,9 @@ export class WorldScene extends Phaser.Scene {
     const unsubUpdated = this.gameState.onEntityUpdated.on((s) => this.handleEntitySnapshot(s));
     const unsubLeft = this.gameState.onEntityLeft.on((id) => this.handleEntityLeft(id));
     const unsubSelf = this.gameState.onSelfState.on((self) => this.handleSelfState(self));
-    this.unsubscribers = [unsubEntered, unsubUpdated, unsubLeft, unsubSelf];
+    const unsubCombat = this.gameState.onCombatResult.on((result) => this.handleCombatResult(result));
+    const unsubHeal = this.gameState.onHeal.on((heal) => this.handleHeal(heal));
+    this.unsubscribers = [unsubEntered, unsubUpdated, unsubLeft, unsubSelf, unsubCombat, unsubHeal];
   }
 
   // ------------------------------------------------------------ input
@@ -314,6 +321,39 @@ export class WorldScene extends Phaser.Scene {
     if (!entry) return;
     entry.view.destroy();
     this.remotes.delete(id);
+  }
+
+  /** Looks up the on-screen view for a combat participant - the local
+   * player or any remote (player or monster) - so combat:result/
+   * combat:heal can anchor a floater and, for a crit, trigger a hit
+   * flash. `undefined` for an id that's not currently rendered (combat
+   * for something out of this player's area-of-interest never reaches
+   * the client to begin with, but a monster's killing blow and its
+   * subsequent entity:left can race - this just silently skips rather
+   * than risk floater-ing a view that's already gone). */
+  private resolveEntityView(id: string): EntityView | MonsterView | undefined {
+    if (id === this.localId) return this.localView;
+    return this.remotes.get(id)?.view;
+  }
+
+  /** SPEC.md section 11 "Damage feedback": a floater over whoever was hit
+   * (or missed/dodged), styled per outcome; a crit additionally gets a
+   * small screen shake and a hit-flash on the target. */
+  private handleCombatResult(result: CombatResult): void {
+    const view = this.resolveEntityView(result.defenderId);
+    if (!view) return;
+
+    const kind: FloaterKind =
+      result.outcome === 'hit' ? 'normal' : result.outcome === 'crit' ? 'crit' : result.outcome === 'miss' ? 'miss' : 'lucky';
+    this.floaters.spawn(view.container, kind, result.damage);
+    if (result.outcome === 'crit') view.flashHit();
+  }
+
+  /** SPEC.md section 11 "Healing: green numbers." */
+  private handleHeal(heal: CombatHeal): void {
+    const view = this.resolveEntityView(heal.characterId);
+    if (!view) return;
+    this.floaters.spawn(view.container, 'heal', heal.amount);
   }
 
   /** A portal/Waystone/`/tp` crossing is the only thing that changes

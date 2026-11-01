@@ -539,6 +539,11 @@ describe('Room: hotbar', () => {
     expect(player.hp).toBe(41); // healHp: 40, from 1 -> 41
     const potionsAfterOne = player.items.find((i) => i.itemId === 'potion_hp_small')?.qty;
     expect(potionsAfterOne).toBe(potionsBefore - 1);
+    // A damage-feedback floater (SPEC.md section 11: "Healing: green
+    // numbers") needs to know a heal happened and by how much - self:state
+    // only carries the resulting hp, silently, so this is a dedicated
+    // broadcast rather than the client diffing two self:states.
+    expect(sentOf(player)).toContainEqual({ t: 'combat:heal', characterId: char.id, amount: 40 });
 
     // Immediately using again should be blocked by the 1s potion cooldown.
     room.handleHotbarUse(player, 1);
@@ -547,6 +552,19 @@ describe('Room: hotbar', () => {
     clock.advance(1100);
     room.handleHotbarUse(player, 1);
     expect(player.items.find((i) => i.itemId === 'potion_hp_small')?.qty).toBe((potionsAfterOne ?? 0) - 1);
+  });
+
+  it('does not send a combat:heal floater when a potion is used at full HP', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+    room.handleHotbarAssign(player, 1, { type: 'item', id: 'potion_hp_small' });
+    // Fresh character is already at full HP.
+
+    room.handleHotbarUse(player, 1);
+
+    expect(sentOf(player).some((m) => m.t === 'combat:heal')).toBe(false);
   });
 });
 

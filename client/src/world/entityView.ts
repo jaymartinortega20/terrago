@@ -87,13 +87,19 @@ export function entityHitArea(): Phaser.Geom.Rectangle {
   return new Phaser.Geom.Rectangle(-TILE_SIZE_PX / 2, -SPRITE_FRAME_SIZE_PX, TILE_SIZE_PX, SPRITE_FRAME_SIZE_PX);
 }
 
+/** How long a crit's "hit flash" (SPEC.md section 11) holds before
+ * clearing - quick enough to read as a flash, not a tint. */
+const HIT_FLASH_MS = 90;
+
 export class EntityView {
   readonly container: Phaser.GameObjects.Container;
+  private readonly scene: Phaser.Scene;
   private readonly wings: Phaser.GameObjects.Sprite;
   private readonly layers: Record<string, Phaser.GameObjects.Sprite>;
   private readonly bar: NameAndHpBar;
 
   constructor(scene: Phaser.Scene, name: string) {
+    this.scene = scene;
     this.wings = scene.add.sprite(0, 0, 'pd_wings_down_0').setOrigin(0.5, FOOT_ANCHOR_Y_RATIO);
 
     this.layers = {};
@@ -147,6 +153,16 @@ export class EntityView {
     updateHpBar(this.bar, state.hpPct);
   }
 
+  /** A brief white tint flash across every visible layer, for a crit's
+   * "hit flash on the target" (SPEC.md section 11). */
+  flashHit(): void {
+    const sprites = [this.wings, ...Object.values(this.layers)];
+    for (const sprite of sprites) sprite.setTintFill(0xffffff);
+    this.scene.time.delayedCall(HIT_FLASH_MS, () => {
+      for (const sprite of sprites) sprite.clearTint();
+    });
+  }
+
   destroy(): void {
     this.container.destroy(); // destroys every added child too
   }
@@ -154,11 +170,13 @@ export class EntityView {
 
 export class MonsterView {
   readonly container: Phaser.GameObjects.Container;
+  private readonly scene: Phaser.Scene;
   private readonly sprite: Phaser.GameObjects.Sprite;
   private readonly bar: NameAndHpBar;
   private spriteId: string;
 
   constructor(scene: Phaser.Scene, name: string, monsterId: string | undefined) {
+    this.scene = scene;
     this.spriteId = monsterSpriteIdFor(monsterId);
     this.sprite = scene.add.sprite(0, 0, `mon_${this.spriteId}_idle_0`).setOrigin(0.5, FOOT_ANCHOR_Y_RATIO);
     this.bar = createNameAndHpBar(scene, 'monster', name);
@@ -176,6 +194,14 @@ export class MonsterView {
     this.spriteId = monsterSpriteIdFor(monsterId);
     this.sprite.play(monsterAnimKey(this.spriteId, state.anim), true);
     updateHpBar(this.bar, state.hpPct);
+  }
+
+  /** Same role as EntityView.flashHit - kept as an identically-named
+   * method on both view classes so WorldScene can call it without an
+   * instanceof check. */
+  flashHit(): void {
+    this.sprite.setTintFill(0xffffff);
+    this.scene.time.delayedCall(HIT_FLASH_MS, () => this.sprite.clearTint());
   }
 
   destroy(): void {

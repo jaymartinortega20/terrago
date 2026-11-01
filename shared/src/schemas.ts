@@ -225,6 +225,17 @@ export const CombatResultSchema = z.object({
   damage: z.number().int().optional(),
 });
 
+/** A potion (or, later, a heal skill) restoring HP - SPEC.md section 11's
+ * damage-feedback table calls for a distinct "green numbers" floater for
+ * healing, which combat:result can't carry (it's an attack-resolution
+ * message with an attacker/defender pair; a self-heal has neither). Kept
+ * to characters only - M1 has nothing that heals a monster. */
+export const CombatHealSchema = z.object({
+  t: z.literal('combat:heal'),
+  characterId: z.string(),
+  amount: z.number().int(),
+});
+
 export const ChatMessageSchema = z.object({
   t: z.literal('chat:message'),
   channel: z.enum(['global', 'map', 'system', 'monster', 'pet', 'npc']),
@@ -255,6 +266,7 @@ export const ServerMessageSchema = z.discriminatedUnion('t', [
   WorldSnapshotSchema,
   SelfStateSchema,
   CombatResultSchema,
+  CombatHealSchema,
   ChatMessageSchema,
   SystemAnnounceSchema,
   QuestUpdateSchema,

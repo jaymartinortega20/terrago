@@ -197,6 +197,16 @@ describe('GameState: quests, chat, combat, system', () => {
     expect(results).toHaveLength(1);
   });
 
+  it('re-emits a combat:heal without storing it (transient floater trigger, not state)', () => {
+    const state = new GameState();
+    const heals: unknown[] = [];
+    state.onHeal.on((h) => heals.push(h));
+
+    state.handleServerMessage({ t: 'combat:heal', characterId: 'a', amount: 40 });
+
+    expect(heals).toHaveLength(1);
+  });
+
   it('re-emits system:announce', () => {
     const state = new GameState();
     const announcements: string[] = [];
