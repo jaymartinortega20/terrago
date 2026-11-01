@@ -16,18 +16,20 @@ Shared:
 - [x] Unit tests for every formula (Vitest) — 46 tests passing (`npm test`)
 
 Server:
-- [ ] better-sqlite3 database + migrations + repository interface
-- [ ] Register/login with argon2 password hashing + session tokens
-- [ ] WS connection handling, message validation, rate limiting
-- [ ] Fixed 20 Hz tick loop; Room for Map 1 (Oakhaven Sanctuary) and Map 2 (Whispering Fields)
-- [ ] Server-authoritative movement (click-to-move via A*, WASD direct) with area-of-interest snapshots
-- [ ] Slime monster: AI, server-calculated combat via `shared/formulas`, aggro barks, loot drops
-- [ ] EXP/level-up, stat point allocation
-- [ ] Inventory + equipment (weapon/helmet/chest/boots/wings), broadcast equipment changes
-- [ ] 8-slot hotbar (skills + stackable items), persisted per character
-- [ ] AUTO mode: scan/target/move/attack loop server-validated exactly like manual input
-- [ ] Elder Fin NPC + "First Steps" and "Cleaning the Horizon" quests (state machine + HUD tracker)
-- [ ] Save on key events + 60s interval; full state restore on login
+- [x] better-sqlite3 database + migrations + repository interface
+- [x] Register/login with argon2 password hashing + session tokens
+- [x] WS connection handling, message validation, rate limiting (`net/`)
+- [x] Room for Map 1 (Oakhaven Sanctuary) and Map 2 (Whispering Fields) (`sim/room.ts`, one per `shared/config/maps.ts` entry)
+- [x] Server-authoritative movement (click-to-move via A*, WASD direct) with area-of-interest snapshots
+- [x] Slime monster: AI, server-calculated combat via `shared/formulas`, aggro barks, loot drops
+- [x] EXP/level-up, stat point allocation
+- [x] Inventory + equipment (weapon/helmet/chest/boots/wings), broadcast equipment changes
+- [x] 8-slot hotbar (skills + stackable items), persisted per character
+- [x] AUTO mode: settings relay + server-side validation (the scan/target/move/attack loop itself runs client-side per SPEC.md §8 — that's task #75/client)
+- [x] Elder Fin NPC + "First Steps" and "Cleaning the Horizon" quests (state machine + HUD tracker)
+- [x] Save on key events + 60s interval; full state restore on login
+- [x] Multi-map orchestration (`sim/world.ts`): per-character room routing, portal transitions between rooms, global-vs-map chat scoping, gated dev commands (`/level`, `/joblevel`, `/give`, `/tp`, `/spawn`, `/boss`)
+- [ ] Fixed 20 Hz tick loop driver + real HTTP/WS server entry point (`server/src/index.ts`) — last piece of task #74
 
 Client:
 - [ ] Boot/loading scene with progress bar driving the asset manifest + placeholder-art generator
