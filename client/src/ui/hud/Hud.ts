@@ -19,6 +19,24 @@ import { ChatLog } from './chatLog.js';
 import { Minimap } from './minimap.js';
 import { AutoPanel } from './autoPanel.js';
 import { InventoryPanel } from './inventoryPanel.js';
+import { SystemMenu } from './systemMenu.js';
+
+/** Just enough of Phaser.Game's surface to replay the intro scene -
+ * avoids a hard Phaser import here, keeping the DOM HUD's existing
+ * "no Phaser dependency" boundary (docs/DECISIONS.md, task #81).
+ * Deliberately exposes both stop() and start(): every other scene
+ * transition in this client (LoginScene, IntroScene, WorldScene's portal
+ * restart) calls `this.scene.start(...)` *from within* a Scene, whose
+ * ScenePlugin stops the calling scene for you automatically. This menu
+ * callback runs outside any Scene (it's driven by a DOM click), so it's
+ * really calling the global SceneManager, not a ScenePlugin - and the
+ * SceneManager's own start() does NOT stop whatever's currently running.
+ * Skipping stop() here left WorldScene (map, HUD, chat) fully running
+ * underneath, and starting Intro only made it run invisibly behind that -
+ * a real bug caught in task #76's own live verification pass. */
+interface SceneStarter {
+  scene: { start(key: string): void; stop(key: string): void };
+}
 
 export class Hud {
   private readonly wrapper: HTMLDivElement;
@@ -29,19 +47,36 @@ export class Hud {
   private readonly minimap: Minimap;
   private readonly autoPanel: AutoPanel;
   private readonly inventoryPanel: InventoryPanel;
+  private readonly systemMenu: SystemMenu;
+  private game: SceneStarter | null = null;
 
   constructor(net: NetClient, gameState: GameState) {
     this.wrapper = document.createElement('div');
     this.wrapper.className = 'terago-hud';
     document.getElementById('ui-root')!.appendChild(this.wrapper);
 
-    this.statusBlock = new StatusBlock(this.wrapper);
+    this.statusBlock = new StatusBlock(this.wrapper, net);
     this.hotbar = new Hotbar(this.wrapper, net);
     this.questTracker = new QuestTracker(this.wrapper);
     this.chatLog = new ChatLog(this.wrapper, net);
     this.minimap = new Minimap(this.wrapper);
     this.autoPanel = new AutoPanel(this.wrapper, net);
     this.inventoryPanel = new InventoryPanel(this.wrapper, net);
+    this.systemMenu = new SystemMenu(this.wrapper, () => {
+      // See the SceneStarter comment above: this menu is only ever
+      // reachable from WorldScene today (the Esc handler below only
+      // fires once `hud.show()` has run, which only WorldScene does),
+      // so it's always the scene to stop before starting Intro.
+      // IntroScene never calls hud.hide() itself - on a normal first
+      // playthrough that's fine (hud.show() hasn't run yet, so the HUD
+      // is already hidden), but on a *replay* the HUD is already
+      // .is-visible from WorldScene and nothing else would ever hide it,
+      // leaving the gameplay HUD rendered on top of the intro scrolls.
+      // Also a real bug caught in task #76's live verification pass.
+      this.hide();
+      this.game?.scene.stop('World');
+      this.game?.scene.start('Intro');
+    });
 
     gameState.onSelfState.on((self) => {
       this.statusBlock.update(self);
@@ -77,12 +112,14 @@ export class Hud {
     if (!this.wrapper.classList.contains('is-visible')) return;
 
     if (e.key === 'Escape') {
-      // SPEC.md control table: "close the top-most window". No system
-      // menu exists yet (out of scope for #81 - nothing in SPEC.md
-      // names what it contains beyond this one line), so Esc with
-      // nothing open is a no-op rather than guessing at one.
+      // SPEC.md control table: "Close the top-most window, or open the
+      // system menu" - close whatever's open; with nothing open, open
+      // the system menu (task #76: closes the M1 acceptance bullet
+      // "...can be replayed from Settings" - see systemMenu.ts).
       if (this.inventoryPanel.isOpen()) this.inventoryPanel.close();
       else if (this.autoPanel.isSettingsOpen()) this.autoPanel.closeSettings();
+      else if (this.systemMenu.isOpen()) this.systemMenu.close();
+      else this.systemMenu.toggle();
       return;
     }
 
@@ -99,6 +136,12 @@ export class Hud {
     if (e.key === 'CapsLock') {
       this.autoPanel.toggle();
     }
+  }
+
+  /** Called once from main.ts right after the Phaser.Game is constructed
+   * (Hud itself is built slightly earlier - see main.ts). */
+  setGame(game: SceneStarter): void {
+    this.game = game;
   }
 
   show(): void {

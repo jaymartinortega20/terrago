@@ -344,6 +344,30 @@
 }
 .terago-hud-minimap canvas { display: block; border-radius: 8px; }
 
+/* ---- System menu (Esc, when nothing else is open) ---- */
+.terago-hud-system-menu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* `display: flex` above is an author-origin rule, so it always beats the
+ * browser's own `[hidden] { display: none; }` UA-origin rule regardless
+ * of specificity (author origin outranks user-agent origin in the
+ * cascade before specificity is even compared) - without this, toggling
+ * the `hidden` attribute/property correctly flips `.hidden` in JS but
+ * never actually hides the panel on screen. Needs to win over the bare
+ * class rule above, hence the extra `[hidden]` attribute selector. */
+.terago-hud-system-menu[hidden] { display: none; }
+.terago-hud-system-menu h3 { margin: 0 0 4px; }
+.terago-system-replay-intro { background: var(--terago-accent); }
+.terago-system-menu-close { background: rgba(255, 255, 255, 0.12); }
+
 /* ---- Inventory panel ---- */
 .terago-hud-inventory {
   position: absolute;

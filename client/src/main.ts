@@ -41,6 +41,7 @@ const game = new Phaser.Game({
   scene: [BootScene, LoginScene, IntroScene, WorldScene],
 });
 
+hud.setGame(game);
 game.registry.set(REGISTRY_KEYS.net, netClient);
 game.registry.set(REGISTRY_KEYS.gameState, gameState);
 game.registry.set(REGISTRY_KEYS.hud, hud);
