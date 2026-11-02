@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: terrago-server
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build -w shared && npm run build -w server
+    startCommand: node server/dist/index.js
+    healthCheckPath: /
