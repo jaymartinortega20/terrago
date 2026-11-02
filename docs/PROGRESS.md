@@ -47,9 +47,10 @@ Client:
 - [ ] Settings: rebindable keys, volume sliders, replay intro — no Settings window exists yet; out of scope for #81 (not named in its own task description), not blocking any M1 acceptance criterion since every key has a sane default and nothing requires rebinding to be playable
 
 Tests & acceptance:
-- [ ] Playwright smoke test: two browser contexts log in and see each other move
-- [ ] Every M1 acceptance criterion in `SPEC.md` §3 checked against a running build
-- [ ] `npm run dev` / `npm test` both clean, no console errors during normal play
+- [x] Full workspace typecheck + `npm test` clean (339/339) — task #83
+- [x] Single-session Playwright smoke test driving the real `npm run dev` server+client end to end: register → skip intro → World (Oakhaven) → talk to Elder Fin (quest tracker populates "Cleaning the Horizon") → open inventory (starting potions present) → send a chat message → cross the portal to Whispering Fields → fight a Slime manually → toggle AUTO on and let it fight autonomously → toggle AUTO off → cross the portal back to Oakhaven (no ghost entities) — zero console errors throughout, and the quest objective correctly advanced 0/5 → 1/5 from the AUTO-mode kill, confirming client/server state stayed consistent across the whole session — task #83
+- [ ] Playwright smoke test: two browser contexts log in and see each other move — task #76 (two-player acceptance pass), not yet started
+- [ ] Every M1 acceptance criterion in `SPEC.md` §3 checked against a running build — task #76
 
 ## M2 — Jobs and Act II: Maps 3–4
 - [ ] Not started.
