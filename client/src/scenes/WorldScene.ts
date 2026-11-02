@@ -5,9 +5,9 @@
  * rendered from world:snapshot with ~100ms interpolation. Combat feedback
  * (damage floaters, crit hit-flash/shake - task #82) reacts to
  * GameState's combat:result/combat:heal signals the same way every other
- * panel does; AUTO mode's own scan/target/attack loop is the other half
- * of #82, layered on top of what this scene already sends intents for.
- * The DOM HUD (task #81,
+ * panel does; AUTO mode's own scan/target/attack loop (`world/autoLoop.ts`,
+ * also task #82) is driven from this scene's own update loop and fed every
+ * manual move/target action so it knows when to back off. The DOM HUD (task #81,
  * `ui/hud/Hud.ts`) is a singleton main.ts creates once and this scene just
  * shows - not torn down/rebuilt on a portal crossing's `scene.restart()`.
  */
@@ -29,6 +29,7 @@ import {
 import { RemoteInterpolator } from '../world/remoteInterpolation.js';
 import { EntityView, MonsterView, entityHitArea } from '../world/entityView.js';
 import { DamageFloaters, type FloaterKind } from '../world/damageFloaters.js';
+import { AutoLoop } from '../world/autoLoop.js';
 
 interface LocalDisplayState {
   anim: EntitySnapshot['anim'];
@@ -66,6 +67,7 @@ export class WorldScene extends Phaser.Scene {
 
   private readonly remotes = new Map<string, RemoteEntry>();
   private floaters!: DamageFloaters;
+  private autoLoop!: AutoLoop;
   private wasdKeys: WasdKeys | null = null;
   private lastSentDir = { dx: 0, dy: 0 };
   private unsubscribers: Array<() => void> = [];
@@ -90,6 +92,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor('#0a0710');
     this.floaters = new DamageFloaters(this);
+    this.autoLoop = new AutoLoop(this.net, this.gameState, this.map);
     this.renderTilemap();
     this.renderNpcMarkers();
     this.createLocalPlayer();
@@ -125,6 +128,8 @@ export class WorldScene extends Phaser.Scene {
         entry.view.update({ anim: entry.anim, hpPct: entry.hpPct }, entry.monsterId);
       }
     }
+
+    this.autoLoop.update(now);
   }
 
   // ------------------------------------------------------------ setup
@@ -206,7 +211,11 @@ export class WorldScene extends Phaser.Scene {
 
     this.input.on('gameobjectdown', (_pointer: Phaser.Input.Pointer, gameObject: Phaser.GameObjects.GameObject) => {
       const entityId = gameObject.getData('entityId') as string | undefined;
-      if (entityId) this.net.send({ t: 'target:set', entityId });
+      if (!entityId) return;
+      this.net.send({ t: 'target:set', entityId });
+      // Tell AUTO this is now the active target too, so it doesn't
+      // immediately try to pick a different one on its next scan.
+      this.autoLoop.setManualTarget(entityId);
     });
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => this.handleGroundClick(pointer));
@@ -236,6 +245,7 @@ export class WorldScene extends Phaser.Scene {
 
     if (!predictMoveTo(this.localPredictionState, this.map, { x: tileX, y: tileY })) return;
     this.net.send({ t: 'move:to', target: { x: tileX, y: tileY } });
+    this.autoLoop.noteManualInput();
     this.showDestinationMarker(tileX, tileY);
   }
 
@@ -263,6 +273,7 @@ export class WorldScene extends Phaser.Scene {
     this.lastSentDir = { dx, dy };
     predictMoveDir(this.localPredictionState, dx, dy);
     this.net.send({ t: 'move:dir', dx, dy });
+    this.autoLoop.noteManualInput();
   }
 
   // ------------------------------------------------------------ gamestate wiring
@@ -371,5 +382,6 @@ export class WorldScene extends Phaser.Scene {
     this.unsubscribers = [];
     for (const entry of this.remotes.values()) entry.view.destroy();
     this.remotes.clear();
+    this.autoLoop.destroy();
   }
 }
