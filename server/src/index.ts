@@ -25,7 +25,17 @@ const db = openDatabase(DB_PATH);
 const repo = createSqliteRepository(db);
 const world = new World(repo, { devToolsEnabled: DEV_TOOLS_ENABLED });
 
-const httpServer = createServer();
+// `createServer()` with no request listener leaves every plain HTTP
+// request (as opposed to a WS upgrade, handled separately below) hanging
+// forever with no response - fine for local dev, but a deploy platform's
+// health check is exactly a plain GET, and would time out and mark the
+// service unhealthy. Answer any GET with 200 "ok" - deliberately generic
+// rather than checking DB/tick-loop health, since this only needs to
+// prove the process is alive and accepting connections.
+const httpServer = createServer((req, res) => {
+  res.writeHead(200, { 'content-type': 'text/plain' });
+  res.end('ok');
+});
 const wss = new WebSocketServer({ server: httpServer });
 
 wss.on('connection', (ws) => {
