@@ -470,6 +470,36 @@ describe('Room: NPC talk and quest chaining', () => {
     expect(questUpdatesSecondTalk).toEqual([]);
     expect(player.gold).toBe(goldAfterFirstTalk);
   });
+
+  it('re-hydrates an already-active quest with quest:update on a fresh join (SPEC.md M1: "restores... quest state")', async () => {
+    const repo = createSqliteRepository(openDatabase(':memory:'));
+    const char = await freshCharacter(repo, 'alice');
+    const room = new Room(MAP_OAKHAVEN, repo);
+    const player = withCollector(room, char.id);
+    const elderFin = MAP_OAKHAVEN.npcs.find((n) => n.id === 'elder_fin')!;
+    player.x = elderFin.x;
+    player.y = elderFin.y;
+
+    // Start "Cleaning the Horizon" (active, not yet ready to turn in) and
+    // leave - simulating the player disconnecting mid-quest.
+    room.handleTargetSet(player, 'elder_fin');
+    room.tick(0.05);
+    room.leave(char.id);
+
+    // A plain re-join, with no further interaction, used to never tell the
+    // newly-connected client about quests that were already active before
+    // this session existed - join() only ever called sendSelfState, and
+    // every quest:update send site is event-driven (start/progress/turn-in).
+    const rejoined = withCollector(room, char.id);
+    const questUpdatesOnRejoin = sentOf(rejoined).filter((m) => m.t === 'quest:update');
+    expect(questUpdatesOnRejoin).toEqual([
+      { t: 'quest:update', questId: 'cleaning_the_horizon', state: 'active', objectiveProgress: { kill_slimes: 0 } },
+    ]);
+    // 'complete' quests (first_steps, from the same first talk) have nothing
+    // for the tracker to hydrate - QuestTracker only ever renders active/
+    // readyToTurnIn - so they're correctly left out.
+    expect(questUpdatesOnRejoin.some((m: any) => m.questId === 'first_steps')).toBe(false);
+  });
 });
 
 describe('Room: equipment and inventory', () => {

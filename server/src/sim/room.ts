@@ -347,6 +347,19 @@ export class Room {
     };
     this.players.set(characterId, player);
     this.sendSelfState(player);
+    // M1 acceptance: "Logging out and back in restores... quest state."
+    // `quests` above already loads the persisted rows, but every quest:update
+    // send site is event-driven (start/progress/turn-in) - none of them fire
+    // on a plain join, so a freshly (re)connected client never learned about
+    // quests that were already active before this session existed. Hydrate
+    // the HUD's quest tracker the same way a live event would (completed
+    // quests are omitted - the tracker itself only ever renders active/
+    // readyToTurnIn, so there's nothing for a 'complete' row to hydrate).
+    for (const quest of quests) {
+      if (quest.state === 'active' || quest.state === 'readyToTurnIn') {
+        player.send({ t: 'quest:update', questId: quest.questId, state: quest.state, objectiveProgress: quest.progress });
+      }
+    }
     return player;
   }
 
