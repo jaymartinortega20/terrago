@@ -3,6 +3,7 @@ import { listAllAssetEntries } from './manifest.js';
 import { PAPER_DOLL_FACINGS, PAPER_DOLL_LAYERS, TOTAL_FRAMES_PER_FACING, WINGS_FLUTTER_FRAME_COUNT } from './paperDollManifest.js';
 import { ANIM_FRAME_COUNTS } from './generators/pose.js';
 import { MONSTER_ANIMS, MONSTER_SPRITE_IDS } from './monsterManifest.js';
+import { NPC_PALETTES } from './palette.js';
 import manifestJson from '../../assets/manifest.json' with { type: 'json' };
 
 describe('listAllAssetEntries', () => {
@@ -20,7 +21,8 @@ describe('listAllAssetEntries', () => {
       raw.intro.length +
       PAPER_DOLL_LAYERS.length * PAPER_DOLL_FACINGS.length * TOTAL_FRAMES_PER_FACING +
       PAPER_DOLL_FACINGS.length * WINGS_FLUTTER_FRAME_COUNT +
-      monsterFrameCount;
+      monsterFrameCount +
+      Object.keys(NPC_PALETTES).length;
 
     expect(entries).toHaveLength(expectedCount);
     expect(new Set(entries.map((e) => e.key)).size).toBe(entries.length);

@@ -58,6 +58,44 @@ export const SLIME_SHADOW = '#4e9e28';
 export const SLIME_HIGHLIGHT = 'rgba(255, 255, 255, 0.55)';
 export const SLIME_EYE = '#1f3a12';
 
+/** Stationary world NPCs (generators/npc.ts) - each gets its own skin/hair/
+ * outfit so Elder Fin, the Blacksmith and the shopkeeper read as distinct
+ * characters at a glance, not re-tinted copies of each other. Found during
+ * a visual pass that NPCs were rendering as a flat colored circle marker
+ * with no character art at all (WorldScene.ts's renderNpcMarkers never
+ * drew a sprite) - a real gap against SPEC.md section 6's "chibi style...
+ * good enough to judge game feel, not grey boxes" bar. */
+export const NPC_PALETTES = {
+  elder_fin: {
+    skin: '#e8c9a0',
+    skinShadow: '#cda876',
+    hair: '#e8e4de', // white/grey - elderly
+    hairShadow: '#c7c2b8',
+    robe: '#5a8a6e', // sage green, "wise elder" coding
+    robeShadow: '#3d6b50',
+    accent: '#d8c488', // gold trim
+  },
+  blacksmith: {
+    skin: '#d9a876',
+    skinShadow: '#b8835a',
+    hair: '#2a211c',
+    hairShadow: '#15100d',
+    robe: '#8a5a3c', // leather apron
+    robeShadow: '#6b4228',
+    accent: '#4a4a52', // steel-grey buckle
+  },
+  shopkeeper: {
+    skin: '#f4c9a0',
+    skinShadow: '#d9a876',
+    hair: '#6b4428',
+    hairShadow: '#4a2f1c',
+    robe: '#7a3c5a', // merchant burgundy vest
+    robeShadow: '#5a2a40',
+    accent: '#d4af37', // coin-gold buttons
+  },
+} as const;
+export type NpcId = keyof typeof NPC_PALETTES;
+
 /** SPEC.md section 11: talking world entities' chat colors. */
 export const CHAT_SPEAKER_COLORS = {
   monster: '#c23c3c',

@@ -23,7 +23,7 @@ import type { PaperDollFacing as PdFacing } from '../assets/generators/paperDoll
  * worldY), which is what tile-grid placement and y-sorting both want.
  * The monster sprites (generators/monsters.ts) were drawn to the same
  * convention specifically so this one ratio covers both view types. */
-const FOOT_ANCHOR_Y_RATIO = 60 / SPRITE_FRAME_SIZE_PX;
+export const FOOT_ANCHOR_Y_RATIO = 60 / SPRITE_FRAME_SIZE_PX;
 
 const HP_BAR_WIDTH = 28;
 const HP_BAR_HEIGHT = 4;

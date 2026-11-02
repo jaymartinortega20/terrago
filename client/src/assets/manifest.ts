@@ -12,6 +12,7 @@ import { ICON_SIZE_PX } from './generators/ui.js';
 import { INTRO_BG_HEIGHT, INTRO_BG_WIDTH } from './generators/intro.js';
 import { listPaperDollFrameAssets, listWingsFrameAssets } from './paperDollManifest.js';
 import { listMonsterFrameAssets } from './monsterManifest.js';
+import { listNpcFrameAssets } from './npcManifest.js';
 
 export interface AssetEntry {
   key: string;
@@ -61,6 +62,7 @@ export function listAllAssetEntries(): AssetEntry[] {
   const paperDollAssets = listPaperDollFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
   const wingsAssets = listWingsFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
   const monsterAssets = listMonsterFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
+  const npcAssets = listNpcFrameAssets().map((a) => ({ ...a, ...paperDollSize }));
 
-  return [...tileAssets, ...uiAssets, ...introAssets, ...paperDollAssets, ...wingsAssets, ...monsterAssets];
+  return [...tileAssets, ...uiAssets, ...introAssets, ...paperDollAssets, ...wingsAssets, ...monsterAssets, ...npcAssets];
 }

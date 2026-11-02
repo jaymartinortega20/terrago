@@ -27,7 +27,8 @@ import {
   type LocalPredictionState,
 } from '../world/localPrediction.js';
 import { RemoteInterpolator } from '../world/remoteInterpolation.js';
-import { EntityView, MonsterView, entityHitArea } from '../world/entityView.js';
+import { EntityView, MonsterView, entityHitArea, FOOT_ANCHOR_Y_RATIO } from '../world/entityView.js';
+import { npcFrameKey } from '../assets/npcManifest.js';
 import { DamageFloaters, type FloaterKind } from '../world/damageFloaters.js';
 import { AutoLoop } from '../world/autoLoop.js';
 
@@ -148,7 +149,9 @@ export class WorldScene extends Phaser.Scene {
     for (const npc of this.map.npcs) {
       const px = npc.x * TILE_SIZE_PX + TILE_SIZE_PX / 2;
       const py = npc.y * TILE_SIZE_PX + TILE_SIZE_PX / 2;
-      const circle = this.add.circle(0, 0, TILE_SIZE_PX * 0.3, 0x3cb4e2).setStrokeStyle(2, 0x1f6b8a);
+      // A real chibi portrait (generators/npc.ts), not a flat colored
+      // circle - found missing during a visual pass (docs/DECISIONS.md).
+      const sprite = this.add.image(0, 0, npcFrameKey(npc.id)).setOrigin(0.5, FOOT_ANCHOR_Y_RATIO);
       const label = this.add
         .text(0, -TILE_SIZE_PX * 0.55, npc.name, {
           fontFamily: 'sans-serif',
@@ -158,7 +161,7 @@ export class WorldScene extends Phaser.Scene {
           strokeThickness: 3,
         })
         .setOrigin(0.5);
-      const container = this.add.container(px, py, [circle, label]);
+      const container = this.add.container(px, py, [sprite, label]);
       container.setDepth(py);
       container.setData('entityId', npc.id);
       container.setInteractive(entityHitArea(), Phaser.Geom.Rectangle.Contains);
