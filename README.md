@@ -24,11 +24,11 @@ Starts the game server (WebSocket, fixed 20 Hz tick) and the client (Vite + Phas
 ## Dev commands
 
 - `npm test` — Vitest unit tests (shared formulas, server systems)
-- `npm run test:e2e` — Playwright smoke test (two browser contexts)
+- `npm run test:e2e` — Playwright smoke tests: `e2e/two-player.spec.ts` (two browser contexts register, see each other, move via both click-to-move and WASD, and see a live equipment change) and `e2e/system-menu.spec.ts` (Esc opens the system menu, Replay Intro actually hides the HUD and shows the intro, skipping it returns cleanly to World). Starts `npm run dev` itself if it isn't already running. Needs `npx playwright install chromium` once if no compatible browser build is present locally.
 - `npm run typecheck` — TypeScript, no emit, across all three workspaces
 - `npm run build` — production build of server + client
 
-In dev mode, chat commands like `/level 50`, `/give potion_hp 10`, `/tp 5`, `/spawn slime`, `/boss gatekeeper` are available for testing (see `SPEC.md` §2, `server/src/devtools/commands.ts`).
+In dev mode (`TERAGO_DEV_TOOLS=1`), the server accepts `dev:command` messages like `/level 50`, `/give potion_hp_small 10`, `/tp map2`, `/spawn slime`, `/boss gatekeeper` (see `SPEC.md` §2, `server/src/devtools/commands.ts`). **The client does not yet translate a `/`-prefixed chat message into one of these** (a known gap - `chat:send` is always sent and treated as literal chat, never sniffed for a leading `/`; see `docs/DECISIONS.md`), so for now these are reachable only by sending the raw WebSocket message yourself (e.g. from devtools' console, or a small script) - not by typing into the in-game chat box.
 
 ## Replacing placeholder art
 
