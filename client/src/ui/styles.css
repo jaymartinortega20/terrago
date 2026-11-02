@@ -191,6 +191,15 @@
 .terago-status-level { font-size: 11px; color: var(--terago-text-dim); margin-top: 2px; }
 .terago-status-bars { margin-top: 10px; }
 
+/* Stat-point allocation (M1 acceptance: "stat points can be allocated") -
+   only shown while unallocatedStatPoints > 0 (statusBlock.ts toggles
+   [hidden]). Six compact rows, each a name/value/+ button. */
+.terago-status-stats { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.terago-stat-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.terago-stat-name { width: 28px; color: var(--terago-text-dim); font-weight: 600; }
+.terago-stat-value { flex: 1; text-align: right; font-variant-numeric: tabular-nums; }
+.terago-stat-add { padding: 2px 9px; font-size: 13px; line-height: 1; min-width: 22px; }
+
 /* ---- Hotbar (bottom center) + AUTO button beside it ---- */
 .terago-hud-hotbar {
   position: absolute;
